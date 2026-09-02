@@ -1,0 +1,677 @@
+/* =========================================================
+   SIH ADMIN PORTAL
+   OPPORTUNITY DETAILS
+   COLLEGE DETAILS INSPIRED UI
+   ========================================================= */
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.details-header {
+    margin-bottom: 22px;
+}
+
+.back-link {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 14px;
+
+    color: #475569;
+
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    color: #2563eb;
+}
+
+.page-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #2563eb;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.details-title-row h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 30px;
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+.details-title-row p {
+    margin: 7px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   PROFILE CARD
+   ========================================================= */
+
+.profile-card {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    min-height: 120px;
+
+    padding: 22px 26px;
+
+    margin-bottom: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 13px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.profile-main {
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    min-width: 0;
+}
+
+.profile-icon {
+    width: 68px;
+    height: 68px;
+
+    min-width: 68px;
+
+    border-radius: 15px;
+
+    background: #eff6ff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 29px;
+}
+
+.profile-content {
+    min-width: 0;
+}
+
+.profile-content h2 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 21px;
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+.profile-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 6px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+.separator {
+    color: #cbd5e1;
+}
+
+.profile-status {
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status-badge {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.status-badge.open {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.status-badge.draft {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.status-badge.closed {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.status-badge.cancelled {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.summary-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    min-height: 102px;
+
+    padding: 17px 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.035);
+}
+
+.summary-icon {
+    width: 46px;
+    height: 46px;
+
+    min-width: 46px;
+
+    border-radius: 11px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+}
+
+.summary-card > div:last-child {
+    min-width: 0;
+}
+
+.summary-card span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.7px;
+}
+
+.summary-card strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #0f172a;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.summary-card small {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+}
+
+
+/* Summary colors */
+
+.summary-icon.type {
+    background: #eff6ff;
+}
+
+.summary-icon.mode {
+    background: #ecfdf5;
+}
+
+.summary-icon.deadline {
+    background: #fffbeb;
+}
+
+.summary-icon.location {
+    background: #fef2f2;
+}
+
+
+/* =========================================================
+   DETAILS GRID
+   ========================================================= */
+
+.details-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+
+    margin-bottom: 18px;
+}
+
+.details-card {
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.035);
+}
+
+.full-width-card {
+    width: 100%;
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   CARD HEADING
+   ========================================================= */
+
+.card-heading {
+    min-height: 68px;
+
+    padding: 15px 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    box-sizing: border-box;
+}
+
+.heading-icon {
+    width: 38px;
+    height: 38px;
+
+    min-width: 38px;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 18px;
+}
+
+.card-heading span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.9px;
+}
+
+.card-heading h2 {
+    margin: 3px 0 0;
+
+    color: #0f172a;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+
+/* =========================================================
+   ICON COLORS
+   ========================================================= */
+
+.compensation-icon {
+    background: #ecfdf5;
+}
+
+.description-icon {
+    background: #fffbeb;
+}
+
+.skills-icon {
+    background: #eff6ff;
+}
+
+.eligibility-icon {
+    background: #ecfdf5;
+}
+
+.account-icon {
+    background: #f1f5f9;
+}
+
+
+/* =========================================================
+   INFORMATION
+   ========================================================= */
+
+.information-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    column-gap: 30px;
+
+    row-gap: 20px;
+
+    padding: 20px 22px;
+
+    box-sizing: border-box;
+}
+
+.info-item {
+    min-width: 0;
+}
+
+.info-item span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+}
+
+.info-item strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    line-height: 1.45;
+
+    word-break: break-word;
+}
+
+.small-value {
+    color: #64748b !important;
+
+    font-size: 10px !important;
+}
+
+
+/* =========================================================
+   TEXT BODY
+   ========================================================= */
+
+.text-body {
+    padding: 20px 22px;
+
+    min-height: 80px;
+
+    box-sizing: border-box;
+}
+
+.text-body p {
+    margin: 0;
+
+    color: #475569;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+
+    white-space: pre-line;
+}
+
+.no-data {
+    color: #94a3b8 !important;
+}
+
+
+/* =========================================================
+   ACCOUNT
+   ========================================================= */
+
+.account-card {
+    margin-bottom: 18px;
+}
+
+.account-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 25px;
+
+    padding: 20px 22px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   BOTTOM
+   ========================================================= */
+
+.bottom-actions {
+    margin-bottom: 18px;
+}
+
+.back-button {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 9px 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #dbe2ea;
+
+    border-radius: 8px;
+
+    color: #475569;
+
+    text-decoration: none;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.back-button:hover {
+    background: #f8fafc;
+
+    color: #2563eb;
+
+    border-color: #cbd5e1;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 850px) {
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .profile-card {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .profile-status {
+        align-self: flex-start;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .information-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .details-title-row h1 {
+        font-size: 26px;
+    }
+
+    .profile-card {
+        padding: 18px;
+    }
+
+    .profile-icon {
+        width: 60px;
+        height: 60px;
+
+        min-width: 60px;
+
+        font-size: 25px;
+    }
+
+    .profile-content h2 {
+        font-size: 18px;
+    }
+
+    .information-grid,
+    .text-body,
+    .account-grid {
+        padding-left: 17px;
+        padding-right: 17px;
+    }
+
+}

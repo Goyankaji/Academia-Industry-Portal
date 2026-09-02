@@ -1,0 +1,584 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/reports.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="reports-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="reports-topbar">
+
+        <div class="reports-heading">
+            <div class="heading-icon">▥</div>
+
+            <div>
+                <span class="eyebrow">ADMINISTRATION / ANALYTICS</span>
+                <h1>Reports Center</h1>
+                <p>
+                    A consolidated view of academic, institutional
+                    and industry engagement data.
+                </p>
+            </div>
+        </div>
+
+        <button class="refresh-button" id="refreshReports" type="button">
+            <span class="refresh-symbol">↻</span>
+            Refresh
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI STRIP
+         ===================================================== -->
+
+    <section class="kpi-strip">
+
+        <div class="report-kpi student-kpi">
+            <div class="kpi-icon">🎓</div>
+
+            <div class="kpi-body">
+                <span class="kpi-label">TOTAL STUDENTS</span>
+                <strong id="totalStudents">
+                    {{ total_students }}
+                </strong>
+                <small>Registered learners</small>
+            </div>
+        </div>
+
+
+        <div class="report-kpi industry-kpi">
+            <div class="kpi-icon">🏭</div>
+
+            <div class="kpi-body">
+                <span class="kpi-label">ACTIVE INDUSTRIES</span>
+                <strong id="activeIndustries">
+                    {{ active_industries }}
+                </strong>
+                <small>Currently participating</small>
+            </div>
+        </div>
+
+
+        <div class="report-kpi collaboration-kpi">
+            <div class="kpi-icon">🤝</div>
+
+            <div class="kpi-body">
+                <span class="kpi-label">COLLABORATIONS</span>
+                <strong id="industryCollaborations">
+                    {{ total_collaborations }}
+                </strong>
+                <small>Total engagements</small>
+            </div>
+        </div>
+
+
+        <div class="report-kpi opportunity-kpi">
+            <div class="kpi-icon">💼</div>
+
+            <div class="kpi-body">
+                <span class="kpi-label">OPPORTUNITIES</span>
+                <strong id="industryOpportunities">
+                    {{ total_opportunities }}
+                </strong>
+                <small>Published & managed</small>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN ANALYTICS
+         ===================================================== -->
+
+    <section class="analytics-layout">
+
+
+        <!-- =================================================
+             STUDENT ANALYTICS
+             ================================================= -->
+
+        <div class="analytics-panel student-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">ACADEMIC ANALYTICS</span>
+                    <h2>Student Distribution</h2>
+                    <p>Students grouped by academic branch.</p>
+                </div>
+
+                <div class="panel-tag">
+                    BRANCH WISE
+                </div>
+
+            </div>
+
+
+            <div class="branch-chart" id="studentDistribution">
+
+                {% if student_distribution %}
+
+                    {% for item in student_distribution %}
+
+                    <div class="branch-row">
+
+                        <div class="branch-meta">
+                            <span>{{ item.branch or 'Other' }}</span>
+                            <strong>{{ item.total }}</strong>
+                        </div>
+
+                        <div class="branch-track">
+                            <div class="branch-fill"
+                                 style="width: 0%;">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="analytics-empty">
+                        <span>🎓</span>
+                        <p>No student distribution data available.</p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="panel-note">
+                <span>ⓘ</span>
+                Distribution is calculated from registered student records.
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             COLLABORATION ANALYTICS
+             ================================================= -->
+
+        <div class="analytics-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">INDUSTRY RELATIONS</span>
+                    <h2>Collaboration Overview</h2>
+                    <p>Current engagement lifecycle.</p>
+                </div>
+
+                <div class="panel-symbol">🤝</div>
+
+            </div>
+
+
+            <div class="status-analytics">
+
+                <div class="status-row">
+                    <div class="status-title">
+                        <span class="status-marker active"></span>
+                        <span>Active</span>
+                    </div>
+
+                    <strong id="activeCollaborations">0</strong>
+                </div>
+
+
+                <div class="status-row">
+                    <div class="status-title">
+                        <span class="status-marker pending"></span>
+                        <span>Pending</span>
+                    </div>
+
+                    <strong id="pendingCollaborations">0</strong>
+                </div>
+
+
+                <div class="status-row">
+                    <div class="status-title">
+                        <span class="status-marker completed"></span>
+                        <span>Completed</span>
+                    </div>
+
+                    <strong id="completedCollaborations">0</strong>
+                </div>
+
+
+                <div class="status-row">
+                    <div class="status-title">
+                        <span class="status-marker rejected"></span>
+                        <span>Rejected</span>
+                    </div>
+
+                    <strong id="rejectedCollaborations">0</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             OPPORTUNITY ANALYTICS
+             ================================================= -->
+
+        <div class="analytics-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">CAREER ECOSYSTEM</span>
+                    <h2>Opportunity Pipeline</h2>
+                    <p>Current opportunity lifecycle.</p>
+                </div>
+
+                <div class="panel-symbol">💼</div>
+
+            </div>
+
+
+            <div class="opportunity-grid">
+
+                <div class="opportunity-stat open">
+                    <span class="opportunity-count"
+                          id="openOpportunities">0</span>
+
+                    <div>
+                        <strong>Open</strong>
+                        <small>Accepting applications</small>
+                    </div>
+                </div>
+
+
+                <div class="opportunity-stat draft">
+                    <span class="opportunity-count"
+                          id="draftOpportunities">0</span>
+
+                    <div>
+                        <strong>Draft</strong>
+                        <small>Not published</small>
+                    </div>
+                </div>
+
+
+                <div class="opportunity-stat closed">
+                    <span class="opportunity-count"
+                          id="closedOpportunities">0</span>
+
+                    <div>
+                        <strong>Closed</strong>
+                        <small>Applications ended</small>
+                    </div>
+                </div>
+
+
+                <div class="opportunity-stat cancelled">
+                    <span class="opportunity-count"
+                          id="cancelledOpportunities">0</span>
+
+                    <div>
+                        <strong>Cancelled</strong>
+                        <small>No longer available</small>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             INDUSTRY ENGAGEMENT
+             ================================================= -->
+
+        <div class="analytics-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">INDUSTRY ECOSYSTEM</span>
+                    <h2>Engagement Snapshot</h2>
+                    <p>Industry contribution across the portal.</p>
+                </div>
+
+                <div class="panel-symbol">🏢</div>
+
+            </div>
+
+
+            <div class="engagement-list">
+
+                <div class="engagement-row">
+                    <div class="engagement-left">
+                        <span class="engagement-icon">🏭</span>
+
+                        <div>
+                            <strong>Active Industries</strong>
+                            <small>Registered industry partners</small>
+                        </div>
+                    </div>
+
+                    <strong id="industrySnapshotIndustries">0</strong>
+                </div>
+
+
+                <div class="engagement-row">
+                    <div class="engagement-left">
+                        <span class="engagement-icon">📁</span>
+
+                        <div>
+                            <strong>Student Projects</strong>
+                            <small>Projects in the ecosystem</small>
+                        </div>
+                    </div>
+
+                    <strong id="industryProjects">0</strong>
+                </div>
+
+
+                <div class="engagement-row">
+                    <div class="engagement-left">
+                        <span class="engagement-icon">🎯</span>
+
+                        <div>
+                            <strong>Opportunities</strong>
+                            <small>Industry-led opportunities</small>
+                        </div>
+                    </div>
+
+                    <strong id="industrySnapshotOpportunities">0</strong>
+                </div>
+
+
+                <div class="engagement-row">
+                    <div class="engagement-left">
+                        <span class="engagement-icon">🤝</span>
+
+                        <div>
+                            <strong>Collaborations</strong>
+                            <small>Institution-industry engagements</small>
+                        </div>
+                    </div>
+
+                    <strong id="industrySnapshotCollaborations">0</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         REPORT LIBRARY
+         ===================================================== -->
+
+    <section class="report-library" id="reportLibrary">
+
+        <div class="library-header">
+
+            <div>
+                <span class="panel-eyebrow">REPORT DIRECTORY</span>
+                <h2>Explore Reports</h2>
+                <p>
+                    Jump directly to the analytical area you want to review.
+                </p>
+            </div>
+
+
+            <div class="report-search">
+
+                <span>⌕</span>
+
+                <input
+                    type="text"
+                    id="reportSearch"
+                    placeholder="Search report..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="report-grid" id="reportGrid">
+
+
+            <button class="report-card"
+                    type="button"
+                    data-report="student">
+
+                <span class="report-card-icon">🎓</span>
+
+                <span class="report-card-content">
+                    <strong>Student Analytics</strong>
+                    <small>
+                        Academic branch distribution and student participation.
+                    </small>
+                </span>
+
+                <span class="report-card-arrow">→</span>
+
+            </button>
+
+
+            <button class="report-card"
+                    type="button"
+                    data-report="industry">
+
+                <span class="report-card-icon">🏭</span>
+
+                <span class="report-card-content">
+                    <strong>Industry Engagement</strong>
+                    <small>
+                        Industry participation, projects and opportunities.
+                    </small>
+                </span>
+
+                <span class="report-card-arrow">→</span>
+
+            </button>
+
+
+            <button class="report-card"
+                    type="button"
+                    data-report="collaboration">
+
+                <span class="report-card-icon">🤝</span>
+
+                <span class="report-card-content">
+                    <strong>Collaboration Report</strong>
+                    <small>
+                        Active, pending, completed and rejected engagements.
+                    </small>
+                </span>
+
+                <span class="report-card-arrow">→</span>
+
+            </button>
+
+
+            <button class="report-card"
+                    type="button"
+                    data-report="opportunity">
+
+                <span class="report-card-icon">💼</span>
+
+                <span class="report-card-content">
+                    <strong>Opportunity Report</strong>
+                    <small>
+                        Internship, placement, project, training and job data.
+                    </small>
+                </span>
+
+                <span class="report-card-arrow">→</span>
+
+            </button>
+
+
+            <button class="report-card"
+                    type="button"
+                    data-report="projects">
+
+                <span class="report-card-icon">📁</span>
+
+                <span class="report-card-content">
+                    <strong>Project Activity</strong>
+                    <small>
+                        Student project activity linked with industry.
+                    </small>
+                </span>
+
+                <span class="report-card-arrow">→</span>
+
+            </button>
+
+
+            <button class="report-card"
+                    type="button"
+                    data-report="institution">
+
+                <span class="report-card-icon">🏛️</span>
+
+                <span class="report-card-content">
+                    <strong>Institution Overview</strong>
+                    <small>
+                        College and institutional participation insights.
+                    </small>
+                </span>
+
+                <span class="report-card-arrow">→</span>
+
+            </button>
+
+        </div>
+
+
+        <div class="no-report-result" id="noReports">
+            <span>⌕</span>
+            <strong>No matching report</strong>
+            <small>Try a different search term.</small>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOOTER INSIGHT
+         ===================================================== -->
+
+    <div class="reports-footer">
+
+        <div class="footer-icon">✦</div>
+
+        <div>
+            <strong>Administrative Insight</strong>
+            <p>
+                Reports are generated from the latest records available
+                in the SIH Portal database.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+
+<script>
+    window.reportsData = {
+        studentDistribution: {{ student_distribution | tojson }},
+        collaborationStatus: {{ collaboration_status | tojson }},
+        opportunityStatus: {{ opportunity_status | tojson }},
+        activeIndustries: {{ active_industries | tojson }},
+        industryProjects: {{ industry_projects | tojson }},
+        industryOpportunities: {{ total_opportunities | tojson }},
+        industryCollaborations: {{ total_collaborations | tojson }},
+        totalStudents: {{ total_students | tojson }}
+    };
+</script>
+
+<script src="{{ url_for('static', filename='js/admin/reports.js') }}"></script>
+
+{% endblock %}

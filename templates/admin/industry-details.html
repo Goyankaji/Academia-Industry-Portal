@@ -1,0 +1,719 @@
+{% extends "admin/base.html" %}
+
+{% block title %}SIH Admin | Industry Details{% endblock %}
+
+{% block breadcrumb %}
+Industries / Details
+{% endblock %}
+
+
+{% block page_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/admin/industry-details.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =====================================================
+     PAGE HEADER
+     ===================================================== -->
+
+<section class="details-header">
+
+    <div class="details-heading">
+
+        <a
+            href="/admin/industries"
+            class="back-link">
+
+            ← Back to Industries
+
+        </a>
+
+        <span class="page-label">
+            INDUSTRY PROFILE
+        </span>
+
+        <h1>
+            Industry Details
+        </h1>
+
+        <p>
+            Complete industry and business information.
+        </p>
+
+    </div>
+
+
+    <div class="details-actions">
+
+        {% if industry.status == "ACTIVE" %}
+
+            <form
+                method="POST"
+                action="/admin/industries/{{ industry.id }}/toggle-status"
+                class="status-form">
+
+                <input
+                    type="hidden"
+                    name="status"
+                    value="INACTIVE">
+
+                <button
+                    type="submit"
+                    class="danger-outline-btn">
+
+                    Deactivate Industry
+
+                </button>
+
+            </form>
+
+        {% elif industry.status == "INACTIVE" %}
+
+            <form
+                method="POST"
+                action="/admin/industries/{{ industry.id }}/toggle-status"
+                class="status-form">
+
+                <input
+                    type="hidden"
+                    name="status"
+                    value="ACTIVE">
+
+                <button
+                    type="submit"
+                    class="success-btn">
+
+                    Activate Industry
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PROFILE OVERVIEW
+     ===================================================== -->
+
+<section class="profile-overview">
+
+    <div class="profile-main">
+
+        <div class="large-avatar">
+
+            {{ industry.company_name[0]|upper
+               if industry.company_name else 'I' }}
+
+        </div>
+
+
+        <div class="profile-identity">
+
+            <h2>
+                {{ industry.company_name or 'Industry' }}
+            </h2>
+
+            <span class="profile-email">
+                {{ industry.email or '—' }}
+            </span>
+
+            <div class="profile-meta">
+
+                <span>
+                    {{ industry.company_type or 'Industry' }}
+                </span>
+
+                <span class="meta-separator">
+                    •
+                </span>
+
+                <span>
+                    {{ industry.industry_sector or '—' }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="profile-status">
+
+        {% if industry.status == "ACTIVE" %}
+
+            <span class="status-badge active">
+                <span class="status-dot"></span>
+                Active Account
+            </span>
+
+        {% elif industry.status == "PENDING" %}
+
+            <span class="status-badge pending">
+                <span class="status-dot"></span>
+                Pending Account
+            </span>
+
+        {% else %}
+
+            <span class="status-badge inactive">
+                <span class="status-dot"></span>
+                Inactive Account
+            </span>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SUMMARY
+     ===================================================== -->
+
+<section class="summary-grid">
+
+
+    <div class="summary-card">
+
+        <span>
+            INDUSTRY TYPE
+        </span>
+
+        <strong>
+            {{ industry.company_type or '—' }}
+        </strong>
+
+        <small>
+            Organization type
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <span>
+            SECTOR
+        </span>
+
+        <strong>
+            {{ industry.industry_sector or '—' }}
+        </strong>
+
+        <small>
+            Industry sector
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <span>
+            CONTACT
+        </span>
+
+        <strong>
+            {{ industry.contact_person or '—' }}
+        </strong>
+
+        <small>
+            Primary representative
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <span>
+            PHONE
+        </span>
+
+        <strong>
+            {{ industry.phone or '—' }}
+        </strong>
+
+        <small>
+            Contact number
+        </small>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INFORMATION GRID
+     ===================================================== -->
+
+<section class="details-grid">
+
+
+    <!-- =================================================
+         INDUSTRY INFORMATION
+         ================================================= -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                👤
+            </div>
+
+            <div>
+
+                <span>
+                    PROFILE
+                </span>
+
+                <h2>
+                    Industry Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+
+            <div class="info-item">
+
+                <span>
+                    Company Name
+                </span>
+
+                <strong>
+                    {{ industry.company_name or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Company Type
+                </span>
+
+                <strong>
+                    {{ industry.company_type or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Industry Sector
+                </span>
+
+                <strong>
+                    {{ industry.industry_sector or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Account Status
+                </span>
+
+                <strong>
+
+                    {% if industry.status == "ACTIVE" %}
+                        Active
+                    {% elif industry.status == "PENDING" %}
+                        Pending
+                    {% else %}
+                        Inactive
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         CONTACT INFORMATION
+         ================================================= -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                📞
+            </div>
+
+            <div>
+
+                <span>
+                    CONTACT
+                </span>
+
+                <h2>
+                    Contact Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+
+            <div class="info-item">
+
+                <span>
+                    Contact Person
+                </span>
+
+                <strong>
+                    {{ industry.contact_person or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Designation
+                </span>
+
+                <strong>
+                    {{ industry.designation or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    {{ industry.email or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Phone
+                </span>
+
+                <strong>
+                    {{ industry.phone or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item full-width">
+
+                <span>
+                    Website
+                </span>
+
+                {% if industry.website %}
+
+                    <a
+                        href="{{ industry.website }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="website-link">
+
+                        {{ industry.website }}
+                        ↗
+
+                    </a>
+
+                {% else %}
+
+                    <strong>
+                        —
+                    </strong>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         ADDRESS
+         ================================================= -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                📍
+            </div>
+
+            <div>
+
+                <span>
+                    LOCATION
+                </span>
+
+                <h2>
+                    Business Address
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+
+            <div class="info-item full-width">
+
+                <span>
+                    Address
+                </span>
+
+                <strong>
+                    {{ industry.address or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    City
+                </span>
+
+                <strong>
+                    {{ industry.city or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    State
+                </span>
+
+                <strong>
+                    {{ industry.state or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         DESCRIPTION
+         ================================================= -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                📝
+            </div>
+
+            <div>
+
+                <span>
+                    ABOUT
+                </span>
+
+                <h2>
+                    Industry Description
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="description-container">
+
+            {% if industry.description %}
+
+                <p>
+                    {{ industry.description }}
+                </p>
+
+            {% else %}
+
+                <div class="no-data">
+                    No industry description provided.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ACCOUNT INFORMATION
+     ===================================================== -->
+
+<section class="details-card account-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon">
+            ⚙️
+        </div>
+
+        <div>
+
+            <span>
+                ACCOUNT
+            </span>
+
+            <h2>
+                Account Information
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="account-grid">
+
+
+        <div class="info-item">
+
+            <span>
+                Account Status
+            </span>
+
+            <strong>
+
+                {% if industry.status == "ACTIVE" %}
+                    Active
+                {% elif industry.status == "PENDING" %}
+                    Pending
+                {% else %}
+                    Inactive
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>
+                Registered On
+            </span>
+
+            <strong>
+
+                {% if industry.created_at %}
+                    {{ industry.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                {% else %}
+                    —
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>
+                Last Updated
+            </span>
+
+            <strong>
+
+                {% if industry.updated_at %}
+                    {{ industry.updated_at.strftime('%d %b %Y, %I:%M %p') }}
+                {% else %}
+                    —
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     BOTTOM ACTION
+     ===================================================== -->
+
+<div class="bottom-actions">
+
+    <a
+        href="/admin/industries"
+        class="back-button">
+
+        ← Back to Industries
+
+    </a>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block page_js %}
+
+<script
+    src="{{ url_for('static', filename='js/admin/industry-details.js') }}">
+</script>
+
+{% endblock %}

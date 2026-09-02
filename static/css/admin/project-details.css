@@ -1,0 +1,1041 @@
+/* =========================================================
+   SIH ADMIN PORTAL
+   PROJECT DETAILS
+   COLLEGE DETAILS STYLE
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.details-header {
+    margin-bottom: 22px;
+}
+
+.details-heading {
+    width: 100%;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-bottom: 14px;
+
+    color: #475569;
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    color: #2563eb;
+}
+
+.page-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #2563eb;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.details-heading h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 30px;
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+.details-heading p {
+    margin: 7px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   PROJECT PROFILE
+   ========================================================= */
+
+.profile-overview {
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+
+    padding: 22px 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+
+    min-height: 124px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.profile-main {
+    display: flex;
+    align-items: center;
+
+    gap: 17px;
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+
+/* =========================================================
+   PROFILE ICON
+   ========================================================= */
+
+.large-avatar {
+    width: 68px;
+    height: 68px;
+
+    min-width: 68px;
+
+    border-radius: 15px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 30px;
+
+    box-sizing: border-box;
+}
+
+/* Hide Font Awesome icon if library is unavailable */
+.large-avatar i {
+    display: none;
+}
+
+/* Create visible icon */
+.large-avatar::before {
+    content: "📁";
+
+    font-family:
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        sans-serif;
+
+    font-size: 29px;
+    line-height: 1;
+}
+
+
+.profile-identity {
+    min-width: 0;
+}
+
+.profile-identity h2 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 21px;
+    font-weight: 700;
+
+    line-height: 1.25;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-type {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.profile-meta {
+    display: flex;
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-top: 6px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+.meta-separator {
+    color: #cbd5e1;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.profile-status {
+    flex-shrink: 0;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+.status-badge.ongoing {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.status-badge.completed {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.status-badge.cancelled {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   SUMMARY CARDS
+   ========================================================= */
+
+.summary-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    padding: 17px 18px;
+
+    min-height: 102px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.035);
+}
+
+
+/* =========================================================
+   SUMMARY ICONS
+   ========================================================= */
+
+.summary-icon {
+    width: 46px;
+    height: 46px;
+
+    min-width: 46px;
+
+    border-radius: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+
+    box-sizing: border-box;
+}
+
+.summary-icon i {
+    display: none;
+}
+
+.summary-icon::before {
+    font-family:
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        sans-serif;
+
+    font-size: 21px;
+
+    line-height: 1;
+}
+
+
+/* Project */
+.project-icon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.project-icon::before {
+    content: "📁";
+}
+
+
+/* Start */
+.start-icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.start-icon::before {
+    content: "📅";
+}
+
+
+/* End */
+.end-icon {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.end-icon::before {
+    content: "✅";
+}
+
+
+/* Student */
+.student-icon {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.student-icon::before {
+    content: "🎓";
+}
+
+
+.summary-content {
+    min-width: 0;
+}
+
+.summary-content span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.8px;
+}
+
+.summary-content strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #0f172a;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    line-height: 1.25;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.summary-content small {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   DETAILS GRID
+   ========================================================= */
+
+.details-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+
+    margin-bottom: 18px;
+}
+
+.details-card {
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.035);
+}
+
+.full-width-card {
+    width: 100%;
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   CARD HEADER
+   ========================================================= */
+
+.card-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 15px 18px;
+
+    min-height: 68px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    box-sizing: border-box;
+}
+
+.heading-icon {
+    width: 38px;
+    height: 38px;
+
+    min-width: 38px;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+.heading-icon i {
+    display: none;
+}
+
+.heading-icon::before {
+    font-family:
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        sans-serif;
+
+    font-size: 18px;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   INDIVIDUAL CARD ICONS
+   ========================================================= */
+
+/* Project Information */
+.details-grid .details-card:nth-child(1)
+.heading-icon::before {
+    content: "📁";
+}
+
+/* Student Information */
+.details-grid .details-card:nth-child(2)
+.heading-icon::before {
+    content: "🎓";
+}
+
+/* College Information */
+.details-grid .details-card:nth-child(3)
+.heading-icon::before {
+    content: "🏫";
+}
+
+/* Industry Information */
+.details-grid .details-card:nth-child(4)
+.heading-icon::before {
+    content: "🏢";
+}
+
+
+/* Technology */
+.full-width-card:nth-of-type(1)
+.heading-icon::before {
+    content: "💻";
+}
+
+
+/* Description */
+.full-width-card:nth-of-type(2)
+.heading-icon::before {
+    content: "📝";
+}
+
+
+/* Documents */
+.full-width-card:nth-of-type(3)
+.heading-icon::before {
+    content: "🔗";
+}
+
+
+/* Account */
+.account-card .heading-icon::before {
+    content: "⚙️";
+}
+
+
+/* Technology icon background */
+.technology-icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+
+/* Description icon background */
+.description-icon {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+
+/* Account icon background */
+.account-icon {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* =========================================================
+   CARD TEXT
+   ========================================================= */
+
+.card-heading > div:last-child {
+    min-width: 0;
+}
+
+.card-heading span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.9px;
+}
+
+.card-heading h2 {
+    margin: 3px 0 0;
+
+    color: #0f172a;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+
+/* =========================================================
+   INFORMATION GRID
+   ========================================================= */
+
+.information-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    column-gap: 30px;
+
+    row-gap: 20px;
+
+    padding: 20px 22px;
+
+    box-sizing: border-box;
+}
+
+.info-item {
+    min-width: 0;
+}
+
+.info-item span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+    font-weight: 500;
+}
+
+.info-item strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    line-height: 1.45;
+
+    word-break: break-word;
+}
+
+.small-value {
+    font-size: 10px !important;
+
+    color: #64748b !important;
+}
+
+
+/* =========================================================
+   DESCRIPTION / TECHNOLOGY BODY
+   ========================================================= */
+
+.description-body {
+    padding: 20px 22px;
+
+    box-sizing: border-box;
+}
+
+.description-body p {
+    margin: 0;
+
+    color: #475569;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+}
+
+.no-data {
+    color: #94a3b8 !important;
+
+    font-size: 11px !important;
+}
+
+
+/* =========================================================
+   TECHNOLOGY TAGS
+   ========================================================= */
+
+.technology-tags {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+.technology-tag {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 7px 11px;
+
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   PROJECT LINKS
+   ========================================================= */
+
+.links-body {
+    padding: 20px 22px;
+
+    box-sizing: border-box;
+}
+
+.links-grid {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+.document-link {
+    min-width: 230px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 12px 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #dbe2ea;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    box-sizing: border-box;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.document-link:hover {
+    background: #f8fafc;
+
+    border-color: #bfdbfe;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   DOCUMENT ICONS
+   ========================================================= */
+
+.document-icon {
+    width: 34px;
+    height: 34px;
+
+    min-width: 34px;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+}
+
+.document-icon i {
+    display: none;
+}
+
+.document-icon::before {
+    font-family:
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        sans-serif;
+
+    font-size: 16px;
+}
+
+.document-icon:not(.report)::before {
+    content: "🔗";
+}
+
+.document-icon.report {
+    background: #fff7ed;
+
+    color: #ea580c;
+}
+
+.document-icon.report::before {
+    content: "📄";
+}
+
+.document-link strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+.document-link span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+}
+
+.no-links {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   ACCOUNT / RECORD INFORMATION
+   ========================================================= */
+
+.account-card {
+    margin-bottom: 18px;
+}
+
+.account-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 25px;
+
+    padding: 20px 22px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   BOTTOM BUTTON
+   ========================================================= */
+
+.bottom-actions {
+    margin-bottom: 18px;
+}
+
+.back-button {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 9px 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #dbe2ea;
+
+    border-radius: 8px;
+
+    color: #475569;
+
+    text-decoration: none;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.back-button:hover {
+    background: #f8fafc;
+
+    color: #2563eb;
+
+    border-color: #cbd5e1;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 850px) {
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .profile-overview {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .profile-status {
+        align-self: flex-start;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .information-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-identity h2 {
+        white-space: normal;
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .details-heading h1 {
+        font-size: 25px;
+    }
+
+    .profile-overview {
+        padding: 18px;
+    }
+
+    .profile-main {
+        gap: 13px;
+    }
+
+    .large-avatar {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+    }
+
+    .large-avatar::before {
+        font-size: 25px;
+    }
+
+    .profile-identity h2 {
+        font-size: 18px;
+    }
+
+    .summary-card {
+        padding: 15px;
+    }
+
+    .card-heading {
+        padding: 14px 16px;
+    }
+
+    .information-grid,
+    .description-body,
+    .links-body,
+    .account-grid {
+        padding: 17px 16px;
+    }
+
+    .document-link {
+        width: 100%;
+        min-width: 0;
+    }
+
+}

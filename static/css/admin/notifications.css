@@ -1,0 +1,660 @@
+/* =========================================================
+   NOTIFICATIONS CENTER
+   ========================================================= */
+
+.notifications-page {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.notifications-page .notifications-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    margin-bottom: 22px;
+}
+
+.notifications-page .notifications-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.notifications-page .heading-icon {
+    width: 47px;
+    height: 47px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: #edf4ff;
+    color: #2563eb;
+    font-size: 24px;
+}
+
+.eyebrow,
+.notifications-page .panel-eyebrow {
+    display: block;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.notifications-page .notifications-heading h1 {
+    margin: 4px 0 4px;
+    color: #102348;
+    font-size: 27px;
+    line-height: 1.15;
+    font-weight: 750;
+}
+
+.notifications-page .notifications-heading p {
+    margin: 0;
+    color: #7b8798;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.notifications-page .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.secondary-action,
+.notifications-page .primary-action {
+    height: 39px;
+    padding: 0 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.notifications-page .secondary-action {
+    border: 1px solid #d9e1ea;
+    background: #ffffff;
+    color: #334155;
+}
+
+.notifications-page .secondary-action:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #f8fbff;
+}
+
+.notifications-page .primary-action {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.notifications-page .primary-action:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.notifications-page .primary-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.notifications-page .notification-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.notifications-page .summary-item {
+    height: 78px;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e3e9f0;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 7px rgba(15, 23, 42, 0.03);
+    cursor: default;
+}
+
+.notifications-page .summary-item.active-summary {
+    border-color: #c9dcfb;
+    background: #f9fbff;
+}
+
+.notifications-page .summary-symbol {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef4ff;
+    color: #2563eb;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.notifications-page .unread-symbol {
+    background: #fff7e8;
+    color: #f59e0b;
+}
+
+.notifications-page .important-symbol {
+    background: #fff0f0;
+    color: #ef4444;
+}
+
+.notifications-page .system-symbol {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.notifications-page .summary-item span {
+    display: block;
+    color: #7b8798;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+}
+
+.notifications-page .summary-item strong {
+    display: block;
+    margin-top: 3px;
+    color: #12244a;
+    font-size: 21px;
+    line-height: 1;
+}
+
+
+/* =========================================================
+   MAIN PANEL
+   ========================================================= */
+
+.notifications-page .notification-panel {
+    background: #ffffff;
+    border: 1px solid #e3e9f0;
+    border-radius: 11px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+}
+
+.notifications-page .panel-header {
+    padding: 21px 22px 17px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.notifications-page .panel-header h2 {
+    margin: 4px 0 3px;
+    color: #102348;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.notifications-page .panel-header p {
+    margin: 0;
+    color: #8995a7;
+    font-size: 11px;
+}
+
+.notifications-page .notification-search {
+    width: 235px;
+    height: 36px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 11px;
+    border: 1px solid #dce3eb;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.notifications-page .notification-search > span {
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.notifications-page .notification-search input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #334155;
+    font-size: 11px;
+}
+
+.notifications-page .notification-search input::placeholder {
+    color: #a0aabd;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.notifications-page .notification-filters {
+    padding: 0 22px 15px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.notifications-page .filter-button {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid #e0e6ed;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.notifications-page .filter-button:hover {
+    border-color: #bfd2ed;
+    color: #2563eb;
+}
+
+.notifications-page .filter-button.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   NOTIFICATION LIST
+   ========================================================= */
+
+.notifications-page .notification-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.notifications-page .notification-item {
+    min-height: 96px;
+    padding: 16px 22px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 43px 1fr auto;
+    align-items: center;
+    gap: 13px;
+    border-bottom: 1px solid #edf1f5;
+    background: #ffffff;
+    transition: background 0.2s ease;
+}
+
+.notifications-page .notification-item:last-child {
+    border-bottom: 0;
+}
+
+.notifications-page .notification-item:hover {
+    background: #fbfcfe;
+}
+
+.notifications-page .notification-item.unread {
+    background: #f9fbff;
+}
+
+.notifications-page .notification-item.unread:hover {
+    background: #f5f9ff;
+}
+
+
+/* =========================================================
+   NOTIFICATION ICON
+   ========================================================= */
+
+.notifications-page .notification-icon {
+    width: 43px;
+    height: 43px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+
+.notifications-page .notification-icon.registration {
+    background: #eef4ff;
+}
+
+.notifications-page .notification-icon.collaboration {
+    background: #fff7e8;
+}
+
+.notifications-page .notification-icon.opportunity {
+    background: #f5efff;
+}
+
+.notifications-page .notification-icon.system {
+    background: #f1f5f9;
+}
+
+
+/* =========================================================
+   NOTIFICATION CONTENT
+   ========================================================= */
+
+.notifications-page .notification-content {
+    min-width: 0;
+}
+
+.notifications-page .notification-top {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.notifications-page .notification-top h3 {
+    margin: 0;
+    color: #273b60;
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.notifications-page .notification-item.unread .notification-top h3 {
+    color: #102348;
+}
+
+.notifications-page .unread-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #2563eb;
+}
+
+.notifications-page .notification-content > p {
+    margin: 5px 0 7px;
+    color: #718096;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.notifications-page .notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #9aa6b6;
+    font-size: 9px;
+}
+
+.notifications-page .notification-meta span:first-child {
+    color: #64748b;
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.notifications-page .notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.65;
+    transition: opacity 0.2s ease;
+}
+
+.notifications-page .notification-item:hover .notification-actions {
+    opacity: 1;
+}
+
+.read-button,
+.notifications-page .delete-button {
+    width: 29px;
+    height: 29px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.notifications-page .read-button {
+    border: 1px solid #dbe3eb;
+    background: #ffffff;
+    color: #64748b;
+}
+
+.notifications-page .read-button:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.notifications-page .delete-button {
+    border: 1px solid transparent;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.notifications-page .delete-button:hover {
+    border-color: #fecaca;
+    background: #fff5f5;
+    color: #ef4444;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.notifications-page .notification-empty {
+    display: none;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.notifications-page .empty-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #94a3b8;
+    font-size: 25px;
+}
+
+.notifications-page .notification-empty h3 {
+    margin: 0;
+    color: #475569;
+    font-size: 14px;
+}
+
+.notifications-page .notification-empty p {
+    max-width: 350px;
+    margin: 6px auto 0;
+    color: #94a3b8;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.notifications-page .notification-footer {
+    min-height: 43px;
+    padding: 0 22px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    border-top: 1px solid #edf1f5;
+    background: #fafbfd;
+    color: #94a3b8;
+    font-size: 9px;
+}
+
+.notifications-page .notification-footer strong {
+    color: #64748b;
+}
+
+
+/* =========================================================
+   INFORMATION STRIP
+   ========================================================= */
+
+.notifications-page .notification-info {
+    margin-top: 14px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e3e9f0;
+    border-radius: 9px;
+    background: #f8fafc;
+}
+
+.notifications-page .info-symbol {
+    width: 29px;
+    height: 29px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.notifications-page .notification-info strong {
+    display: block;
+    color: #334155;
+    font-size: 10px;
+}
+
+.notifications-page .notification-info p {
+    margin: 3px 0 0;
+    color: #94a3b8;
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .notifications-page .notification-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .notifications-page .notification-item {
+        grid-template-columns: 43px 1fr;
+    }
+
+    .notifications-page .notification-actions {
+        grid-column: 2;
+        justify-content: flex-start;
+        margin-top: -3px;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .notifications-page .notifications-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .notifications-page .header-actions {
+        width: 100%;
+    }
+
+    .secondary-action,
+    .notifications-page .primary-action {
+        flex: 1;
+    }
+
+    .notifications-page .notification-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .notifications-page .panel-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .notifications-page .notification-search {
+        width: 100%;
+    }
+
+    .notifications-page .notification-item {
+        grid-template-columns: 40px 1fr;
+        padding: 15px;
+    }
+
+    .notifications-page .notification-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .notifications-page .notification-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        padding: 10px 15px;
+    }
+}
+
+/* =========================================================
+   CLICKABLE NOTIFICATION ROWS
+   ========================================================= */
+
+.notifications-page .notification-item {
+    cursor: pointer;
+}
+
+.notifications-page .notification-item .read-button,
+.notifications-page .notification-item .delete-button {
+    cursor: pointer;
+}

@@ -1,0 +1,745 @@
+{% extends "admin/base.html" %}
+
+{% block title %}SIH Admin | Dashboard{% endblock %}
+
+{% block breadcrumb %}Dashboard{% endblock %}
+
+
+{% block page_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/dashboard.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     DASHBOARD HEADER
+     ===================================================== -->
+
+<section class="dashboard-header">
+
+    <div class="dashboard-heading">
+
+        <span class="page-label">
+            ADMIN DASHBOARD
+        </span>
+
+        <h1>Dashboard</h1>
+
+        <p>
+            Welcome back, <strong>{{ name }}</strong>.
+            Here's an overview of your SIH Portal.
+        </p>
+
+    </div>
+
+
+    <div class="dashboard-actions">
+
+        <button
+            type="button"
+            class="refresh-btn"
+            id="refreshDashboard">
+
+            <span class="refresh-icon">↻</span>
+            <span>Refresh</span>
+
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     STATISTICS CARDS
+     ===================================================== -->
+
+<section class="stats-grid">
+
+
+    <!-- TOTAL STUDENTS -->
+
+    <div class="stat-card students-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">🎓</div>
+
+            <span class="stat-label">
+                Students
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ total_students }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Registered students
+            </span>
+
+            <a href="/admin/students"
+               class="stat-link">
+                View
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- TOTAL COLLEGES -->
+
+    <div class="stat-card colleges-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">🏫</div>
+
+            <span class="stat-label">
+                Colleges
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ total_colleges }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Registered colleges
+            </span>
+
+            <a href="/admin/colleges"
+               class="stat-link">
+                View
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- PLACEMENT CELLS -->
+
+    <div class="stat-card placement-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">🏢</div>
+
+            <span class="stat-label">
+                Placement Cells
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ total_placement_cells }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Registered cells
+            </span>
+
+            <a href="/admin/placement-cells"
+               class="stat-link">
+                View
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- INDUSTRIES -->
+
+    <div class="stat-card industries-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">🏭</div>
+
+            <span class="stat-label">
+                Industries
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ total_industries }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Industry partners
+            </span>
+
+            <a href="/admin/industries"
+               class="stat-link">
+                View
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ACTIVE USERS -->
+
+    <div class="stat-card users-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">👥</div>
+
+            <span class="stat-label">
+                Active Users
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ active_users }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Currently active
+            </span>
+
+            <a href="/admin/users"
+               class="stat-link">
+                Manage
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- PENDING REGISTRATIONS -->
+
+    <div class="stat-card pending-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">⏳</div>
+
+            <span class="stat-label">
+                Pending Registrations
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ pending_colleges + pending_placement_cells + pending_industries }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Awaiting approval
+            </span>
+
+            <span class="status-badge pending">
+                Pending
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ACTIVE COLLABORATIONS -->
+
+    <div class="stat-card collaboration-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">🤝</div>
+
+            <span class="stat-label">
+                Active Collaborations
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ active_collaborations }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Ongoing collaborations
+            </span>
+
+            <a href="/admin/collaborations"
+               class="stat-link">
+                View
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- TOTAL PROJECTS -->
+
+    <div class="stat-card projects-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">📁</div>
+
+            <span class="stat-label">
+                Projects
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            {{ total_projects }}
+        </div>
+
+        <div class="stat-footer">
+
+            <span>
+                Total projects
+            </span>
+
+            <a href="/admin/projects"
+               class="stat-link">
+                View
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     LOWER DASHBOARD
+     ===================================================== -->
+
+<section class="dashboard-lower">
+
+
+    <!-- =================================================
+         RECENT REGISTRATIONS
+         ================================================= -->
+
+    <div class="dashboard-panel registrations-panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <span class="panel-label">
+                    USER ACTIVITY
+                </span>
+
+                <h2>
+                    Recent Registrations
+                </h2>
+
+            </div>
+
+            <a href="/admin/users"
+               class="panel-action">
+
+                View All
+                <span>→</span>
+
+            </a>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="registrations-table">
+
+                <thead>
+
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% if recent_registrations %}
+
+                    {% for user in recent_registrations %}
+
+                    <tr>
+
+                        <!-- USER -->
+
+                        <td>
+
+                            <div class="user-cell">
+
+                                <div class="user-avatar">
+                                    {{ user.name[0]|upper }}
+                                </div>
+
+                                <div class="user-details">
+
+                                    <strong>
+                                        {{ user.name }}
+                                    </strong>
+
+                                    <span>
+                                        {{ user.email }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- ROLE -->
+
+                        <td>
+
+                            {% if user.role == "ADMIN" %}
+
+                                <span class="role-badge admin">
+                                    Admin
+                                </span>
+
+                            {% elif user.role == "STUDENT" %}
+
+                                <span class="role-badge student">
+                                    Student
+                                </span>
+
+                            {% elif user.role == "COLLEGE" %}
+
+                                <span class="role-badge college">
+                                    College
+                                </span>
+
+                            {% elif user.role == "PLACEMENT_CELL" %}
+
+                                <span class="role-badge placement">
+                                    Placement Cell
+                                </span>
+
+                            {% elif user.role == "INDUSTRY" %}
+
+                                <span class="role-badge industry">
+                                    Industry
+                                </span>
+
+                            {% else %}
+
+                                <span class="role-badge">
+                                    {{ user.role }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- EMAIL -->
+
+                        <td class="email-cell">
+                            {{ user.email }}
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if user.status == "ACTIVE" %}
+
+                                <span class="status-badge active">
+                                    Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge inactive">
+                                    Inactive
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- DATE -->
+
+                        <td class="date-cell">
+
+                            {% if user.created_at %}
+                                {{ user.created_at.strftime('%d %b %Y') }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="empty-state">
+
+                            <div class="empty-icon">
+                                📋
+                            </div>
+
+                            <strong>
+                                No registrations yet
+                            </strong>
+
+                            <span>
+                                New user registrations will appear here.
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         QUICK ACTIONS
+         ================================================= -->
+
+    <div class="dashboard-panel quick-actions-panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <span class="panel-label">
+                    SHORTCUTS
+                </span>
+
+                <h2>
+                    Quick Actions
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+
+            <!-- STUDENTS -->
+
+            <a href="/admin/students"
+               class="quick-action">
+
+                <div class="quick-action-icon">
+                    🎓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Manage Students
+                    </strong>
+
+                    <span>
+                        View and manage students
+                    </span>
+
+                </div>
+
+                <span class="quick-arrow">
+                    →
+                </span>
+
+            </a>
+
+
+
+            <!-- COLLEGES -->
+
+            <a href="/admin/colleges"
+               class="quick-action">
+
+                <div class="quick-action-icon">
+                    🏫
+                </div>
+
+                <div>
+
+                    <strong>
+                        Manage Colleges
+                    </strong>
+
+                    <span>
+                        View registered colleges
+                    </span>
+
+                </div>
+
+                <span class="quick-arrow">
+                    →
+                </span>
+
+            </a>
+
+
+
+            <!-- INDUSTRIES -->
+
+            <a href="/admin/industries"
+               class="quick-action">
+
+                <div class="quick-action-icon">
+                    🏭
+                </div>
+
+                <div>
+
+                    <strong>
+                        Manage Industries
+                    </strong>
+
+                    <span>
+                        View industry partners
+                    </span>
+
+                </div>
+
+                <span class="quick-arrow">
+                    →
+                </span>
+
+            </a>
+
+
+
+            <!-- COLLABORATIONS -->
+
+            <a href="/admin/collaborations"
+               class="quick-action">
+
+                <div class="quick-action-icon">
+                    🤝
+                </div>
+
+                <div>
+
+                    <strong>
+                        Collaborations
+                    </strong>
+
+                    <span>
+                        Manage collaborations
+                    </span>
+
+                </div>
+
+                <span class="quick-arrow">
+                    →
+                </span>
+
+            </a>
+
+
+
+            <!-- REPORTS -->
+
+            <a href="/admin/reports"
+               class="quick-action">
+
+                <div class="quick-action-icon">
+                    📊
+                </div>
+
+                <div>
+
+                    <strong>
+                        View Reports
+                    </strong>
+
+                    <span>
+                        Analyze portal statistics
+                    </span>
+
+                </div>
+
+                <span class="quick-arrow">
+                    →
+                </span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+
+
+<!-- =====================================================
+     DASHBOARD JAVASCRIPT
+     ===================================================== -->
+
+{% block page_js %}
+
+<script src="{{ url_for('static', filename='js/admin/dashboard.js') }}"></script>
+
+{% endblock %}

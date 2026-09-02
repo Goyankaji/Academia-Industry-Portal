@@ -1,0 +1,501 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/settings.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="settings-page">
+
+    <!-- PAGE HEADER -->
+    <div class="settings-header">
+
+        <div class="settings-heading">
+
+            <div class="heading-icon">⚙</div>
+
+            <div>
+                <span class="eyebrow">SYSTEM / CONFIGURATION</span>
+
+                <h1>Settings</h1>
+
+                <p>
+                    Manage your administrator profile, security,
+                    notifications and portal preferences.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PROFILE + SECURITY -->
+    <div class="settings-grid">
+
+        <!-- ADMIN PROFILE -->
+        <section class="settings-card">
+
+            <div class="card-header">
+
+                <div class="card-icon profile-icon">👤</div>
+
+                <div>
+                    <h2>Admin Profile</h2>
+                    <p>Manage your administrator account information.</p>
+                </div>
+
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="adminName">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="adminName"
+                        value="{{ admin.name if admin else 'System Admin' }}"
+                        placeholder="Enter your name">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="adminEmail">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="adminEmail"
+                        value="{{ admin.email if admin else '' }}"
+                        placeholder="Enter email address">
+
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+
+                <span class="save-message"
+                      id="profileMessage"></span>
+
+                <button
+                    type="button"
+                    class="save-button"
+                    id="saveProfile">
+
+                    Save Changes
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECURITY -->
+        <section class="settings-card">
+
+            <div class="card-header">
+
+                <div class="card-icon security-icon">🔐</div>
+
+                <div>
+                    <h2>Security</h2>
+                    <p>Keep your administrator account secure.</p>
+                </div>
+
+            </div>
+
+
+            <div class="password-fields">
+
+                <div class="form-group">
+
+                    <label for="currentPassword">
+                        Current Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="currentPassword"
+                        placeholder="Enter current password">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="newPassword">
+                        New Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="newPassword"
+                        placeholder="Enter new password">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="confirmPassword">
+                        Confirm New Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Confirm new password">
+
+                </div>
+
+            </div>
+
+
+            <div class="card-footer">
+
+                <span class="save-message"
+                      id="passwordMessage"></span>
+
+                <button
+                    type="button"
+                    class="save-button"
+                    id="changePassword">
+
+                    Update Password
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- NOTIFICATIONS + APPEARANCE -->
+    <div class="settings-grid">
+
+        <!-- NOTIFICATION PREFERENCES -->
+        <section class="settings-card">
+
+            <div class="card-header">
+
+                <div class="card-icon notification-icon">
+                    🔔
+                </div>
+
+                <div>
+                    <h2>Notification Preferences</h2>
+                    <p>
+                        Choose which administrative activities
+                        you want to receive alerts for.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="preference-list">
+
+                <div class="preference-row">
+
+                    <div class="preference-info">
+
+                        <strong>
+                            New Registrations
+                        </strong>
+
+                        <span>
+                            Alerts for new student, college,
+                            placement cell and industry registrations.
+                        </span>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input
+                            type="checkbox"
+                            id="registrationNotifications"
+                            checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="preference-row">
+
+                    <div class="preference-info">
+
+                        <strong>
+                            Collaboration Activity
+                        </strong>
+
+                        <span>
+                            Receive updates when collaboration
+                            activity is recorded.
+                        </span>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input
+                            type="checkbox"
+                            id="collaborationNotifications"
+                            checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="preference-row">
+
+                    <div class="preference-info">
+
+                        <strong>
+                            New Opportunities
+                        </strong>
+
+                        <span>
+                            Get notified when industries publish
+                            new opportunities.
+                        </span>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input
+                            type="checkbox"
+                            id="opportunityNotifications"
+                            checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-footer">
+
+                <span class="save-message"
+                      id="notificationMessage"></span>
+
+                <button
+                    type="button"
+                    class="save-button"
+                    id="saveNotifications">
+
+                    Save Preferences
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- APPEARANCE -->
+        <section class="settings-card">
+
+            <div class="card-header">
+
+                <div class="card-icon appearance-icon">
+                    ◐
+                </div>
+
+                <div>
+                    <h2>Appearance</h2>
+                    <p>
+                        Choose how the administration interface
+                        should appear.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="theme-section">
+
+                <span class="field-label">
+                    Theme Preference
+                </span>
+
+
+                <div class="theme-options">
+
+                    <label class="theme-option active">
+
+                        <input
+                            type="radio"
+                            name="theme"
+                            value="light"
+                            checked>
+
+                        <div class="theme-preview light-preview">
+
+                            <div class="preview-top"></div>
+
+                            <div class="preview-body">
+
+                                <span></span>
+                                <span></span>
+                                <span></span>
+
+                            </div>
+
+                        </div>
+
+                        <strong>Light</strong>
+
+                    </label>
+
+
+                    <label class="theme-option">
+
+                        <input
+                            type="radio"
+                            name="theme"
+                            value="dark">
+
+                        <div class="theme-preview dark-preview">
+
+                            <div class="preview-top"></div>
+
+                            <div class="preview-body">
+
+                                <span></span>
+                                <span></span>
+                                <span></span>
+
+                            </div>
+
+                        </div>
+
+                        <strong>Dark</strong>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-footer">
+
+                <span class="save-message"
+                      id="appearanceMessage"></span>
+
+                <button
+                    type="button"
+                    class="save-button"
+                    id="saveAppearance">
+
+                    Save Appearance
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- SYSTEM INFORMATION -->
+    <section class="settings-card system-card">
+
+        <div class="card-header">
+
+            <div class="card-icon system-icon">
+                ℹ
+            </div>
+
+            <div>
+                <h2>System Information</h2>
+                <p>Current SIH Portal administration environment.</p>
+            </div>
+
+        </div>
+
+
+        <div class="system-info-grid">
+
+            <div class="system-info-item">
+
+                <span>Portal</span>
+
+                <strong>
+                    SIH Academia–Industry Portal
+                </strong>
+
+            </div>
+
+
+            <div class="system-info-item">
+
+                <span>Module</span>
+
+                <strong>
+                    Administration
+                </strong>
+
+            </div>
+
+
+            <div class="system-info-item">
+
+                <span>Role</span>
+
+                <strong>
+                    Administrator
+                </strong>
+
+            </div>
+
+
+            <div class="system-info-item">
+
+                <span>Version</span>
+
+                <strong>
+                    1.0.0
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+<script src="{{ url_for('static', filename='js/admin/settings.js') }}"></script>
+{% endblock %}

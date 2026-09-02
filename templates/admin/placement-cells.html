@@ -1,0 +1,581 @@
+{% extends "admin/base.html" %}
+
+{% block title %}SIH Admin | Placement Cells{% endblock %}
+
+{% block breadcrumb %}Placement Cells{% endblock %}
+
+
+{% block page_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/admin/placement-cells.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     PAGE HEADER
+     ===================================================== -->
+
+<section class="placement-page-header">
+
+    <div class="placement-page-heading">
+
+        <span class="placement-page-label">
+            PLACEMENT CELL MANAGEMENT
+        </span>
+
+        <h1>Placement Cells</h1>
+
+        <p>
+            View, search and manage registered placement cells.
+        </p>
+
+    </div>
+
+
+    <div class="placement-header-actions">
+
+        <button
+            type="button"
+            class="placement-outline-btn"
+            id="refreshPlacementCells">
+
+            <span class="placement-refresh-icon">↻</span>
+
+            Refresh
+
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SUMMARY CARDS
+     ===================================================== -->
+
+<section class="placement-summary-grid">
+
+
+    <!-- TOTAL -->
+
+    <div class="placement-summary-card">
+
+        <div class="placement-summary-icon">
+            🏢
+        </div>
+
+        <div class="placement-summary-content">
+
+            <span>
+                Total Placement Cells
+            </span>
+
+            <strong>
+                {{ placement_cells|length if placement_cells else 0 }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACTIVE -->
+
+    <div class="placement-summary-card">
+
+        <div class="placement-summary-icon active-icon">
+            ✓
+        </div>
+
+        <div class="placement-summary-content">
+
+            <span>
+                Active Cells
+            </span>
+
+            <strong id="activeCount">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- PENDING -->
+
+    <div class="placement-summary-card">
+
+        <div class="placement-summary-icon pending-icon">
+            ⏳
+        </div>
+
+        <div class="placement-summary-content">
+
+            <span>
+                Pending Cells
+            </span>
+
+            <strong id="pendingCount">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- INACTIVE -->
+
+    <div class="placement-summary-card">
+
+        <div class="placement-summary-icon inactive-icon">
+            !
+        </div>
+
+        <div class="placement-summary-content">
+
+            <span>
+                Inactive Cells
+            </span>
+
+            <strong id="inactiveCount">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     DIRECTORY / FILTER PANEL
+     ===================================================== -->
+
+<section class="placement-panel">
+
+
+    <div class="placement-filter-header">
+
+        <div>
+
+            <span class="placement-panel-label">
+                DIRECTORY
+            </span>
+
+            <h2>
+                Placement Cell Directory
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="placement-filter-container">
+
+
+        <!-- SEARCH -->
+
+        <div class="placement-search-box">
+
+            <span class="placement-search-icon">
+                🔍
+            </span>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by name, college or email..."
+                autocomplete="off">
+
+        </div>
+
+
+        <!-- COLLEGE -->
+
+        <div class="placement-filter-group">
+
+            <label for="collegeFilter">
+                College
+            </label>
+
+            <select id="collegeFilter">
+
+                <option value="">
+                    All Colleges
+                </option>
+
+                {% if colleges %}
+
+                    {% for college in colleges %}
+
+                    <option value="{{ college.id }}">
+                        {{ college.college_name }}
+                    </option>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </select>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div class="placement-filter-group">
+
+            <label for="statusFilter">
+                Status
+            </label>
+
+            <select id="statusFilter">
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option value="ACTIVE">
+                    Active
+                </option>
+
+                <option value="PENDING">
+                    Pending
+                </option>
+
+                <option value="INACTIVE">
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- RESET -->
+
+        <button
+            type="button"
+            class="placement-reset-btn"
+            id="resetFilters">
+
+            Reset
+
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PLACEMENT CELL TABLE
+     ===================================================== -->
+
+<section class="placement-panel placement-table-panel">
+
+
+    <div class="placement-table-topbar">
+
+        <div class="placement-result-info">
+
+            Showing
+
+            <strong id="resultCount">
+                {{ placement_cells|length if placement_cells else 0 }}
+            </strong>
+
+            placement cells
+
+        </div>
+
+    </div>
+
+
+    <div class="placement-table-wrapper">
+
+        <table
+            class="placement-table"
+            id="placementTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Placement Cell
+                    </th>
+
+                    <th>
+                        College
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Phone
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Registered
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="placementTableBody">
+
+
+            {% if placement_cells %}
+
+                {% for cell in placement_cells %}
+
+                <tr
+                    class="placement-row"
+
+                    data-name="{{ cell.name|lower }}"
+
+                    data-email="{{ cell.email|lower }}"
+
+                    data-college="{{ cell.college_name|lower }}"
+
+                    data-college-id="{{ cell.college_id }}"
+
+                    data-status="{{ cell.status }}">
+
+
+                    <!-- PLACEMENT CELL -->
+
+                    <td>
+
+                        <div class="placement-cell-user">
+
+                            <div class="placement-user-avatar">
+
+                                {{ cell.name[0]|upper
+                                   if cell.name else 'P' }}
+
+                            </div>
+
+
+                            <div class="placement-user-info">
+
+                                <strong>
+                                    {{ cell.name or '—' }}
+                                </strong>
+
+                                <span>
+                                    Placement Cell
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- COLLEGE -->
+
+                    <td>
+
+                        <span class="placement-college-name">
+
+                            {{ cell.college_name or '—' }}
+
+                        </span>
+
+                        {% if cell.college_code %}
+
+                        <span class="placement-college-code">
+
+                            {{ cell.college_code }}
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- EMAIL -->
+
+                    <td class="placement-email">
+
+                        {{ cell.email or '—' }}
+
+                    </td>
+
+
+                    <!-- PHONE -->
+
+                    <td>
+
+                        {{ cell.phone or '—' }}
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if cell.status == "ACTIVE" %}
+
+                        <span class="placement-status active">
+                            Active
+                        </span>
+
+                        {% elif cell.status == "PENDING" %}
+
+                        <span class="placement-status pending">
+                            Pending
+                        </span>
+
+                        {% else %}
+
+                        <span class="placement-status inactive">
+                            Inactive
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- REGISTERED -->
+
+                    <td>
+
+                        {% if cell.created_at %}
+
+                            {{ cell.created_at.strftime('%d %b %Y') }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+                        <a
+                            href="/admin/placement-cells/{{ cell.id }}"
+                            class="placement-view-btn">
+
+                            View Details
+
+                            <span>→</span>
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="placement-empty-state">
+
+                        <div class="placement-empty-icon">
+                            🏢
+                        </div>
+
+                        <strong>
+                            No placement cells registered
+                        </strong>
+
+                        <span>
+                            Registered placement cells will appear here.
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+
+            <!-- FILTER EMPTY -->
+
+            <tr
+                id="filterEmptyRow"
+                class="placement-filter-empty hidden">
+
+                <td
+                    colspan="7"
+                    class="placement-empty-state">
+
+                    <div class="placement-empty-icon">
+                        🔍
+                    </div>
+
+                    <strong>
+                        No matching placement cells
+                    </strong>
+
+                    <span>
+                        Try changing your search or filters.
+                    </span>
+
+                </td>
+
+            </tr>
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+
+
+{% block page_js %}
+
+<script
+    src="{{ url_for('static', filename='js/admin/placement-cells.js') }}">
+</script>
+
+{% endblock %}

@@ -1,0 +1,451 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Opportunities{% endblock %}
+
+{% block breadcrumb %}
+SIH Portal / Admin / Opportunities
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/opportunities.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div class="page-heading">
+        <span class="page-label">OPPORTUNITY MANAGEMENT</span>
+
+        <h1>Opportunities</h1>
+
+        <p>
+            View, search and monitor industry opportunities.
+        </p>
+    </div>
+
+    <button class="refresh-btn" id="refreshOpportunities">
+        <span>↻</span>
+        Refresh
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     STATISTICS
+     ===================================================== -->
+
+<div class="stats-grid">
+
+    <div class="stat-card total">
+        <div class="stat-icon">💼</div>
+
+        <div class="stat-info">
+            <span>Total Opportunities</span>
+            <strong id="totalOpportunities">
+                {{ opportunities|length }}
+            </strong>
+        </div>
+    </div>
+
+
+    <div class="stat-card open">
+        <div class="stat-icon">✓</div>
+
+        <div class="stat-info">
+            <span>Open</span>
+            <strong id="openOpportunities">0</strong>
+        </div>
+    </div>
+
+
+    <div class="stat-card draft">
+        <div class="stat-icon">📝</div>
+
+        <div class="stat-info">
+            <span>Draft</span>
+            <strong id="draftOpportunities">0</strong>
+        </div>
+    </div>
+
+
+    <div class="stat-card closed">
+        <div class="stat-icon">!</div>
+
+        <div class="stat-info">
+            <span>Closed</span>
+            <strong id="closedOpportunities">0</strong>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     DIRECTORY
+     ===================================================== -->
+
+<div class="directory-card">
+
+    <div class="directory-header">
+
+        <span class="section-label">
+            OPPORTUNITY DIRECTORY
+        </span>
+
+        <h2>Opportunity Directory</h2>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filter-section">
+
+        <div class="filter-group search-group">
+
+            <label for="opportunitySearch">
+                Search
+            </label>
+
+            <div class="search-wrapper">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    type="text"
+                    id="opportunitySearch"
+                    placeholder="Search by opportunity, industry or location..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="filter-group">
+
+            <label for="industryFilter">
+                Industry
+            </label>
+
+            <select id="industryFilter">
+
+                <option value="">All Industries</option>
+
+                {% for industry in industries %}
+                <option value="{{ industry.id }}">
+                    {{ industry.company_name }}
+                </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-group">
+
+            <label for="typeFilter">
+                Type
+            </label>
+
+            <select id="typeFilter">
+
+                <option value="">All Types</option>
+
+                <option value="INTERNSHIP">Internship</option>
+                <option value="PLACEMENT">Placement</option>
+                <option value="PROJECT">Project</option>
+                <option value="TRAINING">Training</option>
+                <option value="JOB">Job</option>
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-group">
+
+            <label for="workModeFilter">
+                Work Mode
+            </label>
+
+            <select id="workModeFilter">
+
+                <option value="">All Modes</option>
+
+                <option value="ONSITE">Onsite</option>
+                <option value="REMOTE">Remote</option>
+                <option value="HYBRID">Hybrid</option>
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-group status-group">
+
+            <label for="statusFilter">
+                Status
+            </label>
+
+            <select id="statusFilter">
+
+                <option value="">All Status</option>
+
+                <option value="DRAFT">Draft</option>
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+                <option value="CANCELLED">Cancelled</option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="reset-btn"
+            id="resetFilters"
+        >
+            Reset
+        </button>
+
+    </div>
+
+
+    <!-- RESULT COUNT -->
+
+    <div class="result-bar">
+
+        <span>
+            Showing
+            <strong id="visibleOpportunityCount">
+                {{ opportunities|length }}
+            </strong>
+            opportunities
+        </span>
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div class="table-wrapper">
+
+        <table class="opportunities-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>OPPORTUNITY</th>
+
+                    <th>INDUSTRY</th>
+
+                    <th>TYPE</th>
+
+                    <th>LOCATION</th>
+
+                    <th>WORK MODE</th>
+
+                    <th>DEADLINE</th>
+
+                    <th>STATUS</th>
+
+                    <th>ACTION</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="opportunityTableBody">
+
+                {% for opportunity in opportunities %}
+
+                <tr
+                    class="opportunity-row"
+                    data-search="{{ (
+                        opportunity.title ~ ' ' ~
+                        (opportunity.company_name or '') ~ ' ' ~
+                        (opportunity.location or '')
+                    )|lower }}"
+                    data-industry="{{ opportunity.industry_id or '' }}"
+                    data-type="{{ opportunity.opportunity_type or '' }}"
+                    data-work-mode="{{ opportunity.work_mode or '' }}"
+                    data-status="{{ opportunity.status or '' }}"
+                >
+
+                    <!-- OPPORTUNITY -->
+
+                    <td>
+
+                        <div class="opportunity-cell">
+
+                            <div class="row-icon">
+                                💼
+                            </div>
+
+                            <div class="opportunity-info">
+
+                                <strong>
+                                    {{ opportunity.title }}
+                                </strong>
+
+                                {% if opportunity.description %}
+                                <span>
+                                    {{ opportunity.description[:85] }}
+                                    {% if opportunity.description|length > 85 %}...{% endif %}
+                                </span>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- INDUSTRY -->
+
+                    <td>
+
+                        <div class="industry-cell">
+
+                            <strong>
+                                {{ opportunity.company_name or 'Not Assigned' }}
+                            </strong>
+
+                            {% if opportunity.industry_sector %}
+                            <span>
+                                {{ opportunity.industry_sector }}
+                            </span>
+                            {% endif %}
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- TYPE -->
+
+                    <td>
+
+                        <span class="type-badge">
+                            {{ opportunity.opportunity_type }}
+                        </span>
+
+                    </td>
+
+
+                    <!-- LOCATION -->
+
+                    <td>
+
+                        <span class="location-text">
+                            {{ opportunity.location or 'Not Specified' }}
+                        </span>
+
+                    </td>
+
+
+                    <!-- WORK MODE -->
+
+                    <td>
+
+                        {% if opportunity.work_mode %}
+                        <span class="mode-badge {{ opportunity.work_mode|lower }}">
+                            {{ opportunity.work_mode }}
+                        </span>
+                        {% else %}
+                        <span class="muted-text">—</span>
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- DEADLINE -->
+
+                    <td>
+
+                        {% if opportunity.application_deadline %}
+                        <span class="date-text">
+                            {{ opportunity.application_deadline }}
+                        </span>
+                        {% else %}
+                        <span class="muted-text">—</span>
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        <span class="status-badge {{ opportunity.status|lower }}">
+                            {{ opportunity.status }}
+                        </span>
+
+                    </td>
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+                        <a
+                            href="/admin/opportunities/{{ opportunity.id }}"
+                            class="view-details"
+                        >
+                            View Details →
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr id="emptyOpportunityRow">
+
+                    <td colspan="8">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                💼
+                            </div>
+
+                            <h3>No Opportunities Found</h3>
+
+                            <p>
+                                There are currently no opportunity records available.
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+<script src="{{ url_for('static', filename='js/admin/opportunities.js') }}"></script>
+{% endblock %}

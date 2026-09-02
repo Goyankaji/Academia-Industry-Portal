@@ -1,0 +1,801 @@
+/* =========================================================
+   SIH ADMIN PORTAL
+   COLLABORATIONS MANAGEMENT
+   ========================================================= */
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.collaboration-header {
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 22px;
+}
+
+
+.collaboration-heading {
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.page-label {
+
+    margin-bottom: 6px;
+
+    color: #2563eb;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+}
+
+
+.collaboration-heading h1 {
+
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 28px;
+    font-weight: 700;
+}
+
+
+.collaboration-heading p {
+
+    margin: 6px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   REFRESH
+   ========================================================= */
+
+.refresh-btn {
+
+    height: 40px;
+
+    padding: 0 16px;
+
+    border: 1px solid #dbe2ea;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.refresh-btn:hover {
+
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   KPI / STATS
+   SAME SIZE AS PLACEMENT CELLS
+   ========================================================= */
+
+.stats-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 24px;
+}
+
+
+/* =========================================================
+   KPI CARD
+   ========================================================= */
+
+.stat-card {
+
+    height: 94px;
+    min-height: 94px;
+
+    box-sizing: border-box;
+
+    padding: 20px 22px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.04);
+
+    display: grid;
+
+    grid-template-columns: 50px 1fr;
+
+    grid-template-rows: 22px 32px;
+
+    column-gap: 16px;
+
+    align-items: start;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   KPI TOP
+   ========================================================= */
+
+.stat-card-top {
+
+    display: contents;
+}
+
+
+/* =========================================================
+   KPI ICON
+   ========================================================= */
+
+.stat-icon {
+
+    width: 50px;
+    height: 50px;
+
+    min-width: 50px;
+
+    grid-column: 1;
+    grid-row: 1 / 3;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    font-size: 23px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   KPI LABEL
+   ========================================================= */
+
+.stat-label {
+
+    grid-column: 2;
+    grid-row: 1;
+
+    align-self: start;
+
+    margin: 3px 0 0;
+
+    color: #475569;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    line-height: 1.2;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   KPI VALUE
+   ========================================================= */
+
+.stat-value {
+
+    grid-column: 2;
+    grid-row: 2;
+
+    align-self: start;
+
+    margin: 0;
+
+    color: #020617;
+
+    font-size: 27px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   KPI FOOTER
+   ========================================================= */
+
+.stat-footer {
+
+    display: none;
+}
+
+
+/* =========================================================
+   KPI ICON BACKGROUNDS
+   ========================================================= */
+
+.stat-card:first-child .stat-icon {
+
+    background: #eff6ff;
+}
+
+
+.active-card .stat-icon {
+
+    background: #ecfdf5;
+}
+
+
+.pending-card .stat-icon {
+
+    background: #fffbeb;
+}
+
+
+.inactive-card .stat-icon {
+
+    background: #fef2f2;
+}
+
+
+/* =========================================================
+   DIRECTORY
+   ========================================================= */
+
+.directory-panel {
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+}
+
+
+.panel-header {
+
+    padding: 20px 24px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.panel-label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+.panel-header h2 {
+
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.filter-section {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 220px 180px auto;
+
+    align-items: end;
+
+    gap: 14px;
+
+    padding: 18px 24px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.search-box {
+
+    position: relative;
+}
+
+
+.search-icon {
+
+    position: absolute;
+
+    left: 13px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-size: 15px;
+}
+
+
+.search-box input,
+.filter-group select {
+
+    width: 100%;
+
+    height: 42px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    outline: none;
+}
+
+
+.search-box input {
+
+    padding: 0 12px 0 38px;
+}
+
+
+.filter-group select {
+
+    padding: 0 12px;
+}
+
+
+.search-box input:focus,
+.filter-group select:focus {
+
+    border-color: #2563eb;
+}
+
+
+.filter-group label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #64748b;
+
+    font-size: 10px;
+}
+
+
+.reset-btn {
+
+    height: 42px;
+
+    padding: 0 17px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.reset-btn:hover {
+
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   RESULT
+   ========================================================= */
+
+.result-bar {
+
+    padding: 13px 24px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.result-bar strong {
+
+    color: #334155;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.table-wrapper {
+
+    overflow-x: auto;
+}
+
+
+.collaboration-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+
+.collaboration-table th {
+
+    padding: 13px 16px;
+
+    text-align: left;
+
+    background: #f8fafc;
+
+    border-top: 1px solid #e2e8f0;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.collaboration-table td {
+
+    padding: 15px 16px;
+
+    border-bottom: 1px solid #edf2f7;
+
+    color: #334155;
+
+    font-size: 12px;
+}
+
+
+.collaboration-table tbody tr:hover {
+
+    background: #fafcff;
+}
+
+
+/* =========================================================
+   COLLABORATION
+   ========================================================= */
+
+.collaboration-cell {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+}
+
+
+.collaboration-icon {
+
+    width: 36px;
+    height: 36px;
+
+    min-width: 36px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    font-size: 16px;
+}
+
+
+.collaboration-details strong {
+
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 12px;
+}
+
+
+.collaboration-details span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   PEOPLE / COMPANY
+   ========================================================= */
+
+.person-info strong,
+.company-info strong,
+.college-info strong {
+
+    display: block;
+
+    color: #334155;
+
+    font-size: 12px;
+}
+
+
+.person-info span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+}
+
+
+.type-badge {
+
+    display: inline-flex;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 5px 10px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+.status-badge.active {
+
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.status-badge.pending {
+
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+.status-badge.inactive {
+
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   ACTION
+   ========================================================= */
+
+.view-btn {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+.view-btn:hover {
+
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.empty-state {
+
+    padding: 45px 20px !important;
+
+    text-align: center;
+
+    color: #94a3b8 !important;
+}
+
+
+.empty-icon {
+
+    margin-bottom: 9px;
+
+    font-size: 28px;
+}
+
+
+.empty-state strong {
+
+    display: block;
+
+    color: #334155;
+
+    font-size: 13px;
+}
+
+
+.empty-state span {
+
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 11px;
+}
+
+
+.hidden {
+
+    display: none !important;
+}
+
+
+.filter-empty-row {
+
+    display: none;
+}
+
+
+.filter-empty-row:not(.hidden) {
+
+    display: table-row;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .stats-grid {
+
+        grid-template-columns: repeat(2, 1fr);
+
+    }
+
+
+    .filter-section {
+
+        grid-template-columns: 1fr 1fr;
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .collaboration-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .stats-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .filter-section {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}

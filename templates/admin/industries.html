@@ -1,0 +1,538 @@
+{% extends "admin/base.html" %}
+
+{% block title %}SIH Admin | Industries{% endblock %}
+
+{% block breadcrumb %}
+Industries
+{% endblock %}
+
+
+{% block page_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/admin/industries.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<section class="industry-header">
+
+    <div class="industry-heading">
+
+        <span class="page-label">
+            INDUSTRY MANAGEMENT
+        </span>
+
+        <h1>
+            Industries
+        </h1>
+
+        <p>
+            View, search and manage registered industry partners.
+        </p>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="refresh-btn"
+        id="refreshIndustries">
+
+        ↻&nbsp; Refresh
+
+    </button>
+
+</section>
+
+
+<!-- =====================================================
+     STATS
+     ===================================================== -->
+
+<section class="stats-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                🏢
+            </div>
+
+            <span class="stat-label">
+                Total Industries
+            </span>
+
+        </div>
+
+        <div class="stat-value" id="totalIndustryCount">
+            {{ industries|length }}
+        </div>
+
+        <div class="stat-footer">
+            Registered industry partners
+        </div>
+
+    </div>
+
+
+    <div class="stat-card active-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                ✓
+            </div>
+
+            <span class="stat-label">
+                Active Industries
+            </span>
+
+        </div>
+
+        <div class="stat-value" id="activeIndustryCount">
+            0
+        </div>
+
+        <div class="stat-footer">
+            Currently active
+        </div>
+
+    </div>
+
+
+    <div class="stat-card pending-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                ⏳
+            </div>
+
+            <span class="stat-label">
+                Pending Industries
+            </span>
+
+        </div>
+
+        <div class="stat-value" id="pendingIndustryCount">
+            0
+        </div>
+
+        <div class="stat-footer">
+            Awaiting approval
+        </div>
+
+    </div>
+
+
+    <div class="stat-card inactive-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                !
+            </div>
+
+            <span class="stat-label">
+                Inactive Industries
+            </span>
+
+        </div>
+
+        <div class="stat-value" id="inactiveIndustryCount">
+            0
+        </div>
+
+        <div class="stat-footer">
+            Currently inactive
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     DIRECTORY
+     ===================================================== -->
+
+<section class="directory-panel">
+
+    <div class="panel-header">
+
+        <span class="panel-label">
+            DIRECTORY
+        </span>
+
+        <h2>
+            Industry Directory
+        </h2>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filter-section">
+
+        <div class="search-box">
+
+            <span class="search-icon">
+                🔍
+            </span>
+
+            <input
+                type="text"
+                id="industrySearch"
+                placeholder="Search by company, contact or email...">
+
+        </div>
+
+
+        <div class="filter-group">
+
+            <label for="typeFilter">
+                Industry Type
+            </label>
+
+            <select id="typeFilter">
+
+                <option value="">
+                    All Types
+                </option>
+
+                {% for type in industry_types %}
+
+                <option value="{{ type|lower }}">
+                    {{ type }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-group">
+
+            <label for="sectorFilter">
+                Sector
+            </label>
+
+            <select id="sectorFilter">
+
+                <option value="">
+                    All Sectors
+                </option>
+
+                {% for sector in industry_sectors %}
+
+                <option value="{{ sector|lower }}">
+                    {{ sector }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-group">
+
+            <label for="statusFilter">
+                Status
+            </label>
+
+            <select id="statusFilter">
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option value="ACTIVE">
+                    Active
+                </option>
+
+                <option value="PENDING">
+                    Pending
+                </option>
+
+                <option value="INACTIVE">
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="reset-btn"
+            id="resetFilters">
+
+            Reset
+
+        </button>
+
+    </div>
+
+
+    <!-- RESULT BAR -->
+
+    <div class="result-bar">
+
+        Showing
+        <strong id="visibleIndustryCount">
+            {{ industries|length }}
+        </strong>
+        industries
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div class="table-wrapper">
+
+        <table class="industry-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        INDUSTRY
+                    </th>
+
+                    <th>
+                        TYPE
+                    </th>
+
+                    <th>
+                        SECTOR
+                    </th>
+
+                    <th>
+                        CONTACT
+                    </th>
+
+                    <th>
+                        EMAIL
+                    </th>
+
+                    <th>
+                        STATUS
+                    </th>
+
+                    <th>
+                        ACTION
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% if industries %}
+
+                {% for industry in industries %}
+
+                <tr
+                    class="industry-row"
+                    data-name="{{ industry.company_name|lower }}"
+                    data-contact="{{ industry.contact_person|lower if industry.contact_person else '' }}"
+                    data-email="{{ industry.email|lower if industry.email else '' }}"
+                    data-type="{{ industry.company_type|lower if industry.company_type else '' }}"
+                    data-sector="{{ industry.industry_sector|lower if industry.industry_sector else '' }}"
+                    data-status="{{ industry.status|upper }}">
+
+                    <td>
+
+                        <div class="industry-info">
+
+                            <div class="industry-avatar">
+                                {{ industry.company_name[0]|upper
+                                   if industry.company_name else 'I' }}
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    {{ industry.company_name or '—' }}
+                                </strong>
+
+                                <span>
+                                    {{ industry.city or '—' }}{% if industry.state %}, {{ industry.state }}{% endif %}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+                        <span class="type-text">
+                            {{ industry.company_type or '—' }}
+                        </span>
+                    </td>
+
+
+                    <td>
+                        <span class="sector-text">
+                            {{ industry.industry_sector or '—' }}
+                        </span>
+                    </td>
+
+
+                    <td>
+
+                        <div class="contact-info">
+
+                            <strong>
+                                {{ industry.contact_person or '—' }}
+                            </strong>
+
+                            {% if industry.designation %}
+
+                            <span>
+                                {{ industry.designation }}
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </td>
+
+
+                    <td class="email-cell">
+                        {{ industry.email or '—' }}
+                    </td>
+
+
+                    <td>
+
+                        {% if industry.status == "ACTIVE" %}
+
+                            <span class="status-badge active">
+                                Active
+                            </span>
+
+                        {% elif industry.status == "PENDING" %}
+
+                            <span class="status-badge pending">
+                                Pending
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge inactive">
+                                Inactive
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="/admin/industries/{{ industry.id }}"
+                            class="view-btn">
+
+                            View Details →
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+                <tr
+                    id="filterEmptyRow"
+                    class="filter-empty-row hidden">
+
+                    <td colspan="7">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                🔍
+                            </div>
+
+                            <strong>
+                                No matching industries found
+                            </strong>
+
+                            <span>
+                                Try changing your search or filters.
+                            </span>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="7">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                🏢
+                            </div>
+
+                            <strong>
+                                No industries registered
+                            </strong>
+
+                            <span>
+                                Registered industry partners will appear here.
+                            </span>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+
+{% block page_js %}
+
+<script
+    src="{{ url_for('static', filename='js/admin/industries.js') }}">
+</script>
+
+{% endblock %}

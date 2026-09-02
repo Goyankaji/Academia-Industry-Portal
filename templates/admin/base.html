@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}SIH Admin{% endblock %}</title>
+
+
+    <!-- Common Admin CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/admin/common.css') }}">
+
+
+    <!-- Page Specific CSS -->
+    {% block page_css %}{% endblock %}
+
+</head>
+
+
+<body>
+
+
+<!-- ==============================
+     MOBILE OVERLAY
+     ============================== -->
+
+<div class="sidebar-overlay"
+     id="sidebarOverlay">
+</div>
+
+
+
+<!-- ==============================
+     ADMIN SIDEBAR
+     ============================== -->
+
+<aside class="admin-sidebar"
+       id="adminSidebar">
+
+
+    <!-- Sidebar Header -->
+
+    <div class="sidebar-header">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                S
+            </div>
+
+
+            <div class="brand-text">
+
+                <span class="brand-title">
+                    SIH Portal
+                </span>
+
+                <span class="brand-subtitle">
+                    Administration
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Mobile Close Button -->
+
+        <button class="sidebar-close"
+                id="sidebarClose"
+                type="button"
+                aria-label="Close sidebar">
+
+            &times;
+
+        </button>
+
+    </div>
+
+
+
+    <!-- ==============================
+         SIDEBAR NAVIGATION
+         ============================== -->
+
+    <nav class="sidebar-nav">
+
+
+        <!-- Main -->
+
+        <div class="nav-section">
+
+            <div class="nav-section-title">
+                MAIN
+            </div>
+
+
+            <a href="/admin/dashboard"
+               class="nav-item {% if request.path == '/admin/dashboard' %}active{% endif %}">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span class="nav-text">
+                    Dashboard
+                </span>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- Management -->
+
+        <div class="nav-section">
+
+            <div class="nav-section-title">
+                MANAGEMENT
+            </div>
+
+
+            <a href="/admin/students"
+               class="nav-item {% if request.path.startswith('/admin/students') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    🎓
+                </span>
+
+                <span class="nav-text">
+                    Students
+                </span>
+
+            </a>
+
+
+            <a href="/admin/colleges"
+               class="nav-item {% if request.path.startswith('/admin/colleges') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    🏫
+                </span>
+
+                <span class="nav-text">
+                    Colleges
+                </span>
+
+            </a>
+
+
+            <a href="/admin/placement-cells"
+               class="nav-item {% if request.path.startswith('/admin/placement-cells') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    🏢
+                </span>
+
+                <span class="nav-text">
+                    Placement Cells
+                </span>
+
+            </a>
+
+
+            <a href="/admin/industries"
+               class="nav-item {% if request.path.startswith('/admin/industries') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    🏭
+                </span>
+
+                <span class="nav-text">
+                    Industries
+                </span>
+
+            </a>
+
+
+            <a href="/admin/users"
+               class="nav-item {% if request.path.startswith('/admin/users') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    👥
+                </span>
+
+                <span class="nav-text">
+                    Users
+                </span>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- Collaboration -->
+
+        <div class="nav-section">
+
+            <div class="nav-section-title">
+                COLLABORATION
+            </div>
+
+
+            <a href="/admin/collaborations"
+               class="nav-item {% if request.path.startswith('/admin/collaborations') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    🤝
+                </span>
+
+                <span class="nav-text">
+                    Collaborations
+                </span>
+
+            </a>
+
+
+            <a href="/admin/projects"
+               class="nav-item {% if request.path.startswith('/admin/projects') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    📁
+                </span>
+
+                <span class="nav-text">
+                    Projects
+                </span>
+
+            </a>
+
+
+            <a href="/admin/opportunities"
+               class="nav-item {% if request.path.startswith('/admin/opportunities') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    💼
+                </span>
+
+                <span class="nav-text">
+                    Opportunities
+                </span>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- System -->
+
+        <div class="nav-section">
+
+            <div class="nav-section-title">
+                SYSTEM
+            </div>
+
+
+            <a href="/admin/reports"
+               class="nav-item {% if request.path.startswith('/admin/reports') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    📊
+                </span>
+
+                <span class="nav-text">
+                    Reports
+                </span>
+
+            </a>
+
+
+            <a href="/admin/notifications"
+               class="nav-item {% if request.path.startswith('/admin/notifications') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    🔔
+                </span>
+
+                <span class="nav-text">
+                    Notifications
+                </span>
+
+                {% if unread_notification_count and unread_notification_count > 0 %}
+                    <span class="notification-dot"></span>
+                {% endif %}
+
+            </a>
+
+
+            <a href="/admin/settings"
+               class="nav-item {% if request.path.startswith('/admin/settings') %}active{% endif %}">
+
+                <span class="nav-icon">
+                    ⚙
+                </span>
+
+                <span class="nav-text">
+                    Settings
+                </span>
+
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ==============================
+         SIDEBAR FOOTER
+         ============================== -->
+
+    <div class="sidebar-footer">
+
+        <a href="/logout"
+           class="logout-item"
+           id="logoutLink">
+
+            <span class="nav-icon">
+                ↪
+            </span>
+
+            <span class="nav-text">
+                Logout
+            </span>
+
+        </a>
+
+    </div>
+
+</aside>
+
+
+
+<!-- ==============================
+     MAIN WRAPPER
+     ============================== -->
+
+<div class="admin-wrapper">
+
+
+
+    <!-- ==============================
+         TOP NAVBAR
+         ============================== -->
+
+    <header class="admin-navbar">
+
+
+        <!-- Mobile Menu Button -->
+
+        <button class="mobile-menu-btn"
+                id="mobileMenuBtn"
+                type="button"
+                aria-label="Open menu">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
+
+
+        <!-- Navbar Left -->
+
+        <div class="navbar-left">
+
+            <div class="breadcrumb">
+
+                <span class="breadcrumb-home">
+                    SIH Portal
+                </span>
+
+                <span class="breadcrumb-separator">
+                    /
+                </span>
+
+                <span class="breadcrumb-current">
+
+                    {% if request.path == '/admin/dashboard' %}
+                        Dashboard
+
+                    {% elif request.path.startswith('/admin/students') %}
+                        Students
+
+                    {% elif request.path.startswith('/admin/colleges') %}
+                        Colleges
+
+                    {% elif request.path.startswith('/admin/placement-cells') %}
+                        Placement Cells
+
+                    {% elif request.path.startswith('/admin/industries') %}
+                        Industries
+
+                    {% elif request.path.startswith('/admin/users') %}
+                        Users
+
+                    {% elif request.path.startswith('/admin/collaborations') %}
+                        Collaborations
+
+                    {% elif request.path.startswith('/admin/projects') %}
+                        Projects
+
+                    {% elif request.path.startswith('/admin/opportunities') %}
+                        Opportunities
+
+                    {% elif request.path.startswith('/admin/reports') %}
+                        Reports
+
+                    {% elif request.path.startswith('/admin/notifications') %}
+                        Notifications
+
+                    {% elif request.path.startswith('/admin/settings') %}
+                        Settings
+
+                    {% elif request.path.startswith('/admin/profile') %}
+                        My Profile
+
+                    {% else %}
+                        Administration
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Navbar Right -->
+
+        <div class="navbar-right">
+
+
+            <!-- ==========================================
+                 NOTIFICATION
+                 ========================================== -->
+
+            <div class="navbar-notification">
+
+
+                <button class="notification-btn"
+                        id="notificationBtn"
+                        type="button"
+                        aria-label="Notifications">
+
+                    <span class="notification-icon">
+                        🔔
+                    </span>
+
+
+                    {% if unread_notification_count and unread_notification_count > 0 %}
+
+                    <span class="notification-badge">
+                        {{ unread_notification_count }}
+                    </span>
+
+                    {% endif %}
+
+                </button>
+
+
+
+                <!-- Notification Dropdown -->
+
+                <div class="notification-dropdown"
+                     id="notificationDropdown">
+
+
+                    <!-- Dropdown Header -->
+
+                    <div class="dropdown-header">
+
+                        <span>
+                            Notifications
+                        </span>
+
+
+                        {% if unread_notification_count and unread_notification_count > 0 %}
+
+                        <span class="notification-count">
+                            {{ unread_notification_count }} New
+                        </span>
+
+                        {% else %}
+
+                        <span class="notification-count">
+                            No New
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- Notification List -->
+
+                    <div class="notification-list">
+
+
+                        {% if navbar_notifications %}
+
+
+                            {% for notification in navbar_notifications %}
+
+                            <a href="{{ notification.url or '/admin/notifications' }}"
+                               class="notification-item">
+
+                                <div class="notification-item-icon">
+
+                                    {{ notification.icon }}
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        {{ notification.title }}
+                                    </strong>
+
+
+                                    <p>
+                                        {{ notification.description }}
+                                    </p>
+
+
+                                    <small>
+
+                                        {% if notification.created_at %}
+
+                                            {{ notification.created_at.strftime('%d %b %Y, %I:%M %p') }}
+
+                                        {% else %}
+
+                                            Recent
+
+                                        {% endif %}
+
+                                    </small>
+
+                                </div>
+
+                            </a>
+
+                            {% endfor %}
+
+
+                        {% else %}
+
+                            <div class="notification-empty-dropdown">
+
+                                <div>
+                                    ✓
+                                </div>
+
+                                <p>
+                                    No new notifications
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- Dropdown Footer -->
+
+                    <div class="dropdown-footer">
+
+                        <a href="/admin/notifications">
+                            View all notifications
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==========================================
+                 ADMIN PROFILE
+                 ========================================== -->
+
+            <div class="admin-profile-wrapper">
+
+
+                <button class="admin-profile-btn"
+                        id="adminProfileBtn"
+                        type="button">
+
+
+                    <div class="admin-avatar">
+                        A
+                    </div>
+
+
+                    <div class="admin-info">
+
+                        <span class="admin-name">
+                            System Admin
+                        </span>
+
+                        <span class="admin-role">
+                            Administrator
+                        </span>
+
+                    </div>
+
+
+                    <span class="profile-arrow">
+                        ▾
+                    </span>
+
+                </button>
+
+
+
+                <!-- Profile Dropdown -->
+
+                <div class="profile-dropdown"
+                     id="profileDropdown">
+
+
+                    <div class="profile-dropdown-header">
+
+                        <div class="large-avatar">
+                            A
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                System Admin
+                            </strong>
+
+                            <span>
+                                Administrator
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dropdown-divider"></div>
+
+
+                    <a href="/admin/profile"
+                       class="profile-dropdown-item">
+
+                        <span>
+                            👤
+                        </span>
+
+                        <span>
+                            My Profile
+                        </span>
+
+                    </a>
+
+
+                    <a href="/admin/settings"
+                       class="profile-dropdown-item">
+
+                        <span>
+                            ⚙
+                        </span>
+
+                        <span>
+                            Settings
+                        </span>
+
+                    </a>
+
+
+                    <div class="dropdown-divider"></div>
+
+
+                    <a href="/logout"
+                       class="profile-dropdown-item logout-dropdown">
+
+                        <span>
+                            ↪
+                        </span>
+
+                        <span>
+                            Logout
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ==============================
+         PAGE CONTENT
+         ============================== -->
+
+    <main class="admin-content">
+
+        {% block content %}
+
+        {% endblock %}
+
+    </main>
+
+
+</div>
+
+
+
+<!-- ==============================
+     COMMON ADMIN JS
+     ============================== -->
+
+<script src="{{ url_for('static', filename='js/admin/common.js') }}"></script>
+
+
+<!-- Page Specific JS -->
+
+{% block page_js %}{% endblock %}
+
+
+</body>
+</html>

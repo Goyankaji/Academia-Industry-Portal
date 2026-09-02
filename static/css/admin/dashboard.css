@@ -1,0 +1,1049 @@
+/* =========================================================
+   SIH ADMIN PORTAL
+   DASHBOARD STYLES
+   ========================================================= */
+
+
+/* =========================================================
+   DASHBOARD HEADER
+   ========================================================= */
+
+.dashboard-header {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 26px;
+}
+
+
+.dashboard-heading {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.page-label {
+
+    display: inline-block;
+
+    margin-bottom: 6px;
+
+    color: #2563eb;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+}
+
+
+.dashboard-heading h1 {
+
+    margin: 0;
+
+    font-size: 28px;
+
+    line-height: 1.2;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+.dashboard-heading p {
+
+    margin-top: 7px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+
+.dashboard-heading p strong {
+
+    color: #374151;
+}
+
+
+/* =========================================================
+   REFRESH BUTTON
+   ========================================================= */
+
+.refresh-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    height: 38px;
+
+    padding: 0 15px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+
+.refresh-btn:hover {
+
+    border-color: #2563eb;
+
+    color: #2563eb;
+
+    background: #eff6ff;
+}
+
+
+.refresh-icon {
+
+    font-size: 17px;
+
+    line-height: 1;
+
+    transition: transform 0.5s ease;
+}
+
+
+.refresh-btn.loading .refresh-icon {
+
+    animation:
+        dashboard-spin 0.8s linear infinite;
+}
+
+
+@keyframes dashboard-spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =========================================================
+   STATISTICS GRID
+   ========================================================= */
+
+.stats-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 16px;
+
+    margin-bottom: 22px;
+}
+
+
+/* =========================================================
+   STAT CARD
+   ========================================================= */
+
+.stat-card {
+
+    position: relative;
+
+    min-width: 0;
+
+    padding: 19px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.stat-card:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 7px 18px rgba(0, 0, 0, 0.07);
+
+    border-color: #d1d5db;
+}
+
+
+/* =========================================================
+   STAT CARD TOP
+   ========================================================= */
+
+.stat-card-top {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+
+.stat-icon {
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    font-size: 17px;
+}
+
+
+.stat-label {
+
+    flex: 1;
+
+    color: #6b7280;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   STAT VALUE
+   ========================================================= */
+
+.stat-value {
+
+    margin-top: 15px;
+
+    color: #111827;
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   STAT FOOTER
+   ========================================================= */
+
+.stat-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin-top: 14px;
+
+    padding-top: 12px;
+
+    border-top:
+        1px solid #f3f4f6;
+
+    color: #9ca3af;
+
+    font-size: 10px;
+}
+
+
+.stat-link {
+
+    color: #2563eb;
+
+    font-weight: 600;
+
+    font-size: 10px;
+}
+
+
+.stat-link:hover {
+
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   CARD VARIATIONS
+   ========================================================= */
+
+.students-card .stat-icon {
+
+    background: #eff6ff;
+}
+
+
+.colleges-card .stat-icon {
+
+    background: #f0fdf4;
+}
+
+
+.placement-card .stat-icon {
+
+    background: #faf5ff;
+}
+
+
+.industries-card .stat-icon {
+
+    background: #fff7ed;
+}
+
+
+.users-card .stat-icon {
+
+    background: #f0fdfa;
+}
+
+
+.pending-card .stat-icon {
+
+    background: #fffbeb;
+}
+
+
+.collaboration-card .stat-icon {
+
+    background: #fdf2f8;
+}
+
+
+.projects-card .stat-icon {
+
+    background: #f5f3ff;
+}
+
+
+/* =========================================================
+   LOWER DASHBOARD
+   ========================================================= */
+
+.dashboard-lower {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(300px, 1fr);
+
+    gap: 20px;
+}
+
+
+/* =========================================================
+   DASHBOARD PANEL
+   ========================================================= */
+
+.dashboard-panel {
+
+    min-width: 0;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04);
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   PANEL HEADER
+   ========================================================= */
+
+.panel-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 18px 20px;
+
+    border-bottom:
+        1px solid #e5e7eb;
+}
+
+
+.panel-label {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+.panel-header h2 {
+
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+.panel-action {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: #2563eb;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.panel-action:hover {
+
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.table-wrapper {
+
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.registrations-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 650px;
+}
+
+
+.registrations-table th {
+
+    padding: 11px 16px;
+
+    background: #f9fafb;
+
+    color: #6b7280;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+    border-bottom:
+        1px solid #e5e7eb;
+}
+
+
+.registrations-table td {
+
+    padding: 12px 16px;
+
+    color: #4b5563;
+
+    font-size: 11px;
+
+    border-bottom:
+        1px solid #f3f4f6;
+
+    vertical-align: middle;
+}
+
+
+.registrations-table tbody tr {
+
+    transition:
+        background 0.15s ease;
+}
+
+
+.registrations-table tbody tr:hover {
+
+    background: #f9fafb;
+}
+
+
+.registrations-table tbody tr:last-child td {
+
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   USER CELL
+   ========================================================= */
+
+.user-cell {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    min-width: 170px;
+}
+
+
+.user-avatar {
+
+    width: 32px;
+    height: 32px;
+
+    min-width: 32px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+
+.user-details {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+
+.user-details strong {
+
+    color: #111827;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.user-details span {
+
+    margin-top: 2px;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.email-cell {
+
+    max-width: 180px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.date-cell {
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   ROLE BADGES
+   ========================================================= */
+
+.role-badge,
+.status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    white-space: nowrap;
+
+    border-radius: 20px;
+
+    font-size: 9px;
+
+    font-weight: 600;
+}
+
+
+.role-badge {
+
+    padding: 4px 8px;
+
+    background: #f3f4f6;
+
+    color: #4b5563;
+}
+
+
+.role-badge.admin {
+
+    background: #f3e8ff;
+
+    color: #7e22ce;
+}
+
+
+.role-badge.student {
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+.role-badge.college {
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.role-badge.placement {
+
+    background: #faf5ff;
+
+    color: #9333ea;
+}
+
+
+.role-badge.industry {
+
+    background: #fff7ed;
+
+    color: #c2410c;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+.status-badge {
+
+    padding: 4px 8px;
+}
+
+
+.status-badge.active {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.status-badge.inactive {
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+}
+
+
+.status-badge.pending {
+
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+
+    height: 180px;
+
+    text-align: center;
+
+    vertical-align: middle !important;
+}
+
+
+.empty-state .empty-icon {
+
+    font-size: 26px;
+
+    margin-bottom: 7px;
+}
+
+
+.empty-state strong {
+
+    display: block;
+
+    color: #374151;
+
+    font-size: 12px;
+}
+
+
+.empty-state span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #9ca3af;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+.quick-actions {
+
+    padding: 8px;
+}
+
+
+.quick-action {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 11px;
+
+    border-radius: 8px;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.quick-action:hover {
+
+    background: #f9fafb;
+
+    transform:
+        translateX(2px);
+}
+
+
+.quick-action-icon {
+
+    width: 35px;
+    height: 35px;
+
+    min-width: 35px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    font-size: 15px;
+}
+
+
+.quick-action > div:nth-child(2) {
+
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.quick-action strong {
+
+    display: block;
+
+    color: #374151;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.quick-action span:not(.quick-arrow) {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+}
+
+
+.quick-arrow {
+
+    color: #9ca3af;
+
+    font-size: 15px;
+
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.quick-action:hover .quick-arrow {
+
+    color: #2563eb;
+
+    transform:
+        translateX(3px);
+}
+
+
+/* =========================================================
+   RESPONSIVE — LARGE TABLET
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .stats-grid {
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+
+    .dashboard-lower {
+
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .stats-grid {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .dashboard-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        margin-bottom: 20px;
+    }
+
+
+    .dashboard-heading h1 {
+
+        font-size: 24px;
+    }
+
+
+    .dashboard-heading p {
+
+        font-size: 12px;
+    }
+
+
+    .dashboard-actions {
+
+        width: 100%;
+    }
+
+
+    .refresh-btn {
+
+        width: 100%;
+
+        justify-content: center;
+    }
+
+
+    .stats-grid {
+
+        grid-template-columns:
+            1fr;
+
+        gap: 12px;
+    }
+
+
+    .stat-card {
+
+        padding: 16px;
+    }
+
+
+    .dashboard-lower {
+
+        gap: 14px;
+    }
+
+
+    .panel-header {
+
+        padding: 15px;
+    }
+
+
+    .registrations-table th,
+    .registrations-table td {
+
+        padding: 10px 12px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .stat-card,
+    .quick-action,
+    .refresh-btn {
+
+        transition: none;
+    }
+
+    .refresh-btn.loading .refresh-icon {
+
+        animation: none;
+    }
+
+}

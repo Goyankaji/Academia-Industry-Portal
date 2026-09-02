@@ -1,0 +1,678 @@
+{% extends "admin/base.html" %}
+
+{% block title %}SIH Admin | Placement Cell Details{% endblock %}
+
+{% block breadcrumb %}
+Placement Cells / Details
+{% endblock %}
+
+
+{% block page_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/admin/placement-cell-details.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =====================================================
+     PAGE HEADER
+     ===================================================== -->
+
+<section class="details-header">
+
+    <div class="details-heading">
+
+        <a
+            href="/admin/placement-cells"
+            class="back-link">
+
+            ← Back to Placement Cells
+
+        </a>
+
+        <span class="page-label">
+            PLACEMENT CELL PROFILE
+        </span>
+
+        <h1>
+            Placement Cell Details
+        </h1>
+
+        <p>
+            Complete placement cell and institutional information.
+        </p>
+
+    </div>
+
+
+    <div class="details-actions">
+
+        {% if placement_cell.status == "ACTIVE" %}
+
+            <form
+                method="POST"
+                action="/admin/placement-cells/{{ placement_cell.id }}/toggle-status"
+                class="status-form">
+
+                <input
+                    type="hidden"
+                    name="status"
+                    value="INACTIVE">
+
+                <button
+                    type="submit"
+                    class="danger-outline-btn">
+
+                    Deactivate Cell
+
+                </button>
+
+            </form>
+
+        {% elif placement_cell.status == "INACTIVE" %}
+
+            <form
+                method="POST"
+                action="/admin/placement-cells/{{ placement_cell.id }}/toggle-status"
+                class="status-form">
+
+                <input
+                    type="hidden"
+                    name="status"
+                    value="ACTIVE">
+
+                <button
+                    type="submit"
+                    class="success-btn">
+
+                    Activate Cell
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PROFILE OVERVIEW
+     ===================================================== -->
+
+<section class="profile-overview">
+
+    <div class="profile-main">
+
+        <div class="large-avatar">
+
+            {{ placement_cell.name[0]|upper
+               if placement_cell.name else 'P' }}
+
+        </div>
+
+
+        <div class="profile-identity">
+
+            <h2>
+                {{ placement_cell.name or 'Placement Cell' }}
+            </h2>
+
+            <span class="profile-email">
+                {{ placement_cell.email or '—' }}
+            </span>
+
+            <div class="profile-meta">
+
+                <span>
+                    Placement Cell
+                </span>
+
+                <span class="meta-separator">
+                    •
+                </span>
+
+                <span>
+                    {{ placement_cell.college_name or '—' }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="profile-status">
+
+        {% if placement_cell.status == "ACTIVE" %}
+
+            <span class="status-badge active">
+                <span class="status-dot"></span>
+                Active Account
+            </span>
+
+        {% elif placement_cell.status == "PENDING" %}
+
+            <span class="status-badge pending">
+                <span class="status-dot"></span>
+                Pending Account
+            </span>
+
+        {% else %}
+
+            <span class="status-badge inactive">
+                <span class="status-dot"></span>
+                Inactive Account
+            </span>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SUMMARY
+     ===================================================== -->
+
+<section class="summary-grid">
+
+
+    <div class="summary-card">
+
+        <span>
+            COLLEGE
+        </span>
+
+        <strong>
+            {{ placement_cell.college_name or '—' }}
+        </strong>
+
+        <small>
+            Institution
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <span>
+            STUDENTS
+        </span>
+
+        <strong>
+            {{ student_count }}
+        </strong>
+
+        <small>
+            Registered students
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <span>
+            EMAIL
+        </span>
+
+        <strong>
+            {{ placement_cell.email or '—' }}
+        </strong>
+
+        <small>
+            Registered email
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <span>
+            PHONE
+        </span>
+
+        <strong>
+            {{ placement_cell.phone or '—' }}
+        </strong>
+
+        <small>
+            Contact number
+        </small>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INFORMATION GRID
+     ===================================================== -->
+
+<section class="details-grid">
+
+
+    <!-- =================================================
+         PLACEMENT CELL INFORMATION
+         ================================================= -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                👤
+            </div>
+
+            <div>
+
+                <span>
+                    PROFILE
+                </span>
+
+                <h2>
+                    Placement Cell Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+
+            <div class="info-item">
+
+                <span>
+                    Full Name
+                </span>
+
+                <strong>
+                    {{ placement_cell.name or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    {{ placement_cell.email or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Phone
+                </span>
+
+                <strong>
+                    {{ placement_cell.phone or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Account Status
+                </span>
+
+                <strong>
+
+                    {% if placement_cell.status == "ACTIVE" %}
+                        Active
+                    {% elif placement_cell.status == "PENDING" %}
+                        Pending
+                    {% else %}
+                        Inactive
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         COLLEGE INFORMATION
+         ================================================= -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                🏫
+            </div>
+
+            <div>
+
+                <span>
+                    INSTITUTION
+                </span>
+
+                <h2>
+                    College Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+
+            <div class="info-item full-width">
+
+                <span>
+                    College
+                </span>
+
+                <strong>
+                    {{ placement_cell.college_name or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    College Code
+                </span>
+
+                <strong>
+                    {{ placement_cell.college_code or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    University
+                </span>
+
+                <strong>
+                    {{ placement_cell.university_name or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Students
+                </span>
+
+                <strong>
+                    {{ student_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     STUDENTS
+     ===================================================== -->
+
+<section class="students-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon">
+            🎓
+        </div>
+
+        <div>
+
+            <span>
+                STUDENTS
+            </span>
+
+            <h2>
+                Students Under This College
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Student</th>
+                    <th>Enrollment</th>
+                    <th>Course</th>
+                    <th>Branch</th>
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% if students %}
+
+                {% for student in students %}
+
+                <tr>
+
+                    <td>
+
+                        <strong>
+                            {{ student.name }}
+                        </strong>
+
+                        <span class="sub-text">
+                            {{ student.email }}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+                        {{ student.enrollment_no or '—' }}
+                    </td>
+
+
+                    <td>
+                        {{ student.course or '—' }}
+                    </td>
+
+
+                    <td>
+                        {{ student.branch or '—' }}
+                    </td>
+
+
+                    <td>
+
+                        {% if student.status == "ACTIVE" %}
+
+                            <span class="status-badge active">
+                                Active
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge inactive">
+                                Inactive
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="empty-state">
+
+                        No students registered under this college.
+
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ACCOUNT INFORMATION
+     ===================================================== -->
+
+<section class="details-card account-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon">
+            ⚙️
+        </div>
+
+        <div>
+
+            <span>
+                ACCOUNT
+            </span>
+
+            <h2>
+                Account Information
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="account-grid">
+
+
+        <div class="info-item">
+
+            <span>
+                Account Status
+            </span>
+
+            <strong>
+
+                {% if placement_cell.status == "ACTIVE" %}
+                    Active
+                {% elif placement_cell.status == "PENDING" %}
+                    Pending
+                {% else %}
+                    Inactive
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>
+                Registered On
+            </span>
+
+            <strong>
+
+                {% if placement_cell.created_at %}
+                    {{ placement_cell.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                {% else %}
+                    —
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     BOTTOM ACTION
+     ===================================================== -->
+
+<div class="bottom-actions">
+
+    <a
+        href="/admin/placement-cells"
+        class="back-button">
+
+        ← Back to Placement Cells
+
+    </a>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block page_js %}
+
+<script
+    src="{{ url_for('static', filename='js/admin/placement-cell-details.js') }}">
+</script>
+
+{% endblock %}

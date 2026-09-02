@@ -1,0 +1,624 @@
+{% extends "admin/base.html" %}
+
+{% block title %}
+Opportunity Details
+{% endblock %}
+
+{% block breadcrumb %}
+SIH Portal / Admin / Opportunities / Opportunity Details
+{% endblock %}
+
+{% block page_css %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/admin/opportunity-details.css') }}"
+>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="details-header">
+
+    <a
+        href="/admin/opportunities"
+        class="back-link"
+    >
+        ← Back to Opportunities
+    </a>
+
+    <span class="page-label">
+        OPPORTUNITY DETAILS
+    </span>
+
+    <div class="details-title-row">
+
+        <div>
+
+            <h1>
+                {{ opportunity.title }}
+            </h1>
+
+            <p>
+                Complete opportunity information and industry details.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PROFILE
+     ===================================================== -->
+
+<div class="profile-card">
+
+    <div class="profile-main">
+
+        <div class="profile-icon">
+            💼
+        </div>
+
+        <div class="profile-content">
+
+            <h2>
+                {{ opportunity.title }}
+            </h2>
+
+            <div class="profile-meta">
+
+                <span>
+                    {{ opportunity.opportunity_type }}
+                </span>
+
+                <span class="separator">•</span>
+
+                <span>
+                    {{ opportunity.company_name or 'Industry Not Assigned' }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="profile-status">
+
+        <span class="status-badge {{ opportunity.status|lower }}">
+            {{ opportunity.status }}
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SUMMARY
+     ===================================================== -->
+
+<div class="summary-grid">
+
+    <div class="summary-card">
+
+        <div class="summary-icon type">
+            💼
+        </div>
+
+        <div>
+
+            <span>OPPORTUNITY TYPE</span>
+
+            <strong>
+                {{ opportunity.opportunity_type }}
+            </strong>
+
+            <small>
+                Opportunity category
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon mode">
+            💻
+        </div>
+
+        <div>
+
+            <span>WORK MODE</span>
+
+            <strong>
+                {{ opportunity.work_mode or '—' }}
+            </strong>
+
+            <small>
+                Working arrangement
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon deadline">
+            📅
+        </div>
+
+        <div>
+
+            <span>APPLICATION DEADLINE</span>
+
+            <strong>
+                {{ opportunity.application_deadline or '—' }}
+            </strong>
+
+            <small>
+                Last application date
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon location">
+            📍
+        </div>
+
+        <div>
+
+            <span>LOCATION</span>
+
+            <strong>
+                {{ opportunity.location or '—' }}
+            </strong>
+
+            <small>
+                Opportunity location
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMATION GRID
+     ===================================================== -->
+
+<div class="details-grid">
+
+
+    <!-- INDUSTRY -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                🏢
+            </div>
+
+            <div>
+
+                <span>INDUSTRY</span>
+
+                <h2>Industry Information</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+            <div class="info-item">
+
+                <span>Company</span>
+
+                <strong>
+                    {{ opportunity.company_name or 'Not Assigned' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Company Type</span>
+
+                <strong>
+                    {{ opportunity.company_type or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Industry Sector</span>
+
+                <strong>
+                    {{ opportunity.industry_sector or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Industry Email</span>
+
+                <strong>
+                    {{ opportunity.industry_email or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- OPPORTUNITY -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                💼
+            </div>
+
+            <div>
+
+                <span>OPPORTUNITY</span>
+
+                <h2>Opportunity Information</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+            <div class="info-item">
+
+                <span>Title</span>
+
+                <strong>
+                    {{ opportunity.title }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Type</span>
+
+                <strong>
+                    {{ opportunity.opportunity_type }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Location</span>
+
+                <strong>
+                    {{ opportunity.location or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Work Mode</span>
+
+                <strong>
+                    {{ opportunity.work_mode or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     COMPENSATION
+     ===================================================== -->
+
+<div class="details-card full-width-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon compensation-icon">
+            💰
+        </div>
+
+        <div>
+
+            <span>COMPENSATION</span>
+
+            <h2>Stipend & Package</h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="information-grid">
+
+        <div class="info-item">
+
+            <span>Stipend</span>
+
+            <strong>
+                {% if opportunity.stipend is not none %}
+                    ₹ {{ opportunity.stipend }}
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>Package</span>
+
+            <strong>
+                {% if opportunity.package is not none %}
+                    ₹ {{ opportunity.package }}
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     DESCRIPTION
+     ===================================================== -->
+
+<div class="details-card full-width-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon description-icon">
+            📝
+        </div>
+
+        <div>
+
+            <span>DESCRIPTION</span>
+
+            <h2>Opportunity Description</h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="text-body">
+
+        {% if opportunity.description %}
+
+        <p>
+            {{ opportunity.description }}
+        </p>
+
+        {% else %}
+
+        <p class="no-data">
+            No description provided.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SKILLS & ELIGIBILITY
+     ===================================================== -->
+
+<div class="details-grid">
+
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon skills-icon">
+                🛠️
+            </div>
+
+            <div>
+
+                <span>REQUIREMENTS</span>
+
+                <h2>Required Skills</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="text-body">
+
+            {% if opportunity.required_skills %}
+
+            <p>
+                {{ opportunity.required_skills }}
+            </p>
+
+            {% else %}
+
+            <p class="no-data">
+                No skills specified.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon eligibility-icon">
+                ✓
+            </div>
+
+            <div>
+
+                <span>ELIGIBILITY</span>
+
+                <h2>Eligibility Criteria</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="text-body">
+
+            {% if opportunity.eligibility_criteria %}
+
+            <p>
+                {{ opportunity.eligibility_criteria }}
+            </p>
+
+            {% else %}
+
+            <p class="no-data">
+                No eligibility criteria specified.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     RECORD INFORMATION
+     ===================================================== -->
+
+<div class="details-card account-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon account-icon">
+            ⚙️
+        </div>
+
+        <div>
+
+            <span>RECORD</span>
+
+            <h2>Record Information</h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="account-grid">
+
+        <div class="info-item">
+
+            <span>Opportunity ID</span>
+
+            <strong class="small-value">
+                {{ opportunity.id }}
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>Created At</span>
+
+            <strong>
+                {{ opportunity.created_at }}
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>Last Updated</span>
+
+            <strong>
+                {{ opportunity.updated_at }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="bottom-actions">
+
+    <a
+        href="/admin/opportunities"
+        class="back-button"
+    >
+        ← Back to Opportunities
+    </a>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+<script
+    src="{{ url_for('static', filename='js/admin/opportunity-details.js') }}"
+></script>
+{% endblock %}

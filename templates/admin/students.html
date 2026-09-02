@@ -1,0 +1,613 @@
+{% extends "admin/base.html" %}
+
+{% block title %}SIH Admin | Students{% endblock %}
+
+{% block breadcrumb %}Students{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/students.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     PAGE HEADER
+     ===================================================== -->
+
+<section class="students-page-header">
+
+    <div class="page-heading">
+
+        <span class="page-label">
+            STUDENT MANAGEMENT
+        </span>
+
+        <h1>Students</h1>
+
+        <p>
+            View, search and manage registered students.
+        </p>
+
+    </div>
+
+
+    <div class="header-actions">
+
+        <button
+            type="button"
+            class="outline-btn"
+            id="refreshStudents">
+
+            <span class="refresh-icon">↻</span>
+            Refresh
+
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     SUMMARY CARDS
+     ===================================================== -->
+
+<section class="student-summary-grid">
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon">
+            🎓
+        </div>
+
+        <div class="summary-content">
+
+            <span>Total Students</span>
+
+            <strong id="totalStudentCount">
+                {{ students|length if students else 0 }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon active-icon">
+            ✓
+        </div>
+
+        <div class="summary-content">
+
+            <span>Active Students</span>
+
+            <strong id="activeStudentCount">
+                {{ students|selectattr('status', 'equalto', 'ACTIVE')|list|length if students else 0 }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon inactive-icon">
+            !
+        </div>
+
+        <div class="summary-content">
+
+            <span>Inactive Students</span>
+
+            <strong id="inactiveStudentCount">
+                {{ students|selectattr('status', 'equalto', 'INACTIVE')|list|length if students else 0 }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon backlog-icon">
+            ⚠
+        </div>
+
+        <div class="summary-content">
+
+            <span>Students With Backlogs</span>
+
+            <strong id="backlogStudentCount">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FILTER / SEARCH PANEL
+     ===================================================== -->
+
+<section class="students-panel">
+
+
+    <div class="filter-header">
+
+        <div>
+
+            <span class="panel-label">
+                DIRECTORY
+            </span>
+
+            <h2>
+                Student Directory
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="filter-container">
+
+
+        <!-- SEARCH -->
+
+        <div class="search-box">
+
+            <span class="search-icon">
+                🔍
+            </span>
+
+            <input
+                type="text"
+                id="studentSearch"
+                placeholder="Search by name, email or enrollment number..."
+                autocomplete="off">
+
+            <button
+                type="button"
+                id="clearSearch"
+                class="clear-search"
+                aria-label="Clear search">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <!-- COLLEGE -->
+
+        <div class="filter-group">
+
+            <label for="collegeFilter">
+                College
+            </label>
+
+            <select id="collegeFilter">
+
+                <option value="">
+                    All Colleges
+                </option>
+
+                {% if colleges %}
+
+                    {% for college in colleges %}
+
+                    <option value="{{ college.college_name }}">
+                        {{ college.college_name }}
+                    </option>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </select>
+
+        </div>
+
+
+        <!-- BRANCH -->
+
+        <div class="filter-group">
+
+            <label for="branchFilter">
+                Branch
+            </label>
+
+            <select id="branchFilter">
+
+                <option value="">
+                    All Branches
+                </option>
+
+                {% if branches %}
+
+                    {% for branch in branches %}
+
+                    <option value="{{ branch }}">
+                        {{ branch }}
+                    </option>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </select>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div class="filter-group">
+
+            <label for="statusFilter">
+                Status
+            </label>
+
+            <select id="statusFilter">
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option value="ACTIVE">
+                    Active
+                </option>
+
+                <option value="INACTIVE">
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="reset-btn"
+            id="resetFilters">
+
+            Reset
+
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     STUDENT TABLE
+     ===================================================== -->
+
+<section class="students-panel table-panel">
+
+
+    <div class="table-topbar">
+
+        <div class="result-info">
+
+            Showing
+            <strong id="visibleStudentCount">
+                {{ students|length if students else 0 }}
+            </strong>
+            students
+
+        </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table
+            class="students-table"
+            id="studentsTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Enrollment No.
+                    </th>
+
+                    <th>
+                        College
+                    </th>
+
+                    <th>
+                        Branch
+                    </th>
+
+                    <th>
+                        CGPA
+                    </th>
+
+                    <th>
+                        SGPA
+                    </th>
+
+                    <th>
+                        Backlogs
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="studentsTableBody">
+
+            {% if students %}
+
+                {% for student in students %}
+
+                <tr
+                    class="student-row"
+                    data-name="{{ student.name|lower }}"
+                    data-email="{{ student.email|lower }}"
+                    data-enrollment="{{ student.enrollment_no|lower }}"
+                    data-college="{{ student.college_name|lower }}"
+                    data-branch="{{ student.branch|lower }}"
+                    data-status="{{ student.status }}"
+                    data-backlogs="{{ student.active_backlogs or 0 }}">
+
+
+                    <!-- STUDENT -->
+
+                    <td>
+
+                        <div class="student-cell">
+
+                            <div class="student-avatar">
+
+                                {{ student.name[0]|upper }}
+
+                            </div>
+
+                            <div class="student-info">
+
+                                <strong>
+                                    {{ student.name }}
+                                </strong>
+
+                                <span>
+                                    {{ student.email }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- ENROLLMENT -->
+
+                    <td class="enrollment-cell">
+
+                        {{ student.enrollment_no }}
+
+                    </td>
+
+
+                    <!-- COLLEGE -->
+
+                    <td>
+
+                        <span class="college-name">
+
+                            {{ student.college_name }}
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- BRANCH -->
+
+                    <td>
+
+                        <span class="branch-badge">
+
+                            {{ student.branch }}
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- CGPA -->
+
+                    <td>
+
+                        <strong class="academic-value">
+
+                            {{ student.cgpa if student.cgpa is not none else '—' }}
+
+                        </strong>
+
+                    </td>
+
+
+                    <!-- SGPA -->
+
+                    <td>
+
+                        <strong class="academic-value">
+
+                            {{ student.current_sgpa if student.current_sgpa is not none else '—' }}
+
+                        </strong>
+
+                    </td>
+
+
+                    <!-- BACKLOGS -->
+
+                    <td>
+
+                        {% set backlogs = student.active_backlogs or 0 %}
+
+                        {% if backlogs > 0 %}
+
+                            <span class="backlog-badge danger">
+                                {{ backlogs }}
+                            </span>
+
+                        {% else %}
+
+                            <span class="backlog-badge clear">
+                                0
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if student.status == 'ACTIVE' %}
+
+                            <span class="status-badge active">
+                                Active
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge inactive">
+                                Inactive
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+                        <a
+                            href="/admin/students/{{ student.id }}"
+                            class="view-btn">
+
+                            View Details
+                            <span>→</span>
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr id="emptyStudentRow">
+
+                    <td
+                        colspan="9"
+                        class="empty-state">
+
+                        <div class="empty-icon">
+                            🎓
+                        </div>
+
+                        <strong>
+                            No students registered
+                        </strong>
+
+                        <span>
+                            Student records will appear here once registered.
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+
+            <!-- FILTER EMPTY STATE -->
+
+            <tr
+                id="filterEmptyRow"
+                class="hidden">
+
+                <td
+                    colspan="9"
+                    class="empty-state">
+
+                    <div class="empty-icon">
+                        🔍
+                    </div>
+
+                    <strong>
+                        No matching students
+                    </strong>
+
+                    <span>
+                        Try changing your search or filters.
+                    </span>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+
+
+{% block page_js %}
+
+<script src="{{ url_for('static', filename='js/admin/students.js') }}"></script>
+
+{% endblock %}

@@ -1,0 +1,590 @@
+{% extends "admin/base.html" %}
+
+{% block title %}SIH Admin | Users{% endblock %}
+
+{% block breadcrumb %}
+Users
+{% endblock %}
+
+
+{% block page_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/users.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =====================================================
+     PAGE HEADER
+     ===================================================== -->
+
+<section class="users-header">
+
+    <div class="users-heading">
+
+        <span class="page-label">
+            USER MANAGEMENT
+        </span>
+
+        <h1>
+            Users
+        </h1>
+
+        <p>
+            View, search and manage registered users.
+        </p>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="refresh-btn"
+        id="refreshUsers">
+
+        <span>↻</span>
+        Refresh
+
+    </button>
+
+</section>
+
+
+
+<!-- =====================================================
+     STATISTICS
+     ===================================================== -->
+
+<section class="stats-grid">
+
+
+    <div class="stat-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                👥
+            </div>
+
+            <span class="stat-label">
+                Total Users
+            </span>
+
+        </div>
+
+        <div class="stat-value"
+             id="totalUserCount">
+
+            {{ users|length }}
+
+        </div>
+
+        <div class="stat-footer">
+            Registered accounts
+        </div>
+
+    </div>
+
+
+
+    <div class="stat-card active-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                ✓
+            </div>
+
+            <span class="stat-label">
+                Active Users
+            </span>
+
+        </div>
+
+        <div class="stat-value"
+             id="activeUserCount">
+
+            0
+
+        </div>
+
+        <div class="stat-footer">
+            Currently active
+        </div>
+
+    </div>
+
+
+
+    <div class="stat-card inactive-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                !
+            </div>
+
+            <span class="stat-label">
+                Inactive Users
+            </span>
+
+        </div>
+
+        <div class="stat-value"
+             id="inactiveUserCount">
+
+            0
+
+        </div>
+
+        <div class="stat-footer">
+            Currently inactive
+        </div>
+
+    </div>
+
+
+
+    <div class="stat-card role-card">
+
+        <div class="stat-card-top">
+
+            <div class="stat-icon">
+                ◈
+            </div>
+
+            <span class="stat-label">
+                Roles
+            </span>
+
+        </div>
+
+        <div class="stat-value">
+            5
+        </div>
+
+        <div class="stat-footer">
+            Registered user types
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     USER DIRECTORY
+     ===================================================== -->
+
+<section class="directory-panel">
+
+
+    <div class="panel-header">
+
+        <span class="panel-label">
+            DIRECTORY
+        </span>
+
+        <h2>
+            User Directory
+        </h2>
+
+    </div>
+
+
+
+    <!-- =================================================
+         FILTERS
+         ================================================= -->
+
+    <div class="filter-section">
+
+
+        <div class="search-box">
+
+            <span class="search-icon">
+                🔍
+            </span>
+
+            <input
+                type="text"
+                id="userSearch"
+                placeholder="Search by name or email...">
+
+        </div>
+
+
+
+        <div class="filter-group">
+
+            <label for="roleFilter">
+                Role
+            </label>
+
+            <select id="roleFilter">
+
+                <option value="">
+                    All Roles
+                </option>
+
+                <option value="ADMIN">
+                    Admin
+                </option>
+
+                <option value="STUDENT">
+                    Student
+                </option>
+
+                <option value="COLLEGE">
+                    College
+                </option>
+
+                <option value="PLACEMENT_CELL">
+                    Placement Cell
+                </option>
+
+                <option value="INDUSTRY">
+                    Industry
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <div class="filter-group">
+
+            <label for="statusFilter">
+                Status
+            </label>
+
+            <select id="statusFilter">
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option value="ACTIVE">
+                    Active
+                </option>
+
+                <option value="INACTIVE">
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <button
+            type="button"
+            class="reset-btn"
+            id="resetFilters">
+
+            Reset
+
+        </button>
+
+    </div>
+
+
+
+    <!-- =================================================
+         RESULT BAR
+         ================================================= -->
+
+    <div class="result-bar">
+
+        Showing
+        <strong id="visibleUserCount">
+            {{ users|length }}
+        </strong>
+        users
+
+    </div>
+
+
+
+    <!-- =================================================
+         TABLE
+         ================================================= -->
+
+    <div class="table-wrapper">
+
+        <table class="users-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        User
+                    </th>
+
+                    <th>
+                        Role
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Registered
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="usersTableBody">
+
+
+            {% if users %}
+
+                {% for user in users %}
+
+                <tr
+                    class="user-row"
+                    data-name="{{ user.name|lower }}"
+                    data-email="{{ user.email|lower }}"
+                    data-role="{{ user.role }}"
+                    data-status="{{ user.status }}">
+
+
+                    <!-- USER -->
+
+                    <td>
+
+                        <div class="user-cell">
+
+                            <div class="user-avatar">
+
+                                {{ user.name[0]|upper
+                                   if user.name else 'U' }}
+
+                            </div>
+
+                            <div class="user-details">
+
+                                <strong>
+                                    {{ user.name or '—' }}
+                                </strong>
+
+                                <span>
+                                    {{ user.role.replace('_', ' ')|title }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+
+                    <!-- ROLE -->
+
+                    <td>
+
+                        {% if user.role == "ADMIN" %}
+
+                            <span class="role-badge admin">
+                                Admin
+                            </span>
+
+                        {% elif user.role == "STUDENT" %}
+
+                            <span class="role-badge student">
+                                Student
+                            </span>
+
+                        {% elif user.role == "COLLEGE" %}
+
+                            <span class="role-badge college">
+                                College
+                            </span>
+
+                        {% elif user.role == "PLACEMENT_CELL" %}
+
+                            <span class="role-badge placement">
+                                Placement Cell
+                            </span>
+
+                        {% elif user.role == "INDUSTRY" %}
+
+                            <span class="role-badge industry">
+                                Industry
+                            </span>
+
+                        {% else %}
+
+                            <span class="role-badge">
+                                {{ user.role }}
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+
+                    <!-- EMAIL -->
+
+                    <td class="email-cell">
+
+                        {{ user.email or '—' }}
+
+                    </td>
+
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if user.status == "ACTIVE" %}
+
+                            <span class="status-badge active">
+                                Active
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge inactive">
+                                Inactive
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+
+                    <!-- REGISTERED -->
+
+                    <td class="date-cell">
+
+                        {% if user.created_at %}
+
+                            {{ user.created_at.strftime('%d %b %Y') }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+                        <a
+                            href="/admin/users/{{ user.id }}"
+                            class="view-btn">
+
+                            View Details →
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+                <!-- FILTER EMPTY -->
+
+                <tr
+                    id="filterEmptyRow"
+                    class="filter-empty-row hidden">
+
+                    <td
+                        colspan="6"
+                        class="empty-state">
+
+                        <div class="empty-icon">
+                            🔍
+                        </div>
+
+                        <strong>
+                            No users found
+                        </strong>
+
+                        <span>
+                            Try changing your search or filters.
+                        </span>
+
+                    </td>
+
+                </tr>
+
+
+            {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="empty-state">
+
+                        <div class="empty-icon">
+                            👥
+                        </div>
+
+                        <strong>
+                            No users registered
+                        </strong>
+
+                        <span>
+                            Registered users will appear here.
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% endblock %}
+
+
+
+{% block page_js %}
+
+<script
+    src="{{ url_for('static', filename='js/admin/users.js') }}">
+</script>
+
+{% endblock %}

@@ -1,0 +1,459 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="notifications-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="notifications-header">
+
+        <div class="notifications-heading">
+
+            <div class="heading-icon">
+                ♢
+            </div>
+
+            <div>
+                <span class="eyebrow">
+                    ADMINISTRATION / ALERT CENTER
+                </span>
+
+                <h1>Notifications</h1>
+
+                <p>
+                    Stay updated with registrations, collaborations,
+                    opportunities and important system activity.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <button
+                type="button"
+                class="secondary-action"
+                id="refreshNotifications">
+
+                <span>↻</span>
+                Refresh
+
+            </button>
+
+
+            <button
+                type="button"
+                class="primary-action"
+                id="markAllRead">
+
+                <span>✓</span>
+                Mark all as read
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NOTIFICATION SUMMARY
+         ===================================================== -->
+
+    <section class="notification-summary">
+
+        <div class="summary-item active-summary">
+
+            <div class="summary-symbol">
+                ◉
+            </div>
+
+            <div>
+                <span>ALL</span>
+                <strong id="allCount">0</strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-symbol unread-symbol">
+                ●
+            </div>
+
+            <div>
+                <span>UNREAD</span>
+                <strong id="unreadCount">0</strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-symbol important-symbol">
+                !
+            </div>
+
+            <div>
+                <span>IMPORTANT</span>
+                <strong id="importantCount">0</strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-symbol system-symbol">
+                ⚙
+            </div>
+
+            <div>
+                <span>SYSTEM</span>
+                <strong id="systemCount">0</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         NOTIFICATION PANEL
+         ===================================================== -->
+
+    <section class="notification-panel">
+
+
+        <!-- PANEL HEADER -->
+
+        <div class="panel-header">
+
+            <div>
+
+                <span class="panel-eyebrow">
+                    ACTIVITY CENTER
+                </span>
+
+                <h2>
+                    Recent Notifications
+                </h2>
+
+                <p>
+                    Review important activity across the SIH Portal.
+                </p>
+
+            </div>
+
+
+            <div class="notification-search">
+
+                <span>⌕</span>
+
+                <input
+                    type="text"
+                    id="notificationSearch"
+                    placeholder="Search notifications..."
+                    autocomplete="off">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FILTER BAR
+             ================================================= -->
+
+        <div class="notification-filters">
+
+            <button
+                type="button"
+                class="filter-button active"
+                data-filter="all">
+
+                All
+
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="unread">
+
+                Unread
+
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="important">
+
+                Important
+
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="system">
+
+                System
+
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="registration">
+
+                Registrations
+
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="collaboration">
+
+                Collaborations
+
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="opportunity">
+
+                Opportunities
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             NOTIFICATION LIST
+             ================================================= -->
+
+        <div
+            class="notification-list"
+            id="notificationList">
+
+
+            {% if notifications %}
+
+                {% for notification in notifications %}
+
+                <article
+                    class="notification-item {% if not notification.read %}unread{% endif %} {{ notification.type }}"
+                    data-category="{{ notification.category }}"
+                    data-type="{{ notification.type }}"
+                    data-read="{{ 'true' if notification.read else 'false' }}"
+                    data-url="{{ notification.url }}">
+
+
+                    <!-- NOTIFICATION ICON -->
+
+                    <div class="notification-icon {{ notification.category }}">
+                        {{ notification.icon }}
+                    </div>
+
+
+                    <!-- NOTIFICATION CONTENT -->
+
+                    <div class="notification-content">
+
+                        <div class="notification-top">
+
+                            <h3>
+                                {{ notification.title }}
+                            </h3>
+
+
+                            {% if not notification.read %}
+
+                            <span class="unread-dot"></span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <p>
+                            {{ notification.description }}
+                        </p>
+
+
+                        <div class="notification-meta">
+
+                            <span>
+                                {{ notification.meta }}
+                            </span>
+
+                            <span>
+                                •
+                            </span>
+
+                            <span>
+
+                                {% if notification.created_at %}
+
+                                    {{ notification.created_at.strftime('%d %b %Y, %I:%M %p') }}
+
+                                {% else %}
+
+                                    Recent activity
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="notification-actions">
+
+                        <button
+                            type="button"
+                            class="read-button"
+                            title="{% if notification.read %}Mark as unread{% else %}Mark as read{% endif %}">
+
+                            {% if notification.read %}
+                                ↶
+                            {% else %}
+                                ✓
+                            {% endif %}
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="delete-button"
+                            title="Remove notification">
+
+                            ×
+
+                        </button>
+
+                    </div>
+
+
+                </article>
+
+                {% endfor %}
+
+
+            {% endif %}
+
+
+        </div>
+
+
+        <!-- =================================================
+             EMPTY STATE
+             ================================================= -->
+
+        <div
+            class="notification-empty"
+            id="notificationEmpty">
+
+            <div class="empty-icon">
+                ✓
+            </div>
+
+            <h3>
+                No notifications found
+            </h3>
+
+            <p>
+                There are no notifications matching your
+                current filter or search.
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             PANEL FOOTER
+             ================================================= -->
+
+        <div class="notification-footer">
+
+            <span>
+                Showing
+                <strong id="visibleCount">0</strong>
+                notifications
+            </span>
+
+
+            <span>
+                Latest activity appears here automatically.
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INFORMATION STRIP
+         ===================================================== -->
+
+    <div class="notification-info">
+
+        <div class="info-symbol">
+            i
+        </div>
+
+
+        <div>
+
+            <strong>
+                Notification Center
+            </strong>
+
+            <p>
+                Important administrative activity, registrations,
+                collaborations and opportunities will appear here.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+
+<script src="{{ url_for('static', filename='js/admin/notifications.js') }}"></script>
+
+{% endblock %}

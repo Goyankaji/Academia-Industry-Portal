@@ -1,0 +1,755 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Project Details{% endblock %}
+
+{% block breadcrumb %}
+<span>Admin</span>
+<span class="breadcrumb-separator">/</span>
+<a href="{{ url_for('admin_projects') }}">Projects</a>
+<span class="breadcrumb-separator">/</span>
+<span>Project Details</span>
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/project-details.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+
+<div class="details-header">
+
+    <div class="details-heading">
+
+        <a href="{{ url_for('admin_projects') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Projects
+        </a>
+
+        <span class="page-label">PROJECT PROFILE</span>
+
+        <h1>Project Details</h1>
+
+        <p>
+            Complete project information and associated portal data.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PROJECT PROFILE
+     ========================================================= -->
+
+<div class="profile-overview">
+
+    <div class="profile-main">
+
+        <div class="large-avatar">
+            <i class="fas fa-folder-open"></i>
+        </div>
+
+        <div class="profile-identity">
+
+            <h2>{{ project.title }}</h2>
+
+            <span class="profile-type">
+                Student Project
+            </span>
+
+            <div class="profile-meta">
+
+                <span>
+                    {{ project.student_name or 'Student Not Assigned' }}
+                </span>
+
+                <span class="meta-separator">•</span>
+
+                <span>
+                    {{ project.college_name or 'College Not Assigned' }}
+                </span>
+
+                {% if project.industry_name %}
+
+                <span class="meta-separator">•</span>
+
+                <span>
+                    {{ project.industry_name }}
+                </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="profile-status">
+
+        <span class="status-badge
+            {% if project.status == 'ONGOING' %}
+                ongoing
+            {% elif project.status == 'COMPLETED' %}
+                completed
+            {% elif project.status == 'CANCELLED' %}
+                cancelled
+            {% endif %}
+        ">
+
+            <span class="status-dot"></span>
+
+            {{ project.status }}
+
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PROJECT SUMMARY
+     ========================================================= -->
+
+<div class="summary-grid">
+
+    <div class="summary-card">
+
+        <div class="summary-icon project-icon">
+            <i class="fas fa-folder"></i>
+        </div>
+
+        <div class="summary-content">
+
+            <span>PROJECT STATUS</span>
+
+            <strong>{{ project.status }}</strong>
+
+            <small>Current project status</small>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon start-icon">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+
+        <div class="summary-content">
+
+            <span>START DATE</span>
+
+            <strong>
+                {{ project.start_date or '—' }}
+            </strong>
+
+            <small>Project commencement</small>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon end-icon">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+
+        <div class="summary-content">
+
+            <span>END DATE</span>
+
+            <strong>
+                {{ project.end_date or '—' }}
+            </strong>
+
+            <small>Expected completion</small>
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-icon student-icon">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+
+        <div class="summary-content">
+
+            <span>STUDENT</span>
+
+            <strong>
+                {{ project.student_name or '—' }}
+            </strong>
+
+            <small>
+                {{ project.enrollment_no or 'No enrollment number' }}
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     INFORMATION CARDS
+     ========================================================= -->
+
+<div class="details-grid">
+
+
+    <!-- PROJECT INFORMATION -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+
+            <div>
+
+                <span>PROJECT</span>
+
+                <h2>Project Information</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+            <div class="info-item">
+
+                <span>Project Title</span>
+
+                <strong>
+                    {{ project.title or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Status</span>
+
+                <strong>
+                    {{ project.status or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Start Date</span>
+
+                <strong>
+                    {{ project.start_date or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>End Date</span>
+
+                <strong>
+                    {{ project.end_date or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- STUDENT INFORMATION -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+
+            <div>
+
+                <span>STUDENT</span>
+
+                <h2>Student Information</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+            <div class="info-item">
+
+                <span>Student Name</span>
+
+                <strong>
+                    {{ project.student_name or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Enrollment Number</span>
+
+                <strong>
+                    {{ project.enrollment_no or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- COLLEGE INFORMATION -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fas fa-university"></i>
+            </div>
+
+            <div>
+
+                <span>INSTITUTION</span>
+
+                <h2>College Information</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+            <div class="info-item">
+
+                <span>College Name</span>
+
+                <strong>
+                    {{ project.college_name or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>College Code</span>
+
+                <strong>
+                    {{ project.college_code or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>University</span>
+
+                <strong>
+                    {{ project.university_name or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- INDUSTRY INFORMATION -->
+
+    <div class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fas fa-building"></i>
+            </div>
+
+            <div>
+
+                <span>INDUSTRY</span>
+
+                <h2>Industry Information</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+            <div class="info-item">
+
+                <span>Company</span>
+
+                <strong>
+                    {{ project.industry_name or 'Not Assigned' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Company Type</span>
+
+                <strong>
+                    {{ project.company_type or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Industry Sector</span>
+
+                <strong>
+                    {{ project.industry_sector or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Industry Email</span>
+
+                <strong>
+                    {{ project.industry_email or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     TECHNOLOGY STACK
+     ========================================================= -->
+
+<div class="details-card full-width-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon technology-icon">
+            <i class="fas fa-code"></i>
+        </div>
+
+        <div>
+
+            <span>TECHNOLOGY</span>
+
+            <h2>Technology Stack</h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="description-body">
+
+        {% if project.technology_stack %}
+
+        <div class="technology-tags">
+
+            {% for technology in project.technology_stack.split(',') %}
+
+            <span class="technology-tag">
+                {{ technology.strip() }}
+            </span>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <p class="no-data">
+            No technology stack information provided.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PROJECT DESCRIPTION
+     ========================================================= -->
+
+<div class="details-card full-width-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon description-icon">
+            <i class="fas fa-align-left"></i>
+        </div>
+
+        <div>
+
+            <span>OVERVIEW</span>
+
+            <h2>Project Description</h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="description-body">
+
+        {% if project.description %}
+
+        <p>
+            {{ project.description }}
+        </p>
+
+        {% else %}
+
+        <p class="no-data">
+            No project description provided.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PROJECT DOCUMENTS
+     ========================================================= -->
+
+<div class="details-card full-width-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon">
+            <i class="fas fa-link"></i>
+        </div>
+
+        <div>
+
+            <span>RESOURCES</span>
+
+            <h2>Project Documents & Links</h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="links-body">
+
+        <div class="links-grid">
+
+            {% if project.project_url %}
+
+            <a
+                href="{{ project.project_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="document-link"
+            >
+
+                <div class="document-icon">
+                    <i class="fas fa-external-link-alt"></i>
+                </div>
+
+                <div>
+
+                    <strong>Project URL</strong>
+
+                    <span>
+                        Open project link
+                    </span>
+
+                </div>
+
+            </a>
+
+            {% endif %}
+
+
+            {% if project.report_url %}
+
+            <a
+                href="{{ project.report_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="document-link"
+            >
+
+                <div class="document-icon report">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+
+                <div>
+
+                    <strong>Project Report</strong>
+
+                    <span>
+                        Open project report
+                    </span>
+
+                </div>
+
+            </a>
+
+            {% endif %}
+
+
+            {% if not project.project_url and not project.report_url %}
+
+            <div class="no-links">
+
+                <i class="fas fa-file-circle-xmark"></i>
+
+                <span>
+                    No project links or reports available.
+                </span>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     RECORD INFORMATION
+     ========================================================= -->
+
+<div class="details-card account-card">
+
+    <div class="card-heading">
+
+        <div class="heading-icon account-icon">
+            <i class="fas fa-cog"></i>
+        </div>
+
+        <div>
+
+            <span>RECORD</span>
+
+            <h2>Record Information</h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="account-grid">
+
+        <div class="info-item">
+
+            <span>Created At</span>
+
+            <strong>
+                {{ project.created_at or '—' }}
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>Last Updated</span>
+
+            <strong>
+                {{ project.updated_at or '—' }}
+            </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span>Project ID</span>
+
+            <strong class="small-value">
+                {{ project.id }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     BOTTOM
+     ========================================================= -->
+
+<div class="bottom-actions">
+
+    <a
+        href="{{ url_for('admin_projects') }}"
+        class="back-button"
+    >
+        <i class="fas fa-arrow-left"></i>
+        Back to Projects
+    </a>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+
+<script src="{{ url_for('static', filename='js/admin/project-details.js') }}"></script>
+
+{% endblock %}
