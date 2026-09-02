@@ -1,0 +1,308 @@
+{% extends "admin/base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin/admin-profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="profile-page">
+
+    <!-- PAGE HEADER -->
+    <div class="profile-page-header">
+
+        <div>
+            <span class="profile-eyebrow">ACCOUNT / ADMINISTRATION</span>
+            <h1>My Profile</h1>
+            <p>View and manage your administrator profile.</p>
+        </div>
+
+        <a href="{{ url_for('admin_settings') }}"
+           class="settings-link">
+            ⚙ Settings
+        </a>
+
+    </div>
+
+
+    <!-- PROFILE CARD -->
+    <section class="profile-card">
+
+        <!-- COVER -->
+        <div class="cover-area" id="coverArea">
+
+            <div class="cover-placeholder">
+                <span>Admin Profile</span>
+            </div>
+
+            <img
+                id="coverPreview"
+                class="cover-image {% if admin and admin.cover_image %}visible{% endif %}"
+                src="{{ admin.cover_image if admin and admin.cover_image else '' }}"
+                alt="Cover Image">
+
+            <div class="cover-actions">
+
+                <label for="coverInput" class="cover-button">
+                    📷 Change Cover
+                </label>
+
+                {% if admin and admin.cover_image %}
+
+                <button
+                    type="button"
+                    id="removeCover"
+                    class="remove-cover-button">
+
+                    🗑 Remove Cover
+
+                </button>
+
+                {% endif %}
+
+            </div>
+
+        <input
+            type="file"
+            id="coverInput"
+            accept="image/png,image/jpeg,image/webp">
+
+        </div>
+
+
+        <!-- PROFILE HEADER -->
+        <div class="profile-main">
+
+            <div class="avatar-wrapper">
+
+                <div class="avatar" id="avatarPreview">
+
+                    {% if admin and admin.profile_image %}
+
+                        <img
+                            src="{{ admin.profile_image }}"
+                            alt="Admin Profile Image">
+
+                    {% else %}
+
+                        {{ admin.name[0]|upper if admin else 'A' }}
+
+                    {% endif %}
+
+                </div>
+
+                <label for="avatarInput"
+                       class="avatar-edit">
+                    ✎
+                </label>
+
+                <input
+                    type="file"
+                    id="avatarInput"
+                    accept="image/png,image/jpeg,image/webp">
+
+            </div>
+
+
+            <div class="profile-identity">
+
+                <h2>
+                    {{ admin.name if admin else 'System Admin' }}
+                </h2>
+
+                <p>
+                    {{ admin.email if admin else 'admin@sihportal.com' }}
+                </p>
+
+                <span class="role-badge">
+                    Administrator
+                </span>
+
+            </div>
+
+
+            <div class="profile-status">
+
+                <span class="status-dot"></span>
+
+                {{ admin.status if admin else 'ACTIVE' }}
+
+            </div>
+
+        </div>
+
+
+        <!-- PROFILE INFORMATION -->
+        <div class="profile-content">
+
+            <div class="section-heading">
+
+                <div class="section-icon">👤</div>
+
+                <div>
+                    <h3>Profile Information</h3>
+                    <p>Your administrator account details.</p>
+                </div>
+
+            </div>
+
+
+            <div class="info-grid">
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Full Name
+                    </span>
+
+                    <strong>
+                        {{ admin.name if admin else 'System Admin' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Email Address
+                    </span>
+
+                    <strong>
+                        {{ admin.email if admin else 'admin@sihportal.com' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Account Role
+                    </span>
+
+                    <strong>
+                        Administrator
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Account Status
+                    </span>
+
+                    <strong class="active-text">
+                        {{ admin.status if admin else 'ACTIVE' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        User ID
+                    </span>
+
+                    <strong class="user-id">
+                        {{ admin.id if admin else '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Member Since
+                    </span>
+
+                    <strong>
+                        {% if admin and admin.created_at %}
+                            {{ admin.created_at.strftime('%d %b %Y') }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- COVER ACTION -->
+        <div class="profile-footer">
+
+            <div class="upload-message"
+                 id="uploadMessage"></div>
+
+            <button
+                type="button"
+                id="saveImages"
+                class="save-images-button">
+
+                Save Images
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ACCOUNT SUMMARY -->
+    <div class="profile-summary-grid">
+
+        <div class="summary-card">
+
+            <div class="summary-icon">🛡️</div>
+
+            <div>
+                <span>ACCOUNT TYPE</span>
+                <strong>Administrator</strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon">🔐</div>
+
+            <div>
+                <span>SECURITY</span>
+                <strong>Protected Account</strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon">🌐</div>
+
+            <div>
+                <span>PORTAL</span>
+                <strong>SIH Portal</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+<script src="{{ url_for('static', filename='js/admin/admin-profile.js') }}"></script>
+{% endblock %}

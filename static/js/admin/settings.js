@@ -4,30 +4,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       ELEMENTS
-       ===================================================== */
-
-    const saveProfile =
-        document.getElementById("saveProfile");
-
-    const changePassword =
-        document.getElementById("changePassword");
-
-    const saveNotifications =
-        document.getElementById("saveNotifications");
-
-    const saveAppearance =
-        document.getElementById("saveAppearance");
-
-
-    /* =====================================================
-       SHOW MESSAGE
+       COMMON MESSAGE FUNCTION
        ===================================================== */
 
     function showMessage(elementId, message, success = true) {
 
-        const element =
-            document.getElementById(elementId);
+        const element = document.getElementById(elementId);
 
         if (!element) {
             return;
@@ -35,181 +17,283 @@ document.addEventListener("DOMContentLoaded", function () {
 
         element.textContent = message;
 
-        element.style.color =
-            success ? "#16a34a" : "#dc2626";
-
+        element.style.color = success
+            ? "#16a34a"
+            : "#dc2626";
 
         setTimeout(function () {
-
             element.textContent = "";
-
-        }, 2500);
-
+        }, 3000);
     }
 
 
     /* =====================================================
-       PROFILE
+       HELPER - SEND FORM DATA
        ===================================================== */
+
+    async function sendRequest(url, data) {
+
+        const response = await fetch(url, {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+
+            body: new URLSearchParams(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                result.message || "Something went wrong."
+            );
+        }
+
+        return result;
+    }
+
+
+    /* =====================================================
+       1. ADMIN PROFILE
+       ===================================================== */
+
+    const saveProfile =
+        document.getElementById("saveProfile");
 
     if (saveProfile) {
 
-        saveProfile.addEventListener(
-            "click",
-            function () {
+        saveProfile.addEventListener("click", async function () {
 
-                const name =
-                    document.getElementById("adminName").value.trim();
+            const name =
+                document.getElementById("adminName").value.trim();
 
-                const email =
-                    document.getElementById("adminEmail").value.trim();
+            const email =
+                document.getElementById("adminEmail").value.trim();
 
 
-                if (!name) {
-
-                    showMessage(
-                        "profileMessage",
-                        "Name is required.",
-                        false
-                    );
-
-                    return;
-
-                }
-
-
-                if (!email) {
-
-                    showMessage(
-                        "profileMessage",
-                        "Email is required.",
-                        false
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                 * Backend API will be connected here.
-                 * For now this validates the form.
-                 */
+            if (!name) {
 
                 showMessage(
                     "profileMessage",
-                    "Profile details ready to save."
+                    "Name is required.",
+                    false
                 );
 
+                return;
             }
-        );
+
+
+            if (!email) {
+
+                showMessage(
+                    "profileMessage",
+                    "Email is required.",
+                    false
+                );
+
+                return;
+            }
+
+
+            saveProfile.disabled = true;
+            saveProfile.textContent = "Saving...";
+
+
+            try {
+
+                const result = await sendRequest(
+                    "/admin/settings/profile",
+                    {
+                        name: name,
+                        email: email
+                    }
+                );
+
+
+                if (result.success) {
+
+                    showMessage(
+                        "profileMessage",
+                        result.message,
+                        true
+                    );
+
+                }
+
+            } catch (error) {
+
+                showMessage(
+                    "profileMessage",
+                    error.message,
+                    false
+                );
+
+            } finally {
+
+                saveProfile.disabled = false;
+                saveProfile.textContent = "Save Changes";
+
+            }
+
+        });
 
     }
 
 
     /* =====================================================
-       CHANGE PASSWORD
+       2. CHANGE PASSWORD
        ===================================================== */
+
+    const changePassword =
+        document.getElementById("changePassword");
 
     if (changePassword) {
 
-        changePassword.addEventListener(
-            "click",
-            function () {
+        changePassword.addEventListener("click", async function () {
 
-                const currentPassword =
-                    document.getElementById(
-                        "currentPassword"
-                    ).value;
+            const currentPassword =
+                document.getElementById(
+                    "currentPassword"
+                ).value;
 
-                const newPassword =
-                    document.getElementById(
-                        "newPassword"
-                    ).value;
+            const newPassword =
+                document.getElementById(
+                    "newPassword"
+                ).value;
 
-                const confirmPassword =
-                    document.getElementById(
-                        "confirmPassword"
-                    ).value;
+            const confirmPassword =
+                document.getElementById(
+                    "confirmPassword"
+                ).value;
 
 
-                if (!currentPassword) {
-
-                    showMessage(
-                        "passwordMessage",
-                        "Enter your current password.",
-                        false
-                    );
-
-                    return;
-
-                }
-
-
-                if (!newPassword) {
-
-                    showMessage(
-                        "passwordMessage",
-                        "Enter a new password.",
-                        false
-                    );
-
-                    return;
-
-                }
-
-
-                if (newPassword.length < 6) {
-
-                    showMessage(
-                        "passwordMessage",
-                        "Password must be at least 6 characters.",
-                        false
-                    );
-
-                    return;
-
-                }
-
-
-                if (newPassword !== confirmPassword) {
-
-                    showMessage(
-                        "passwordMessage",
-                        "Passwords do not match.",
-                        false
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                 * Backend password update will be
-                 * connected here.
-                 */
+            if (!currentPassword) {
 
                 showMessage(
                     "passwordMessage",
-                    "Password details validated."
+                    "Enter your current password.",
+                    false
                 );
 
+                return;
             }
-        );
+
+
+            if (!newPassword) {
+
+                showMessage(
+                    "passwordMessage",
+                    "Enter a new password.",
+                    false
+                );
+
+                return;
+            }
+
+
+            if (newPassword.length < 6) {
+
+                showMessage(
+                    "passwordMessage",
+                    "Password must be at least 6 characters.",
+                    false
+                );
+
+                return;
+            }
+
+
+            if (newPassword !== confirmPassword) {
+
+                showMessage(
+                    "passwordMessage",
+                    "New passwords do not match.",
+                    false
+                );
+
+                return;
+            }
+
+
+            changePassword.disabled = true;
+            changePassword.textContent = "Updating...";
+
+
+            try {
+
+                const result = await sendRequest(
+                    "/admin/settings/password",
+                    {
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    }
+                );
+
+
+                if (result.success) {
+
+                    showMessage(
+                        "passwordMessage",
+                        result.message,
+                        true
+                    );
+
+
+                    /*
+                     * Clear password fields after
+                     * successful update.
+                     */
+
+                    document.getElementById(
+                        "currentPassword"
+                    ).value = "";
+
+                    document.getElementById(
+                        "newPassword"
+                    ).value = "";
+
+                    document.getElementById(
+                        "confirmPassword"
+                    ).value = "";
+
+                }
+
+            } catch (error) {
+
+                showMessage(
+                    "passwordMessage",
+                    error.message,
+                    false
+                );
+
+            } finally {
+
+                changePassword.disabled = false;
+                changePassword.textContent = "Update Password";
+
+            }
+
+        });
 
     }
 
 
     /* =====================================================
-       NOTIFICATION PREFERENCES
+       3. NOTIFICATION PREFERENCES
        ===================================================== */
+
+    const saveNotifications =
+        document.getElementById("saveNotifications");
+
 
     if (saveNotifications) {
 
         saveNotifications.addEventListener(
             "click",
-            function () {
+            async function () {
 
                 const registrations =
                     document.getElementById(
@@ -227,20 +311,52 @@ document.addEventListener("DOMContentLoaded", function () {
                     ).checked;
 
 
-                console.log(
-                    "Notification Preferences:",
-                    {
-                        registrations: registrations,
-                        collaborations: collaborations,
-                        opportunities: opportunities
+                saveNotifications.disabled = true;
+                saveNotifications.textContent = "Saving...";
+
+
+                try {
+
+                    const result = await sendRequest(
+                        "/admin/settings/notifications",
+                        {
+                            notify_registrations:
+                                registrations ? "true" : "false",
+
+                            notify_collaborations:
+                                collaborations ? "true" : "false",
+
+                            notify_opportunities:
+                                opportunities ? "true" : "false"
+                        }
+                    );
+
+
+                    if (result.success) {
+
+                        showMessage(
+                            "notificationMessage",
+                            result.message,
+                            true
+                        );
+
                     }
-                );
 
+                } catch (error) {
 
-                showMessage(
-                    "notificationMessage",
-                    "Notification preferences saved."
-                );
+                    showMessage(
+                        "notificationMessage",
+                        error.message,
+                        false
+                    );
+
+                } finally {
+
+                    saveNotifications.disabled = false;
+                    saveNotifications.textContent =
+                        "Save Preferences";
+
+                }
 
             }
         );
@@ -249,7 +365,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       THEME SELECTION
+       4. THEME SELECTION
        ===================================================== */
 
     const themeOptions =
@@ -299,14 +415,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       SAVE APPEARANCE
+       5. SAVE APPEARANCE
        ===================================================== */
+
+    const saveAppearance =
+        document.getElementById("saveAppearance");
+
 
     if (saveAppearance) {
 
         saveAppearance.addEventListener(
             "click",
-            function () {
+            async function () {
 
                 const selectedTheme =
                     document.querySelector(
@@ -315,20 +435,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                 if (!selectedTheme) {
+
+                    showMessage(
+                        "appearanceMessage",
+                        "Please select a theme.",
+                        false
+                    );
+
                     return;
                 }
 
 
-                console.log(
-                    "Selected Theme:",
-                    selectedTheme.value
-                );
+                saveAppearance.disabled = true;
+                saveAppearance.textContent = "Saving...";
 
 
-                showMessage(
-                    "appearanceMessage",
-                    "Appearance preference saved."
-                );
+                try {
+
+                    const result = await sendRequest(
+                        "/admin/settings/appearance",
+                        {
+                            theme: selectedTheme.value
+                        }
+                    );
+
+
+                    if (result.success) {
+
+                        showMessage(
+                            "appearanceMessage",
+                            result.message,
+                            true
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    showMessage(
+                        "appearanceMessage",
+                        error.message,
+                        false
+                    );
+
+                } finally {
+
+                    saveAppearance.disabled = false;
+                    saveAppearance.textContent =
+                        "Save Appearance";
+
+                }
 
             }
         );

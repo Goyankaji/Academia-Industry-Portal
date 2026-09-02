@@ -1,3 +1,8 @@
+import os
+import uuid
+
+from werkzeug.utils import secure_filename
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
 from functools import wraps
@@ -3955,6 +3960,10 @@ def update_admin_profile():
 
         conn.commit()
 
+        # Update current session
+        session["user_name"] = name
+        session["user_email"] = email
+
         return {
             "success": True,
             "message": "Profile updated successfully."
@@ -4255,7 +4264,793 @@ def update_admin_appearance():
             cursor.close()
 
         if conn:
-            conn.close()                                                               
+            conn.close()   
+
+# =========================================================
+# ADMIN PROFILE
+# =========================================================
+
+import os
+import uuid
+
+from werkzeug.utils import secure_filename
+
+
+# =========================================================
+# PROFILE IMAGE CONFIGURATION
+# =========================================================
+
+ALLOWED_IMAGE_EXTENSIONS = {
+    "png",
+    "jpg",
+    "jpeg",
+    "webp"
+}
+
+
+MAX_IMAGE_SIZE = 5 * 1024 * 1024   # 5 MB
+
+
+# =========================================================
+# CHECK ALLOWED IMAGE
+# =========================================================
+
+def allowed_image(filename):
+
+    if not filename:
+        return False
+
+    if "." not in filename:
+        return False
+
+    extension = filename.rsplit(
+        ".",
+        1
+    )[1].lower()
+
+    return extension in ALLOWED_IMAGE_EXTENSIONS
+
+
+# =========================================================
+# DELETE OLD IMAGE FILE
+# =========================================================
+
+def delete_admin_image(image_path):
+
+    if not image_path:
+        return
+
+    try:
+
+        # Example:
+        # /static/uploads/admin/profile_xxx.jpg
+        relative_path = image_path.lstrip("/")
+
+        file_path = os.path.join(
+            app.root_path,
+            relative_path
+        )
+
+        if os.path.isfile(file_path):
+
+            os.remove(file_path)
+
+            print(
+                "Deleted old image:",
+                file_path
+            )
+
+    except Exception as e:
+
+        print(
+            "IMAGE DELETE ERROR:",
+            e
+        )
+
+
+# =========================================================
+# ADMIN PROFILE PAGE
+# =========================================================
+
+@app.route("/admin/profile")
+def admin_profile():
+
+    # -----------------------------------------------------
+    # ADMIN ONLY
+    # -----------------------------------------------------
+
+    if session.get("role") != "ADMIN":
+        return redirect(url_for("login"))
+
+
+    conn = None
+    cursor = None
+
+
+    try:
+
+        admin_id = session.get("user_id")
+
+
+        if not admin_id:
+            return redirect(url_for("login"))
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # -------------------------------------------------
+        # GET ADMIN
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                name,
+                email,
+                role,
+                status,
+                created_at,
+                profile_image,
+                cover_image
+            FROM users
+            WHERE id = %s
+              AND role = 'ADMIN'
+        """, (
+            admin_id,
+        ))
+
+
+        admin = cursor.fetchone()
+
+
+        if not admin:
+
+            return (
+                "Admin profile not found",
+                404
+            )
+
+
+        # -------------------------------------------------
+        # PROFILE PAGE
+        # -------------------------------------------------
+
+        return render_template(
+            "admin/admin-profile.html",
+            admin=admin
+        )
+
+
+    except Exception as e:
+
+        print(
+            "ADMIN PROFILE ERROR:",
+            e
+        )
+
+        return (
+            "Error loading admin profile",
+            500
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# UPLOAD ADMIN PROFILE / COVER IMAGE
+# =========================================================
+
+@app.route(
+    "/admin/profile/upload-images",
+    methods=["POST"]
+)
+def upload_admin_profile_images():
+
+    # -----------------------------------------------------
+    # ADMIN ONLY
+    # -----------------------------------------------------
+
+    if session.get("role") != "ADMIN":
+
+        return {
+            "success": False,
+            "message": "Unauthorized access."
+        }, 403
+
+
+    conn = None
+    cursor = None
+
+
+    try:
+
+        admin_id = session.get("user_id")
+
+
+        if not admin_id:
+
+            return {
+                "success": False,
+                "message": "Admin session expired."
+            }, 401
+
+
+        # -------------------------------------------------
+        # FILES
+        # -------------------------------------------------
+
+        profile_file = request.files.get(
+            "profile_image"
+        )
+
+        cover_file = request.files.get(
+            "cover_image"
+        )
+
+
+        if (
+            not profile_file
+            and not cover_file
+        ):
+
+            return {
+                "success": False,
+                "message": "Please select an image."
+            }, 400
+
+
+        # -------------------------------------------------
+        # UPLOAD DIRECTORY
+        # -------------------------------------------------
+
+        upload_folder = os.path.join(
+            app.root_path,
+            "static",
+            "uploads",
+            "admin"
+        )
+
+
+        os.makedirs(
+            upload_folder,
+            exist_ok=True
+        )
+
+
+        # -------------------------------------------------
+        # GET OLD IMAGES
+        # -------------------------------------------------
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        cursor.execute("""
+            SELECT
+                profile_image,
+                cover_image
+            FROM users
+            WHERE id = %s
+              AND role = 'ADMIN'
+        """, (
+            admin_id,
+        ))
+
+
+        admin = cursor.fetchone()
+
+
+        if not admin:
+
+            return {
+                "success": False,
+                "message": "Admin account not found."
+            }, 404
+
+
+        old_profile_image = admin[
+            "profile_image"
+        ]
+
+        old_cover_image = admin[
+            "cover_image"
+        ]
+
+
+        new_profile_image = None
+        new_cover_image = None
+
+
+        # =================================================
+        # PROFILE IMAGE
+        # =================================================
+
+        if (
+            profile_file
+            and profile_file.filename
+        ):
+
+            # ---------------------------------------------
+            # EXTENSION CHECK
+            # ---------------------------------------------
+
+            if not allowed_image(
+                profile_file.filename
+            ):
+
+                return {
+                    "success": False,
+                    "message": (
+                        "Invalid profile image format. "
+                        "Use JPG, JPEG, PNG or WEBP."
+                    )
+                }, 400
+
+
+            # ---------------------------------------------
+            # FILE SIZE CHECK
+            # ---------------------------------------------
+
+            profile_file.seek(
+                0,
+                os.SEEK_END
+            )
+
+            profile_size = profile_file.tell()
+
+            profile_file.seek(0)
+
+
+            if profile_size > MAX_IMAGE_SIZE:
+
+                return {
+                    "success": False,
+                    "message": (
+                        "Profile image must be "
+                        "5 MB or smaller."
+                    )
+                }, 400
+
+
+            # ---------------------------------------------
+            # SAFE EXTENSION
+            # ---------------------------------------------
+
+            extension = (
+                profile_file
+                .filename
+                .rsplit(".", 1)[1]
+                .lower()
+            )
+
+
+            # ---------------------------------------------
+            # UNIQUE FILE NAME
+            # ---------------------------------------------
+
+            filename = (
+                "profile_"
+                + str(uuid.uuid4())
+                + "."
+                + extension
+            )
+
+
+            filename = secure_filename(
+                filename
+            )
+
+
+            file_path = os.path.join(
+                upload_folder,
+                filename
+            )
+
+
+            # ---------------------------------------------
+            # SAVE
+            # ---------------------------------------------
+
+            profile_file.save(
+                file_path
+            )
+
+
+            new_profile_image = (
+                "/static/uploads/admin/"
+                + filename
+            )
+
+
+        # =================================================
+        # COVER IMAGE
+        # =================================================
+
+        if (
+            cover_file
+            and cover_file.filename
+        ):
+
+            # ---------------------------------------------
+            # EXTENSION CHECK
+            # ---------------------------------------------
+
+            if not allowed_image(
+                cover_file.filename
+            ):
+
+                return {
+                    "success": False,
+                    "message": (
+                        "Invalid cover image format. "
+                        "Use JPG, JPEG, PNG or WEBP."
+                    )
+                }, 400
+
+
+            # ---------------------------------------------
+            # FILE SIZE CHECK
+            # ---------------------------------------------
+
+            cover_file.seek(
+                0,
+                os.SEEK_END
+            )
+
+            cover_size = cover_file.tell()
+
+            cover_file.seek(0)
+
+
+            if cover_size > MAX_IMAGE_SIZE:
+
+                return {
+                    "success": False,
+                    "message": (
+                        "Cover image must be "
+                        "5 MB or smaller."
+                    )
+                }, 400
+
+
+            # ---------------------------------------------
+            # EXTENSION
+            # ---------------------------------------------
+
+            extension = (
+                cover_file
+                .filename
+                .rsplit(".", 1)[1]
+                .lower()
+            )
+
+
+            # ---------------------------------------------
+            # UNIQUE FILE NAME
+            # ---------------------------------------------
+
+            filename = (
+                "cover_"
+                + str(uuid.uuid4())
+                + "."
+                + extension
+            )
+
+
+            filename = secure_filename(
+                filename
+            )
+
+
+            file_path = os.path.join(
+                upload_folder,
+                filename
+            )
+
+
+            # ---------------------------------------------
+            # SAVE
+            # ---------------------------------------------
+
+            cover_file.save(
+                file_path
+            )
+
+
+            new_cover_image = (
+                "/static/uploads/admin/"
+                + filename
+            )
+
+
+        # =================================================
+        # DATABASE UPDATE
+        # =================================================
+
+        if (
+            new_profile_image
+            and new_cover_image
+        ):
+
+            cursor.execute("""
+                UPDATE users
+                SET
+                    profile_image = %s,
+                    cover_image = %s
+                WHERE id = %s
+                  AND role = 'ADMIN'
+            """, (
+                new_profile_image,
+                new_cover_image,
+                admin_id
+            ))
+
+
+        elif new_profile_image:
+
+            cursor.execute("""
+                UPDATE users
+                SET
+                    profile_image = %s
+                WHERE id = %s
+                  AND role = 'ADMIN'
+            """, (
+                new_profile_image,
+                admin_id
+            ))
+
+
+        elif new_cover_image:
+
+            cursor.execute("""
+                UPDATE users
+                SET
+                    cover_image = %s
+                WHERE id = %s
+                  AND role = 'ADMIN'
+            """, (
+                new_cover_image,
+                admin_id
+            ))
+
+
+        conn.commit()
+
+
+        # =================================================
+        # DELETE OLD FILES
+        # =================================================
+
+        if (
+            new_profile_image
+            and old_profile_image
+            and old_profile_image != new_profile_image
+        ):
+
+            delete_admin_image(
+                old_profile_image
+            )
+
+
+        if (
+            new_cover_image
+            and old_cover_image
+            and old_cover_image != new_cover_image
+        ):
+
+            delete_admin_image(
+                old_cover_image
+            )
+
+
+        # =================================================
+        # RESPONSE
+        # =================================================
+
+        return {
+            "success": True,
+            "message": (
+                "Profile images updated successfully."
+            ),
+            "profile_image": new_profile_image,
+            "cover_image": new_cover_image
+        }
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+
+        print(
+            "ADMIN IMAGE UPLOAD ERROR:",
+            e
+        )
+
+
+        return {
+            "success": False,
+            "message": (
+                "Unable to upload profile images."
+            )
+        }, 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# REMOVE ADMIN COVER IMAGE
+# =========================================================
+
+@app.route(
+    "/admin/profile/remove-cover",
+    methods=["POST"]
+)
+def remove_admin_cover():
+
+    # -----------------------------------------------------
+    # ADMIN ONLY
+    # -----------------------------------------------------
+
+    if session.get("role") != "ADMIN":
+
+        return {
+            "success": False,
+            "message": "Unauthorized access."
+        }, 403
+
+
+    conn = None
+    cursor = None
+
+
+    try:
+
+        admin_id = session.get("user_id")
+
+
+        if not admin_id:
+
+            return {
+                "success": False,
+                "message": "Admin session expired."
+            }, 401
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # -------------------------------------------------
+        # GET CURRENT COVER
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT cover_image
+            FROM users
+            WHERE id = %s
+              AND role = 'ADMIN'
+        """, (
+            admin_id,
+        ))
+
+
+        admin = cursor.fetchone()
+
+
+        if not admin:
+
+            return {
+                "success": False,
+                "message": "Admin account not found."
+            }, 404
+
+
+        old_cover_image = admin[
+            "cover_image"
+        ]
+
+
+        # -------------------------------------------------
+        # NOTHING TO REMOVE
+        # -------------------------------------------------
+
+        if not old_cover_image:
+
+            return {
+                "success": True,
+                "message": "No cover image to remove."
+            }
+
+
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
+
+        cursor.execute("""
+            UPDATE users
+            SET cover_image = NULL
+            WHERE id = %s
+              AND role = 'ADMIN'
+        """, (
+            admin_id,
+        ))
+
+
+        conn.commit()
+
+
+        # -------------------------------------------------
+        # DELETE FILE
+        # -------------------------------------------------
+
+        delete_admin_image(
+            old_cover_image
+        )
+
+
+        return {
+            "success": True,
+            "message": (
+                "Cover image removed successfully."
+            )
+        }
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+
+        print(
+            "REMOVE COVER ERROR:",
+            e
+        )
+
+
+        return {
+            "success": False,
+            "message": (
+                "Unable to remove cover image."
+            )
+        }, 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+                                                                        
 # =========================================================
 # LOGOUT
 # =========================================================

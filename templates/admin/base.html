@@ -605,14 +605,14 @@
 
 
                     <div class="admin-avatar">
-                        A
+                        {{ session.get('user_name', 'System Admin')[0]|upper }}
                     </div>
 
 
                     <div class="admin-info">
 
                         <span class="admin-name">
-                            System Admin
+                            {{ session.get('user_name', 'System Admin') }}
                         </span>
 
                         <span class="admin-role">
@@ -639,14 +639,14 @@
                     <div class="profile-dropdown-header">
 
                         <div class="large-avatar">
-                            A
+                            {{ session.get('user_name', 'System Admin')[0]|upper }}
                         </div>
 
 
                         <div>
 
                             <strong>
-                                System Admin
+                                {{ session.get('user_name', 'System Admin') }}
                             </strong>
 
                             <span>
