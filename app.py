@@ -3828,7 +3828,434 @@ def admin_notifications():
         "admin/notifications.html",
         notifications=notifications
     )
-                                                                
+
+# =========================================================
+# ADMIN SETTINGS
+# =========================================================
+
+@app.route("/admin/settings")
+def admin_settings():
+
+    if session.get("role") != "ADMIN":
+        return redirect(url_for("login"))
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        admin_id = session.get("user_id")
+
+        # Admin profile
+        cursor.execute("""
+            SELECT id, name, email, role, status
+            FROM users
+            WHERE id = %s
+        """, (admin_id,))
+
+        admin = cursor.fetchone()
+
+        if not admin:
+            return "Admin account not found", 404
+
+        # Existing settings
+        cursor.execute("""
+            SELECT
+                notify_registrations,
+                notify_collaborations,
+                notify_opportunities,
+                theme_preference
+            FROM admin_settings
+            WHERE user_id = %s
+        """, (admin_id,))
+
+        settings = cursor.fetchone()
+
+        # Create default settings if not available
+        if not settings:
+
+            cursor.execute("""
+                INSERT INTO admin_settings (
+                    user_id,
+                    notify_registrations,
+                    notify_collaborations,
+                    notify_opportunities,
+                    theme_preference
+                )
+                VALUES (%s, TRUE, TRUE, TRUE, 'light')
+            """, (admin_id,))
+
+            conn.commit()
+
+            settings = {
+                "notify_registrations": True,
+                "notify_collaborations": True,
+                "notify_opportunities": True,
+                "theme_preference": "light"
+            }
+
+        return render_template(
+            "admin/settings.html",
+            admin=admin,
+            settings=settings
+        )
+
+    except Exception as e:
+
+        print("ADMIN SETTINGS ERROR:", e)
+
+        return "Error loading settings", 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# UPDATE ADMIN PROFILE
+# =========================================================
+
+@app.route("/admin/settings/profile", methods=["POST"])
+def update_admin_profile():
+
+    if session.get("role") != "ADMIN":
+        return redirect(url_for("login"))
+
+    conn = None
+    cursor = None
+
+    try:
+
+        admin_id = session.get("user_id")
+
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+
+        if not name or not email:
+            return {
+                "success": False,
+                "message": "Name and email are required."
+            }, 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE users
+            SET name = %s,
+                email = %s
+            WHERE id = %s
+        """, (name, email, admin_id))
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Profile updated successfully."
+        }
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("UPDATE PROFILE ERROR:", e)
+
+        return {
+            "success": False,
+            "message": "Email may already be in use."
+        }, 400
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("UPDATE PROFILE ERROR:", e)
+
+        return {
+            "success": False,
+            "message": "Unable to update profile."
+        }, 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# CHANGE ADMIN PASSWORD
+# =========================================================
+
+@app.route("/admin/settings/password", methods=["POST"])
+def change_admin_password():
+
+    if session.get("role") != "ADMIN":
+        return redirect(url_for("login"))
+
+    conn = None
+    cursor = None
+
+    try:
+
+        admin_id = session.get("user_id")
+
+        current_password = request.form.get(
+            "current_password",
+            ""
+        )
+
+        new_password = request.form.get(
+            "new_password",
+            ""
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            ""
+        )
+
+        if not current_password:
+            return {
+                "success": False,
+                "message": "Current password is required."
+            }, 400
+
+        if not new_password:
+            return {
+                "success": False,
+                "message": "New password is required."
+            }, 400
+
+        if len(new_password) < 6:
+            return {
+                "success": False,
+                "message": "Password must be at least 6 characters."
+            }, 400
+
+        if new_password != confirm_password:
+            return {
+                "success": False,
+                "message": "New passwords do not match."
+            }, 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT password
+            FROM users
+            WHERE id = %s
+        """, (admin_id,))
+
+        admin = cursor.fetchone()
+
+        if not admin:
+            return {
+                "success": False,
+                "message": "Admin account not found."
+            }, 404
+
+        # Current project stores passwords directly.
+        if admin["password"] != current_password:
+            return {
+                "success": False,
+                "message": "Current password is incorrect."
+            }, 400
+
+        cursor.execute("""
+            UPDATE users
+            SET password = %s
+            WHERE id = %s
+        """, (new_password, admin_id))
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Password changed successfully."
+        }
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("CHANGE PASSWORD ERROR:", e)
+
+        return {
+            "success": False,
+            "message": "Unable to change password."
+        }, 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# UPDATE NOTIFICATION PREFERENCES
+# =========================================================
+
+@app.route("/admin/settings/notifications", methods=["POST"])
+def update_notification_preferences():
+
+    if session.get("role") != "ADMIN":
+        return redirect(url_for("login"))
+
+    conn = None
+    cursor = None
+
+    try:
+
+        admin_id = session.get("user_id")
+
+        notify_registrations = (
+            request.form.get("notify_registrations") == "true"
+        )
+
+        notify_collaborations = (
+            request.form.get("notify_collaborations") == "true"
+        )
+
+        notify_opportunities = (
+            request.form.get("notify_opportunities") == "true"
+        )
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO admin_settings (
+                user_id,
+                notify_registrations,
+                notify_collaborations,
+                notify_opportunities
+            )
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                notify_registrations = VALUES(notify_registrations),
+                notify_collaborations = VALUES(notify_collaborations),
+                notify_opportunities = VALUES(notify_opportunities)
+        """, (
+            admin_id,
+            notify_registrations,
+            notify_collaborations,
+            notify_opportunities
+        ))
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Notification preferences saved."
+        }
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("NOTIFICATION SETTINGS ERROR:", e)
+
+        return {
+            "success": False,
+            "message": "Unable to save notification preferences."
+        }, 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# UPDATE THEME
+# =========================================================
+
+@app.route("/admin/settings/appearance", methods=["POST"])
+def update_admin_appearance():
+
+    if session.get("role") != "ADMIN":
+        return redirect(url_for("login"))
+
+    conn = None
+    cursor = None
+
+    try:
+
+        admin_id = session.get("user_id")
+
+        theme = request.form.get(
+            "theme",
+            "light"
+        ).strip().lower()
+
+        if theme not in ["light", "dark"]:
+            return {
+                "success": False,
+                "message": "Invalid theme selected."
+            }, 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO admin_settings (
+                user_id,
+                theme_preference
+            )
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE
+                theme_preference = VALUES(theme_preference)
+        """, (
+            admin_id,
+            theme
+        ))
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Appearance preference saved."
+        }
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("APPEARANCE SETTINGS ERROR:", e)
+
+        return {
+            "success": False,
+            "message": "Unable to save appearance preference."
+        }, 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()                                                               
 # =========================================================
 # LOGOUT
 # =========================================================
