@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Login | SIH Portal</title>
+    <title>Login | SIH Academia–Industry Portal</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/login.css') }}">
@@ -12,86 +13,368 @@
 
 <body>
 
-<div class="login-container">
+    <main class="login-page">
 
-    <div class="login-card">
+        <!-- ================= LEFT BRANDING SECTION ================= -->
 
-        <div class="logo-section">
-            <div class="logo">SIH</div>
+        <section class="brand-panel">
 
-            <h1>Academia–Industry Portal</h1>
+            <div class="brand-content">
 
-            <p>Secure Portal Login</p>
-        </div>
+                <div class="brand-logo">
+                    <span>SIH</span>
+                </div>
+
+                <div class="brand-text">
+                    <h1>Academia–Industry<br>Collaboration Portal</h1>
+
+                    <p>
+                        Connecting students, institutions and industries
+                        through one unified platform.
+                    </p>
+                </div>
 
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
+                <div class="portal-features">
 
-            {% if messages %}
+                    <div class="feature-item">
 
-                {% for category, message in messages %}
+                        <div class="feature-icon">
+                            <!-- Users Icon -->
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
 
-                    <div class="message {{ category }}">
-                        {{ message }}
+                        <div>
+                            <strong>Connected Ecosystem</strong>
+                            <span>Students, colleges and industries</span>
+                        </div>
+
                     </div>
 
-                {% endfor %}
 
-            {% endif %}
+                    <div class="feature-item">
 
-        {% endwith %}
+                        <div class="feature-icon">
+                            <!-- Building Icon -->
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 21h18"/>
+                                <path d="M5 21V5l7-3 7 3v16"/>
+                                <path d="M9 9h1"/>
+                                <path d="M14 9h1"/>
+                                <path d="M9 13h1"/>
+                                <path d="M14 13h1"/>
+                                <path d="M9 17h1"/>
+                                <path d="M14 17h1"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>Industry Collaboration</strong>
+                            <span>Build meaningful academic partnerships</span>
+                        </div>
+
+                    </div>
 
 
-        <form method="POST" action="{{ url_for('login') }}">
+                    <div class="feature-item">
 
-            <div class="form-group">
+                        <div class="feature-icon">
+                            <!-- Shield Icon -->
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                        </div>
 
-                <label for="email">
-                    Email Address
-                </label>
+                        <div>
+                            <strong>Secure Access</strong>
+                            <span>Role-based access to your portal</span>
+                        </div>
 
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    required
-                >
+                    </div>
+
+                </div>
+
+
+                <div class="brand-footer">
+                    <span>Smart India Hackathon</span>
+                    <span class="footer-dot"></span>
+                    <span>Academia × Industry</span>
+                </div>
 
             </div>
 
+        </section>
 
-            <div class="form-group">
 
-                <label for="password">
-                    Password
-                </label>
+        <!-- ================= LOGIN SECTION ================= -->
 
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    required
+        <section class="login-panel">
+
+            <div class="login-card">
+
+                <div class="mobile-logo">
+                    <div class="mobile-logo-box">SIH</div>
+                </div>
+
+
+                <div class="login-header">
+
+                    <span class="welcome-label">
+                        WELCOME BACK
+                    </span>
+
+                    <h2>Sign in to your account</h2>
+
+                    <p>
+                        Enter your credentials to access the portal.
+                    </p>
+
+                </div>
+
+
+                <!-- Flask Flash Messages -->
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+
+                    {% if messages %}
+
+                        <div class="flash-container">
+
+                            {% for category, message in messages %}
+
+                                <div class="flash-message {{ category }}">
+
+                                    {% if category == "error" %}
+                                        <span class="flash-icon">!</span>
+                                    {% else %}
+                                        <span class="flash-icon">✓</span>
+                                    {% endif %}
+
+                                    <span>{{ message }}</span>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+                {% endwith %}
+
+
+                <!-- Login Form -->
+
+                <form
+                    id="loginForm"
+                    method="POST"
+                    action="{{ url_for('login') }}"
+                    novalidate
                 >
+
+                    <!-- Email -->
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email Address
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <span class="input-icon">
+
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                    <polyline points="3,7 12,13 21,7"/>
+                                </svg>
+
+                            </span>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter your email address"
+                                autocomplete="email"
+                                required
+                            >
+
+                        </div>
+
+                        <small class="field-error" id="emailError"></small>
+
+                    </div>
+
+
+                    <!-- Password -->
+
+                    <div class="form-group">
+
+                        <div class="password-label-row">
+
+                            <label for="password">
+                                Password
+                            </label>
+
+                            <a href="#" class="forgot-link" id="forgotPassword">
+                                Forgot password?
+                            </a>
+
+                        </div>
+
+
+                        <div class="input-wrapper">
+
+                            <span class="input-icon">
+
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="11" width="18" height="10" rx="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+
+                            </span>
+
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="passwordToggle"
+                                aria-label="Show password"
+                            >
+
+                                <!-- Eye -->
+
+                                <svg
+                                    id="eyeIcon"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+
+                            </button>
+
+                        </div>
+
+                        <small class="field-error" id="passwordError"></small>
+
+                    </div>
+
+
+                    <!-- Remember Me -->
+
+                    <div class="form-options">
+
+                        <label class="remember-option">
+
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                                name="remember_me"
+                            >
+
+                            <span class="custom-checkbox"></span>
+
+                            <span>Remember me</span>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- Login Button -->
+
+                    <button
+                        type="submit"
+                        class="login-button"
+                        id="loginButton"
+                    >
+
+                        <span class="button-text">
+                            Sign In
+                        </span>
+
+                        <span class="button-loader"></span>
+
+                        <svg
+                            class="button-arrow"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12,5 19,12 12,19"/>
+                        </svg>
+
+                    </button>
+
+                </form>
+
+
+                <!-- Registration Information -->
+
+                <!-- Registration Information -->
+
+                <div class="registration-info">
+
+                    <div class="divider">
+                        <span>PORTAL ACCESS</span>
+                    </div>
+
+                    <p>
+                        Student, College, Placement Cell and Industry
+                        accounts can register through their respective
+                        registration portals.
+                    </p>
+
+                    <div class="register-link">
+                        <span>Don't have an account?</span>
+
+                        <a href="{{ url_for('register') }}">
+                            Create an account →
+                        </a>
+                    </div>
+
+                </div>
+
+
+                <div class="login-security">
+
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+
+                    <span>Your connection is secure</span>
+
+                </div>
 
             </div>
 
+        </section>
 
-            <button type="submit" class="login-button">
-                Login
-            </button>
-
-        </form>
+    </main>
 
 
-        <div class="login-footer">
-            <p>SIH Academia–Industry Collaboration Portal</p>
-        </div>
-
-    </div>
-
-</div>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 
 </body>
+
 </html>

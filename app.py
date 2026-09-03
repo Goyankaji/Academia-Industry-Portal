@@ -1,10 +1,11 @@
 import os
 import uuid
+import re
 
 from werkzeug.utils import secure_filename
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from database.db import get_db_connection
 
@@ -76,11 +77,14 @@ def login():
 
     if request.method == "POST":
 
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
 
         if not email or not password:
-            flash("Email and password are required.", "error")
+            flash(
+                "Email and password are required.",
+                "error"
+            )
             return render_template("login.html")
 
         conn = None
@@ -106,40 +110,71 @@ def login():
 
             user = cursor.fetchone()
 
+            # -------------------------------------------------
+            # USER NOT FOUND
+            # -------------------------------------------------
+
             if not user:
-                flash("Invalid email or password.", "error")
+                flash(
+                    "Invalid email or password.",
+                    "error"
+                )
                 return render_template("login.html")
 
+            # -------------------------------------------------
+            # ACCOUNT STATUS
+            # -------------------------------------------------
+
             if user["status"] != "ACTIVE":
-                flash("Your account is not active.", "error")
+                flash(
+                    "Your account is not active.",
+                    "error"
+                )
                 return render_template("login.html")
+
+            # -------------------------------------------------
+            # PASSWORD CHECK
+            # -------------------------------------------------
 
             if not check_password_hash(
                 user["password"],
                 password
             ):
-                flash("Invalid email or password.", "error")
+                flash(
+                    "Invalid email or password.",
+                    "error"
+                )
                 return render_template("login.html")
 
-            # Store user information in session
+            # -------------------------------------------------
+            # LOGIN SUCCESS
+            # -------------------------------------------------
+
             session["user_id"] = user["id"]
             session["name"] = user["name"]
             session["email"] = user["email"]
+            session["user_name"] = user["name"]
+            session["user_email"] = user["email"]
             session["role"] = user["role"]
 
-            # Admin
+            # -------------------------------------------------
+            # ADMIN
+            # -------------------------------------------------
+
             if user["role"] == "ADMIN":
+
                 return redirect(
                     url_for("admin_dashboard")
                 )
 
-            # Other roles will be handled later
-            flash(
-                "You are not authorized for the Admin Panel.",
-                "error"
-            )
+            # -------------------------------------------------
+            # OTHER ROLES
+            # -------------------------------------------------
 
-            session.clear()
+            flash(
+                "Login successful. Your dashboard is coming soon.",
+                "success"
+            )
 
             return redirect(
                 url_for("login")
@@ -149,6 +184,7 @@ def login():
 
             print("=" * 60)
             print("LOGIN ERROR:")
+            print(type(e).__name__)
             print(e)
             print("=" * 60)
 
@@ -5050,6 +5086,461 @@ def remove_admin_cover():
 
         if conn:
             conn.close()
+# =========================================================
+# COMMON REGISTRATION FOUNDATION
+# =========================================================
+
+@app.route("/register")
+def register():
+
+    return render_template(
+        "register.html"
+    )
+
+
+# =========================================================
+# COMMON REGISTRATION FORM
+# =========================================================
+
+@app.route(
+    "/register/<role>",
+    methods=["GET", "POST"]
+)
+def register_user(role):
+
+    # -----------------------------------------------------
+    # ALLOWED REGISTRATION ROLES
+    # -----------------------------------------------------
+
+    allowed_roles = {
+        "student": "STUDENT",
+        "college": "COLLEGE",
+        "placement-cell": "PLACEMENT_CELL",
+        "industry": "INDUSTRY"
+    }
+
+
+    # -----------------------------------------------------
+    # CHECK ROLE
+    # -----------------------------------------------------
+
+    if role not in allowed_roles:
+
+        flash(
+            "Invalid registration type.",
+            "error"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+
+    # -----------------------------------------------------
+    # AUTOMATIC ROLE ASSIGNMENT
+    # -----------------------------------------------------
+
+    assigned_role = allowed_roles[role]
+
+
+    # =====================================================
+    # POST REQUEST
+    # =====================================================
+
+    if request.method == "POST":
+
+        # -------------------------------------------------
+        # GET FORM DATA
+        # -------------------------------------------------
+
+        name = request.form.get(
+            "name",
+            ""
+        ).strip()
+
+        email = request.form.get(
+            "email",
+            ""
+        ).strip().lower()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            ""
+        )
+
+
+        # =================================================
+        # NAME VALIDATION
+        # =================================================
+
+        if not name:
+
+            flash(
+                "Full name is required.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        if len(name) < 2:
+
+            flash(
+                "Name must contain at least 2 characters.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        if len(name) > 100:
+
+            flash(
+                "Name cannot exceed 100 characters.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        # =================================================
+        # EMAIL VALIDATION
+        # =================================================
+
+        if not email:
+
+            flash(
+                "Email address is required.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        email_pattern = (
+            r"^[A-Za-z0-9._%+-]+@"
+            r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+        )
+
+
+        if not re.match(
+            email_pattern,
+            email
+        ):
+
+            flash(
+                "Please enter a valid email address.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        if len(email) > 150:
+
+            flash(
+                "Email address cannot exceed 150 characters.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        # =================================================
+        # PASSWORD VALIDATION
+        # =================================================
+
+        if not password:
+
+            flash(
+                "Password is required.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        if len(password) < 6:
+
+            flash(
+                "Password must be at least 6 characters.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        # =================================================
+        # CONFIRM PASSWORD
+        # =================================================
+
+        if not confirm_password:
+
+            flash(
+                "Please confirm your password.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        if password != confirm_password:
+
+            flash(
+                "Passwords do not match.",
+                "error"
+            )
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        # =================================================
+        # DATABASE
+        # =================================================
+
+        conn = None
+        cursor = None
+
+
+        try:
+
+            conn = get_db_connection()
+
+            cursor = conn.cursor(
+                dictionary=True
+            )
+
+
+            # =================================================
+            # DUPLICATE EMAIL CHECK
+            # =================================================
+
+            cursor.execute("""
+                SELECT
+                    id
+                FROM users
+                WHERE email = %s
+                LIMIT 1
+            """, (
+                email,
+            ))
+
+
+            existing_user = cursor.fetchone()
+
+
+            if existing_user:
+
+                flash(
+                    "An account with this email already exists.",
+                    "error"
+                )
+
+                return render_template(
+                    "register.html",
+                    selected_role=role,
+                    role_name=assigned_role
+                )
+
+
+            # =================================================
+            # GENERATE UUID
+            # =================================================
+
+            user_id = str(
+                uuid.uuid4()
+            )
+
+
+            # =================================================
+            # HASH PASSWORD
+            # =================================================
+
+            hashed_password = generate_password_hash(
+                password
+            )
+
+
+            # =================================================
+            # INSERT USER
+            # =================================================
+
+            cursor.execute("""
+                INSERT INTO users (
+                    id,
+                    name,
+                    email,
+                    password,
+                    role,
+                    status
+                )
+                VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+            """, (
+                user_id,
+                name,
+                email,
+                hashed_password,
+                assigned_role,
+                "ACTIVE"
+            ))
+
+
+            # =================================================
+            # COMMIT
+            # =================================================
+
+            conn.commit()
+
+
+            # =================================================
+            # SUCCESS
+            # =================================================
+
+            flash(
+                "Registration successful. You can now login.",
+                "success"
+            )
+
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =====================================================
+        # DUPLICATE / DATABASE CONSTRAINT ERROR
+        # =====================================================
+
+        except mysql.connector.IntegrityError as e:
+
+            if conn:
+                conn.rollback()
+
+
+            print("=" * 70)
+            print("REGISTRATION DATABASE ERROR:")
+            print(e)
+            print("=" * 70)
+
+
+            flash(
+                "This email is already registered.",
+                "error"
+            )
+
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        # =====================================================
+        # GENERAL ERROR
+        # =====================================================
+
+        except Exception as e:
+
+            if conn:
+                conn.rollback()
+
+
+            print("=" * 70)
+            print("REGISTRATION ERROR:")
+            print(type(e).__name__)
+            print(e)
+            print("=" * 70)
+
+
+            flash(
+                "Unable to complete registration. Please try again.",
+                "error"
+            )
+
+
+            return render_template(
+                "register.html",
+                selected_role=role,
+                role_name=assigned_role
+            )
+
+
+        # =====================================================
+        # CLOSE DATABASE
+        # =====================================================
+
+        finally:
+
+            if cursor:
+                cursor.close()
+
+
+            if conn:
+                conn.close()
+
+
+    # =====================================================
+    # GET REQUEST
+    # =====================================================
+
+    return render_template(
+        "register.html",
+        selected_role=role,
+        role_name=assigned_role
+    )
                                                                         
 # =========================================================
 # LOGOUT
