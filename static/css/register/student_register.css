@@ -1,0 +1,639 @@
+/* =========================================================
+   SIH PORTAL - STUDENT REGISTRATION
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ROOT
+   ========================================================= */
+
+:root {
+
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+
+    --text-dark: #0f172a;
+    --text: #334155;
+    --text-muted: #64748b;
+
+    --border: #d1d5db;
+    --border-light: #e2e8f0;
+
+    --white: #ffffff;
+
+}
+
+
+/* =========================================================
+   BODY
+   ========================================================= */
+
+body {
+
+    min-height: 100vh;
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background: #f4f7fb;
+
+    color: var(--text-dark);
+
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.student-page {
+
+    min-height: 100vh;
+
+    padding: 45px 20px 60px;
+
+    display: flex;
+
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(37, 99, 235, 0.05),
+            transparent 30%
+        ),
+        #f4f7fb;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.student-card {
+
+    width: 100%;
+
+    max-width: 900px;
+
+    background: var(--white);
+
+    border-radius: 20px;
+
+    padding: 42px 50px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(15, 23, 42, 0.08);
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.page-header {
+
+    margin-bottom: 32px;
+}
+
+
+.back-link {
+
+    display: inline-block;
+
+    margin-bottom: 22px;
+
+    color: var(--primary);
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+
+.back-link:hover {
+
+    text-decoration: underline;
+}
+
+
+.header-content {
+
+    border-bottom:
+        1px solid
+        var(--border-light);
+
+    padding-bottom: 25px;
+}
+
+
+.page-badge {
+
+    display: inline-block;
+
+    padding: 6px 11px;
+
+    border-radius: 20px;
+
+    background: var(--primary-light);
+
+    color: var(--primary-dark);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+.header-content h1 {
+
+    margin-top: 14px;
+
+    font-size: 32px;
+
+    line-height: 1.2;
+
+    letter-spacing: -0.7px;
+}
+
+
+.header-content p {
+
+    margin-top: 8px;
+
+    max-width: 650px;
+
+    color: var(--text-muted);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   FLASH MESSAGES
+   ========================================================= */
+
+.messages {
+
+    margin-bottom: 25px;
+}
+
+
+.message {
+
+    padding: 12px 15px;
+
+    border-radius: 9px;
+
+    margin-bottom: 8px;
+
+    font-size: 13px;
+}
+
+
+.message.error {
+
+    background: #fef2f2;
+
+    border: 1px solid #fecaca;
+
+    color: #b91c1c;
+}
+
+
+.message.success {
+
+    background: #f0fdf4;
+
+    border: 1px solid #bbf7d0;
+
+    color: #15803d;
+}
+
+
+/* =========================================================
+   FORM SECTION
+   ========================================================= */
+
+.form-section {
+
+    padding: 26px 0;
+
+    border-bottom:
+        1px solid
+        #eef2f7;
+}
+
+
+.form-section:last-of-type {
+
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   SECTION HEADING
+   ========================================================= */
+
+.section-heading {
+
+    margin-bottom: 20px;
+}
+
+
+.section-heading h2 {
+
+    font-size: 18px;
+
+    color: var(--text-dark);
+}
+
+
+.section-heading p {
+
+    margin-top: 4px;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   FORM LAYOUT
+   ========================================================= */
+
+.form-row {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 18px;
+}
+
+
+.form-group {
+
+    margin-bottom: 18px;
+}
+
+
+.form-row .form-group {
+
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.form-group label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.form-group label span {
+
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+
+    width: 100%;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 10px;
+
+    outline: none;
+
+    background: white;
+
+    color: var(--text-dark);
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.form-group input,
+.form-group select {
+
+    height: 48px;
+
+    padding: 0 14px;
+}
+
+
+.form-group textarea {
+
+    padding: 12px 14px;
+
+    resize: vertical;
+
+    min-height: 85px;
+}
+
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+
+    color: #94a3b8;
+}
+
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(37, 99, 235, 0.10);
+}
+
+
+/* =========================================================
+   FIELD STATES
+   ========================================================= */
+
+.form-group input.invalid,
+.form-group select.invalid {
+
+    border-color: #dc2626;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(220, 38, 38, 0.08);
+}
+
+
+.form-group input.valid,
+.form-group select.valid {
+
+    border-color: #16a34a;
+}
+
+
+/* =========================================================
+   FIELD MESSAGES
+   ========================================================= */
+
+.field-error {
+
+    display: block;
+
+    min-height: 16px;
+
+    margin-top: 5px;
+
+    color: #dc2626;
+
+    font-size: 11px;
+}
+
+
+.field-info {
+
+    display: block;
+
+    min-height: 16px;
+
+    margin-top: 5px;
+
+    color: var(--text-muted);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   ACCOUNT TYPE
+   ========================================================= */
+
+.role-display {
+
+    margin-top: 25px;
+
+    padding: 15px 17px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    border:
+        1px solid
+        #dbeafe;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+.role-display strong {
+
+    color: #1d4ed8;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+.register-button {
+
+    width: 100%;
+
+    height: 50px;
+
+    margin-top: 18px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.register-button:hover {
+
+    background: var(--primary-dark);
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(37, 99, 235, 0.20);
+}
+
+
+.register-button:disabled {
+
+    opacity: 0.65;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-link {
+
+    margin-top: 20px;
+
+    text-align: center;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+.login-link a {
+
+    color: var(--primary);
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.login-link a:hover {
+
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .student-page {
+
+        padding: 20px 12px 35px;
+    }
+
+
+    .student-card {
+
+        padding: 28px 22px;
+
+        border-radius: 16px;
+    }
+
+
+    .header-content h1 {
+
+        font-size: 27px;
+    }
+
+
+    .form-row {
+
+        grid-template-columns: 1fr;
+
+        gap: 0;
+    }
+
+
+    .form-row .form-group {
+
+        margin-bottom: 18px;
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .student-card {
+
+        padding: 24px 17px;
+    }
+
+
+    .header-content h1 {
+
+        font-size: 24px;
+    }
+
+}

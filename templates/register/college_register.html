@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>College Registration | SIH Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/register/college_register.css') }}"
+    >
+
+    <script
+        src="{{ url_for('static', filename='js/register/college_register.js') }}"
+        defer
+    ></script>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+    <div class="registration-card">
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <a
+            href="{{ url_for('register') }}"
+            class="back-link"
+        >
+            ← Back
+        </a>
+
+
+        <div class="page-header">
+
+            <span class="registration-badge">
+                COLLEGE REGISTRATION
+            </span>
+
+            <h1>
+                Register Your College
+            </h1>
+
+            <p>
+                Create your college account on the
+                SIH Academia–Industry Collaboration Portal.
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             FLASH MESSAGES
+        ================================================== -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for category, message in messages %}
+
+                        <div class="message {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <form
+            id="collegeRegisterForm"
+            method="POST"
+            action="{{ url_for('register_user', role='college') }}"
+            novalidate
+        >
+
+
+            <!-- =================================================
+                 ACCOUNT INFORMATION
+            ================================================== -->
+
+            <section class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Account Information
+                    </h2>
+
+                    <p>
+                        Create login credentials for your college account.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Contact Person Name <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter contact person's full name"
+                        maxlength="100"
+                        required
+                    >
+
+                    <small
+                        id="nameError"
+                        class="field-error"
+                    ></small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address <span>*</span>
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter official college email"
+                        maxlength="150"
+                        required
+                    >
+
+                    <small
+                        id="emailError"
+                        class="field-error"
+                    ></small>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Minimum 6 characters"
+                            required
+                        >
+
+                        <div
+                            id="passwordStrength"
+                            class="password-status"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm Password <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Confirm password"
+                            required
+                        >
+
+                        <div
+                            id="passwordMatch"
+                            class="password-status"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 COLLEGE INFORMATION
+            ================================================== -->
+
+            <section class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        College Information
+                    </h2>
+
+                    <p>
+                        Enter your institution's official details.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="college_name">
+                        College Name <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="college_name"
+                        name="college_name"
+                        placeholder="Enter full college name"
+                        maxlength="200"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="college_code">
+                            College Code <span>*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="college_code"
+                            name="college_code"
+                            placeholder="e.g. PCE001"
+                            maxlength="50"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="university_name">
+                            University Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="university_name"
+                            name="university_name"
+                            placeholder="Enter affiliated university"
+                            maxlength="200"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="college_email">
+                        College Official Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="college_email"
+                        name="college_email"
+                        placeholder="e.g. info@college.edu"
+                        maxlength="150"
+                    >
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CONTACT INFORMATION
+            ================================================== -->
+
+            <section class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Contact Information
+                    </h2>
+
+                    <p>
+                        Provide the college's contact and location details.
+                    </p>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="phone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="Enter phone number"
+                            maxlength="15"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="pincode">
+                            Pincode
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pincode"
+                            name="pincode"
+                            placeholder="Enter pincode"
+                            maxlength="10"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="address">
+                        Address
+                    </label>
+
+                    <textarea
+                        id="address"
+                        name="address"
+                        placeholder="Enter complete college address"
+                        rows="4"
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="city">
+                            City
+                        </label>
+
+                        <input
+                            type="text"
+                            id="city"
+                            name="city"
+                            placeholder="Enter city"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="state">
+                            State
+                        </label>
+
+                        <input
+                            type="text"
+                            id="state"
+                            name="state"
+                            placeholder="Enter state"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="website">
+                        College Website
+                    </label>
+
+                    <input
+                        type="url"
+                        id="website"
+                        name="website"
+                        placeholder="https://www.example.edu"
+                        maxlength="255"
+                    >
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ACCOUNT TYPE
+            ================================================== -->
+
+            <div class="role-display">
+
+                <span class="role-label">
+                    Account Type
+                </span>
+
+                <span class="role-value">
+                    College
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUBMIT
+            ================================================== -->
+
+            <button
+                type="submit"
+                id="collegeRegisterButton"
+                class="register-button"
+            >
+                Create College Account
+            </button>
+
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a href="{{ url_for('login') }}">
+                    Login
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

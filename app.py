@@ -1,6 +1,7 @@
 import os
 import uuid
 import re
+import mysql.connector
 
 from werkzeug.utils import secure_filename
 
@@ -5086,20 +5087,21 @@ def remove_admin_cover():
 
         if conn:
             conn.close()
+
 # =========================================================
-# COMMON REGISTRATION FOUNDATION
+# REGISTRATION
 # =========================================================
 
 @app.route("/register")
 def register():
 
     return render_template(
-        "register.html"
+        "register/register.html"
     )
 
 
 # =========================================================
-# COMMON REGISTRATION FORM
+# ROLE REGISTRATION
 # =========================================================
 
 @app.route(
@@ -5107,10 +5109,6 @@ def register():
     methods=["GET", "POST"]
 )
 def register_user(role):
-
-    # -----------------------------------------------------
-    # ALLOWED REGISTRATION ROLES
-    # -----------------------------------------------------
 
     allowed_roles = {
         "student": "STUDENT",
@@ -5120,9 +5118,9 @@ def register_user(role):
     }
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # CHECK ROLE
-    # -----------------------------------------------------
+    # =====================================================
 
     if role not in allowed_roles:
 
@@ -5136,216 +5134,17 @@ def register_user(role):
         )
 
 
-    # -----------------------------------------------------
-    # AUTOMATIC ROLE ASSIGNMENT
-    # -----------------------------------------------------
-
     assigned_role = allowed_roles[role]
 
 
     # =====================================================
-    # POST REQUEST
+    # STUDENT REGISTRATION
     # =====================================================
 
-    if request.method == "POST":
-
-        # -------------------------------------------------
-        # GET FORM DATA
-        # -------------------------------------------------
-
-        name = request.form.get(
-            "name",
-            ""
-        ).strip()
-
-        email = request.form.get(
-            "email",
-            ""
-        ).strip().lower()
-
-        password = request.form.get(
-            "password",
-            ""
-        )
-
-        confirm_password = request.form.get(
-            "confirm_password",
-            ""
-        )
-
-
-        # =================================================
-        # NAME VALIDATION
-        # =================================================
-
-        if not name:
-
-            flash(
-                "Full name is required.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        if len(name) < 2:
-
-            flash(
-                "Name must contain at least 2 characters.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        if len(name) > 100:
-
-            flash(
-                "Name cannot exceed 100 characters.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        # =================================================
-        # EMAIL VALIDATION
-        # =================================================
-
-        if not email:
-
-            flash(
-                "Email address is required.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        email_pattern = (
-            r"^[A-Za-z0-9._%+-]+@"
-            r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-        )
-
-
-        if not re.match(
-            email_pattern,
-            email
-        ):
-
-            flash(
-                "Please enter a valid email address.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        if len(email) > 150:
-
-            flash(
-                "Email address cannot exceed 150 characters.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        # =================================================
-        # PASSWORD VALIDATION
-        # =================================================
-
-        if not password:
-
-            flash(
-                "Password is required.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        if len(password) < 6:
-
-            flash(
-                "Password must be at least 6 characters.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        # =================================================
-        # CONFIRM PASSWORD
-        # =================================================
-
-        if not confirm_password:
-
-            flash(
-                "Please confirm your password.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        if password != confirm_password:
-
-            flash(
-                "Passwords do not match.",
-                "error"
-            )
-
-            return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
-            )
-
-
-        # =================================================
-        # DATABASE
-        # =================================================
+    if role == "student":
 
         conn = None
         cursor = None
-
 
         try:
 
@@ -5357,134 +5156,1130 @@ def register_user(role):
 
 
             # =================================================
-            # DUPLICATE EMAIL CHECK
+            # GET ACTIVE COLLEGES
             # =================================================
 
             cursor.execute("""
                 SELECT
-                    id
-                FROM users
-                WHERE email = %s
-                LIMIT 1
-            """, (
-                email,
-            ))
-
-
-            existing_user = cursor.fetchone()
-
-
-            if existing_user:
-
-                flash(
-                    "An account with this email already exists.",
-                    "error"
-                )
-
-                return render_template(
-                    "register.html",
-                    selected_role=role,
-                    role_name=assigned_role
-                )
-
-
-            # =================================================
-            # GENERATE UUID
-            # =================================================
-
-            user_id = str(
-                uuid.uuid4()
-            )
-
-
-            # =================================================
-            # HASH PASSWORD
-            # =================================================
-
-            hashed_password = generate_password_hash(
-                password
-            )
-
-
-            # =================================================
-            # INSERT USER
-            # =================================================
-
-            cursor.execute("""
-                INSERT INTO users (
                     id,
+                    college_name,
+                    college_code
+                FROM colleges
+                WHERE status = 'ACTIVE'
+                ORDER BY college_name ASC
+            """)
+
+            colleges = cursor.fetchall()
+
+
+            # =================================================
+            # GET REQUEST DATA
+            # =================================================
+
+            if request.method == "POST":
+
+                # -------------------------------------------------
+                # ACCOUNT INFORMATION
+                # -------------------------------------------------
+
+                name = request.form.get(
+                    "name",
+                    ""
+                ).strip()
+
+                email = request.form.get(
+                    "email",
+                    ""
+                ).strip().lower()
+
+                password = request.form.get(
+                    "password",
+                    ""
+                )
+
+                confirm_password = request.form.get(
+                    "confirm_password",
+                    ""
+                )
+
+
+                # -------------------------------------------------
+                # STUDENT INFORMATION
+                # -------------------------------------------------
+
+                college_id = request.form.get(
+                    "college_id",
+                    ""
+                ).strip()
+
+                enrollment_no = request.form.get(
+                    "enrollment_no",
+                    ""
+                ).strip()
+
+                course = request.form.get(
+                    "course",
+                    ""
+                ).strip()
+
+                branch = request.form.get(
+                    "branch",
+                    ""
+                ).strip()
+
+                semester = request.form.get(
+                    "semester",
+                    ""
+                ).strip()
+
+                passing_year = request.form.get(
+                    "passing_year",
+                    ""
+                ).strip()
+
+
+                # -------------------------------------------------
+                # PERSONAL INFORMATION
+                # -------------------------------------------------
+
+                phone = request.form.get(
+                    "phone",
+                    ""
+                ).strip()
+
+                dob = request.form.get(
+                    "dob",
+                    ""
+                ).strip()
+
+                # -------------------------------------------------
+                # DOB VALIDATION
+                # -------------------------------------------------
+
+                if dob:
+
+                    from datetime import datetime
+
+                    try:
+
+                        parsed_dob = datetime.strptime(
+                            dob,
+                            "%Y-%m-%d"
+                        ).date()
+
+                        current_year = datetime.now().year
+
+                        if parsed_dob.year < 1950 or parsed_dob.year > current_year:
+
+                            flash(
+                                "Please enter a valid date of birth.",
+                                "error"
+                            )
+
+                            return render_template(
+                                "register/student_register.html",
+                                colleges=colleges
+                            )
+
+                    except ValueError:
+
+                        flash(
+                            "Please enter a valid date of birth.",
+                            "error"
+                        )
+
+                        return render_template(
+                            "register/student_register.html",
+                            colleges=colleges
+                        )
+
+                gender = request.form.get(
+                    "gender",
+                    ""
+                ).strip()
+
+                address = request.form.get(
+                    "address",
+                    ""
+                ).strip()
+
+
+                # -------------------------------------------------
+                # ACADEMIC INFORMATION
+                # -------------------------------------------------
+
+                cgpa = request.form.get(
+                    "cgpa",
+                    ""
+                ).strip()
+
+                current_sgpa = request.form.get(
+                    "current_sgpa",
+                    ""
+                ).strip()
+
+                active_backlogs = request.form.get(
+                    "active_backlogs",
+                    "0"
+                ).strip()
+
+
+                # -------------------------------------------------
+                # PROFESSIONAL LINKS
+                # -------------------------------------------------
+
+                linkedin_url = request.form.get(
+                    "linkedin_url",
+                    ""
+                ).strip()
+
+                github_url = request.form.get(
+                    "github_url",
+                    ""
+                ).strip()
+
+                portfolio_url = request.form.get(
+                    "portfolio_url",
+                    ""
+                ).strip()
+
+
+                # =================================================
+                # BASIC VALIDATION
+                # =================================================
+
+                if not name:
+
+                    flash(
+                        "Full name is required.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                if len(name) < 2:
+
+                    flash(
+                        "Name must contain at least 2 characters.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                if len(name) > 100:
+
+                    flash(
+                        "Name cannot exceed 100 characters.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                # =================================================
+                # EMAIL VALIDATION
+                # =================================================
+
+                email_pattern = (
+                    r"^[A-Za-z0-9._%+-]+@"
+                    r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+                )
+
+
+                if not email:
+
+                    flash(
+                        "Email address is required.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                if not re.match(
+                    email_pattern,
+                    email
+                ):
+
+                    flash(
+                        "Please enter a valid email address.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                # =================================================
+                # PASSWORD VALIDATION
+                # =================================================
+
+                if len(password) < 6:
+
+                    flash(
+                        "Password must be at least 6 characters.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                if password != confirm_password:
+
+                    flash(
+                        "Passwords do not match.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                # =================================================
+                # STUDENT REQUIRED FIELDS
+                # =================================================
+
+                if not college_id:
+
+                    flash(
+                        "Please select your college.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                if not enrollment_no:
+
+                    flash(
+                        "Enrollment number is required.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                if not course:
+
+                    flash(
+                        "Course is required.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                if not branch:
+
+                    flash(
+                        "Branch is required.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                # =================================================
+                # DUPLICATE EMAIL
+                # =================================================
+
+                cursor.execute("""
+                    SELECT id
+                    FROM users
+                    WHERE email = %s
+                    LIMIT 1
+                """, (
+                    email,
+                ))
+
+                existing_user = cursor.fetchone()
+
+
+                if existing_user:
+
+                    flash(
+                        "An account with this email already exists.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                # =================================================
+                # DUPLICATE ENROLLMENT
+                # =================================================
+
+                cursor.execute("""
+                    SELECT id
+                    FROM students
+                    WHERE enrollment_no = %s
+                    LIMIT 1
+                """, (
+                    enrollment_no,
+                ))
+
+                existing_student = cursor.fetchone()
+
+
+                if existing_student:
+
+                    flash(
+                        "This enrollment number is already registered.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                # =================================================
+                # VERIFY COLLEGE
+                # =================================================
+
+                cursor.execute("""
+                    SELECT id
+                    FROM colleges
+                    WHERE id = %s
+                      AND status = 'ACTIVE'
+                    LIMIT 1
+                """, (
+                    college_id,
+                ))
+
+                selected_college = cursor.fetchone()
+
+
+                if not selected_college:
+
+                    flash(
+                        "Selected college is not available.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/student_register.html",
+                        colleges=colleges
+                    )
+
+
+                # =================================================
+                # GENERATE IDS
+                # =================================================
+
+                user_id = str(
+                    uuid.uuid4()
+                )
+
+                student_id = str(
+                    uuid.uuid4()
+                )
+
+
+                # =================================================
+                # HASH PASSWORD
+                # =================================================
+
+                hashed_password = generate_password_hash(
+                    password
+                )
+
+
+                # =================================================
+                # INSERT USER
+                # =================================================
+
+                cursor.execute("""
+                    INSERT INTO users (
+                        id,
+                        name,
+                        email,
+                        password,
+                        role,
+                        status
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s
+                    )
+                """, (
+                    user_id,
                     name,
                     email,
-                    password,
-                    role,
-                    status
+                    hashed_password,
+                    assigned_role,
+                    "ACTIVE"
+                ))
+
+
+                # =================================================
+                # INSERT STUDENT
+                # =================================================
+
+                cursor.execute("""
+                    INSERT INTO students (
+                        id,
+                        user_id,
+                        college_id,
+                        enrollment_no,
+                        course,
+                        branch,
+                        semester,
+                        passing_year,
+                        phone,
+                        dob,
+                        gender,
+                        address,
+                        cgpa,
+                        current_sgpa,
+                        active_backlogs,
+                        linkedin_url,
+                        github_url,
+                        portfolio_url
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        %s,
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, '')
+                    )
+                """, (
+                    student_id,
+                    user_id,
+                    college_id,
+                    enrollment_no,
+                    course,
+                    branch,
+                    semester,
+                    passing_year,
+                    phone,
+                    dob,
+                    gender,
+                    address,
+                    cgpa,
+                    current_sgpa,
+                    active_backlogs or 0,
+                    linkedin_url,
+                    github_url,
+                    portfolio_url
+                ))
+
+
+                # =================================================
+                # COMMIT BOTH INSERTS
+                # =================================================
+
+                conn.commit()
+
+
+                # =================================================
+                # SUCCESS
+                # =================================================
+
+                flash(
+                    "Student registration successful. You can now login.",
+                    "success"
                 )
-                VALUES (
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s
+
+                return redirect(
+                    url_for("login")
                 )
-            """, (
-                user_id,
-                name,
-                email,
-                hashed_password,
-                assigned_role,
-                "ACTIVE"
-            ))
 
 
-            # =================================================
-            # COMMIT
-            # =================================================
+            # =====================================================
+            # GET REQUEST
+            # =====================================================
 
-            conn.commit()
-
-
-            # =================================================
-            # SUCCESS
-            # =================================================
-
-            flash(
-                "Registration successful. You can now login.",
-                "success"
+            return render_template(
+                "register/student_register.html",
+                colleges=colleges
             )
 
 
-            return redirect(
-                url_for("login")
-            )
+        # =========================================================
+        # DATABASE ERROR
+        # =========================================================
 
-
-        # =====================================================
-        # DUPLICATE / DATABASE CONSTRAINT ERROR
-        # =====================================================
-
-        except mysql.connector.IntegrityError as e:
+        except mysql.connector.Error as e:
 
             if conn:
                 conn.rollback()
 
-
             print("=" * 70)
-            print("REGISTRATION DATABASE ERROR:")
+            print("STUDENT REGISTRATION DATABASE ERROR:")
+            print(type(e).__name__)
             print(e)
             print("=" * 70)
 
-
             flash(
-                "This email is already registered.",
+                "Unable to complete student registration.",
                 "error"
             )
 
+            return render_template(
+                "register/student_register.html",
+                colleges=colleges if "colleges" in locals() else []
+            )
+
+
+        # =========================================================
+        # GENERAL ERROR
+        # =========================================================
+
+        except Exception as e:
+
+            if conn:
+                conn.rollback()
+
+            print("=" * 70)
+            print("STUDENT REGISTRATION ERROR:")
+            print(type(e).__name__)
+            print(e)
+            print("=" * 70)
+
+            flash(
+                "Unable to complete student registration.",
+                "error"
+            )
 
             return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
+                "register/student_register.html",
+                colleges=colleges if "colleges" in locals() else []
+            )
+
+
+        # =========================================================
+        # CLOSE DATABASE
+        # =========================================================
+
+        finally:
+
+            if cursor:
+                cursor.close()
+
+            if conn:
+                conn.close()
+
+    # =====================================================
+    # COLLEGE REGISTRATION
+    # =====================================================
+
+    if role == "college":
+
+        conn = None
+        cursor = None
+
+        try:
+
+            conn = get_db_connection()
+
+            cursor = conn.cursor(
+                dictionary=True
+            )
+
+
+            # =================================================
+            # POST REQUEST
+            # =================================================
+
+            if request.method == "POST":
+
+                # -------------------------------------------------
+                # ACCOUNT
+                # -------------------------------------------------
+
+                name = request.form.get(
+                    "name",
+                    ""
+                ).strip()
+
+                email = request.form.get(
+                    "email",
+                    ""
+                ).strip().lower()
+
+                password = request.form.get(
+                    "password",
+                    ""
+                )
+
+                confirm_password = request.form.get(
+                    "confirm_password",
+                    ""
+                )
+
+
+                # -------------------------------------------------
+                # COLLEGE
+                # -------------------------------------------------
+
+                college_name = request.form.get(
+                    "college_name",
+                    ""
+                ).strip()
+
+                college_code = request.form.get(
+                    "college_code",
+                    ""
+                ).strip().upper()
+
+                university_name = request.form.get(
+                    "university_name",
+                    ""
+                ).strip()
+
+                college_email = request.form.get(
+                    "college_email",
+                    ""
+                ).strip().lower()
+
+
+                # -------------------------------------------------
+                # CONTACT
+                # -------------------------------------------------
+
+                phone = request.form.get(
+                    "phone",
+                    ""
+                ).strip()
+
+                address = request.form.get(
+                    "address",
+                    ""
+                ).strip()
+
+                city = request.form.get(
+                    "city",
+                    ""
+                ).strip()
+
+                state = request.form.get(
+                    "state",
+                    ""
+                ).strip()
+
+                pincode = request.form.get(
+                    "pincode",
+                    ""
+                ).strip()
+
+                website = request.form.get(
+                    "website",
+                    ""
+                ).strip()
+
+
+                # =================================================
+                # NAME VALIDATION
+                # =================================================
+
+                if len(name) < 2:
+
+                    flash(
+                        "Please enter a valid contact person name.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                if len(name) > 100:
+
+                    flash(
+                        "Name cannot exceed 100 characters.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                # =================================================
+                # EMAIL VALIDATION
+                # =================================================
+
+                email_pattern = (
+                    r"^[A-Za-z0-9._%+-]+@"
+                    r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+                )
+
+
+                if not re.match(
+                    email_pattern,
+                    email
+                ):
+
+                    flash(
+                        "Please enter a valid email address.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                # =================================================
+                # PASSWORD
+                # =================================================
+
+                if len(password) < 6:
+
+                    flash(
+                        "Password must be at least 6 characters.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                if password != confirm_password:
+
+                    flash(
+                        "Passwords do not match.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                # =================================================
+                # COLLEGE REQUIRED FIELDS
+                # =================================================
+
+                if not college_name:
+
+                    flash(
+                        "College name is required.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                if len(college_name) > 200:
+
+                    flash(
+                        "College name cannot exceed 200 characters.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                if not college_code:
+
+                    flash(
+                        "College code is required.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                # =================================================
+                # COLLEGE EMAIL VALIDATION
+                # =================================================
+
+                if (
+                    college_email and
+                    not re.match(
+                        email_pattern,
+                        college_email
+                    )
+                ):
+
+                    flash(
+                        "Please enter a valid college email address.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                # =================================================
+                # DUPLICATE USER EMAIL
+                # =================================================
+
+                cursor.execute("""
+                    SELECT id
+                    FROM users
+                    WHERE email = %s
+                    LIMIT 1
+                """, (
+                    email,
+                ))
+
+                existing_user = cursor.fetchone()
+
+
+                if existing_user:
+
+                    flash(
+                        "An account with this email already exists.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                # =================================================
+                # DUPLICATE COLLEGE CODE
+                # =================================================
+
+                cursor.execute("""
+                    SELECT id
+                    FROM colleges
+                    WHERE college_code = %s
+                    LIMIT 1
+                """, (
+                    college_code,
+                ))
+
+                existing_college = cursor.fetchone()
+
+
+                if existing_college:
+
+                    flash(
+                        "This college code is already registered.",
+                        "error"
+                    )
+
+                    return render_template(
+                        "register/college_register.html"
+                    )
+
+
+                # =================================================
+                # GENERATE UUIDs
+                # =================================================
+
+                user_id = str(
+                    uuid.uuid4()
+                )
+
+                college_id = str(
+                    uuid.uuid4()
+                )
+
+
+                # =================================================
+                # HASH PASSWORD
+                # =================================================
+
+                hashed_password = generate_password_hash(
+                    password
+                )
+
+
+                # =================================================
+                # INSERT USER
+                # =================================================
+
+                cursor.execute("""
+                    INSERT INTO users (
+                        id,
+                        name,
+                        email,
+                        password,
+                        role,
+                        status
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s
+                    )
+                """, (
+                    user_id,
+                    name,
+                    email,
+                    hashed_password,
+                    "COLLEGE",
+                    "ACTIVE"
+                ))
+
+
+                # =================================================
+                # INSERT COLLEGE
+                # =================================================
+
+                cursor.execute("""
+                    INSERT INTO colleges (
+                        id,
+                        user_id,
+                        college_name,
+                        college_code,
+                        university_name,
+                        email,
+                        phone,
+                        address,
+                        city,
+                        state,
+                        pincode,
+                        website,
+                        status
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        NULLIF(%s, ''),
+                        %s
+                    )
+                """, (
+                    college_id,
+                    user_id,
+                    college_name,
+                    college_code,
+                    university_name,
+                    college_email,
+                    phone,
+                    address,
+                    city,
+                    state,
+                    pincode,
+                    website,
+                    "PENDING"
+                ))
+
+
+                # =================================================
+                # COMMIT
+                # =================================================
+
+                conn.commit()
+
+
+                # =================================================
+                # SUCCESS
+                # =================================================
+
+                flash(
+                    "College registration successful. You can now login.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("login")
+                )
+
+
+            # =================================================
+            # GET
+            # =================================================
+
+            return render_template(
+                "register/college_register.html"
+            )
+
+
+        # =====================================================
+        # DATABASE ERROR
+        # =====================================================
+
+        except mysql.connector.Error as e:
+
+            if conn:
+                conn.rollback()
+
+            print("=" * 70)
+            print("COLLEGE REGISTRATION DATABASE ERROR:")
+            print(type(e).__name__)
+            print(e)
+            print("=" * 70)
+
+            flash(
+                "Unable to complete college registration.",
+                "error"
+            )
+
+            return render_template(
+                "register/college_register.html"
             )
 
 
@@ -5497,24 +6292,19 @@ def register_user(role):
             if conn:
                 conn.rollback()
 
-
             print("=" * 70)
-            print("REGISTRATION ERROR:")
+            print("COLLEGE REGISTRATION ERROR:")
             print(type(e).__name__)
             print(e)
             print("=" * 70)
 
-
             flash(
-                "Unable to complete registration. Please try again.",
+                "Unable to complete college registration.",
                 "error"
             )
 
-
             return render_template(
-                "register.html",
-                selected_role=role,
-                role_name=assigned_role
+                "register/college_register.html"
             )
 
 
@@ -5527,19 +6317,21 @@ def register_user(role):
             if cursor:
                 cursor.close()
 
-
             if conn:
                 conn.close()
 
 
     # =====================================================
-    # GET REQUEST
+    # OTHER ROLES - NEXT PHASE
     # =====================================================
 
-    return render_template(
-        "register.html",
-        selected_role=role,
-        role_name=assigned_role
+    flash(
+        f"{assigned_role.replace('_', ' ').title()} registration will be configured next.",
+        "error"
+    )
+
+    return redirect(
+        url_for("register")
     )
                                                                         
 # =========================================================

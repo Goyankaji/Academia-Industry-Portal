@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Create Account | SIH Portal
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/register/register.css') }}"
+    >
+
+    <script
+        src="{{ url_for('static', filename='js/register/register.js') }}"
+        defer
+    ></script>
+
+</head>
+
+<body>
+
+<main class="page">
+
+    <!-- =================================================
+         LEFT SECTION
+         ================================================= -->
+
+    <section class="intro-section">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                SIH
+            </div>
+
+            <div class="brand-info">
+
+                <h1>
+                    SIH Portal
+                </h1>
+
+                <p>
+                    Academia–Industry Collaboration
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="intro-content">
+
+            <span class="badge">
+                JOIN THE PLATFORM
+            </span>
+
+            <h2>
+                Connect. Collaborate.
+                <span>Grow.</span>
+            </h2>
+
+            <p>
+                Create your account and become part of
+                the SIH Academia–Industry Collaboration
+                Portal.
+            </p>
+
+        </div>
+
+
+        <div class="intro-footer">
+
+            <span>
+                Smart India Hackathon
+            </span>
+
+            <span class="footer-dot"></span>
+
+            <span>
+                Academia × Industry
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         RIGHT SECTION
+         ================================================= -->
+
+    <section class="registration-section">
+
+        <div class="registration-card">
+
+            <!-- HEADER -->
+
+            <div class="card-header">
+
+                <h2>
+                    Create Your Account
+                </h2>
+
+                <p>
+                    Select how you want to register
+                    on the SIH Portal.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 REGISTRATION OPTIONS
+                 ================================================= -->
+
+            <div class="registration-options">
+
+
+                <!-- STUDENT -->
+
+                <a
+                    href="{{ url_for('register_user', role='student') }}"
+                    class="registration-option"
+                >
+
+                    <div class="option-icon">
+                        🎓
+                    </div>
+
+                    <div class="option-content">
+
+                        <h3>
+                            Student
+                        </h3>
+
+                        <p>
+                            Register as a student
+                        </p>
+
+                    </div>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </a>
+
+
+                <!-- COLLEGE -->
+
+                <a
+                    href="{{ url_for('register_user', role='college') }}"
+                    class="registration-option"
+                >
+
+                    <div class="option-icon">
+                        🏫
+                    </div>
+
+                    <div class="option-content">
+
+                        <h3>
+                            College
+                        </h3>
+
+                        <p>
+                            Register your college
+                        </p>
+
+                    </div>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </a>
+
+
+                <!-- PLACEMENT CELL -->
+
+                <a
+                    href="{{ url_for('register_user', role='placement-cell') }}"
+                    class="registration-option"
+                >
+
+                    <div class="option-icon">
+                        📋
+                    </div>
+
+                    <div class="option-content">
+
+                        <h3>
+                            Placement Cell
+                        </h3>
+
+                        <p>
+                            Register your placement cell
+                        </p>
+
+                    </div>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </a>
+
+
+                <!-- INDUSTRY -->
+
+                <a
+                    href="{{ url_for('register_user', role='industry') }}"
+                    class="registration-option"
+                >
+
+                    <div class="option-icon">
+                        🏭
+                    </div>
+
+                    <div class="option-content">
+
+                        <h3>
+                            Industry
+                        </h3>
+
+                        <p>
+                            Register your organization
+                        </p>
+
+                    </div>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 LOGIN LINK
+                 ================================================= -->
+
+            <div class="login-link">
+
+                <span>
+                    Already have an account?
+                </span>
+
+                <a href="{{ url_for('login') }}">
+                    Login
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+
+</html>

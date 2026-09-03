@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Student Registration | SIH Portal
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/register/student_register.css') }}"
+    >
+
+    <script
+        src="{{ url_for('static', filename='js/register/student_register.js') }}"
+        defer
+    ></script>
+
+</head>
+
+<body>
+
+<main class="student-page">
+
+    <section class="student-card">
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <div class="page-header">
+
+            <a
+                href="{{ url_for('register') }}"
+                class="back-link"
+            >
+                ← Back
+            </a>
+
+            <div class="header-content">
+
+                <span class="page-badge">
+                    STUDENT REGISTRATION
+                </span>
+
+                <h1>
+                    Create Your Account
+                </h1>
+
+                <p>
+                    Register as a student on the SIH
+                    Academia–Industry Collaboration Portal.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FLASH MESSAGES
+             ================================================= -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for category, message in messages %}
+
+                        <div class="message {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- =================================================
+             REGISTRATION FORM
+             ================================================= -->
+
+        <form
+            id="studentRegisterForm"
+            method="POST"
+            action="{{ url_for('register_user', role='student') }}"
+            novalidate
+        >
+
+            <!-- =================================================
+                 SECTION 1 - ACCOUNT INFORMATION
+                 ================================================= -->
+
+            <div class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Account Information
+                    </h2>
+
+                    <p>
+                        Create your login credentials.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        maxlength="100"
+                        autocomplete="name"
+                        required
+                    >
+
+                    <small
+                        id="nameError"
+                        class="field-error"
+                    ></small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        maxlength="150"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <small
+                        id="emailError"
+                        class="field-error"
+                    ></small>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Minimum 6 characters"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <small
+                            id="passwordStrength"
+                            class="field-info"
+                        ></small>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm Password
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Confirm password"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <small
+                            id="passwordMatch"
+                            class="field-info"
+                        ></small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SECTION 2 - STUDENT INFORMATION
+                 ================================================= -->
+
+            <div class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Student Information
+                    </h2>
+
+                    <p>
+                        Enter your academic details.
+                    </p>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- COLLEGE -->
+
+                    <div class="form-group">
+
+                        <label for="college_id">
+                            College
+                            <span>*</span>
+                        </label>
+
+                        <select
+                            id="college_id"
+                            name="college_id"
+                            required
+                        >
+
+                            <option value="">
+                                Select your college
+                            </option>
+
+                            {% for college in colleges %}
+
+                                <option
+                                    value="{{ college.id }}"
+                                >
+                                    {{ college.college_name }}
+                                    {% if college.college_code %}
+                                        ({{ college.college_code }})
+                                    {% endif %}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <small
+                            id="collegeError"
+                            class="field-error"
+                        ></small>
+
+                    </div>
+
+
+                    <!-- ENROLLMENT -->
+
+                    <div class="form-group">
+
+                        <label for="enrollment_no">
+                            Enrollment Number
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="enrollment_no"
+                            name="enrollment_no"
+                            placeholder="Enter enrollment number"
+                            maxlength="50"
+                            required
+                        >
+
+                        <small
+                            id="enrollmentError"
+                            class="field-error"
+                        ></small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- COURSE -->
+
+                    <div class="form-group">
+
+                        <label for="course">
+                            Course
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="course"
+                            name="course"
+                            placeholder="e.g. B.Tech"
+                            maxlength="100"
+                            required
+                        >
+
+                        <small
+                            id="courseError"
+                            class="field-error"
+                        ></small>
+
+                    </div>
+
+
+                    <!-- BRANCH -->
+
+                    <div class="form-group">
+
+                        <label for="branch">
+                            Branch
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="branch"
+                            name="branch"
+                            placeholder="e.g. Information Technology"
+                            maxlength="100"
+                            required
+                        >
+
+                        <small
+                            id="branchError"
+                            class="field-error"
+                        ></small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- SEMESTER -->
+
+                    <div class="form-group">
+
+                        <label for="semester">
+                            Current Semester
+                        </label>
+
+                        <select
+                            id="semester"
+                            name="semester"
+                        >
+
+                            <option value="">
+                                Select semester
+                            </option>
+
+                            <option value="1">1st Semester</option>
+                            <option value="2">2nd Semester</option>
+                            <option value="3">3rd Semester</option>
+                            <option value="4">4th Semester</option>
+                            <option value="5">5th Semester</option>
+                            <option value="6">6th Semester</option>
+                            <option value="7">7th Semester</option>
+                            <option value="8">8th Semester</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- PASSING YEAR -->
+
+                    <div class="form-group">
+
+                        <label for="passing_year">
+                            Passing Year
+                        </label>
+
+                        <input
+                            type="number"
+                            id="passing_year"
+                            name="passing_year"
+                            placeholder="e.g. 2027"
+                            min="2024"
+                            max="2100"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SECTION 3 - PERSONAL INFORMATION
+                 ================================================= -->
+
+            <div class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Personal Information
+                    </h2>
+
+                    <p>
+                        These details are optional and can be
+                        completed later.
+                    </p>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- PHONE -->
+
+                    <div class="form-group">
+
+                        <label for="phone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="Enter phone number"
+                            maxlength="15"
+                            autocomplete="tel"
+                        >
+
+                    </div>
+
+
+                    <!-- DOB -->
+
+                    <div class="form-group">
+
+                        <label for="dob">
+                            Date of Birth
+                        </label>
+
+                        <input
+                            type="date"
+                            id="dob"
+                            name="dob"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- GENDER -->
+
+                <div class="form-group">
+
+                    <label for="gender">
+                        Gender
+                    </label>
+
+                    <select
+                        id="gender"
+                        name="gender"
+                    >
+
+                        <option value="">
+                            Select gender
+                        </option>
+
+                        <option value="MALE">
+                            Male
+                        </option>
+
+                        <option value="FEMALE">
+                            Female
+                        </option>
+
+                        <option value="OTHER">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ADDRESS -->
+
+                <div class="form-group">
+
+                    <label for="address">
+                        Address
+                    </label>
+
+                    <textarea
+                        id="address"
+                        name="address"
+                        rows="3"
+                        placeholder="Enter your address"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SECTION 4 - ACADEMIC PERFORMANCE
+                 ================================================= -->
+
+            <div class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Academic Performance
+                    </h2>
+
+                    <p>
+                        You can update these details later.
+                    </p>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="cgpa">
+                            CGPA
+                        </label>
+
+                        <input
+                            type="number"
+                            id="cgpa"
+                            name="cgpa"
+                            placeholder="e.g. 8.50"
+                            min="0"
+                            max="10"
+                            step="0.01"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="current_sgpa">
+                            Current SGPA
+                        </label>
+
+                        <input
+                            type="number"
+                            id="current_sgpa"
+                            name="current_sgpa"
+                            placeholder="e.g. 8.70"
+                            min="0"
+                            max="10"
+                            step="0.01"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="active_backlogs">
+                            Active Backlogs
+                        </label>
+
+                        <input
+                            type="number"
+                            id="active_backlogs"
+                            name="active_backlogs"
+                            placeholder="0"
+                            min="0"
+                            max="255"
+                            value="0"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SECTION 5 - PROFESSIONAL LINKS
+                 ================================================= -->
+
+            <div class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Professional Links
+                    </h2>
+
+                    <p>
+                        Optional links that can be added to your profile.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="linkedin_url">
+                        LinkedIn Profile
+                    </label>
+
+                    <input
+                        type="url"
+                        id="linkedin_url"
+                        name="linkedin_url"
+                        placeholder="https://linkedin.com/in/your-profile"
+                    >
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="github_url">
+                            GitHub Profile
+                        </label>
+
+                        <input
+                            type="url"
+                            id="github_url"
+                            name="github_url"
+                            placeholder="https://github.com/username"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="portfolio_url">
+                            Portfolio
+                        </label>
+
+                        <input
+                            type="url"
+                            id="portfolio_url"
+                            name="portfolio_url"
+                            placeholder="https://yourportfolio.com"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACCOUNT TYPE
+                 ================================================= -->
+
+            <div class="role-display">
+
+                <span>
+                    Account Type
+                </span>
+
+                <strong>
+                    Student
+                </strong>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUBMIT
+                 ================================================= -->
+
+            <button
+                type="submit"
+                id="studentRegisterButton"
+                class="register-button"
+            >
+                Create Student Account
+            </button>
+
+
+            <!-- LOGIN -->
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a href="{{ url_for('login') }}">
+                    Login
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+</body>
+
+</html>
