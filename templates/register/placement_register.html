@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Placement Cell Registration | SIH Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/register/placement_register.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="page-wrapper">
+
+    <div class="registration-card">
+
+        <!-- =====================================================
+             BACK
+        ====================================================== -->
+
+        <a
+            href="{{ url_for('register') }}"
+            class="back-link"
+        >
+            ← Back
+        </a>
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+
+        <div class="page-header">
+
+            <span class="registration-badge">
+                PLACEMENT CELL REGISTRATION
+            </span>
+
+            <h1>
+                Register Your Placement Cell
+            </h1>
+
+            <p>
+                Create your placement cell account on the
+                SIH Academia–Industry Collaboration Portal.
+            </p>
+
+        </div>
+
+
+        <div class="divider"></div>
+
+
+        <!-- =====================================================
+             FLASH MESSAGES
+        ====================================================== -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for category, message in messages %}
+
+                        <div class="message {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- =====================================================
+             REGISTRATION FORM
+        ====================================================== -->
+
+        <form
+            id="placementRegisterForm"
+            method="POST"
+            action="{{ url_for('register_placement_cell') }}"
+            novalidate
+        >
+
+
+            <!-- =================================================
+                 ACCOUNT INFORMATION
+            ================================================== -->
+
+            <section class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Account Information
+                    </h2>
+
+                    <p>
+                        Create login credentials for your
+                        placement cell account.
+                    </p>
+
+                </div>
+
+
+                <!-- Representative Name -->
+
+                <div class="form-group">
+
+                    <label for="representative_name">
+                        Representative Name
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="representative_name"
+                        name="representative_name"
+                        placeholder="Enter representative's full name"
+                        maxlength="150"
+                        autocomplete="name"
+                        required
+                    >
+
+                    <div
+                        id="representativeNameError"
+                        class="field-error"
+                    ></div>
+
+                </div>
+
+
+                <!-- Email -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter placement cell email"
+                        maxlength="150"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <div
+                        id="emailError"
+                        class="field-error"
+                    ></div>
+
+                </div>
+
+
+                <!-- Password Row -->
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Minimum 6 characters"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <div
+                            id="passwordStrength"
+                            class="password-status"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm Password
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Confirm password"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <div
+                            id="passwordMatch"
+                            class="password-status"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <div class="divider"></div>
+
+
+            <!-- =================================================
+                 COLLEGE INFORMATION
+            ================================================== -->
+
+            <section class="form-section">
+
+                <div class="section-heading">
+
+                    <h2>
+                        College Information
+                    </h2>
+
+                    <p>
+                        Select the college that this placement
+                        cell belongs to.
+                    </p>
+
+                </div>
+
+
+                <!-- College Dropdown -->
+
+                <div class="form-group">
+
+                    <label for="college_id">
+                        College
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="college_id"
+                        name="college_id"
+                        required
+                    >
+
+                        <option value="">
+                            Select your college
+                        </option>
+
+                        {% for college in colleges %}
+
+                            <option value="{{ college.id }}">
+
+                                {{ college.college_name }}
+
+                                {% if college.college_code %}
+                                    ({{ college.college_code }})
+                                {% endif %}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <div
+                        id="collegeError"
+                        class="field-error"
+                    ></div>
+
+                    <p class="field-hint">
+                        Only registered colleges are available
+                        for selection.
+                    </p>
+
+                </div>
+
+
+                <!-- Designation -->
+
+                <div class="form-group">
+
+                    <label for="designation">
+                        Designation
+                    </label>
+
+                    <input
+                        type="text"
+                        id="designation"
+                        name="designation"
+                        placeholder="e.g. Training & Placement Officer"
+                        maxlength="100"
+                    >
+
+                </div>
+
+
+                <!-- Phone -->
+
+                <div class="form-group">
+
+                    <label for="phone">
+                        Phone Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="Enter phone number"
+                        maxlength="15"
+                        autocomplete="tel"
+                    >
+
+                    <div
+                        id="phoneError"
+                        class="field-error"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ACCOUNT TYPE
+            ================================================== -->
+
+            <div class="divider"></div>
+
+            <div class="role-display">
+
+                <span class="role-label">
+                    Account Type
+                </span>
+
+                <span class="role-value">
+                    Placement Cell
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUBMIT
+            ================================================== -->
+
+            <button
+                type="submit"
+                id="submitButton"
+                class="register-button"
+            >
+                Create Placement Cell Account
+            </button>
+
+
+            <!-- =================================================
+                 LOGIN
+            ================================================== -->
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a href="{{ url_for('login') }}">
+                    Login
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/register/placement_register.js') }}"
+    defer
+></script>
+
+</body>
+
+</html>

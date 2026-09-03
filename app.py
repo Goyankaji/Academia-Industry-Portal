@@ -6224,7 +6224,7 @@ def register_user(role):
                     state,
                     pincode,
                     website,
-                    "PENDING"
+                    "ACTIVE"
                 ))
 
 
@@ -6320,19 +6320,943 @@ def register_user(role):
             if conn:
                 conn.close()
 
+# =========================================================
+# PLACEMENT CELL REGISTRATION
+# =========================================================
+
+@app.route(
+    "/register/placement-cell",
+    methods=["GET", "POST"]
+)
+def register_placement_cell():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # FETCH REGISTERED COLLEGES
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+        cursor.execute("""
+            SELECT
+                id,
+                college_name,
+                college_code
+            FROM colleges
+            WHERE status = 'ACTIVE'
+            ORDER BY college_name ASC
+        """)
+
+        colleges = cursor.fetchall()
+
+        # =================================================
+        # POST REQUEST
+        # =================================================
+
+        if request.method == "POST":
+
+            # -------------------------------------------------
+            # ACCOUNT INFORMATION
+            # -------------------------------------------------
+
+            representative_name = request.form.get(
+                "representative_name",
+                ""
+            ).strip()
+
+            email = request.form.get(
+                "email",
+                ""
+            ).strip().lower()
+
+            password = request.form.get(
+                "password",
+                ""
+            )
+
+            confirm_password = request.form.get(
+                "confirm_password",
+                ""
+            )
+
+            # -------------------------------------------------
+            # COLLEGE
+            # -------------------------------------------------
+
+            college_id = request.form.get(
+                "college_id",
+                ""
+            ).strip()
+
+            # -------------------------------------------------
+            # OTHER INFORMATION
+            # -------------------------------------------------
+
+            designation = request.form.get(
+                "designation",
+                ""
+            ).strip()
+
+            phone = request.form.get(
+                "phone",
+                ""
+            ).strip()
+
+            # =================================================
+            # NAME VALIDATION
+            # =================================================
+
+            if not representative_name:
+
+                flash(
+                    "Representative name is required.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            if len(representative_name) < 2:
+
+                flash(
+                    "Please enter a valid representative name.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            if len(representative_name) > 150:
+
+                flash(
+                    "Representative name cannot exceed 150 characters.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            # =================================================
+            # EMAIL VALIDATION
+            # =================================================
+
+            if not email:
+
+                flash(
+                    "Email address is required.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            email_pattern = (
+                r"^[A-Za-z0-9._%+-]+@"
+                r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+            )
+
+            if not re.match(
+                email_pattern,
+                email
+            ):
+
+                flash(
+                    "Please enter a valid email address.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            # =================================================
+            # PASSWORD VALIDATION
+            # =================================================
+
+            if len(password) < 6:
+
+                flash(
+                    "Password must be at least 6 characters.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            if password != confirm_password:
+
+                flash(
+                    "Passwords do not match.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            # =================================================
+            # COLLEGE VALIDATION
+            # =================================================
+
+            if not college_id:
+
+                flash(
+                    "Please select your college.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            # =================================================
+            # VERIFY COLLEGE
+            # =================================================
+
+            cursor.execute("""
+                SELECT
+                    id,
+                    college_name
+                FROM colleges
+                WHERE id = %s
+                  AND status = 'ACTIVE'
+                LIMIT 1
+            """, (
+                college_id,
+            ))
+
+            selected_college = cursor.fetchone()
+
+            if not selected_college:
+
+                flash(
+                    "Selected college is not available.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            # =================================================
+            # CHECK EMAIL
+            # =================================================
+
+            cursor.execute("""
+                SELECT
+                    id
+                FROM users
+                WHERE email = %s
+                LIMIT 1
+            """, (
+                email,
+            ))
+
+            existing_user = cursor.fetchone()
+
+            if existing_user:
+
+                flash(
+                    "An account with this email already exists.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            # =================================================
+            # CHECK ONE PLACEMENT CELL PER COLLEGE
+            # =================================================
+
+            cursor.execute("""
+                SELECT
+                    id
+                FROM placement_cells
+                WHERE college_id = %s
+                LIMIT 1
+            """, (
+                college_id,
+            ))
+
+            existing_placement_cell = cursor.fetchone()
+
+            if existing_placement_cell:
+
+                flash(
+                    "A placement cell is already registered for this college.",
+                    "error"
+                )
+
+                return render_template(
+                    "register/placement_register.html",
+                    colleges=colleges
+                )
+
+            # =================================================
+            # GENERATE USER ID
+            # =================================================
+
+            user_id = str(
+                uuid.uuid4()
+            )
+
+            # =================================================
+            # GENERATE PLACEMENT CELL ID
+            # =================================================
+
+            placement_cell_id = str(
+                uuid.uuid4()
+            )
+
+            # =================================================
+            # HASH PASSWORD
+            # =================================================
+
+            hashed_password = generate_password_hash(
+                password
+            )
+
+            # =================================================
+            # INSERT INTO USERS
+            # =================================================
+
+            cursor.execute("""
+                INSERT INTO users (
+                    id,
+                    name,
+                    email,
+                    password,
+                    role,
+                    status
+                )
+                VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+            """, (
+                user_id,
+                representative_name,
+                email,
+                hashed_password,
+                "PLACEMENT_CELL",
+                "ACTIVE"
+            ))
+
+            # =================================================
+            # INSERT INTO PLACEMENT_CELLS
+            # =================================================
+
+            cursor.execute("""
+                INSERT INTO placement_cells (
+                    id,
+                    user_id,
+                    college_id,
+                    representative_name,
+                    designation,
+                    phone,
+                    email,
+                    status
+                )
+                VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+            """, (
+                placement_cell_id,
+                user_id,
+                college_id,
+                representative_name,
+                designation if designation else None,
+                phone if phone else None,
+                email,
+                "ACTIVE"
+            ))
+
+            # =================================================
+            # COMMIT BOTH INSERTS
+            # =================================================
+
+            conn.commit()
+
+            # =================================================
+            # SUCCESS
+            # =================================================
+
+            flash(
+                "Placement Cell registration submitted successfully. "
+                "Your account is pending admin approval.",
+                "success"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        # =================================================
+        # GET REQUEST
+        # =================================================
+
+        return render_template(
+            "register/placement_register.html",
+            colleges=colleges
+        )
 
     # =====================================================
-    # OTHER ROLES - NEXT PHASE
+    # DUPLICATE / DATABASE ERROR
     # =====================================================
 
-    flash(
-        f"{assigned_role.replace('_', ' ').title()} registration will be configured next.",
-        "error"
+    except mysql.connector.IntegrityError as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT CELL DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "This registration could not be completed. "
+            "The email or college may already be registered.",
+            "error"
+        )
+
+        return render_template(
+            "register/placement_register.html",
+            colleges=colleges if "colleges" in locals() else []
+        )
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT CELL REGISTRATION ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to complete placement cell registration.",
+            "error"
+        )
+
+        return render_template(
+            "register/placement_register.html",
+            colleges=colleges if "colleges" in locals() else []
+        )
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# INDUSTRY REGISTRATION
+# =========================================================
+
+@app.route(
+    "/register/industry",
+    methods=["GET", "POST"]
+)
+def register_industry():
+
+    # =====================================================
+    # GET REQUEST
+    # =====================================================
+
+    if request.method == "GET":
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+    # =====================================================
+    # GET FORM DATA
+    # =====================================================
+
+    contact_person = request.form.get(
+        "contact_person",
+        ""
+    ).strip()
+
+    email = request.form.get(
+        "email",
+        ""
+    ).strip().lower()
+
+    password = request.form.get(
+        "password",
+        ""
     )
 
-    return redirect(
-        url_for("register")
+    confirm_password = request.form.get(
+        "confirm_password",
+        ""
     )
+
+    company_name = request.form.get(
+        "company_name",
+        ""
+    ).strip()
+
+    company_type = request.form.get(
+        "company_type",
+        ""
+    ).strip()
+
+    industry_sector = request.form.get(
+        "industry_sector",
+        ""
+    ).strip()
+
+    designation = request.form.get(
+        "designation",
+        ""
+    ).strip()
+
+    phone = request.form.get(
+        "phone",
+        ""
+    ).strip()
+
+    website = request.form.get(
+        "website",
+        ""
+    ).strip()
+
+    address = request.form.get(
+        "address",
+        ""
+    ).strip()
+
+    city = request.form.get(
+        "city",
+        ""
+    ).strip()
+
+    state = request.form.get(
+        "state",
+        ""
+    ).strip()
+
+    description = request.form.get(
+        "description",
+        ""
+    ).strip()
+
+
+    # =====================================================
+    # BASIC VALIDATION
+    # =====================================================
+
+    if not contact_person:
+
+        flash(
+            "Contact person name is required.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    if len(contact_person) < 2:
+
+        flash(
+            "Please enter a valid contact person name.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    if not email:
+
+        flash(
+            "Email address is required.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    email_pattern = (
+        r"^[A-Za-z0-9._%+-]+@"
+        r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+    )
+
+    if not re.match(
+        email_pattern,
+        email
+    ):
+
+        flash(
+            "Please enter a valid email address.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    if not password:
+
+        flash(
+            "Password is required.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    if len(password) < 6:
+
+        flash(
+            "Password must be at least 6 characters.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    if password != confirm_password:
+
+        flash(
+            "Passwords do not match.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    if not company_name:
+
+        flash(
+            "Company name is required.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    if len(company_name) < 2:
+
+        flash(
+            "Please enter a valid company name.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    # =====================================================
+    # DATABASE
+    # =====================================================
+
+    conn = None
+    cursor = None
+
+    try:
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # DUPLICATE EMAIL CHECK
+        # =================================================
+
+        cursor.execute("""
+            SELECT id
+            FROM users
+            WHERE email = %s
+            LIMIT 1
+        """, (
+            email,
+        ))
+
+        existing_user = cursor.fetchone()
+
+
+        if existing_user:
+
+            flash(
+                "An account with this email already exists.",
+                "error"
+            )
+
+            return render_template(
+                "register/industry_register.html"
+            )
+
+
+        # =================================================
+        # GENERATE USER ID
+        # =================================================
+
+        user_id = str(
+            uuid.uuid4()
+        )
+
+
+        # =================================================
+        # GENERATE INDUSTRY ID
+        # =================================================
+
+        industry_id = str(
+            uuid.uuid4()
+        )
+
+
+        # =================================================
+        # HASH PASSWORD
+        # =================================================
+
+        hashed_password = generate_password_hash(
+            password
+        )
+
+
+        # =================================================
+        # INSERT INTO USERS
+        # =================================================
+
+        cursor.execute("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password,
+                role,
+                status
+            )
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+        """, (
+            user_id,
+            contact_person,
+            email,
+            hashed_password,
+            "INDUSTRY",
+            "ACTIVE"
+        ))
+
+
+        # =================================================
+        # INSERT INTO INDUSTRIES
+        # =================================================
+
+        cursor.execute("""
+            INSERT INTO industries (
+                id,
+                user_id,
+                company_name,
+                company_type,
+                industry_sector,
+                contact_person,
+                designation,
+                phone,
+                email,
+                website,
+                address,
+                city,
+                state,
+                description,
+                status
+            )
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+        """, (
+            industry_id,
+            user_id,
+            company_name,
+            company_type or None,
+            industry_sector or None,
+            contact_person,
+            designation or None,
+            phone or None,
+            email,
+            website or None,
+            address or None,
+            city or None,
+            state or None,
+            description or None,
+            "ACTIVE"
+        ))
+
+
+        # =================================================
+        # COMMIT BOTH INSERTS
+        # =================================================
+
+        conn.commit()
+
+
+        # =================================================
+        # SUCCESS
+        # =================================================
+
+        flash(
+            "Industry registration successful. "
+            "You can now login.",
+            "success"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+
+    # =====================================================
+    # DATABASE CONSTRAINT ERROR
+    # =====================================================
+
+    except mysql.connector.IntegrityError as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("INDUSTRY REGISTRATION DATABASE ERROR:")
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Registration failed. "
+            "The email or company information may already exist.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("INDUSTRY REGISTRATION ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to complete industry registration.",
+            "error"
+        )
+
+        return render_template(
+            "register/industry_register.html"
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
                                                                         
 # =========================================================
 # LOGOUT

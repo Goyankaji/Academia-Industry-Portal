@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Industry Registration | SIH Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/register/industry_register.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+    <div class="registration-card">
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <a
+            href="{{ url_for('register') }}"
+            class="back-link"
+        >
+            ← Back
+        </a>
+
+
+        <div class="registration-header">
+
+            <span class="registration-badge">
+                INDUSTRY REGISTRATION
+            </span>
+
+            <h1>
+                Register Your Industry
+            </h1>
+
+            <p>
+                Create your industry account on the
+                SIH Academia–Industry Collaboration Portal.
+            </p>
+
+        </div>
+
+
+        <div class="divider"></div>
+
+
+        <!-- =================================================
+             FLASH MESSAGES
+        ================================================== -->
+
+        {% with messages = get_flashed_messages(
+            with_categories=true
+        ) %}
+
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for category, message in messages %}
+
+                        <div class="message {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- =================================================
+             FORM
+        ================================================== -->
+
+        <form
+            id="industryRegisterForm"
+            method="POST"
+            action="{{ url_for(
+                'register_user',
+                role='industry'
+            ) }}"
+            novalidate
+        >
+
+
+            <!-- =============================================
+                 ACCOUNT INFORMATION
+            ============================================== -->
+
+            <section class="form-section">
+
+                <div class="section-header">
+
+                    <h2>
+                        Account Information
+                    </h2>
+
+                    <p>
+                        Create login credentials for your
+                        industry account.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="contact_person">
+                        Contact Person Name
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="contact_person"
+                        name="contact_person"
+                        placeholder="Enter contact person's full name"
+                        maxlength="150"
+                        required
+                    >
+
+                    <small
+                        id="contactPersonError"
+                        class="field-error"
+                    ></small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter official industry email"
+                        maxlength="150"
+                        required
+                    >
+
+                    <small
+                        id="emailError"
+                        class="field-error"
+                    ></small>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Minimum 6 characters"
+                            required
+                        >
+
+                        <small
+                            id="passwordStrength"
+                            class="password-status"
+                        ></small>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm Password
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Confirm password"
+                            required
+                        >
+
+                        <small
+                            id="passwordMatch"
+                            class="password-status"
+                        ></small>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 COMPANY INFORMATION
+            ============================================== -->
+
+            <section class="form-section">
+
+                <div class="section-header">
+
+                    <h2>
+                        Company Information
+                    </h2>
+
+                    <p>
+                        Enter your organization's official details.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="company_name">
+                        Company Name
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="company_name"
+                        name="company_name"
+                        placeholder="Enter full company name"
+                        maxlength="200"
+                        required
+                    >
+
+                    <small
+                        id="companyNameError"
+                        class="field-error"
+                    ></small>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="company_type">
+                            Company Type
+                        </label>
+
+                        <input
+                            type="text"
+                            id="company_type"
+                            name="company_type"
+                            placeholder="e.g. Private Limited"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="industry_sector">
+                            Industry Sector
+                        </label>
+
+                        <input
+                            type="text"
+                            id="industry_sector"
+                            name="industry_sector"
+                            placeholder="e.g. IT & Software"
+                            maxlength="150"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="website">
+                        Company Website
+                    </label>
+
+                    <input
+                        type="url"
+                        id="website"
+                        name="website"
+                        placeholder="https://www.example.com"
+                        maxlength="255"
+                    >
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 CONTACT INFORMATION
+            ============================================== -->
+
+            <section class="form-section">
+
+                <div class="section-header">
+
+                    <h2>
+                        Contact Information
+                    </h2>
+
+                    <p>
+                        Provide the company's contact details.
+                    </p>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="designation">
+                            Designation
+                        </label>
+
+                        <input
+                            type="text"
+                            id="designation"
+                            name="designation"
+                            placeholder="e.g. HR Manager"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="phone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="Enter phone number"
+                            maxlength="15"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="address">
+                        Address
+                    </label>
+
+                    <textarea
+                        id="address"
+                        name="address"
+                        placeholder="Enter complete company address"
+                        rows="4"
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="city">
+                            City
+                        </label>
+
+                        <input
+                            type="text"
+                            id="city"
+                            name="city"
+                            placeholder="Enter city"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="state">
+                            State
+                        </label>
+
+                        <input
+                            type="text"
+                            id="state"
+                            name="state"
+                            placeholder="Enter state"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 ABOUT COMPANY
+            ============================================== -->
+
+            <section class="form-section">
+
+                <div class="section-header">
+
+                    <h2>
+                        About the Company
+                    </h2>
+
+                    <p>
+                        Provide a short description of your organization.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="description">
+                        Company Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        placeholder="Tell us briefly about your company, products, services or industry..."
+                        rows="6"
+                    ></textarea>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 ACCOUNT TYPE
+            ============================================== -->
+
+            <div class="role-display">
+
+                <span>
+                    Account Type
+                </span>
+
+                <strong>
+                    Industry
+                </strong>
+
+            </div>
+
+
+            <!-- =============================================
+                 SUBMIT
+            ============================================== -->
+
+            <button
+                type="submit"
+                id="industryRegisterButton"
+                class="register-button"
+            >
+                Create Industry Account
+            </button>
+
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a href="{{ url_for('login') }}">
+                    Login
+                </a>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/register/industry_register.js'
+    ) }}"
+    defer
+></script>
+
+</body>
+
+</html>
