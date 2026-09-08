@@ -1,0 +1,925 @@
+/* =========================================================
+   INDUSTRY APPLICATIONS
+========================================================= */
+
+.industry-applications-page,
+.industry-application-detail-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.industry-page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.industry-page-eyebrow,
+.application-detail-eyebrow {
+    display: block;
+    margin-bottom: 7px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 1px;
+}
+
+.industry-page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 34px;
+    line-height: 1.2;
+}
+
+.industry-page-header p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.industry-application-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.industry-application-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-height: 100px;
+    padding: 18px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.035);
+}
+
+.application-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    flex: 0 0 45px;
+    border-radius: 11px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 19px;
+    font-weight: 750;
+}
+
+.application-stat-icon.pending {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.application-stat-icon.shortlisted {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.application-stat-icon.selected {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.application-stat-icon.rejected {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.application-stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.application-stat-content span {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.7px;
+}
+
+.application-stat-content strong {
+    color: #0f172a;
+    font-size: 25px;
+}
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+.industry-application-filter-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.application-search-box {
+    position: relative;
+    flex: 1;
+}
+
+.application-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.application-search-box input,
+.application-filter-select {
+    height: 42px;
+    box-sizing: border-box;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.application-search-box input {
+    width: 100%;
+    padding: 0 12px 0 38px;
+}
+
+.application-filter-select {
+    width: 190px;
+    padding: 0 11px;
+}
+
+.application-search-box input:focus,
+.application-filter-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+/* =========================================================
+   APPLICATION CARDS
+========================================================= */
+
+.industry-applications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.industry-application-card {
+    padding: 22px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.035);
+    transition: all 0.2s ease;
+}
+
+.industry-application-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    transform: translateY(-1px);
+}
+
+.application-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.application-student-section {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.application-student-avatar,
+.detail-student-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.application-student-info h2 {
+    margin: 0 0 4px;
+    color: #0f172a;
+    font-size: 17px;
+}
+
+.application-student-info span {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.industry-application-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #a16207;
+}
+
+.status-reviewed {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.status-shortlisted {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-selected {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   OPPORTUNITY
+========================================================= */
+
+.application-opportunity {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 17px 0;
+    margin-top: 16px;
+    border-top: 1px solid #eef2f7;
+}
+
+.application-info-label {
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.8px;
+}
+
+.application-opportunity strong {
+    color: #1d4ed8;
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   META
+========================================================= */
+
+.application-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 15px 0;
+    border-top: 1px solid #eef2f7;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.application-meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+
+.meta-icon {
+    font-size: 15px;
+}
+
+.application-meta-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.application-meta-item small {
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.7px;
+}
+
+.application-meta-item strong {
+    overflow: hidden;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SKILLS
+========================================================= */
+
+.application-skills {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding-top: 15px;
+}
+
+.application-skills > span {
+    margin-top: 5px;
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.7px;
+}
+
+.application-skills > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.application-skill-tag,
+.application-detail-skills span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0 9px;
+    border: 1px solid #dbeafe;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   CARD FOOTER
+========================================================= */
+
+.application-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 17px;
+}
+
+.application-id {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.application-view-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 37px;
+    padding: 0 13px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.application-view-button:hover {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.industry-applications-empty {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 330px;
+    padding: 35px;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 13px;
+    text-align: center;
+}
+
+.empty-application-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 62px;
+    margin-bottom: 16px;
+    border-radius: 15px;
+    background: #eff6ff;
+    font-size: 26px;
+}
+
+.industry-applications-empty h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.industry-applications-empty p {
+    max-width: 480px;
+    margin: 8px 0 20px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.application-secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.application-secondary-button:hover {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   DETAIL HEADER
+========================================================= */
+
+.application-back-link {
+    display: inline-flex;
+    margin-bottom: 17px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.application-back-link:hover {
+    color: #2563eb;
+}
+
+.application-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    padding: 24px;
+    margin-bottom: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+}
+
+.application-detail-student {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.application-detail-student h1 {
+    margin: 2px 0 4px;
+    color: #0f172a;
+    font-size: 27px;
+}
+
+.application-detail-student p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   DETAIL GRID
+========================================================= */
+
+.application-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 20px;
+}
+
+.application-detail-main,
+.application-detail-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.application-detail-panel {
+    padding: 23px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+}
+
+.application-panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 17px;
+    margin-bottom: 17px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.application-panel-heading > span {
+    font-size: 17px;
+}
+
+.application-panel-heading div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.application-panel-heading div > span {
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.7px;
+}
+
+.application-panel-heading h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   OPPORTUNITY DETAILS
+========================================================= */
+
+.application-opportunity-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 17px;
+}
+
+.application-opportunity-details > div,
+.application-student-info-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.application-opportunity-details small,
+.application-student-info-grid small {
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.7px;
+}
+
+.application-opportunity-details strong,
+.application-student-info-grid strong {
+    color: #334155;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   STUDENT INFO
+========================================================= */
+
+.application-student-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+
+/* =========================================================
+   DETAIL SKILLS
+========================================================= */
+
+.application-detail-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.application-muted {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.application-message {
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   STATUS SIDEBAR
+========================================================= */
+
+.application-status-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding-bottom: 16px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.application-status-current span {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.application-status-current strong {
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.status-text-pending {
+    color: #a16207;
+}
+
+.status-text-reviewed {
+    color: #0369a1;
+}
+
+.status-text-shortlisted {
+    color: #15803d;
+}
+
+.status-text-selected {
+    color: #047857;
+}
+
+.status-text-rejected {
+    color: #b91c1c;
+}
+
+.application-status-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.application-status-button {
+    width: 100%;
+    min-height: 40px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.application-status-button.shortlisted {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.application-status-button.selected {
+    border: 1px solid #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.application-status-button.rejected {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.application-status-button:hover {
+    filter: brightness(0.97);
+}
+
+.application-status-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   DOCUMENT
+========================================================= */
+
+.application-document-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 42px;
+    padding: 0 13px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.application-document-button:hover {
+    background: #dbeafe;
+}
+
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
+.application-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.application-timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.application-timeline-dot {
+    width: 9px;
+    height: 9px;
+    margin-top: 4px;
+    flex: 0 0 9px;
+    border-radius: 50%;
+    background: #2563eb;
+}
+
+.application-timeline-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.application-timeline-item small {
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.7px;
+}
+
+.application-timeline-item strong {
+    color: #475569;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .industry-application-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .application-meta-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 950px) {
+
+    .application-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 720px) {
+
+    .industry-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .industry-application-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .industry-application-filter-panel {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .application-filter-select {
+        width: 100%;
+    }
+
+    .application-card-top {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .application-meta-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .application-card-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .application-detail-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .industry-application-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .industry-application-card,
+    .application-detail-panel,
+    .application-detail-header {
+        padding: 18px;
+    }
+
+    .application-opportunity-details,
+    .application-student-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .application-detail-student h1 {
+        font-size: 23px;
+    }
+
+}

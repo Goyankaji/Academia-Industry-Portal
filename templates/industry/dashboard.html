@@ -1,0 +1,739 @@
+{% extends "industry/base.html" %}
+
+
+{% block title %}
+Industry Dashboard | SIH Portal
+{% endblock %}
+
+
+{% block page_title %}
+Industry Dashboard
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-dashboard.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================================================
+     WELCOME SECTION
+========================================================= -->
+
+<section class="industry-welcome-card">
+
+    <div class="industry-welcome-content">
+
+        <span class="industry-welcome-label">
+            WELCOME BACK
+        </span>
+
+        <h2>
+            Hello, {{ industry.contact_person if industry else session.get("user_name", "Industry") }} 👋
+        </h2>
+
+        <p>
+            Manage your industry profile, opportunities,
+            applications and academic collaborations from one place.
+        </p>
+
+    </div>
+
+
+    <div class="industry-welcome-icon">
+
+        <span>🏭</span>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROFILE COMPLETION
+========================================================= -->
+
+<section class="industry-profile-progress-card">
+
+    <div class="industry-profile-progress-left">
+
+        <div class="industry-section-icon">
+            ✓
+        </div>
+
+        <div>
+
+            <h3>
+                Complete your industry profile
+            </h3>
+
+            <p>
+                A complete profile helps colleges and students
+                understand your organization better.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="industry-profile-progress-right">
+
+        <div class="industry-progress-value">
+
+            <strong>
+                {{ profile_completion|default(0) }}%
+            </strong>
+
+        </div>
+
+        <div class="industry-progress-track">
+
+            <div class="industry-progress-bar"
+                data-progress="{{ profile_completion|default(0) }}">
+            </div>
+
+        </div>
+
+
+        <a href="#"
+           class="industry-complete-profile-btn">
+
+            Complete Profile →
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     STATISTICS
+========================================================= -->
+
+<section class="industry-stats-grid">
+
+
+    <!-- ACTIVE REQUIREMENTS -->
+
+    <div class="industry-stat-card">
+
+        <div class="industry-stat-top">
+
+            <div class="industry-stat-icon">
+                💼
+            </div>
+
+            <span class="industry-stat-label">
+                ACTIVE REQUIREMENTS
+            </span>
+
+        </div>
+
+        <div class="industry-stat-value">
+
+            {{ active_requirements|default(0) }}
+
+        </div>
+
+        <div class="industry-stat-footer">
+
+            <span>
+                Currently active
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- TOTAL APPLICATIONS -->
+
+    <div class="industry-stat-card">
+
+        <div class="industry-stat-top">
+
+            <div class="industry-stat-icon">
+                📄
+            </div>
+
+            <span class="industry-stat-label">
+                APPLICATIONS
+            </span>
+
+        </div>
+
+        <div class="industry-stat-value">
+
+            {{ total_applications|default(0) }}
+
+        </div>
+
+        <div class="industry-stat-footer">
+
+            <span>
+                Applications received
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- SHORTLISTED -->
+
+    <div class="industry-stat-card">
+
+        <div class="industry-stat-top">
+
+            <div class="industry-stat-icon">
+                ✓
+            </div>
+
+            <span class="industry-stat-label">
+                SHORTLISTED
+            </span>
+
+        </div>
+
+        <div class="industry-stat-value">
+
+            {{ shortlisted_applications|default(0) }}
+
+        </div>
+
+        <div class="industry-stat-footer">
+
+            <span>
+                Students shortlisted
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- COLLABORATIONS -->
+
+    <div class="industry-stat-card">
+
+        <div class="industry-stat-top">
+
+            <div class="industry-stat-icon">
+                🤝
+            </div>
+
+            <span class="industry-stat-label">
+                COLLABORATIONS
+            </span>
+
+        </div>
+
+        <div class="industry-stat-value">
+
+            {{ active_collaborations|default(0) }}
+
+        </div>
+
+        <div class="industry-stat-footer">
+
+            <span>
+                Academic collaborations
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     QUICK ACTIONS
+========================================================= -->
+
+<section class="industry-dashboard-section">
+
+    <div class="industry-section-heading">
+
+        <div>
+
+            <span class="industry-section-eyebrow">
+                QUICK ACTIONS
+            </span>
+
+            <h2>
+                What would you like to do?
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="industry-quick-actions">
+
+
+        <!-- CREATE REQUIREMENT -->
+
+        <a href="#"
+           class="industry-action-card">
+
+            <div class="industry-action-icon">
+                +
+            </div>
+
+            <div>
+
+                <h3>
+                    Create Requirement
+                </h3>
+
+                <p>
+                    Publish a new job, internship or project opportunity.
+                </p>
+
+            </div>
+
+            <span class="industry-action-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <!-- APPLICATIONS -->
+
+        <a href="#"
+           class="industry-action-card">
+
+            <div class="industry-action-icon">
+                📄
+            </div>
+
+            <div>
+
+                <h3>
+                    View Applications
+                </h3>
+
+                <p>
+                    Review students who have applied to your opportunities.
+                </p>
+
+            </div>
+
+            <span class="industry-action-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <!-- PROFILE -->
+
+        <a href="#"
+           class="industry-action-card">
+
+            <div class="industry-action-icon">
+                👤
+            </div>
+
+            <div>
+
+                <h3>
+                    Update Profile
+                </h3>
+
+                <p>
+                    Keep your company information and contact details updated.
+                </p>
+
+            </div>
+
+            <span class="industry-action-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <!-- COLLABORATION -->
+
+        <a href="#"
+           class="industry-action-card">
+
+            <div class="industry-action-icon">
+                🤝
+            </div>
+
+            <div>
+
+                <h3>
+                    Collaboration Requests
+                </h3>
+
+                <p>
+                    Manage your academic collaboration activities.
+                </p>
+
+            </div>
+
+            <span class="industry-action-arrow">
+                →
+            </span>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     LOWER DASHBOARD
+========================================================= -->
+
+<section class="industry-dashboard-columns">
+
+
+    <!-- =====================================================
+         RECENT APPLICATIONS
+    ====================================================== -->
+
+    <div class="industry-dashboard-panel">
+
+        <div class="industry-panel-header">
+
+            <div>
+
+                <span class="industry-section-eyebrow">
+                    RECENT ACTIVITY
+                </span>
+
+                <h2>
+                    Recent Applications
+                </h2>
+
+            </div>
+
+            <a href="#">
+                View All
+            </a>
+
+        </div>
+
+
+        {% if recent_applications %}
+
+            <div class="industry-application-list">
+
+                {% for application in recent_applications %}
+
+                    <div class="industry-application-item">
+
+                        <div class="industry-application-avatar">
+
+                            {{ application.student_name[0]|upper }}
+
+                        </div>
+
+                        <div class="industry-application-info">
+
+                            <strong>
+                                {{ application.student_name }}
+                            </strong>
+
+                            <span>
+                                {{ application.opportunity_title }}
+                            </span>
+
+                        </div>
+
+                        <div class="industry-application-status
+                                    status-{{ application.status|lower }}">
+
+                            {{ application.status }}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="industry-empty-state">
+
+                <div class="industry-empty-icon">
+                    📄
+                </div>
+
+                <h3>
+                    No applications yet
+                </h3>
+
+                <p>
+                    Applications received for your opportunities
+                    will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         RECENT COLLABORATIONS
+    ====================================================== -->
+
+    <div class="industry-dashboard-panel">
+
+        <div class="industry-panel-header">
+
+            <div>
+
+                <span class="industry-section-eyebrow">
+                    PARTNERSHIPS
+                </span>
+
+                <h2>
+                    Collaborations
+                </h2>
+
+            </div>
+
+            <a href="#">
+                View All
+            </a>
+
+        </div>
+
+
+        {% if recent_collaborations %}
+
+            <div class="industry-collaboration-list">
+
+                {% for collaboration in recent_collaborations %}
+
+                    <div class="industry-collaboration-item">
+
+                        <div class="industry-collaboration-icon">
+                            🏫
+                        </div>
+
+                        <div class="industry-collaboration-info">
+
+                            <strong>
+                                {{ collaboration.college_name }}
+                            </strong>
+
+                            <span>
+                                {{ collaboration.title }}
+                            </span>
+
+                        </div>
+
+                        <span class="industry-status-badge
+                                     status-{{ collaboration.status|lower }}">
+
+                            {{ collaboration.status }}
+
+                        </span>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="industry-empty-state">
+
+                <div class="industry-empty-icon">
+                    🤝
+                </div>
+
+                <h3>
+                    No collaborations yet
+                </h3>
+
+                <p>
+                    Your academic collaboration activities
+                    will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     RECENT REQUIREMENTS
+========================================================= -->
+
+<section class="industry-dashboard-section">
+
+    <div class="industry-dashboard-panel">
+
+        <div class="industry-panel-header">
+
+            <div>
+
+                <span class="industry-section-eyebrow">
+                    OPPORTUNITIES
+                </span>
+
+                <h2>
+                    Your Recent Requirements
+                </h2>
+
+            </div>
+
+            <a href="#">
+                View All
+            </a>
+
+        </div>
+
+
+        {% if recent_requirements %}
+
+            <div class="industry-requirement-table-wrapper">
+
+                <table class="industry-requirement-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Requirement
+                            </th>
+
+                            <th>
+                                Type
+                            </th>
+
+                            <th>
+                                Deadline
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for requirement in recent_requirements %}
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="industry-requirement-name">
+
+                                        <strong>
+                                            {{ requirement.title }}
+                                        </strong>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+                                    {{ requirement.opportunity_type }}
+                                </td>
+
+                                <td>
+                                    {{ requirement.application_deadline or "—" }}
+                                </td>
+
+                                <td>
+
+                                    <span class="industry-status-badge
+                                                 status-{{ requirement.status|lower }}">
+
+                                        {{ requirement.status }}
+
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="industry-empty-state">
+
+                <div class="industry-empty-icon">
+                    💼
+                </div>
+
+                <h3>
+                    No requirements created
+                </h3>
+
+                <p>
+                    Create your first requirement to start
+                    connecting with students.
+                </p>
+
+                <a href="#"
+                   class="industry-empty-action">
+
+                    Create Requirement →
+
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-dashboard.js'
+) }}"></script>
+
+{% endblock %}

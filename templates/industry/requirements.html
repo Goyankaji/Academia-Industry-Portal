@@ -1,0 +1,551 @@
+{% extends "industry/base.html" %}
+
+{% block title %}
+Requirements | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-requirements.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-requirements-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="industry-page-header">
+
+        <div>
+
+            <span class="industry-page-eyebrow">
+                OPPORTUNITIES
+            </span>
+
+            <h1>
+                Requirements
+            </h1>
+
+            <p>
+                Manage your job, internship and collaboration
+                requirements.
+            </p>
+
+        </div>
+
+
+        <a href="{{ url_for('industry_create_requirement') }}"
+           class="industry-primary-button">
+
+            <span class="button-icon">+</span>
+
+            Create Requirement
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <div class="industry-requirement-stats">
+
+        <!-- TOTAL -->
+
+        <div class="industry-requirement-stat-card">
+
+            <div class="requirement-stat-icon total">
+                📋
+            </div>
+
+            <div class="requirement-stat-content">
+
+                <span>
+                    TOTAL REQUIREMENTS
+                </span>
+
+                <strong>
+                    {{ total_requirements|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- OPEN -->
+
+        <div class="industry-requirement-stat-card">
+
+            <div class="requirement-stat-icon open">
+                ●
+            </div>
+
+            <div class="requirement-stat-content">
+
+                <span>
+                    OPEN
+                </span>
+
+                <strong>
+                    {{ open_requirements|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- CLOSED -->
+
+        <div class="industry-requirement-stat-card">
+
+            <div class="requirement-stat-icon closed">
+                ⏳
+            </div>
+
+            <div class="requirement-stat-content">
+
+                <span>
+                    CLOSED
+                </span>
+
+                <strong>
+                    {{ closed_requirements|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- UPCOMING -->
+
+        <div class="industry-requirement-stat-card">
+
+            <div class="requirement-stat-icon upcoming">
+                📅
+            </div>
+
+            <div class="requirement-stat-content">
+
+                <span>
+                    UPCOMING DEADLINES
+                </span>
+
+                <strong>
+                    {{ upcoming_deadlines|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTER BAR
+    ====================================================== -->
+
+    <div class="industry-requirement-filter-panel">
+
+        <div class="requirement-search-box">
+
+            <span class="requirement-search-icon">
+                🔍
+            </span>
+
+            <input
+                type="text"
+                id="requirementSearch"
+                placeholder="Search requirements..."
+                autocomplete="off">
+
+        </div>
+
+
+        <select id="requirementTypeFilter"
+                class="requirement-filter-select">
+
+            <option value="">
+                All Types
+            </option>
+
+            <option value="JOB">
+                Job
+            </option>
+
+            <option value="INTERNSHIP">
+                Internship
+            </option>
+
+            <option value="PROJECT">
+                Project
+            </option>
+
+            <option value="TRAINING">
+                Training
+            </option>
+
+            <option value="COLLABORATION">
+                Collaboration
+            </option>
+
+        </select>
+
+
+        <select id="requirementStatusFilter"
+                class="requirement-filter-select">
+
+            <option value="">
+                All Status
+            </option>
+
+            <option value="OPEN">
+                Open
+            </option>
+
+            <option value="DRAFT">
+                Draft
+            </option>
+
+            <option value="CLOSED">
+                Closed
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- =====================================================
+         REQUIREMENTS LIST
+    ====================================================== -->
+
+    <div id="requirementsContainer"
+         class="industry-requirements-list">
+
+
+        {% if requirements %}
+
+
+            {% for requirement in requirements %}
+
+                <article
+                    class="industry-requirement-card"
+                    data-title="{{ requirement.title|lower }}"
+                    data-type="{{ requirement.opportunity_type|upper }}"
+                    data-status="{{ requirement.status|upper }}">
+
+
+                    <!-- CARD HEADER -->
+
+                    <div class="requirement-card-header">
+
+                        <div class="requirement-title-area">
+
+                            <div class="requirement-type-icon">
+
+                                {% if requirement.opportunity_type == "JOB" %}
+                                    💼
+                                {% elif requirement.opportunity_type == "INTERNSHIP" %}
+                                    🎓
+                                {% elif requirement.opportunity_type == "PROJECT" %}
+                                    📁
+                                {% elif requirement.opportunity_type == "TRAINING" %}
+                                    📚
+                                {% else %}
+                                    🤝
+                                {% endif %}
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="requirement-type-label">
+                                    {{ requirement.opportunity_type }}
+                                </span>
+
+                                <h2>
+                                    {{ requirement.title }}
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="industry-status-badge
+                                     status-{{ requirement.status|lower }}">
+
+                            {{ requirement.status }}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <p class="requirement-description">
+
+                        {{ requirement.description|truncate(220) }}
+
+                    </p>
+
+
+                    <!-- META -->
+
+                    <div class="requirement-meta-grid">
+
+
+                        <div class="requirement-meta-item">
+
+                            <span class="meta-icon">
+                                📍
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    LOCATION
+                                </small>
+
+                                <strong>
+                                    {{ requirement.location or "Not specified" }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="requirement-meta-item">
+
+                            <span class="meta-icon">
+                                🏢
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    WORK MODE
+                                </small>
+
+                                <strong>
+                                    {{ requirement.work_mode or "Not specified" }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="requirement-meta-item">
+
+                            <span class="meta-icon">
+                                📅
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    DEADLINE
+                                </small>
+
+                                <strong>
+                                    {{ requirement.application_deadline or "No deadline" }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="requirement-meta-item">
+
+                            <span class="meta-icon">
+                                👥
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    APPLICATIONS
+                                </small>
+
+                                <strong>
+                                    {{ requirement.application_count|default(0) }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SKILLS -->
+
+                    {% if requirement.required_skills %}
+
+                        <div class="requirement-skills">
+
+                            <span class="skills-label">
+                                SKILLS
+                            </span>
+
+                            <div class="skills-list">
+
+                                {% for skill in requirement.required_skills.split(',') %}
+
+                                    <span class="skill-tag">
+                                        {{ skill.strip() }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- FOOTER -->
+
+                    <div class="requirement-card-footer">
+
+                        <span class="requirement-created">
+
+                            Created:
+
+                            {% if requirement.created_at %}
+                                {{ requirement.created_at.strftime('%d %b %Y') }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </span>
+
+
+                        <div class="requirement-card-actions">
+
+                            <a
+                                href="{{ url_for(
+                                    'industry_requirement_detail',
+                                    requirement_id=requirement.id
+                                ) }}"
+                                class="requirement-secondary-button">
+
+                                View Details
+
+                            </a>
+
+
+                            <a
+                                href="{{ url_for(
+                                    'industry_edit_requirement',
+                                    requirement_id=requirement.id
+                                ) }}"
+                                class="requirement-edit-button">
+
+                                Edit
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <!-- EMPTY STATE -->
+
+            <div class="industry-requirements-empty">
+
+                <div class="empty-requirement-icon">
+                    📋
+                </div>
+
+                <h2>
+                    No Requirements Yet
+                </h2>
+
+                <p>
+                    You haven't created any requirements yet.
+                    Create your first requirement to get started.
+                </p>
+
+                <a
+                    href="{{ url_for('industry_create_requirement') }}"
+                    class="industry-primary-button">
+
+                    <span class="button-icon">
+                        +
+                    </span>
+
+                    Create Requirement
+
+                </a>
+
+            </div>
+
+
+        {% endif %}
+
+
+        <!-- NO FILTER RESULTS -->
+
+        <div id="noRequirementResults"
+             class="industry-requirements-empty hidden">
+
+            <div class="empty-requirement-icon">
+                🔍
+            </div>
+
+            <h2>
+                No Matching Requirements
+            </h2>
+
+            <p>
+                Try changing your search or filters.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-requirements.js'
+) }}"></script>
+
+{% endblock %}

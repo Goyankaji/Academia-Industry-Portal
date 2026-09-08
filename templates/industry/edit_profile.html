@@ -1,0 +1,461 @@
+{% extends "industry/base.html" %}
+
+
+{% block title %}
+Edit Profile | Industry Portal
+{% endblock %}
+
+
+{% block page_title %}
+Edit Industry Profile
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-profile.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================================================
+     EDIT PROFILE HEADER
+========================================================= -->
+
+<section class="industry-profile-header">
+
+    <div class="industry-profile-header-left">
+
+        <div class="industry-profile-company-icon">
+            ✎
+        </div>
+
+        <div>
+
+            <span class="industry-profile-eyebrow">
+                PROFILE MANAGEMENT
+            </span>
+
+            <h2>
+                Edit Industry Profile
+            </h2>
+
+            <p>
+                Update your organization and contact information.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="industry-profile-header-action">
+
+        <a href="{{ url_for('industry_profile') }}"
+           class="industry-profile-secondary-btn">
+
+            ← Back to Profile
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     EDIT PROFILE FORM
+========================================================= -->
+
+<section class="industry-profile-edit-card">
+
+    <form method="POST"
+          action="#"
+          class="industry-profile-form">
+
+
+        <!-- =================================================
+             COMPANY INFORMATION
+        ================================================== -->
+
+        <div class="industry-profile-form-section">
+
+            <div class="industry-profile-form-heading">
+
+                <span class="industry-profile-section-label">
+                    COMPANY INFORMATION
+                </span>
+
+                <h3>
+                    Organization Details
+                </h3>
+
+                <p>
+                    Provide accurate information about your organization.
+                </p>
+
+            </div>
+
+
+            <div class="industry-profile-form-grid">
+
+
+                <!-- COMPANY NAME -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="company_name">
+                        Company Name
+                        <span>*</span>
+                    </label>
+
+                    <input type="text"
+                           id="company_name"
+                           name="company_name"
+                           value="{{ industry.company_name if industry else '' }}"
+                           placeholder="Enter company name"
+                           required>
+
+                </div>
+
+
+                <!-- COMPANY TYPE -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="company_type">
+                        Company Type
+                        <span>*</span>
+                    </label>
+
+                    <input type="text"
+                           id="company_type"
+                           name="company_type"
+                           value="{{ industry.company_type if industry else '' }}"
+                           placeholder="e.g. Private Limited"
+                           required>
+
+                </div>
+
+
+                <!-- INDUSTRY SECTOR -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="industry_sector">
+                        Industry Sector
+                        <span>*</span>
+                    </label>
+
+                    <input type="text"
+                           id="industry_sector"
+                           name="industry_sector"
+                           value="{{ industry.industry_sector if industry else '' }}"
+                           placeholder="e.g. Information Technology"
+                           required>
+
+                </div>
+
+
+                <!-- WEBSITE -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="website">
+                        Website
+                    </label>
+
+                    <input type="url"
+                           id="website"
+                           name="website"
+                           value="{{ industry.website if industry else '' }}"
+                           placeholder="https://example.com">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CONTACT INFORMATION
+        ================================================== -->
+
+        <div class="industry-profile-form-section">
+
+            <div class="industry-profile-form-heading">
+
+                <span class="industry-profile-section-label">
+                    CONTACT INFORMATION
+                </span>
+
+                <h3>
+                    Primary Contact
+                </h3>
+
+                <p>
+                    Keep your contact information up to date.
+                </p>
+
+            </div>
+
+
+            <div class="industry-profile-form-grid">
+
+
+                <!-- CONTACT PERSON -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="contact_person">
+                        Contact Person
+                        <span>*</span>
+                    </label>
+
+                    <input type="text"
+                           id="contact_person"
+                           name="contact_person"
+                           value="{{ industry.contact_person if industry else '' }}"
+                           placeholder="Enter contact person"
+                           required>
+
+                </div>
+
+
+                <!-- DESIGNATION -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="designation">
+                        Designation
+                        <span>*</span>
+                    </label>
+
+                    <input type="text"
+                           id="designation"
+                           name="designation"
+                           value="{{ industry.designation if industry else '' }}"
+                           placeholder="e.g. HR Manager"
+                           required>
+
+                </div>
+
+
+                <!-- PHONE -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="phone">
+                        Phone Number
+                        <span>*</span>
+                    </label>
+
+                    <input type="tel"
+                           id="phone"
+                           name="phone"
+                           value="{{ industry.phone if industry else '' }}"
+                           placeholder="Enter phone number"
+                           required>
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="email">
+                        Email Address
+                        <span>*</span>
+                    </label>
+
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           value="{{ industry.email if industry else '' }}"
+                           placeholder="Enter email address"
+                           required>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             LOCATION
+        ================================================== -->
+
+        <div class="industry-profile-form-section">
+
+            <div class="industry-profile-form-heading">
+
+                <span class="industry-profile-section-label">
+                    LOCATION
+                </span>
+
+                <h3>
+                    Organization Address
+                </h3>
+
+                <p>
+                    Add your organization's location details.
+                </p>
+
+            </div>
+
+
+            <div class="industry-profile-form-grid">
+
+
+                <!-- ADDRESS -->
+
+                <div class="industry-profile-form-group industry-profile-form-full">
+
+                    <label for="address">
+                        Address
+                    </label>
+
+                    <textarea id="address"
+                              name="address"
+                              rows="3"
+                              placeholder="Enter complete address">{{ industry.address if industry else '' }}</textarea>
+
+                </div>
+
+
+                <!-- CITY -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="city">
+                        City
+                    </label>
+
+                    <input type="text"
+                           id="city"
+                           name="city"
+                           value="{{ industry.city if industry else '' }}"
+                           placeholder="Enter city">
+
+                </div>
+
+
+                <!-- STATE -->
+
+                <div class="industry-profile-form-group">
+
+                    <label for="state">
+                        State
+                    </label>
+
+                    <input type="text"
+                           id="state"
+                           name="state"
+                           value="{{ industry.state if industry else '' }}"
+                           placeholder="Enter state">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DESCRIPTION
+        ================================================== -->
+
+        <div class="industry-profile-form-section">
+
+            <div class="industry-profile-form-heading">
+
+                <span class="industry-profile-section-label">
+                    ABOUT ORGANIZATION
+                </span>
+
+                <h3>
+                    Company Description
+                </h3>
+
+                <p>
+                    Tell colleges and students about your organization.
+                </p>
+
+            </div>
+
+
+            <div class="industry-profile-form-group">
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea id="description"
+                          name="description"
+                          rows="6"
+                          placeholder="Describe your organization, work, services and areas of expertise...">{{ industry.description if industry else '' }}</textarea>
+
+                <small>
+                    A clear description helps colleges and students
+                    understand your organization better.
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FORM ACTIONS
+        ================================================== -->
+
+        <div class="industry-profile-form-actions">
+
+            <a href="{{ url_for('industry_profile') }}"
+               class="industry-profile-cancel-btn">
+
+                Cancel
+
+            </a>
+
+
+            <button type="submit"
+                    class="industry-profile-save-btn">
+
+                <span>
+                    ✓
+                </span>
+
+                Save Changes
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+</section>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-profile.js'
+) }}"></script>
+
+{% endblock %}

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        Industry Portal | SIH
+        {% endblock %}
+    </title>
+
+    <!-- =====================================================
+         COMMON INDUSTRY CSS
+    ====================================================== -->
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/industry/industry.css'
+          ) }}">
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         MOBILE OVERLAY
+    ====================================================== -->
+
+    <div class="industry-sidebar-overlay"
+         id="industrySidebarOverlay"></div>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="industry-sidebar"
+           id="industrySidebar">
+
+        <!-- BRAND -->
+
+        <div class="industry-brand">
+
+            <div class="industry-brand-logo">
+                <span>SIH</span>
+            </div>
+
+            <div class="industry-brand-text">
+
+                <h2>SIH Portal</h2>
+
+                <span>Industry</span>
+
+            </div>
+
+            <button type="button"
+                    class="industry-sidebar-close"
+                    id="industrySidebarClose">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             NAVIGATION
+        ================================================== -->
+
+        <nav class="industry-navigation">
+
+            <div class="industry-nav-section">
+
+                <p class="industry-nav-label">
+                    MAIN
+                </p>
+
+
+                <!-- DASHBOARD -->
+
+                <a href="{{ url_for('industry_dashboard') }}"
+                   class="industry-nav-item
+                   {% if dashboard == 'dashboard' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <rect x="3"
+                                  y="3"
+                                  width="7"
+                                  height="7"></rect>
+
+                            <rect x="14"
+                                  y="3"
+                                  width="7"
+                                  height="7"></rect>
+
+                            <rect x="3"
+                                  y="14"
+                                  width="7"
+                                  height="7"></rect>
+
+                            <rect x="14"
+                                  y="14"
+                                  width="7"
+                                  height="7"></rect>
+
+                        </svg>
+                    </span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+                <!-- PROFILE -->
+
+                <a href="{{ url_for('industry_profile') }}"
+                   class="industry-nav-item
+                   {% if dashboard == 'profile' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <circle cx="12"
+                                    cy="8"
+                                    r="4"></circle>
+
+                            <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        My Profile
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 OPPORTUNITIES
+            ================================================== -->
+
+            <div class="industry-nav-section">
+
+                <p class="industry-nav-label">
+                    OPPORTUNITIES
+                </p>
+
+
+                <a href="{{ url_for('industry_requirements') }}"
+                   class="industry-nav-item
+                   {% if dashboard == 'requirements' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <rect x="3"
+                                  y="5"
+                                  width="18"
+                                  height="16"
+                                  rx="2"></rect>
+
+                            <path d="M8 5V3h8v2"></path>
+
+                            <path d="M8 12h8"></path>
+
+                            <path d="M8 16h5"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Requirements
+                    </span>
+
+                </a>
+
+
+                <a href="{{ url_for('industry_applications') }}"
+                   class="industry-nav-item
+                   {% if dashboard == 'applications' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                            <polyline points="14 2 14 8 20 8"></polyline>
+
+                            <line x1="8"
+                                  y1="13"
+                                  x2="16"
+                                  y2="13"></line>
+
+                            <line x1="8"
+                                  y1="17"
+                                  x2="14"
+                                  y2="17"></line>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Applications
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 NETWORK
+            ================================================== -->
+
+            <div class="industry-nav-section">
+
+                <p class="industry-nav-label">
+                    NETWORK
+                </p>
+
+
+                <a href="{{ url_for('industry_colleges') }}"
+                   class="industry-nav-item
+                   {% if dashboard == 'colleges' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <path d="M3 10l9-7 9 7"></path>
+
+                            <path d="M5 10v10h14V10"></path>
+
+                            <path d="M9 20v-6h6v6"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Colleges
+                    </span>
+
+                </a>
+
+
+                <a href="{{ url_for('industry_students') }}"
+                   class="industry-nav-item
+                   {% if dashboard == 'students' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <circle cx="9"
+                                    cy="7"
+                                    r="4"></circle>
+
+                            <path d="M3 21v-2a6 6 0 0 1 12 0v2"></path>
+
+                            <path d="M16 4a4 4 0 0 1 0 7"></path>
+
+                            <path d="M21 21v-2a6 6 0 0 0-3-5.2"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Students
+                    </span>
+
+                </a>
+
+
+                <a href="{{ url_for('industry_collaboration_requests') }}"
+                   class="industry-nav-item
+                   {% if dashboard == 'collaboration' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path>
+
+                            <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Collaboration
+                    </span>
+
+                </a>
+
+
+                <a href="#"
+                   class="industry-nav-item
+                   {% if dashboard == 'messages' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Messages
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 MANAGEMENT
+            ================================================== -->
+
+            <div class="industry-nav-section">
+
+                <p class="industry-nav-label">
+                    MANAGEMENT
+                </p>
+
+
+                <a href="#"
+                   class="industry-nav-item
+                   {% if dashboard == 'notifications' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Notifications
+                    </span>
+
+                    <span class="industry-nav-badge"
+                          id="sidebarNotificationCount">
+                        0
+                    </span>
+
+                </a>
+
+
+                <a href="#"
+                   class="industry-nav-item
+                   {% if dashboard == 'reports' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <line x1="4"
+                                  y1="19"
+                                  x2="20"
+                                  y2="19"></line>
+
+                            <polyline points="6 16 10 12 13 15 19 8"></polyline>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Reports
+                    </span>
+
+                </a>
+
+
+                <!-- SETTINGS -->
+
+                <a href="#"
+                   class="industry-nav-item
+                   {% if dashboard == 'settings' %}
+                   active
+                   {% endif %}">
+
+                    <span class="industry-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <circle cx="12"
+                                    cy="12"
+                                    r="3"></circle>
+
+                            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.4 1.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L9 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H7.6v-2h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L9 9l1.4-1.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1.9-.3l.1-.1L20.8 9l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2H22a1.7 1.7 0 0 0-1.6 1z"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Settings
+                    </span>
+
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        <!-- =================================================
+             SIDEBAR FOOTER
+        ================================================== -->
+
+        <div class="industry-sidebar-footer">
+
+            <a href="{{ url_for('logout') }}"
+               class="industry-nav-item industry-logout">
+
+                <span class="industry-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+
+                        <polyline points="16 17 21 12 16 7"></polyline>
+
+                        <line x1="21"
+                              y1="12"
+                              x2="9"
+                              y2="12"></line>
+
+                    </svg>
+
+                </span>
+
+                <span>
+                    Logout
+                </span>
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN AREA
+    ====================================================== -->
+
+    <main class="industry-main">
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        <header class="industry-topbar">
+
+            <div class="industry-topbar-left">
+
+                <button type="button"
+                        class="industry-menu-toggle"
+                        id="industryMenuToggle">
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </button>
+
+
+                <div class="industry-heading">
+
+                    <h1>
+                        {% if dashboard == 'applications' %}
+                            Applications
+                        {% elif dashboard == 'requirements' %}
+                            Requirements
+                        {% elif dashboard == 'profile' %}
+                            My Profile
+                        {% elif dashboard == 'colleges' %}
+                            Colleges
+                        {% elif dashboard == 'college_detail' %}
+                            College Details
+                        {% elif dashboard == 'collaboration' %}
+                            Collaboration Requests
+
+                        {% else %}
+                            Dashboard
+                        {% endif %}
+                    </h1>
+
+                    <p>
+                        SIH Academia–Industry Collaboration Portal
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="industry-topbar-right">
+
+                <!-- =================================================
+                     NOTIFICATION BUTTON
+                ================================================== -->
+
+                <button type="button"
+                        class="industry-notification-button"
+                        id="industryNotificationButton"
+                        aria-label="Notifications">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+
+                    </svg>
+
+                    <span class="industry-notification-count"
+                          id="industryNotificationCount">
+                        0
+                    </span>
+
+                </button>
+
+
+                <!-- =================================================
+                     USER
+                ================================================== -->
+
+                <div class="industry-user">
+
+                    <div class="industry-user-avatar">
+
+                        {{ session.get("user_name", "I")[0]|upper }}
+
+                    </div>
+
+
+                    <div class="industry-user-details">
+
+                        <strong>
+                            {{ session.get("user_name", "Industry User") }}
+                        </strong>
+
+                        <span>
+                            Industry
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             FLASH MESSAGES
+        ================================================== -->
+
+        {% with messages = get_flashed_messages(
+            with_categories=true
+        ) %}
+
+            {% if messages %}
+
+                <div class="industry-flash-wrapper">
+
+                    {% for category, message in messages %}
+
+                        <div class="industry-flash
+                                    industry-flash-{{ category }}">
+
+                            <span>
+                                {{ message }}
+                            </span>
+
+                            <button type="button"
+                                    class="industry-flash-close">
+
+                                ×
+
+                            </button>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <section class="industry-page-content">
+
+            {% block content %}
+            {% endblock %}
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         COMMON INDUSTRY JS
+    ====================================================== -->
+
+    <script src="{{ url_for(
+        'static',
+        filename='js/industry/industry.js'
+    ) }}"></script>
+
+
+    {% block extra_js %}
+    {% endblock %}
+
+
+</body>
+
+</html>

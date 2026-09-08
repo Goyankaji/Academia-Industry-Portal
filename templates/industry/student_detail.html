@@ -1,0 +1,451 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Student Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+      filename='css/industry/industry-students.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="student-detail-page">
+
+    <!-- Back -->
+    <a href="{{ url_for('industry_students') }}"
+       class="back-link">
+        ← Back to Student Directory
+    </a>
+
+
+    <!-- Profile Header -->
+    <div class="student-profile-header">
+
+        <div class="profile-main">
+
+            <div class="large-student-avatar">
+                {{ (student.name or 'S')[0]|upper }}
+            </div>
+
+            <div class="profile-heading">
+
+                <div class="profile-name-row">
+
+                    <h1>
+                        {{ student.name or 'Student' }}
+                    </h1>
+
+                    {% if student.profile_completed %}
+                    <span class="verified-profile">
+                        ✓ Profile Complete
+                    </span>
+                    {% endif %}
+
+                </div>
+
+                <p class="profile-course">
+                    {{ student.course }}
+
+                    {% if student.branch %}
+                        · {{ student.branch }}
+                    {% endif %}
+                </p>
+
+                <p class="profile-college">
+                    🏫 {{ student.college_name or 'College not available' }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="profile-actions">
+
+            {% if student.linkedin_url %}
+            <a href="{{ student.linkedin_url }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="profile-action-btn">
+                LinkedIn
+            </a>
+            {% endif %}
+
+            {% if student.github_url %}
+            <a href="{{ student.github_url }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="profile-action-btn">
+                GitHub
+            </a>
+            {% endif %}
+
+            {% if student.portfolio_url %}
+            <a href="{{ student.portfolio_url }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="profile-action-btn">
+                Portfolio
+            </a>
+            {% endif %}
+
+            {% if student.resume_url %}
+            <a href="{{ student.resume_url }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="profile-action-btn primary">
+                View Resume
+            </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="student-detail-layout">
+
+
+        <!-- LEFT COLUMN -->
+        <div class="student-detail-main">
+
+
+            <!-- Academic Information -->
+            <section class="detail-section">
+
+                <div class="section-title">
+
+                    <div>
+                        <span class="section-eyebrow">ACADEMICS</span>
+                        <h2>Academic Information</h2>
+                    </div>
+
+                </div>
+
+
+                <div class="detail-info-grid">
+
+                    <div class="detail-info-item">
+                        <span>Enrollment Number</span>
+                        <strong>{{ student.enrollment_no }}</strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>Course</span>
+                        <strong>{{ student.course }}</strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>Branch</span>
+                        <strong>{{ student.branch }}</strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>Current Semester</span>
+                        <strong>
+                            {{ student.semester or '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>Passing Year</span>
+                        <strong>
+                            {{ student.passing_year or '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>CGPA</span>
+                        <strong>
+                            {{ student.cgpa or '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>Current SGPA</span>
+                        <strong>
+                            {{ student.current_sgpa or '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>Active Backlogs</span>
+                        <strong>
+                            {{ student.active_backlogs or 0 }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Skill Assessment -->
+            <section class="detail-section">
+
+                <div class="section-title">
+
+                    <div>
+                        <span class="section-eyebrow">
+                            SKILL ASSESSMENT
+                        </span>
+
+                        <h2>Technical Skills</h2>
+
+                        <p>
+                            Skills based on student assessment results.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                {% if skills %}
+
+                <div class="assessment-skills-list">
+
+                    {% for skill in skills %}
+
+                    <div class="assessment-skill-card">
+
+                        <div class="assessment-skill-header">
+
+                            <div>
+
+                                <h3>
+                                    {{ skill.skill_name }}
+                                </h3>
+
+                                <span class="assessment-status">
+                                    {% if skill.verification_status == 'VERIFIED' %}
+                                        ✓ Verified
+                                    {% elif skill.verification_status == 'ASSESSED' %}
+                                        ✓ Assessed
+                                    {% else %}
+                                        Not Assessed
+                                    {% endif %}
+                                </span>
+
+                            </div>
+
+
+                            <div class="skill-score">
+
+                                {% if skill.assessment_percentage is not none %}
+
+                                    <strong>
+                                        {{ skill.assessment_percentage|round(0)|int }}%
+                                    </strong>
+
+                                {% else %}
+
+                                    <strong>—</strong>
+
+                                {% endif %}
+
+                                <span>
+                                    {{ skill.proficiency_level or 'BEGINNER' }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        {% if skill.assessment_percentage is not none %}
+
+                        <div class="skill-progress">
+
+                            <div class="skill-progress-bar"
+                                data-percentage="{{ skill.assessment_percentage }}">
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+
+                        {% if skill.last_assessed_at %}
+
+                        <div class="assessment-date">
+                            Last assessed:
+                            {{ skill.last_assessed_at.strftime('%d %b %Y') }}
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="no-assessment">
+
+                    <div class="no-assessment-icon">📊</div>
+
+                    <h3>No Skill Assessment Yet</h3>
+
+                    <p>
+                        This student has not completed any skill
+                        assessment available on the portal.
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- Contact Information -->
+            <section class="detail-section">
+
+                <div class="section-title">
+
+                    <div>
+                        <span class="section-eyebrow">CONTACT</span>
+                        <h2>Contact Information</h2>
+                    </div>
+
+                </div>
+
+
+                <div class="detail-info-grid">
+
+                    <div class="detail-info-item">
+                        <span>Email</span>
+                        <strong>
+                            {{ student.email or '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-info-item">
+                        <span>Phone</span>
+                        <strong>
+                            {{ student.phone or '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-info-item detail-full">
+                        <span>Address</span>
+                        <strong>
+                            {{ student.address or '—' }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+
+        <!-- RIGHT COLUMN -->
+        <aside class="student-detail-sidebar">
+
+
+            <!-- College -->
+            <div class="detail-side-card">
+
+                <span class="section-eyebrow">COLLEGE</span>
+
+                <h3>
+                    {{ student.college_name or 'College' }}
+                </h3>
+
+                {% if student.university_name %}
+                <p>
+                    {{ student.university_name }}
+                </p>
+                {% endif %}
+
+                {% if student.college_city or student.college_state %}
+                <div class="side-location">
+                    📍
+                    {{ student.college_city or '' }}
+                    {% if student.college_city and student.college_state %}
+                        ,
+                    {% endif %}
+                    {{ student.college_state or '' }}
+                </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- Personal -->
+            <div class="detail-side-card">
+
+                <span class="section-eyebrow">PERSONAL</span>
+
+                <div class="side-info">
+
+                    <div>
+                        <span>Date of Birth</span>
+                        <strong>
+                            {% if student.dob %}
+                                {{ student.dob.strftime('%d %b %Y') }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Gender</span>
+                        <strong>
+                            {{ student.gender or '—' }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Academic Summary -->
+            <div class="detail-side-card">
+
+                <span class="section-eyebrow">
+                    ACADEMIC SUMMARY
+                </span>
+
+                <div class="academic-summary">
+
+                    <div class="summary-value">
+                        {{ student.cgpa or '—' }}
+                        <span>CGPA</span>
+                    </div>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-value">
+                        {{ student.active_backlogs or 0 }}
+                        <span>Backlogs</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </aside>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-students.js'
+) }}"></script>
+{% endblock %}

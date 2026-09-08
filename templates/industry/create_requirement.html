@@ -1,0 +1,471 @@
+{% extends "industry/base.html" %}
+
+{% block title %}
+Create Requirement | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-requirements.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-requirement-form-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="industry-page-header">
+
+        <div>
+
+            <span class="industry-page-eyebrow">
+                OPPORTUNITIES
+            </span>
+
+            <h1>
+                Create Requirement
+            </h1>
+
+            <p>
+                Publish a new opportunity for students and
+                academic partners.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
+    <form
+        method="POST"
+        action="{{ url_for('industry_create_requirement') }}"
+        id="createRequirementForm"
+        class="industry-requirement-form">
+
+
+        <!-- =================================================
+             BASIC INFORMATION
+        ================================================== -->
+
+        <section class="requirement-form-section">
+
+            <div class="requirement-form-section-header">
+
+                <div class="form-section-icon">
+                    📋
+                </div>
+
+                <div>
+
+                    <h2>
+                        Basic Information
+                    </h2>
+
+                    <p>
+                        Enter the main details of the opportunity.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="requirement-form-grid">
+
+
+                <!-- TITLE -->
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="title">
+                        Requirement Title
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        placeholder="e.g. Software Development Intern"
+                        maxlength="150"
+                        required>
+
+                    <small>
+                        Give your requirement a clear and meaningful title.
+                    </small>
+
+                </div>
+
+
+                <!-- TYPE -->
+
+                <div class="requirement-form-group">
+
+                    <label for="opportunity_type">
+                        Opportunity Type
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="opportunity_type"
+                        name="opportunity_type"
+                        required>
+
+                        <option value="">
+                            Select type
+                        </option>
+
+                        <option value="JOB">
+                            Job
+                        </option>
+
+                        <option value="INTERNSHIP">
+                            Internship
+                        </option>
+
+                        <option value="PROJECT">
+                            Project
+                        </option>
+
+                        <option value="TRAINING">
+                            Training
+                        </option>
+
+                        <option value="COLLABORATION">
+                            Collaboration
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="requirement-form-group">
+
+                    <label for="status">
+                        Status
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="status"
+                        name="status"
+                        required>
+
+                        <option value="OPEN">
+                            Open
+                        </option>
+
+                        <option value="DRAFT">
+                            Draft
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="description">
+                        Description
+                        <span>*</span>
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="7"
+                        maxlength="3000"
+                        placeholder="Describe the opportunity, responsibilities and expectations..."
+                        required></textarea>
+
+                    <div class="textarea-footer">
+
+                        <small>
+                            Minimum 10 characters.
+                        </small>
+
+                        <span id="descriptionCounter">
+                            0 / 3000
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REQUIREMENTS
+        ================================================== -->
+
+        <section class="requirement-form-section">
+
+            <div class="requirement-form-section-header">
+
+                <div class="form-section-icon">
+                    🎯
+                </div>
+
+                <div>
+
+                    <h2>
+                        Candidate Requirements
+                    </h2>
+
+                    <p>
+                        Specify skills and eligibility criteria.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="requirement-form-grid">
+
+
+                <!-- SKILLS -->
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="required_skills">
+                        Required Skills
+                    </label>
+
+                    <input
+                        type="text"
+                        id="required_skills"
+                        name="required_skills"
+                        placeholder="Python, Java, SQL, Communication">
+
+                    <small>
+                        Separate multiple skills using commas.
+                    </small>
+
+                </div>
+
+
+                <!-- ELIGIBILITY -->
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="eligibility_criteria">
+                        Eligibility Criteria
+                    </label>
+
+                    <textarea
+                        id="eligibility_criteria"
+                        name="eligibility_criteria"
+                        rows="5"
+                        maxlength="2000"
+                        placeholder="e.g. B.Tech/BE students, minimum 7 CGPA..."></textarea>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             OPPORTUNITY DETAILS
+        ================================================== -->
+
+        <section class="requirement-form-section">
+
+            <div class="requirement-form-section-header">
+
+                <div class="form-section-icon">
+                    📍
+                </div>
+
+                <div>
+
+                    <h2>
+                        Opportunity Details
+                    </h2>
+
+                    <p>
+                        Add location, work mode and compensation details.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="requirement-form-grid">
+
+
+                <!-- LOCATION -->
+
+                <div class="requirement-form-group">
+
+                    <label for="location">
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="e.g. Jaipur, Rajasthan">
+
+                </div>
+
+
+                <!-- WORK MODE -->
+
+                <div class="requirement-form-group">
+
+                    <label for="work_mode">
+                        Work Mode
+                    </label>
+
+                    <select
+                        id="work_mode"
+                        name="work_mode">
+
+                        <option value="">
+                            Select work mode
+                        </option>
+
+                        <option value="ONSITE">
+                            Onsite
+                        </option>
+
+                        <option value="REMOTE">
+                            Remote
+                        </option>
+
+                        <option value="HYBRID">
+                            Hybrid
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STIPEND -->
+
+                <div class="requirement-form-group">
+
+                    <label for="stipend">
+                        Stipend
+                    </label>
+
+                    <input
+                        type="text"
+                        id="stipend"
+                        name="stipend"
+                        placeholder="e.g. ₹15,000 / month">
+
+                </div>
+
+
+                <!-- PACKAGE -->
+
+                <div class="requirement-form-group">
+
+                    <label for="package">
+                        Package
+                    </label>
+
+                    <input
+                        type="text"
+                        id="package"
+                        name="package"
+                        placeholder="e.g. ₹6 LPA">
+
+                </div>
+
+
+                <!-- DEADLINE -->
+
+                <div class="requirement-form-group">
+
+                    <label for="application_deadline">
+                        Application Deadline
+                    </label>
+
+                    <input
+                        type="date"
+                        id="application_deadline"
+                        name="application_deadline">
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             FORM ACTIONS
+        ================================================== -->
+
+        <div class="requirement-form-actions">
+
+            <a
+                href="{{ url_for('industry_requirements') }}"
+                class="requirement-cancel-button">
+
+                Cancel
+
+            </a>
+
+
+            <button
+                type="submit"
+                class="industry-primary-button">
+
+                <span class="button-icon">
+                    ✓
+                </span>
+
+                Create Requirement
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-requirements.js'
+) }}"></script>
+
+{% endblock %}

@@ -1,0 +1,582 @@
+{% extends "industry/base.html" %}
+
+{% block title %}
+Applications | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-applications.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-applications-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="industry-page-header">
+
+        <div>
+
+            <span class="industry-page-eyebrow">
+                APPLICATION MANAGEMENT
+            </span>
+
+            <h1>
+                Applications
+            </h1>
+
+            <p>
+                Review and manage students who have applied
+                to your opportunities.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <div class="industry-application-stats">
+
+
+        <!-- TOTAL -->
+
+        <div class="industry-application-stat-card">
+
+            <div class="application-stat-icon total">
+                📄
+            </div>
+
+            <div class="application-stat-content">
+
+                <span>
+                    TOTAL APPLICATIONS
+                </span>
+
+                <strong>
+                    {{ total_applications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- PENDING -->
+
+        <div class="industry-application-stat-card">
+
+            <div class="application-stat-icon pending">
+                ⏳
+            </div>
+
+            <div class="application-stat-content">
+
+                <span>
+                    PENDING
+                </span>
+
+                <strong>
+                    {{ pending_applications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- SHORTLISTED -->
+
+        <div class="industry-application-stat-card">
+
+            <div class="application-stat-icon shortlisted">
+                ✓
+            </div>
+
+            <div class="application-stat-content">
+
+                <span>
+                    SHORTLISTED
+                </span>
+
+                <strong>
+                    {{ shortlisted_applications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- SELECTED -->
+
+        <div class="industry-application-stat-card">
+
+            <div class="application-stat-icon selected">
+                ★
+            </div>
+
+            <div class="application-stat-content">
+
+                <span>
+                    SELECTED
+                </span>
+
+                <strong>
+                    {{ selected_applications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- REJECTED -->
+
+        <div class="industry-application-stat-card">
+
+            <div class="application-stat-icon rejected">
+                ×
+            </div>
+
+            <div class="application-stat-content">
+
+                <span>
+                    REJECTED
+                </span>
+
+                <strong>
+                    {{ rejected_applications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTER PANEL
+    ====================================================== -->
+
+    <div class="industry-application-filter-panel">
+
+
+        <!-- SEARCH -->
+
+        <div class="application-search-box">
+
+            <span class="application-search-icon">
+                🔍
+            </span>
+
+            <input
+                type="text"
+                id="applicationSearch"
+                placeholder="Search student or opportunity..."
+                autocomplete="off">
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <select
+            id="applicationStatusFilter"
+            class="application-filter-select">
+
+            <option value="">
+                All Status
+            </option>
+
+            <option value="PENDING">
+                Pending
+            </option>
+
+            <option value="REVIEWED">
+                Reviewed
+            </option>
+
+            <option value="SHORTLISTED">
+                Shortlisted
+            </option>
+
+            <option value="SELECTED">
+                Selected
+            </option>
+
+            <option value="REJECTED">
+                Rejected
+            </option>
+
+        </select>
+
+
+        <!-- OPPORTUNITY -->
+
+        <select
+            id="applicationOpportunityFilter"
+            class="application-filter-select">
+
+            <option value="">
+                All Opportunities
+            </option>
+
+            {% for opportunity in opportunities|default([]) %}
+
+                <option value="{{ opportunity.id }}">
+                    {{ opportunity.title }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <!-- =====================================================
+         APPLICATIONS LIST
+    ====================================================== -->
+
+    <div
+        id="applicationsContainer"
+        class="industry-applications-list">
+
+
+        {% if applications %}
+
+
+            {% for application in applications %}
+
+                <article
+                    class="industry-application-card"
+
+                    data-student="{{ application.student_name|default('')|lower }}"
+
+                    data-opportunity="{{ application.opportunity_title|default('')|lower }}"
+
+                    data-status="{{ application.status|default('')|upper }}"
+
+                    data-opportunity-id="{{ application.opportunity_id|default('') }}">
+
+
+                    <!-- CARD TOP -->
+
+                    <div class="application-card-top">
+
+
+                        <div class="application-student-section">
+
+
+                            <div class="application-student-avatar">
+
+                                {% if application.student_name %}
+
+                                    {{ application.student_name[0]|upper }}
+
+                                {% else %}
+
+                                    S
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="application-student-info">
+
+                                <h2>
+                                    {{ application.student_name|default("Student") }}
+                                </h2>
+
+                                <span>
+                                    {{ application.student_email|default("Email not available") }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <span
+                            class="industry-application-status
+                                   status-{{ application.status|default('PENDING')|lower }}">
+
+                            {{ application.status|default("PENDING") }}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- OPPORTUNITY -->
+
+                    <div class="application-opportunity">
+
+                        <span class="application-info-label">
+                            APPLIED FOR
+                        </span>
+
+                        <strong>
+                            {{ application.opportunity_title|default("Opportunity") }}
+                        </strong>
+
+                    </div>
+
+
+                    <!-- META -->
+
+                    <div class="application-meta-grid">
+
+
+                        <div class="application-meta-item">
+
+                            <span class="meta-icon">
+                                🏫
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    COLLEGE
+                                </small>
+
+                                <strong>
+                                    {{ application.college_name|default("Not specified") }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="application-meta-item">
+
+                            <span class="meta-icon">
+                                🎓
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    BRANCH
+                                </small>
+
+                                <strong>
+                                    {{ application.branch|default("Not specified") }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="application-meta-item">
+
+                            <span class="meta-icon">
+                                📅
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    APPLIED ON
+                                </small>
+
+                                <strong>
+
+                                    {% if application.applied_at %}
+
+                                        {{ application.applied_at.strftime('%d %b %Y') }}
+
+                                    {% elif application.created_at %}
+
+                                        {{ application.created_at.strftime('%d %b %Y') }}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="application-meta-item">
+
+                            <span class="meta-icon">
+                                📞
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    PHONE
+                                </small>
+
+                                <strong>
+                                    {{ application.student_phone|default("Not available") }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SKILLS -->
+
+                    {% if application.skills %}
+
+                        <div class="application-skills">
+
+                            <span>
+                                SKILLS
+                            </span>
+
+                            <div>
+
+                                {% for skill in application.skills.split(',') %}
+
+                                    <span class="application-skill-tag">
+                                        {{ skill.strip() }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- FOOTER -->
+
+                    <div class="application-card-footer">
+
+
+                        <span class="application-id">
+
+                            Application ID:
+
+                            {{ application.id|default("—") }}
+
+                        </span>
+
+
+                        <a
+                            href="{{ url_for(
+                                'industry_application_detail',
+                                application_id=application.id
+                            ) }}"
+                            class="application-view-button">
+
+                            View Application
+
+                            <span>
+                                →
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <!-- EMPTY STATE -->
+
+            <div class="industry-applications-empty">
+
+                <div class="empty-application-icon">
+                    📄
+                </div>
+
+                <h2>
+                    No Applications Yet
+                </h2>
+
+                <p>
+                    Applications received for your open
+                    opportunities will appear here.
+                </p>
+
+                <a
+                    href="{{ url_for('industry_requirements') }}"
+                    class="application-secondary-button">
+
+                    View Requirements
+
+                </a>
+
+            </div>
+
+
+        {% endif %}
+
+
+        <!-- NO SEARCH RESULTS -->
+
+        <div
+            id="noApplicationResults"
+            class="industry-applications-empty hidden">
+
+            <div class="empty-application-icon">
+                🔍
+            </div>
+
+            <h2>
+                No Matching Applications
+            </h2>
+
+            <p>
+                Try changing your search or filters.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/industry/industry-applications.js'
+    ) }}">
+</script>
+
+{% endblock %}

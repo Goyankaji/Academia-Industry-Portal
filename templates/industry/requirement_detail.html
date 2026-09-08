@@ -1,0 +1,513 @@
+{% extends "industry/base.html" %}
+
+{% block title %}
+Requirement Details | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-requirements.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-requirement-detail-page">
+
+
+    <!-- =====================================================
+         BACK
+    ====================================================== -->
+
+    <a
+        href="{{ url_for('industry_requirements') }}"
+        class="requirement-back-link">
+
+        ← Back to Requirements
+
+    </a>
+
+
+    <!-- =====================================================
+         DETAIL HEADER
+    ====================================================== -->
+
+    <div class="requirement-detail-header">
+
+        <div class="detail-header-left">
+
+            <div class="detail-type-icon">
+
+                {% if requirement.opportunity_type == "JOB" %}
+                    💼
+                {% elif requirement.opportunity_type == "INTERNSHIP" %}
+                    🎓
+                {% elif requirement.opportunity_type == "PROJECT" %}
+                    📁
+                {% elif requirement.opportunity_type == "TRAINING" %}
+                    📚
+                {% else %}
+                    🤝
+                {% endif %}
+
+            </div>
+
+
+            <div>
+
+                <span class="requirement-type-label">
+                    {{ requirement.opportunity_type }}
+                </span>
+
+                <h1>
+                    {{ requirement.title }}
+                </h1>
+
+                <div class="detail-header-meta">
+
+                    <span>
+                        Created
+                        {% if requirement.created_at %}
+                            {{ requirement.created_at.strftime('%d %b %Y') }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </span>
+
+                    <span>
+                        •
+                    </span>
+
+                    <span>
+                        Status:
+                        {{ requirement.status }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="detail-header-actions">
+
+            <span class="industry-status-badge
+                         status-{{ requirement.status|lower }}">
+
+                {{ requirement.status }}
+
+            </span>
+
+
+            <a
+                href="{{ url_for(
+                    'industry_edit_requirement',
+                    requirement_id=requirement.id
+                ) }}"
+                class="requirement-edit-button">
+
+                Edit
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN DETAIL GRID
+    ====================================================== -->
+
+    <div class="requirement-detail-grid">
+
+
+        <!-- =================================================
+             LEFT CONTENT
+        ================================================== -->
+
+        <div class="requirement-detail-main">
+
+
+            <!-- DESCRIPTION -->
+
+            <section class="requirement-detail-panel">
+
+                <div class="detail-panel-heading">
+
+                    <span>
+                        📝
+                    </span>
+
+                    <h2>
+                        Description
+                    </h2>
+
+                </div>
+
+                <div class="detail-description">
+
+                    {{ requirement.description|replace('\n', '<br>')|safe }}
+
+                </div>
+
+            </section>
+
+
+            <!-- SKILLS -->
+
+            <section class="requirement-detail-panel">
+
+                <div class="detail-panel-heading">
+
+                    <span>
+                        🎯
+                    </span>
+
+                    <h2>
+                        Required Skills
+                    </h2>
+
+                </div>
+
+
+                {% if requirement.required_skills %}
+
+                    <div class="detail-skills-list">
+
+                        {% for skill in requirement.required_skills.split(',') %}
+
+                            <span class="detail-skill-tag">
+                                {{ skill.strip() }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <p class="detail-muted">
+                        No specific skills have been specified.
+                    </p>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- ELIGIBILITY -->
+
+            <section class="requirement-detail-panel">
+
+                <div class="detail-panel-heading">
+
+                    <span>
+                        ✅
+                    </span>
+
+                    <h2>
+                        Eligibility Criteria
+                    </h2>
+
+                </div>
+
+
+                {% if requirement.eligibility_criteria %}
+
+                    <div class="detail-description">
+
+                        {{ requirement.eligibility_criteria|replace('\n', '<br>')|safe }}
+
+                    </div>
+
+                {% else %}
+
+                    <p class="detail-muted">
+                        No specific eligibility criteria have been specified.
+                    </p>
+
+                {% endif %}
+
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             RIGHT SIDEBAR
+        ================================================== -->
+
+        <aside class="requirement-detail-sidebar">
+
+
+            <!-- OPPORTUNITY INFO -->
+
+            <section class="requirement-detail-panel">
+
+                <div class="detail-panel-heading">
+
+                    <span>
+                        📌
+                    </span>
+
+                    <h2>
+                        Opportunity Information
+                    </h2>
+
+                </div>
+
+
+                <div class="detail-info-list">
+
+
+                    <div class="detail-info-row">
+
+                        <span>
+                            Location
+                        </span>
+
+                        <strong>
+                            {{ requirement.location or "Not specified" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-info-row">
+
+                        <span>
+                            Work Mode
+                        </span>
+
+                        <strong>
+                            {{ requirement.work_mode or "Not specified" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-info-row">
+
+                        <span>
+                            Stipend
+                        </span>
+
+                        <strong>
+                            {{ requirement.stipend or "Not specified" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-info-row">
+
+                        <span>
+                            Package
+                        </span>
+
+                        <strong>
+                            {{ requirement.package or "Not specified" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-info-row">
+
+                        <span>
+                            Application Deadline
+                        </span>
+
+                        <strong>
+                            {{ requirement.application_deadline or "No deadline" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-info-row">
+
+                        <span>
+                            Applications
+                        </span>
+
+                        <strong>
+                            {{ requirement.application_count|default(0) }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- TIMELINE -->
+
+            <section class="requirement-detail-panel">
+
+                <div class="detail-panel-heading">
+
+                    <span>
+                        🕒
+                    </span>
+
+                    <h2>
+                        Timeline
+                    </h2>
+
+                </div>
+
+
+                <div class="detail-timeline">
+
+                    <div class="timeline-item">
+
+                        <span class="timeline-dot"></span>
+
+                        <div>
+
+                            <small>
+                                CREATED
+                            </small>
+
+                            <strong>
+
+                                {% if requirement.created_at %}
+                                    {{ requirement.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="timeline-item">
+
+                        <span class="timeline-dot"></span>
+
+                        <div>
+
+                            <small>
+                                LAST UPDATED
+                            </small>
+
+                            <strong>
+
+                                {% if requirement.updated_at %}
+                                    {{ requirement.updated_at.strftime('%d %b %Y, %I:%M %p') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CLOSE REQUIREMENT -->
+
+            {% if requirement.status != "CLOSED" %}
+
+                <button
+                    type="button"
+                    id="closeRequirementBtn"
+                    class="requirement-close-button"
+                    data-requirement-id="{{ requirement.id }}">
+
+                    Close Requirement
+
+                </button>
+
+            {% endif %}
+
+        </aside>
+
+    </div>
+
+
+    <!-- =====================================================
+         CLOSE CONFIRMATION MODAL
+    ====================================================== -->
+
+    <div
+        id="closeRequirementModal"
+        class="requirement-modal hidden">
+
+        <div class="requirement-modal-overlay"></div>
+
+
+        <div class="requirement-modal-content">
+
+            <div class="modal-warning-icon">
+                ⚠️
+            </div>
+
+            <h2>
+                Close Requirement?
+            </h2>
+
+            <p>
+                Are you sure you want to close this requirement?
+                It will no longer be considered an active opportunity.
+            </p>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    id="cancelCloseRequirement"
+                    class="requirement-cancel-button">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="confirmCloseRequirement"
+                    class="requirement-danger-button">
+
+                    Close Requirement
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-requirements.js'
+) }}"></script>
+
+{% endblock %}

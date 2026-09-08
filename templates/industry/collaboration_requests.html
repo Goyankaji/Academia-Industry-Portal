@@ -1,0 +1,579 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Collaboration Requests{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-collaboration.css'
+      ) }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="industry-page">
+
+    <!-- HEADER -->
+    <div class="industry-page-header">
+
+        <div>
+
+            <span class="industry-page-eyebrow">
+                COLLABORATION MANAGEMENT
+            </span>
+
+            <h1>Collaboration Requests</h1>
+
+            <p>
+                Track and manage collaboration requests sent
+                to registered colleges.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- STATS -->
+    <div class="industry-stats-grid">
+
+        <div class="industry-stat-card">
+
+            <div class="industry-stat-icon blue">
+                📋
+            </div>
+
+            <div>
+
+                <span class="industry-stat-label">
+                    TOTAL REQUESTS
+                </span>
+
+                <strong>
+                    {{ requests|length if requests else 0 }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-stat-card">
+
+            <div class="industry-stat-icon orange">
+                ⏳
+            </div>
+
+            <div>
+
+                <span class="industry-stat-label">
+                    PENDING
+                </span>
+
+                <strong>
+                    {{
+                        requests
+                        |selectattr("status", "equalto", "PENDING")
+                        |list
+                        |length
+                        if requests else 0
+                    }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-stat-card">
+
+            <div class="industry-stat-icon green">
+                ✓
+            </div>
+
+            <div>
+
+                <span class="industry-stat-label">
+                    ACTIVE
+                </span>
+
+                <strong>
+                    {{
+                        requests
+                        |selectattr("status", "equalto", "ACTIVE")
+                        |list
+                        |length
+                        if requests else 0
+                    }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-stat-card">
+
+            <div class="industry-stat-icon red">
+                ×
+            </div>
+
+            <div>
+
+                <span class="industry-stat-label">
+                    REJECTED
+                </span>
+
+                <strong>
+                    {{
+                        requests
+                        |selectattr("status", "equalto", "REJECTED")
+                        |list
+                        |length
+                        if requests else 0
+                    }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FILTER -->
+    <div class="industry-filter-card">
+
+        <div class="industry-search-box">
+
+            <span class="industry-search-icon">
+                ⌕
+            </span>
+
+            <input
+                type="text"
+                id="collaborationSearch"
+                placeholder="Search college or collaboration..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <select id="collaborationStatusFilter">
+
+            <option value="">
+                All Status
+            </option>
+
+            <option value="PENDING">
+                Pending
+            </option>
+
+            <option value="ACTIVE">
+                Active
+            </option>
+
+            <option value="COMPLETED">
+                Completed
+            </option>
+
+            <option value="REJECTED">
+                Rejected
+            </option>
+
+            <option value="CANCELLED">
+                Cancelled
+            </option>
+
+        </select>
+
+
+        <select id="collaborationTypeFilter">
+
+            <option value="">
+                All Types
+            </option>
+
+            <option value="INTERNSHIP">
+                Internship
+            </option>
+
+            <option value="LIVE_PROJECT">
+                Live Project
+            </option>
+
+            <option value="INDUSTRY_PROJECT">
+                Industry Project
+            </option>
+
+            <option value="TRAINING">
+                Training
+            </option>
+
+            <option value="WORKSHOP">
+                Workshop
+            </option>
+
+            <option value="RESEARCH">
+                Research
+            </option>
+
+            <option value="PLACEMENT">
+                Placement
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- LIST HEADER -->
+    <div class="industry-section-header">
+
+        <div>
+
+            <h2>Your Requests</h2>
+
+            <p>
+                Collaboration requests sent by your organization.
+            </p>
+
+        </div>
+
+        <span id="collaborationResultCount">
+            {{ requests|length if requests else 0 }} requests
+        </span>
+
+    </div>
+
+
+    <!-- REQUEST LIST -->
+    <div
+        class="industry-collaboration-list"
+        id="collaborationRequestList"
+    >
+
+        {% if requests %}
+
+            {% for collaboration in requests %}
+
+            <article
+                class="industry-collaboration-card"
+
+                data-title="{{ collaboration.title|default('')|lower }}"
+
+                data-college="{{ collaboration.college_name|default('')|lower }}"
+
+                data-status="{{ collaboration.status|default('') }}"
+
+                data-type="{{ collaboration.collaboration_type|default('') }}"
+            >
+
+                <div class="industry-collaboration-icon">
+                    🤝
+                </div>
+
+
+                <div class="industry-collaboration-content">
+
+                    <div class="industry-collaboration-top">
+
+                        <div>
+
+                            <h3>
+                                {{ collaboration.title }}
+                            </h3>
+
+                            <p class="industry-collaboration-college">
+                                🏫
+                                {{ collaboration.college_name }}
+                            </p>
+
+                        </div>
+
+
+                        <span
+                            class="industry-status-badge
+                            {% if collaboration.status == 'PENDING' %}
+                                warning
+                            {% elif collaboration.status == 'ACTIVE' %}
+                                success
+                            {% elif collaboration.status == 'REJECTED' %}
+                                danger
+                            {% elif collaboration.status == 'CANCELLED' %}
+                                danger
+                            {% else %}
+                                neutral
+                            {% endif %}"
+                        >
+                            {{ collaboration.status }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="industry-collaboration-meta">
+
+                        <span>
+                            📌
+                            {{ collaboration.collaboration_type
+                               |replace('_', ' ') }}
+                        </span>
+
+
+                        {% if collaboration.start_date %}
+                        <span>
+                            📅
+                            {{ collaboration.start_date }}
+                        </span>
+                        {% endif %}
+
+
+                        {% if collaboration.end_date %}
+                        <span>
+                            → {{ collaboration.end_date }}
+                        </span>
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if collaboration.description %}
+
+                    <p class="industry-collaboration-description">
+                        {{ collaboration.description }}
+                    </p>
+
+                    {% endif %}
+
+
+                    <div class="industry-collaboration-actions">
+
+                        <button
+                            type="button"
+                            class="industry-btn industry-btn-outline collaboration-view-btn"
+                            data-title="{{ collaboration.title }}"
+                            data-college="{{ collaboration.college_name }}"
+                            data-type="{{ collaboration.collaboration_type }}"
+                            data-status="{{ collaboration.status }}"
+                            data-description="{{ collaboration.description|default('') }}"
+                        >
+                            View Details
+                        </button>
+
+
+                        {% if collaboration.status == 'PENDING' %}
+
+                        <button
+                            type="button"
+                            class="industry-btn industry-btn-danger collaboration-cancel-btn"
+                            data-collaboration-id="{{ collaboration.id }}"
+                        >
+                            Cancel Request
+                        </button>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="industry-empty-state">
+
+                <div class="industry-empty-icon">
+                    🤝
+                </div>
+
+                <h3>No Collaboration Requests Yet</h3>
+
+                <p>
+                    Requests sent to colleges will appear here.
+                </p>
+
+                <a
+                    href="{{ url_for('industry_colleges') }}"
+                    class="industry-btn industry-btn-primary"
+                >
+                    Explore Colleges
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- NO RESULTS -->
+    <div
+        class="industry-empty-state"
+        id="collaborationNoResults"
+        style="display:none;"
+    >
+
+        <div class="industry-empty-icon">
+            ⌕
+        </div>
+
+        <h3>No Requests Found</h3>
+
+        <p>
+            Try changing your search or filter.
+        </p>
+
+        <button
+            type="button"
+            class="industry-btn industry-btn-outline"
+            id="clearCollaborationFilters"
+        >
+            Clear Filters
+        </button>
+
+    </div>
+
+
+    <!-- VIEW DETAILS MODAL -->
+    <div
+        class="industry-modal"
+        id="collaborationDetailsModal"
+        style="display:none;"
+    >
+
+        <div class="industry-modal-overlay"></div>
+
+        <div class="industry-modal-content">
+
+            <div class="industry-modal-header">
+
+                <div>
+                    <span class="industry-page-eyebrow">
+                        COLLABORATION
+                    </span>
+
+                    <h2 id="detailModalTitle">
+                        Collaboration
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="industry-modal-close"
+                    id="closeDetailsModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="collaboration-detail-modal-body">
+
+                <div class="modal-detail-row">
+                    <span>College</span>
+                    <strong id="detailModalCollege">—</strong>
+                </div>
+
+                <div class="modal-detail-row">
+                    <span>Type</span>
+                    <strong id="detailModalType">—</strong>
+                </div>
+
+                <div class="modal-detail-row">
+                    <span>Status</span>
+                    <strong id="detailModalStatus">—</strong>
+                </div>
+
+                <div class="modal-detail-description">
+
+                    <span>Description</span>
+
+                    <p id="detailModalDescription">
+                        —
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CANCEL MODAL -->
+    <div
+        class="industry-modal"
+        id="cancelCollaborationModal"
+        style="display:none;"
+    >
+
+        <div class="industry-modal-overlay"></div>
+
+        <div class="industry-modal-content">
+
+            <div class="industry-modal-header">
+
+                <div>
+                    <h2>Cancel Request?</h2>
+
+                    <p>
+                        This will mark the pending collaboration
+                        request as cancelled.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="industry-modal-close"
+                    id="closeCancelCollaborationModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="industry-modal-footer">
+
+                <button
+                    type="button"
+                    class="industry-btn industry-btn-outline"
+                    id="keepCollaborationRequest"
+                >
+                    Keep Request
+                </button>
+
+
+                <button
+                    type="button"
+                    class="industry-btn industry-btn-danger"
+                    id="confirmCancelCollaboration"
+                >
+                    Yes, Cancel
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-collaboration.js'
+) }}"></script>
+{% endblock %}

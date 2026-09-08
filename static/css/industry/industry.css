@@ -1,0 +1,657 @@
+/* =========================================================
+   INDUSTRY PORTAL - COMMON CSS
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --industry-primary: #2563eb;
+    --industry-primary-dark: #1d4ed8;
+
+    --industry-bg: #f5f7fb;
+    --industry-white: #ffffff;
+
+    --industry-text: #111827;
+    --industry-text-secondary: #6b7280;
+    --industry-text-light: #9ca3af;
+
+    --industry-border: #e5e7eb;
+
+    --industry-sidebar: #111827;
+    --industry-sidebar-text: #d1d5db;
+
+    --industry-success: #16a34a;
+    --industry-warning: #d97706;
+    --industry-danger: #dc2626;
+
+    --industry-radius: 12px;
+
+    --industry-shadow:
+        0 4px 18px rgba(15, 23, 42, 0.06);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: var(--industry-bg);
+    color: var(--industry-text);
+
+    min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.industry-sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 260px;
+    height: 100vh;
+
+    background: var(--industry-sidebar);
+
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 1100;
+
+    transition:
+        transform 0.25s ease;
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.industry-brand {
+    height: 78px;
+
+    padding: 0 20px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.08);
+}
+
+.industry-brand-logo {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 10px;
+
+    background: var(--industry-primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    letter-spacing: 0.5px;
+}
+
+.industry-brand-text h2 {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.industry-brand-text span {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 11px;
+
+    color: #9ca3af;
+}
+
+.industry-sidebar-close {
+    display: none;
+
+    margin-left: auto;
+
+    border: none;
+    background: transparent;
+
+    color: white;
+
+    font-size: 25px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.industry-navigation {
+    flex: 1;
+
+    padding: 18px 12px;
+
+    overflow-y: auto;
+}
+
+.industry-nav-section {
+    margin-bottom: 20px;
+}
+
+.industry-nav-label {
+    padding: 0 12px;
+
+    margin-bottom: 8px;
+
+    color: #6b7280;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.industry-nav-item {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    width: 100%;
+
+    padding: 11px 12px;
+
+    margin-bottom: 4px;
+
+    border-radius: 8px;
+
+    color: var(--industry-sidebar-text);
+
+    font-size: 13px;
+    font-weight: 500;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.industry-nav-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: white;
+}
+
+.industry-nav-item.active {
+    background: var(--industry-primary);
+    color: white;
+}
+
+.industry-nav-icon {
+    width: 20px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+.industry-nav-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.industry-nav-badge {
+    margin-left: auto;
+
+    min-width: 20px;
+    height: 20px;
+
+    padding: 0 5px;
+
+    border-radius: 10px;
+
+    background: #ef4444;
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   SIDEBAR FOOTER
+========================================================= */
+
+.industry-sidebar-footer {
+    padding: 12px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.08);
+}
+
+.industry-logout:hover {
+    background: rgba(220, 38, 38, 0.16);
+    color: #fca5a5;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.industry-main {
+    min-height: 100vh;
+
+    margin-left: 260px;
+
+    transition:
+        margin-left 0.25s ease;
+}
+
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.industry-topbar {
+    height: 78px;
+
+    background: white;
+
+    border-bottom:
+        1px solid var(--industry-border);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 30px;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 900;
+}
+
+.industry-topbar-left {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+}
+
+.industry-heading h1 {
+    font-size: 21px;
+    font-weight: 700;
+
+    color: var(--industry-text);
+}
+
+.industry-heading p {
+    margin-top: 3px;
+
+    font-size: 11px;
+
+    color: var(--industry-text-secondary);
+}
+
+.industry-menu-toggle {
+    display: none;
+
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid var(--industry-border);
+
+    border-radius: 8px;
+
+    background: white;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 4px;
+}
+
+.industry-menu-toggle span {
+    width: 18px;
+    height: 2px;
+
+    background: var(--industry-text);
+}
+
+
+/* =========================================================
+   TOPBAR RIGHT
+========================================================= */
+
+.industry-topbar-right {
+    display: flex;
+    align-items: center;
+
+    gap: 22px;
+}
+
+.industry-notification-button {
+    position: relative;
+
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid var(--industry-border);
+
+    border-radius: 50%;
+
+    background: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.industry-notification-button:hover {
+    background: #f9fafb;
+}
+
+.industry-notification-button svg {
+    width: 19px;
+    height: 19px;
+
+    color: #374151;
+}
+
+.industry-notification-count {
+    position: absolute;
+
+    top: -4px;
+    right: -4px;
+
+    min-width: 17px;
+    height: 17px;
+
+    padding: 0 4px;
+
+    border-radius: 20px;
+
+    background: #ef4444;
+
+    color: white;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.industry-user {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.industry-user-avatar {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    background: #dbeafe;
+
+    color: var(--industry-primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.industry-user-details strong {
+    display: block;
+
+    max-width: 180px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 12px;
+
+    color: var(--industry-text);
+}
+
+.industry-user-details span {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 10px;
+
+    color: var(--industry-text-secondary);
+}
+
+
+/* =========================================================
+   PAGE CONTENT
+========================================================= */
+
+.industry-page-content {
+    padding: 28px 30px 40px;
+}
+
+
+/* =========================================================
+   FLASH MESSAGES
+========================================================= */
+
+.industry-flash-wrapper {
+    padding: 15px 30px 0;
+}
+
+.industry-flash {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 12px 15px;
+
+    border-radius: 8px;
+
+    margin-bottom: 10px;
+
+    font-size: 13px;
+}
+
+.industry-flash-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.industry-flash-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.industry-flash-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.industry-flash-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.industry-flash-close {
+    border: none;
+    background: transparent;
+
+    font-size: 20px;
+
+    color: inherit;
+}
+
+
+/* =========================================================
+   MOBILE OVERLAY
+========================================================= */
+
+.industry-sidebar-overlay {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    z-index: 1050;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+.industry-navigation::-webkit-scrollbar {
+    width: 4px;
+}
+
+.industry-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.industry-navigation::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .industry-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .industry-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .industry-main {
+        margin-left: 0;
+    }
+
+    .industry-menu-toggle {
+        display: flex;
+    }
+
+    .industry-sidebar-close {
+        display: block;
+    }
+
+    .industry-sidebar-overlay.active {
+        display: block;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .industry-topbar {
+        height: 70px;
+
+        padding: 0 18px;
+    }
+
+    .industry-heading h1 {
+        font-size: 18px;
+    }
+
+    .industry-heading p {
+        display: none;
+    }
+
+    .industry-user-details {
+        display: none;
+    }
+
+    .industry-topbar-right {
+        gap: 10px;
+    }
+
+    .industry-page-content {
+        padding: 20px 16px 30px;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .industry-user-avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .industry-notification-button {
+        width: 36px;
+        height: 36px;
+    }
+
+}

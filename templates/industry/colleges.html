@@ -1,0 +1,323 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Colleges{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+      filename='css/industry/industry-collaboration.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="industry-page">
+
+    <!-- PAGE HEADER -->
+    <div class="industry-page-header">
+
+        <div>
+            <span class="industry-page-eyebrow">
+                COLLEGE NETWORK
+            </span>
+
+            <h1>Colleges</h1>
+
+            <p>
+                Discover registered colleges and build
+                industry-academia collaborations.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- STATS -->
+    <div class="industry-stats-grid">
+
+        <div class="industry-stat-card">
+            <div class="industry-stat-icon blue">🏫</div>
+
+            <div>
+                <span class="industry-stat-label">
+                    TOTAL COLLEGES
+                </span>
+
+                <strong>
+                    {{ colleges|length if colleges else 0 }}
+                </strong>
+            </div>
+        </div>
+
+
+        <div class="industry-stat-card">
+            <div class="industry-stat-icon green">✓</div>
+
+            <div>
+                <span class="industry-stat-label">
+                    ACTIVE COLLEGES
+                </span>
+
+                <strong>
+                    {{ colleges|length if colleges else 0 }}
+                </strong>
+            </div>
+        </div>
+
+
+        <div class="industry-stat-card">
+            <div class="industry-stat-icon purple">🔗</div>
+
+            <div>
+                <span class="industry-stat-label">
+                    COLLABORATIONS
+                </span>
+
+                <strong>
+                    {{ collaboration_count|default(0) }}
+                </strong>
+            </div>
+        </div>
+
+
+        <div class="industry-stat-card">
+            <div class="industry-stat-icon orange">🤝</div>
+
+            <div>
+                <span class="industry-stat-label">
+                    PENDING REQUESTS
+                </span>
+
+                <strong>
+                    {{ collaboration_request_count|default(0) }}
+                </strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- FILTER -->
+    <div class="industry-filter-card">
+
+        <div class="industry-search-box">
+
+            <span class="industry-search-icon">⌕</span>
+
+            <input
+                type="text"
+                id="collegeSearch"
+                placeholder="Search college, university or city..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <select id="collegeStateFilter">
+
+            <option value="">
+                All States
+            </option>
+
+            {% for state in states|default([]) %}
+                <option value="{{ state|lower }}">
+                    {{ state }}
+                </option>
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <!-- SECTION HEADER -->
+    <div class="industry-section-header">
+
+        <div>
+            <h2>Registered Colleges</h2>
+
+            <p>
+                Active colleges available for collaboration.
+            </p>
+        </div>
+
+        <span id="collegeResultCount">
+            {{ colleges|length if colleges else 0 }} colleges
+        </span>
+
+    </div>
+
+
+    <!-- COLLEGE GRID -->
+    <div
+        class="industry-colleges-grid"
+        id="collegeGrid"
+    >
+
+        {% if colleges %}
+
+            {% for college in colleges %}
+
+            <article
+                class="industry-college-card"
+                data-name="{{ college.college_name|default('')|lower }}"
+                data-university="{{ college.university_name|default('')|lower }}"
+                data-city="{{ college.city|default('')|lower }}"
+                data-state="{{ college.state|default('')|lower }}"
+            >
+
+                <div class="industry-college-card-header">
+
+                    <div class="industry-college-logo">
+                        🏫
+                    </div>
+
+                    <span class="industry-status-badge success">
+                        ACTIVE
+                    </span>
+
+                </div>
+
+
+                <div class="industry-college-card-body">
+
+                    <h3>
+                        {{ college.college_name }}
+                    </h3>
+
+
+                    {% if college.college_code %}
+                    <span class="industry-college-code">
+                        {{ college.college_code }}
+                    </span>
+                    {% endif %}
+
+
+                    {% if college.university_name %}
+                    <p class="industry-college-university">
+                        🎓 {{ college.university_name }}
+                    </p>
+                    {% endif %}
+
+
+                    <div class="industry-college-meta">
+
+                        {% if college.city or college.state %}
+                        <div>
+                            <span>📍</span>
+
+                            <span>
+                                {{ college.city|default('') }}
+
+                                {% if college.city and college.state %}
+                                    ,
+                                {% endif %}
+
+                                {{ college.state|default('') }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+
+                        {% if college.email %}
+                        <div>
+                            <span>✉</span>
+
+                            <span>
+                                {{ college.email }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="industry-college-card-footer">
+
+                    <span class="industry-college-contact">
+                        {% if college.phone %}
+                            {{ college.phone }}
+                        {% else %}
+                            Registered College
+                        {% endif %}
+                    </span>
+
+
+                    <a
+                        href="{{ url_for(
+                            'industry_college_detail',
+                            college_id=college.id
+                        ) }}"
+                        class="industry-btn industry-btn-outline"
+                    >
+                        View Details
+                    </a>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="industry-empty-state">
+
+                <div class="industry-empty-icon">
+                    🏫
+                </div>
+
+                <h3>No Colleges Available</h3>
+
+                <p>
+                    No active colleges are currently available
+                    for collaboration.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- SEARCH EMPTY -->
+    <div
+        class="industry-empty-state"
+        id="collegeNoResults"
+        style="display:none;"
+    >
+
+        <div class="industry-empty-icon">
+            ⌕
+        </div>
+
+        <h3>No Colleges Found</h3>
+
+        <p>
+            Try changing your search or state filter.
+        </p>
+
+        <button
+            type="button"
+            class="industry-btn industry-btn-outline"
+            id="clearCollegeFilters"
+        >
+            Clear Filters
+        </button>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-collaboration.js'
+) }}"></script>
+{% endblock %}

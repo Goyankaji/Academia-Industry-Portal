@@ -1,0 +1,473 @@
+{% extends "industry/base.html" %}
+
+{% block title %}College Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-collaboration.css'
+      ) }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="industry-page">
+
+    <div class="industry-back-row">
+
+        <a
+            href="{{ url_for('industry_colleges') }}"
+            class="industry-back-link"
+        >
+            ← Back to Colleges
+        </a>
+
+    </div>
+
+
+    {% if college %}
+
+    <!-- COLLEGE HEADER -->
+    <div class="industry-detail-header">
+
+        <div class="industry-detail-logo">
+            🏫
+        </div>
+
+
+        <div class="industry-detail-heading">
+
+            <div class="industry-detail-title-row">
+
+                <div>
+
+                    <span class="industry-page-eyebrow">
+                        COLLEGE PROFILE
+                    </span>
+
+                    <h1>
+                        {{ college.college_name }}
+                    </h1>
+
+                    {% if college.college_code %}
+                    <span class="industry-college-code">
+                        {{ college.college_code }}
+                    </span>
+                    {% endif %}
+
+                </div>
+
+
+                <span class="industry-status-badge success">
+                    ACTIVE
+                </span>
+
+            </div>
+
+
+            {% if college.university_name %}
+            <p class="industry-detail-subtitle">
+                🎓 {{ college.university_name }}
+            </p>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- INFORMATION -->
+    <div class="industry-detail-grid">
+
+        <div class="industry-detail-card">
+
+            <div class="industry-detail-card-header">
+                <h2>College Information</h2>
+            </div>
+
+
+            <div class="industry-detail-list">
+
+                {% if college.college_code %}
+                <div class="industry-detail-item">
+                    <span>College Code</span>
+                    <strong>
+                        {{ college.college_code }}
+                    </strong>
+                </div>
+                {% endif %}
+
+
+                {% if college.university_name %}
+                <div class="industry-detail-item">
+                    <span>University</span>
+                    <strong>
+                        {{ college.university_name }}
+                    </strong>
+                </div>
+                {% endif %}
+
+
+                <div class="industry-detail-item">
+                    <span>Status</span>
+                    <strong class="detail-active">
+                        ACTIVE
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-detail-card">
+
+            <div class="industry-detail-card-header">
+                <h2>Contact Information</h2>
+            </div>
+
+
+            <div class="industry-detail-list">
+
+                {% if college.email %}
+                <div class="industry-detail-item">
+                    <span>Email</span>
+
+                    <strong>
+                        {{ college.email }}
+                    </strong>
+                </div>
+                {% endif %}
+
+
+                {% if college.phone %}
+                <div class="industry-detail-item">
+                    <span>Phone</span>
+
+                    <strong>
+                        {{ college.phone }}
+                    </strong>
+                </div>
+                {% endif %}
+
+
+                {% if college.website %}
+                <div class="industry-detail-item">
+                    <span>Website</span>
+
+                    <a
+                        href="{{ college.website }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Visit Website
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- LOCATION -->
+    <div class="industry-detail-card">
+
+        <div class="industry-detail-card-header">
+            <h2>Location</h2>
+        </div>
+
+
+        <div class="industry-location-content">
+
+            <div class="industry-location-icon">
+                📍
+            </div>
+
+            <div>
+
+                <h3>
+
+                    {{ college.city|default('City not available') }}
+
+                    {% if college.state %}
+                        , {{ college.state }}
+                    {% endif %}
+
+                </h3>
+
+
+                {% if college.address %}
+                <p>
+                    {{ college.address }}
+                </p>
+                {% endif %}
+
+
+                {% if college.pincode %}
+                <span>
+                    PIN: {{ college.pincode }}
+                </span>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- COLLABORATION -->
+    <div class="industry-detail-card">
+
+        <div class="industry-detail-card-header">
+
+            <h2>Industry Collaboration</h2>
+
+            <p>
+                Start a new collaboration request with this college.
+            </p>
+
+        </div>
+
+
+        <div class="industry-collaboration-action">
+
+            <div>
+
+                <div class="collaboration-action-icon">
+                    🤝
+                </div>
+
+                <div>
+                    <h3>
+                        Build a College–Industry Partnership
+                    </h3>
+
+                    <p>
+                        Propose internships, live projects,
+                        training, workshops, research or placement
+                        collaboration.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="industry-btn industry-btn-primary"
+                id="requestCollaborationBtn"
+            >
+                + Request Collaboration
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- REQUEST MODAL -->
+    <div
+        class="industry-modal"
+        id="collaborationRequestModal"
+        style="display:none;"
+    >
+
+        <div class="industry-modal-overlay"></div>
+
+
+        <div class="industry-modal-content">
+
+            <div class="industry-modal-header">
+
+                <div>
+                    <h2>Request Collaboration</h2>
+
+                    <p>
+                        Send a request to
+                        <strong>
+                            {{ college.college_name }}
+                        </strong>
+                    </p>
+                </div>
+
+
+                <button
+                    type="button"
+                    class="industry-modal-close"
+                    id="closeCollaborationModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'industry_send_collaboration_request',
+                    college_id=college.id
+                ) }}"
+                id="collaborationRequestForm"
+            >
+
+                <div class="industry-form-group">
+
+                    <label for="collaborationTitle">
+                        Collaboration Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="collaborationTitle"
+                        name="title"
+                        maxlength="200"
+                        placeholder="e.g. Summer Internship Program"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="industry-form-group">
+
+                    <label for="collaborationType">
+                        Collaboration Type
+                    </label>
+
+                    <select
+                        id="collaborationType"
+                        name="collaboration_type"
+                        required
+                    >
+
+                        <option value="">
+                            Select type
+                        </option>
+
+                        <option value="INTERNSHIP">
+                            Internship
+                        </option>
+
+                        <option value="LIVE_PROJECT">
+                            Live Project
+                        </option>
+
+                        <option value="INDUSTRY_PROJECT">
+                            Industry Project
+                        </option>
+
+                        <option value="TRAINING">
+                            Training
+                        </option>
+
+                        <option value="WORKSHOP">
+                            Workshop
+                        </option>
+
+                        <option value="RESEARCH">
+                            Research
+                        </option>
+
+                        <option value="PLACEMENT">
+                            Placement
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="industry-form-group">
+
+                    <label for="collaborationDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="collaborationDescription"
+                        name="description"
+                        rows="5"
+                        maxlength="1000"
+                        placeholder="Describe the proposed collaboration..."
+                        required
+                    ></textarea>
+
+                    <small>
+                        <span id="collaborationDescriptionCount">
+                            0
+                        </span>
+                        / 1000
+                    </small>
+
+                </div>
+
+
+                <div class="industry-modal-footer">
+
+                    <button
+                        type="button"
+                        class="industry-btn industry-btn-outline"
+                        id="cancelCollaborationRequest"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="industry-btn industry-btn-primary"
+                    >
+                        Send Request
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    {% else %}
+
+    <div class="industry-empty-state">
+
+        <div class="industry-empty-icon">
+            🏫
+        </div>
+
+        <h3>College Not Found</h3>
+
+        <p>
+            The requested college does not exist or is no longer active.
+        </p>
+
+        <a
+            href="{{ url_for('industry_colleges') }}"
+            class="industry-btn industry-btn-primary"
+        >
+            Back to Colleges
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-collaboration.js'
+) }}"></script>
+{% endblock %}

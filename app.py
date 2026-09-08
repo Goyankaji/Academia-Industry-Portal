@@ -59,6 +59,32 @@ def admin_required(f):
 
     return decorated_function
 
+# =========================================================
+# INDUSTRY AUTHENTICATION DECORATOR
+# =========================================================
+
+def industry_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        if "user_id" not in session:
+            flash(
+                "Please login first.",
+                "error"
+            )
+            return redirect(url_for("login"))
+
+        if session.get("role") != "INDUSTRY":
+            flash(
+                "Industry access required.",
+                "error"
+            )
+            return redirect(url_for("login"))
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 
 # =========================================================
 # HOME
@@ -168,6 +194,18 @@ def login():
                     url_for("admin_dashboard")
                 )
 
+
+            # -------------------------------------------------
+            # INDUSTRY
+            # -------------------------------------------------
+
+            if user["role"] == "INDUSTRY":
+
+                return redirect(
+                    url_for("industry_dashboard")
+                )
+
+
             # -------------------------------------------------
             # OTHER ROLES
             # -------------------------------------------------
@@ -180,7 +218,6 @@ def login():
             return redirect(
                 url_for("login")
             )
-
         except Exception as e:
 
             print("=" * 60)
@@ -4307,12 +4344,6 @@ def update_admin_appearance():
 # ADMIN PROFILE
 # =========================================================
 
-import os
-import uuid
-
-from werkzeug.utils import secure_filename
-
-
 # =========================================================
 # PROFILE IMAGE CONFIGURATION
 # =========================================================
@@ -7257,7 +7288,5123 @@ def register_industry():
 
         if conn:
             conn.close()
-                                                                        
+
+
+# =========================================================
+# INDUSTRY DASHBOARD
+# =========================================================
+
+@app.route("/industry/dashboard")
+@industry_required
+def industry_dashboard():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+            return redirect(url_for("login"))
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # INDUSTRY PROFILE
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                user_id,
+                company_name,
+                company_type,
+                industry_sector,
+                contact_person,
+                designation,
+                phone,
+                email,
+                website,
+                address,
+                city,
+                state,
+                description,
+                status
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        # =================================================
+        # INDUSTRY NOT FOUND
+        # =================================================
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # PROFILE COMPLETION
+        # =================================================
+
+        profile_fields = [
+            "company_name",
+            "company_type",
+            "industry_sector",
+            "contact_person",
+            "designation",
+            "phone",
+            "email",
+            "website",
+            "address",
+            "city",
+            "state",
+            "description"
+        ]
+
+        completed_fields = 0
+
+        for field in profile_fields:
+
+            value = industry.get(field)
+
+            if value is not None and str(value).strip():
+                completed_fields += 1
+
+
+        profile_completion = round(
+            (
+                completed_fields /
+                len(profile_fields)
+            ) * 100
+        )
+
+
+        # =================================================
+        # ACTIVE REQUIREMENTS
+        # =================================================
+        # Requirements are represented by OPEN opportunities
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE industry_id = %s
+              AND status = 'OPEN'
+        """, (
+            industry["id"],
+        ))
+
+        active_requirements = cursor.fetchone()["total"]
+
+
+        # =================================================
+        # TOTAL APPLICATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            WHERE o.industry_id = %s
+        """, (
+            industry["id"],
+        ))
+
+        total_applications = cursor.fetchone()["total"]
+
+
+        # =================================================
+        # SHORTLISTED APPLICATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            WHERE o.industry_id = %s
+            AND sa.status = 'SHORTLISTED'
+        """, (
+            industry["id"],
+        ))
+
+        shortlisted_applications = cursor.fetchone()["total"]
+
+
+        # =================================================
+        # ACTIVE COLLABORATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE industry_id = %s
+              AND status = 'ACTIVE'
+        """, (
+            industry["id"],
+        ))
+
+        active_collaborations = cursor.fetchone()["total"]
+
+
+        # =================================================
+        # RECENT COLLABORATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                col.id,
+                col.title,
+                col.description,
+                col.collaboration_type,
+                col.start_date,
+                col.end_date,
+                col.status,
+                col.created_at,
+
+                c.college_name
+
+            FROM collaborations col
+
+            INNER JOIN colleges c
+                ON col.college_id = c.id
+
+            WHERE col.industry_id = %s
+
+            ORDER BY col.created_at DESC
+
+            LIMIT 5
+        """, (
+            industry["id"],
+        ))
+
+        recent_collaborations = cursor.fetchall()
+
+
+        # =================================================
+        # RECENT REQUIREMENTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                title,
+                opportunity_type,
+                required_skills,
+                location,
+                work_mode,
+                application_deadline,
+                status,
+                created_at
+
+            FROM opportunities
+
+            WHERE industry_id = %s
+
+            ORDER BY created_at DESC
+
+            LIMIT 5
+        """, (
+            industry["id"],
+        ))
+
+        recent_requirements = cursor.fetchall()
+
+
+        # =================================================
+        # RECENT APPLICATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                sa.id AS application_id,
+
+                sa.status,
+                sa.application_date,
+
+                u.name AS student_name,
+
+                o.title AS opportunity_title
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            WHERE o.industry_id = %s
+
+            ORDER BY sa.application_date DESC
+
+            LIMIT 5
+        """, (
+            industry["id"],
+        ))
+
+        recent_applications = cursor.fetchall()
+
+
+        # =================================================
+        # RENDER DASHBOARD
+        # =================================================
+
+        return render_template(
+            "industry/dashboard.html",
+
+            dashboard="dashboard",
+
+            industry=industry,
+
+            profile_completion=profile_completion,
+
+            active_requirements=active_requirements,
+
+            total_applications=total_applications,
+
+            shortlisted_applications=shortlisted_applications,
+
+            active_collaborations=active_collaborations,
+
+            recent_applications=recent_applications,
+
+            recent_collaborations=recent_collaborations,
+
+            recent_requirements=recent_requirements
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY DASHBOARD DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load industry dashboard.",
+            "error"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY DASHBOARD ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load industry dashboard.",
+            "error"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY PROFILE
+# =========================================================
+
+@app.route("/industry/profile")
+@industry_required
+def industry_profile():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # FETCH INDUSTRY PROFILE
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                user_id,
+                company_name,
+                company_type,
+                industry_sector,
+                contact_person,
+                designation,
+                phone,
+                email,
+                website,
+                address,
+                city,
+                state,
+                description,
+                status
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+
+        industry = cursor.fetchone()
+
+
+        # =================================================
+        # INDUSTRY NOT FOUND
+        # =================================================
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        # =================================================
+        # RENDER PROFILE PAGE
+        # =================================================
+
+        return render_template(
+            "industry/profile.html",
+            dashboard="profile",
+            industry=industry
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY PROFILE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load industry profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY PROFILE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load industry profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# INDUSTRY PROFILE - EDIT
+# =========================================================
+
+@app.route(
+    "/industry/profile/edit",
+    methods=["GET"]
+)
+@industry_required
+def industry_profile_edit():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # FETCH INDUSTRY PROFILE
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                user_id,
+                company_name,
+                company_type,
+                industry_sector,
+                contact_person,
+                designation,
+                phone,
+                email,
+                website,
+                address,
+                city,
+                state,
+                description,
+                status
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+
+        industry = cursor.fetchone()
+
+
+        # =================================================
+        # INDUSTRY NOT FOUND
+        # =================================================
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        # =================================================
+        # RENDER EDIT PAGE
+        # =================================================
+
+        return render_template(
+            "industry/edit_profile.html",
+            dashboard="profile",
+            industry=industry
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY EDIT PROFILE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load edit profile page.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_profile")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY EDIT PROFILE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load edit profile page.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_profile")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY PROFILE - UPDATE
+# =========================================================
+
+@app.route(
+    "/industry/profile/edit",
+    methods=["POST"]
+)
+@industry_required
+def industry_profile_update():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # GET FORM DATA
+        # =================================================
+
+        company_name = request.form.get(
+            "company_name",
+            ""
+        ).strip()
+
+        company_type = request.form.get(
+            "company_type",
+            ""
+        ).strip()
+
+        industry_sector = request.form.get(
+            "industry_sector",
+            ""
+        ).strip()
+
+        contact_person = request.form.get(
+            "contact_person",
+            ""
+        ).strip()
+
+        designation = request.form.get(
+            "designation",
+            ""
+        ).strip()
+
+        phone = request.form.get(
+            "phone",
+            ""
+        ).strip()
+
+        email = request.form.get(
+            "email",
+            ""
+        ).strip().lower()
+
+        website = request.form.get(
+            "website",
+            ""
+        ).strip()
+
+        address = request.form.get(
+            "address",
+            ""
+        ).strip()
+
+        city = request.form.get(
+            "city",
+            ""
+        ).strip()
+
+        state = request.form.get(
+            "state",
+            ""
+        ).strip()
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+
+        # =================================================
+        # BASIC VALIDATION
+        # =================================================
+
+        if not company_name:
+
+            flash(
+                "Company name is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_profile_edit")
+            )
+
+
+        if len(company_name) < 2:
+
+            flash(
+                "Please enter a valid company name.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_profile_edit")
+            )
+
+
+        if not contact_person:
+
+            flash(
+                "Contact person name is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_profile_edit")
+            )
+
+
+        if len(contact_person) < 2:
+
+            flash(
+                "Please enter a valid contact person name.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_profile_edit")
+            )
+
+
+        if not email:
+
+            flash(
+                "Email address is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_profile_edit")
+            )
+
+
+        email_pattern = (
+            r"^[A-Za-z0-9._%+-]+@"
+            r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+        )
+
+        if not re.match(
+            email_pattern,
+            email
+        ):
+
+            flash(
+                "Please enter a valid email address.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_profile_edit")
+            )
+
+
+        # =================================================
+        # DATABASE
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                user_id
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # CHECK EMAIL DUPLICATE
+        # Ignore current user's existing email
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM users
+            WHERE email = %s
+              AND id != %s
+            LIMIT 1
+        """, (
+            email,
+            user_id
+        ))
+
+        existing_user = cursor.fetchone()
+
+
+        if existing_user:
+
+            flash(
+                "This email address is already registered with another account.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_profile_edit")
+            )
+
+
+        # =================================================
+        # UPDATE INDUSTRIES TABLE
+        # =================================================
+
+        cursor.execute("""
+            UPDATE industries
+            SET
+                company_name = %s,
+                company_type = %s,
+                industry_sector = %s,
+                contact_person = %s,
+                designation = %s,
+                phone = %s,
+                email = %s,
+                website = %s,
+                address = %s,
+                city = %s,
+                state = %s,
+                description = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+              AND user_id = %s
+        """, (
+            company_name,
+            company_type or None,
+            industry_sector or None,
+            contact_person,
+            designation or None,
+            phone or None,
+            email,
+            website or None,
+            address or None,
+            city or None,
+            state or None,
+            description or None,
+            industry_id,
+            user_id
+        ))
+
+
+        # =================================================
+        # UPDATE USERS TABLE
+        # Keep account information synchronized
+        # =================================================
+
+        cursor.execute("""
+            UPDATE users
+            SET
+                name = %s,
+                email = %s
+            WHERE id = %s
+              AND role = 'INDUSTRY'
+        """, (
+            contact_person,
+            email,
+            user_id
+        ))
+
+
+        # =================================================
+        # COMMIT
+        # =================================================
+
+        conn.commit()
+
+
+        # =================================================
+        # UPDATE CURRENT SESSION
+        # =================================================
+
+        session["user_name"] = contact_person
+
+
+        # =================================================
+        # SUCCESS
+        # =================================================
+
+        flash(
+            "Industry profile updated successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("industry_profile")
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.IntegrityError as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("INDUSTRY PROFILE UPDATE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Profile update failed. Please check your information.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_profile_edit")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("INDUSTRY PROFILE UPDATE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update industry profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_profile_edit")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY REQUIREMENTS - LIST
+# =========================================================
+
+@app.route("/industry/requirements")
+@industry_required
+def industry_requirements():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        # =================================================
+        # INDUSTRY NOT FOUND
+        # =================================================
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # FETCH REQUIREMENTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                industry_id,
+                title,
+                opportunity_type,
+                description,
+                required_skills,
+                eligibility_criteria,
+                location,
+                work_mode,
+                stipend,
+                package,
+                application_deadline,
+                status,
+                created_at,
+                updated_at
+
+            FROM opportunities
+
+            WHERE industry_id = %s
+
+            ORDER BY created_at DESC
+        """, (
+            industry_id,
+        ))
+
+        requirements = cursor.fetchall()
+
+
+        # =================================================
+        # APPLICATION COUNT
+        #
+        # Applications module will be connected later.
+        # Currently showing 0 safely.
+        # =================================================
+
+        for requirement in requirements:
+
+            cursor.execute("""
+                SELECT COUNT(*) AS total
+
+                FROM student_applications
+
+                WHERE opportunity_id = %s
+            """, (
+                requirement["id"],
+            ))
+
+            requirement["application_count"] = (
+                cursor.fetchone()["total"]
+            )
+
+        # =================================================
+        # STATISTICS
+        # =================================================
+
+        total_requirements = len(
+            requirements
+        )
+
+
+        open_requirements = sum(
+            1
+            for requirement in requirements
+            if requirement["status"] == "OPEN"
+        )
+
+
+        closed_requirements = sum(
+            1
+            for requirement in requirements
+            if requirement["status"] == "CLOSED"
+        )
+
+
+        # =================================================
+        # UPCOMING DEADLINES
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total
+
+            FROM opportunities
+
+            WHERE industry_id = %s
+
+              AND status = 'OPEN'
+
+              AND application_deadline IS NOT NULL
+
+              AND application_deadline >= CURDATE()
+        """, (
+            industry_id,
+        ))
+
+        upcoming_deadlines = cursor.fetchone()["total"]
+
+
+        # =================================================
+        # RENDER REQUIREMENTS PAGE
+        # =================================================
+
+        return render_template(
+            "industry/requirements.html",
+
+            dashboard="requirements",
+
+            requirements=requirements,
+
+            total_requirements=total_requirements,
+
+            open_requirements=open_requirements,
+
+            closed_requirements=closed_requirements,
+
+            upcoming_deadlines=upcoming_deadlines
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY REQUIREMENTS DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load requirements.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY REQUIREMENTS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load requirements.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY REQUIREMENT - CREATE
+# =========================================================
+
+@app.route(
+    "/industry/requirements/create",
+    methods=["GET", "POST"]
+)
+@industry_required
+def industry_create_requirement():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                status
+
+            FROM industries
+
+            WHERE user_id = %s
+
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        # =================================================
+        # INDUSTRY NOT FOUND
+        # =================================================
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        # =================================================
+        # CHECK INDUSTRY STATUS
+        # =================================================
+
+        if industry["status"] != "ACTIVE":
+
+            flash(
+                "Your industry account is not active.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # GET REQUEST
+        # =================================================
+
+        if request.method == "GET":
+
+            return render_template(
+                "industry/create_requirement.html",
+
+                dashboard="requirements"
+            )
+
+
+        # =================================================
+        # POST DATA
+        # =================================================
+
+        title = request.form.get(
+            "title",
+            ""
+        ).strip()
+
+
+        opportunity_type = request.form.get(
+            "opportunity_type",
+            ""
+        ).strip().upper()
+
+
+        status = request.form.get(
+            "status",
+            "DRAFT"
+        ).strip().upper()
+
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+
+        required_skills = request.form.get(
+            "required_skills",
+            ""
+        ).strip()
+
+
+        eligibility_criteria = request.form.get(
+            "eligibility_criteria",
+            ""
+        ).strip()
+
+
+        location = request.form.get(
+            "location",
+            ""
+        ).strip()
+
+
+        work_mode = request.form.get(
+            "work_mode",
+            ""
+        ).strip().upper()
+
+
+        stipend = request.form.get(
+            "stipend",
+            ""
+        ).strip()
+
+
+        package_value = request.form.get(
+            "package",
+            ""
+        ).strip()
+
+
+        application_deadline = request.form.get(
+            "application_deadline",
+            ""
+        ).strip()
+
+
+        # =================================================
+        # VALIDATION
+        # =================================================
+
+        allowed_types = [
+            "JOB",
+            "INTERNSHIP",
+            "PROJECT",
+            "TRAINING",
+            "COLLABORATION"
+        ]
+
+
+        allowed_statuses = [
+            "OPEN",
+            "DRAFT"
+        ]
+
+
+        allowed_work_modes = [
+            "ONSITE",
+            "REMOTE",
+            "HYBRID"
+        ]
+
+
+        if len(title) < 3:
+
+            flash(
+                "Requirement title must be at least 3 characters.",
+                "error"
+            )
+
+            return render_template(
+                "industry/create_requirement.html",
+                dashboard="requirements"
+            )
+
+
+        if opportunity_type not in allowed_types:
+
+            flash(
+                "Invalid opportunity type.",
+                "error"
+            )
+
+            return render_template(
+                "industry/create_requirement.html",
+                dashboard="requirements"
+            )
+
+
+        if status not in allowed_statuses:
+
+            flash(
+                "Invalid requirement status.",
+                "error"
+            )
+
+            return render_template(
+                "industry/create_requirement.html",
+                dashboard="requirements"
+            )
+
+
+        if work_mode not in allowed_work_modes:
+
+            flash(
+                "Invalid work mode.",
+                "error"
+            )
+
+            return render_template(
+                "industry/create_requirement.html",
+                dashboard="requirements"
+            )
+
+
+        if len(description) < 10:
+
+            flash(
+                "Description must be at least 10 characters.",
+                "error"
+            )
+
+            return render_template(
+                "industry/create_requirement.html",
+                dashboard="requirements"
+            )
+
+
+        # =================================================
+        # GENERATE REQUIREMENT ID
+        # =================================================
+
+        requirement_id = str(
+            uuid.uuid4()
+        )
+
+
+        # =================================================
+        # INSERT REQUIREMENT
+        # =================================================
+
+        cursor.execute("""
+            INSERT INTO opportunities (
+                id,
+                industry_id,
+                title,
+                opportunity_type,
+                description,
+                required_skills,
+                eligibility_criteria,
+                location,
+                work_mode,
+                stipend,
+                package,
+                application_deadline,
+                status
+            )
+
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                NULLIF(%s, ''),
+                NULLIF(%s, ''),
+                NULLIF(%s, ''),
+                %s
+            )
+        """, (
+            requirement_id,
+            industry_id,
+            title,
+            opportunity_type,
+            description,
+            required_skills,
+            eligibility_criteria,
+            location,
+            work_mode,
+            stipend,
+            package_value,
+            application_deadline,
+            status
+        ))
+
+
+        # =================================================
+        # COMMIT
+        # =================================================
+
+        conn.commit()
+
+
+        # =================================================
+        # SUCCESS
+        # =================================================
+
+        flash(
+            "Requirement created successfully.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_requirement_detail",
+                requirement_id=requirement_id
+            )
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+
+        print("=" * 70)
+        print("INDUSTRY REQUIREMENT CREATE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+
+        flash(
+            "Unable to create requirement. Please check the database.",
+            "error"
+        )
+
+
+        return redirect(
+            url_for("industry_requirements")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+
+        print("=" * 70)
+        print("INDUSTRY REQUIREMENT CREATE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+
+        flash(
+            "Unable to create requirement.",
+            "error"
+        )
+
+
+        return redirect(
+            url_for("industry_requirements")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY REQUIREMENT - DETAIL
+# =========================================================
+
+@app.route(
+    "/industry/requirements/<requirement_id>"
+)
+@industry_required
+def industry_requirement_detail(requirement_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # GET REQUIREMENT
+        #
+        # VERY IMPORTANT:
+        # industry_id is also checked.
+        #
+        # So Industry A cannot open Industry B's
+        # requirement by changing the URL.
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                industry_id,
+                title,
+                opportunity_type,
+                description,
+                required_skills,
+                eligibility_criteria,
+                location,
+                work_mode,
+                stipend,
+                package,
+                application_deadline,
+                status,
+                created_at,
+                updated_at
+
+            FROM opportunities
+
+            WHERE id = %s
+
+              AND industry_id = %s
+
+            LIMIT 1
+        """, (
+            requirement_id,
+            industry_id
+        ))
+
+        requirement = cursor.fetchone()
+
+
+        if not requirement:
+
+            flash(
+                "Requirement not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_requirements")
+            )
+
+
+        # =================================================
+        # APPLICATION COUNT
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications
+
+            WHERE opportunity_id = %s
+        """, (
+            requirement["id"],
+        ))
+
+        requirement["application_count"] = (
+            cursor.fetchone()["total"]
+        )
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "industry/requirement_detail.html",
+
+            dashboard="requirements",
+
+            requirement=requirement
+        )
+
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("REQUIREMENT DETAIL DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load requirement.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_requirements")
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("REQUIREMENT DETAIL ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load requirement.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_requirements")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY REQUIREMENT - EDIT
+# =========================================================
+
+@app.route(
+    "/industry/requirements/<requirement_id>/edit",
+    methods=["GET", "POST"]
+)
+@industry_required
+def industry_edit_requirement(requirement_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                status
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # GET REQUIREMENT
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                industry_id,
+                title,
+                opportunity_type,
+                description,
+                required_skills,
+                eligibility_criteria,
+                location,
+                work_mode,
+                stipend,
+                package,
+                application_deadline,
+                status,
+                created_at,
+                updated_at
+
+            FROM opportunities
+
+            WHERE id = %s
+
+              AND industry_id = %s
+
+            LIMIT 1
+        """, (
+            requirement_id,
+            industry_id
+        ))
+
+        requirement = cursor.fetchone()
+
+
+        if not requirement:
+
+            flash(
+                "Requirement not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_requirements")
+            )
+
+
+        # =================================================
+        # GET REQUEST
+        # =================================================
+
+        if request.method == "GET":
+
+            return render_template(
+                "industry/edit_requirement.html",
+
+                dashboard="requirements",
+
+                requirement=requirement
+            )
+
+
+        # =================================================
+        # FORM DATA
+        # =================================================
+
+        title = request.form.get(
+            "title",
+            ""
+        ).strip()
+
+        opportunity_type = request.form.get(
+            "opportunity_type",
+            ""
+        ).strip().upper()
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+        required_skills = request.form.get(
+            "required_skills",
+            ""
+        ).strip()
+
+        eligibility_criteria = request.form.get(
+            "eligibility_criteria",
+            ""
+        ).strip()
+
+        location = request.form.get(
+            "location",
+            ""
+        ).strip()
+
+        work_mode = request.form.get(
+            "work_mode",
+            ""
+        ).strip().upper()
+
+        stipend = request.form.get(
+            "stipend",
+            ""
+        ).strip()
+
+        package_value = request.form.get(
+            "package",
+            ""
+        ).strip()
+
+        application_deadline = request.form.get(
+            "application_deadline",
+            ""
+        ).strip()
+
+        status = request.form.get(
+            "status",
+            "OPEN"
+        ).strip().upper()
+
+
+        # =================================================
+        # VALIDATION
+        # =================================================
+
+        allowed_types = [
+            "JOB",
+            "INTERNSHIP",
+            "PROJECT",
+            "TRAINING",
+            "COLLABORATION"
+        ]
+
+        allowed_statuses = [
+            "OPEN",
+            "DRAFT",
+            "CLOSED"
+        ]
+
+        allowed_work_modes = [
+            "",
+            "ONSITE",
+            "REMOTE",
+            "HYBRID"
+        ]
+
+
+        if not title:
+
+            flash(
+                "Requirement title is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_edit_requirement",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        if len(title) < 3:
+
+            flash(
+                "Requirement title must contain at least 3 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_edit_requirement",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        if opportunity_type not in allowed_types:
+
+            flash(
+                "Invalid requirement type.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_edit_requirement",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        if not description:
+
+            flash(
+                "Requirement description is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_edit_requirement",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        if len(description) < 10:
+
+            flash(
+                "Description must contain at least 10 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_edit_requirement",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        if status not in allowed_statuses:
+
+            flash(
+                "Invalid requirement status.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_edit_requirement",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        if work_mode not in allowed_work_modes:
+
+            flash(
+                "Invalid work mode.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_edit_requirement",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        # =================================================
+        # UPDATE
+        # =================================================
+
+        cursor.execute("""
+            UPDATE opportunities
+
+            SET
+                title = %s,
+                opportunity_type = %s,
+                description = %s,
+                required_skills = %s,
+                eligibility_criteria = %s,
+                location = %s,
+                work_mode = %s,
+                stipend = %s,
+                package = %s,
+                application_deadline = NULLIF(%s, ''),
+                status = %s,
+                updated_at = CURRENT_TIMESTAMP
+
+            WHERE id = %s
+
+              AND industry_id = %s
+        """, (
+            title,
+            opportunity_type,
+            description,
+            required_skills or None,
+            eligibility_criteria or None,
+            location or None,
+            work_mode or None,
+            stipend or None,
+            package_value or None,
+            application_deadline,
+            status,
+            requirement_id,
+            industry_id
+        ))
+
+
+        # =================================================
+        # CHECK UPDATE
+        # =================================================
+
+        if cursor.rowcount == 0:
+
+            conn.rollback()
+
+            flash(
+                "No changes were made or requirement was not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_requirement_detail",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        # =================================================
+        # COMMIT
+        # =================================================
+
+        conn.commit()
+
+
+        # =================================================
+        # SUCCESS
+        # =================================================
+
+        flash(
+            "Requirement updated successfully.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_requirement_detail",
+                requirement_id=requirement_id
+            )
+        )
+
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("EDIT REQUIREMENT DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update requirement.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_edit_requirement",
+                requirement_id=requirement_id
+            )
+        )
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("EDIT REQUIREMENT ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update requirement.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_edit_requirement",
+                requirement_id=requirement_id
+            )
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY REQUIREMENT - CLOSE
+# =========================================================
+
+@app.route(
+    "/industry/requirements/<requirement_id>/close",
+    methods=["POST"]
+)
+@industry_required
+def industry_close_requirement(requirement_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # CHECK REQUIREMENT
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                status
+            FROM opportunities
+
+            WHERE id = %s
+
+              AND industry_id = %s
+
+            LIMIT 1
+        """, (
+            requirement_id,
+            industry_id
+        ))
+
+        requirement = cursor.fetchone()
+
+
+        if not requirement:
+
+            flash(
+                "Requirement not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_requirements")
+            )
+
+
+        if requirement["status"] == "CLOSED":
+
+            flash(
+                "Requirement is already closed.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_requirement_detail",
+                    requirement_id=requirement_id
+                )
+            )
+
+
+        # =================================================
+        # CLOSE REQUIREMENT
+        # =================================================
+
+        cursor.execute("""
+            UPDATE opportunities
+
+            SET
+                status = 'CLOSED',
+                updated_at = CURRENT_TIMESTAMP
+
+            WHERE id = %s
+
+              AND industry_id = %s
+        """, (
+            requirement_id,
+            industry_id
+        ))
+
+
+        conn.commit()
+
+
+        flash(
+            "Requirement closed successfully.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_requirement_detail",
+                requirement_id=requirement_id
+            )
+        )
+
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("CLOSE REQUIREMENT DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to close requirement.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_requirement_detail",
+                requirement_id=requirement_id
+            )
+        )
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("CLOSE REQUIREMENT ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to close requirement.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_requirement_detail",
+                requirement_id=requirement_id
+            )
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()    
+
+# =========================================================
+# INDUSTRY APPLICATIONS - LIST
+# =========================================================
+
+@app.route("/industry/applications")
+@industry_required
+def industry_applications():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name,
+                status
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        # =================================================
+        # INDUSTRY NOT FOUND
+        # =================================================
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # FETCH APPLICATIONS
+        #
+        # student_applications
+        #        ↓
+        # opportunities
+        #        ↓
+        # industries
+        #
+        # Only applications belonging to CURRENT industry
+        # are returned.
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                sa.id AS application_id,
+                sa.student_id,
+                sa.opportunity_id,
+
+                sa.application_date,
+                sa.status,
+
+                sa.resume_url,
+                sa.cover_letter,
+
+                sa.created_at,
+                sa.updated_at,
+
+                o.title AS opportunity_title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+                o.application_deadline,
+
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.phone,
+                s.cgpa,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                c.college_name,
+                c.college_code
+
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE i.id = %s
+
+            ORDER BY sa.application_date DESC
+
+        """, (
+            industry_id,
+        ))
+
+        applications = cursor.fetchall()
+
+
+        # =================================================
+        # STATISTICS
+        # =================================================
+
+        total_applications = len(
+            applications
+        )
+
+
+        applied_applications = sum(
+            1
+            for application in applications
+            if application["status"] == "APPLIED"
+        )
+
+
+        shortlisted_applications = sum(
+            1
+            for application in applications
+            if application["status"] == "SHORTLISTED"
+        )
+
+
+        selected_applications = sum(
+            1
+            for application in applications
+            if application["status"] == "SELECTED"
+        )
+
+
+        rejected_applications = sum(
+            1
+            for application in applications
+            if application["status"] == "REJECTED"
+        )
+
+
+        withdrawn_applications = sum(
+            1
+            for application in applications
+            if application["status"] == "WITHDRAWN"
+        )
+
+
+        # =================================================
+        # RENDER APPLICATIONS PAGE
+        # =================================================
+
+        return render_template(
+            "industry/applications.html",
+
+            dashboard="applications",
+
+            applications=applications,
+
+            total_applications=total_applications,
+
+            applied_applications=applied_applications,
+
+            shortlisted_applications=shortlisted_applications,
+
+            selected_applications=selected_applications,
+
+            rejected_applications=rejected_applications,
+
+            withdrawn_applications=withdrawn_applications
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY APPLICATIONS DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load applications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY APPLICATIONS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load applications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# INDUSTRY APPLICATION - DETAIL
+# =========================================================
+
+@app.route(
+    "/industry/applications/<application_id>"
+)
+@industry_required
+def industry_application_detail(application_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name,
+                status
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        # =================================================
+        # INDUSTRY NOT FOUND
+        # =================================================
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # FETCH APPLICATION DETAIL
+        #
+        # IMPORTANT:
+        # Application must belong to an opportunity
+        # owned by CURRENT INDUSTRY.
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                sa.id AS application_id,
+                sa.student_id,
+                sa.opportunity_id,
+
+                sa.application_date,
+                sa.status,
+
+                sa.resume_url,
+                sa.cover_letter,
+
+                sa.created_at,
+                sa.updated_at,
+
+                o.title AS opportunity_title,
+                o.opportunity_type,
+                o.description AS opportunity_description,
+                o.required_skills,
+                o.eligibility_criteria,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+                o.application_deadline,
+                o.status AS opportunity_status,
+
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.phone,
+                s.dob,
+                s.gender,
+                s.address,
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+                s.linkedin_url,
+                s.github_url,
+                s.portfolio_url,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.city AS college_city,
+                c.state AS college_state
+
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE sa.id = %s
+
+              AND i.id = %s
+
+            LIMIT 1
+
+        """, (
+            application_id,
+            industry_id
+        ))
+
+        application = cursor.fetchone()
+
+
+        # =================================================
+        # APPLICATION NOT FOUND
+        # =================================================
+
+        if not application:
+
+            flash(
+                "Application not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_applications")
+            )
+
+
+        # =================================================
+        # RENDER DETAIL
+        # =================================================
+
+        return render_template(
+            "industry/application_detail.html",
+
+            dashboard="applications",
+
+            application=application
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY APPLICATION DETAIL DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load application.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_applications")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY APPLICATION DETAIL ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load application.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_applications")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# INDUSTRY APPLICATION - UPDATE STATUS
+# =========================================================
+
+@app.route(
+    "/industry/applications/<application_id>/status",
+    methods=["POST"]
+)
+@industry_required
+def industry_update_application_status(application_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT INDUSTRY USER
+        # =================================================
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # GET NEW STATUS
+        # =================================================
+
+        new_status = request.form.get(
+            "status",
+            ""
+        ).strip().upper()
+
+
+        # =================================================
+        # ALLOWED APPLICATION STATUSES
+        # =================================================
+
+        allowed_statuses = [
+            "APPLIED",
+            "SHORTLISTED",
+            "REJECTED",
+            "SELECTED",
+            "WITHDRAWN"
+        ]
+
+
+        if new_status not in allowed_statuses:
+
+            flash(
+                "Invalid application status.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_application_detail",
+                    application_id=application_id
+                )
+            )
+
+
+        # =================================================
+        # DATABASE
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # VERIFY APPLICATION BELONGS TO INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                sa.id,
+                sa.status
+
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            WHERE sa.id = %s
+
+              AND o.industry_id = %s
+
+            LIMIT 1
+
+        """, (
+            application_id,
+            industry_id
+        ))
+
+        application = cursor.fetchone()
+
+
+        if not application:
+
+            flash(
+                "Application not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_applications")
+            )
+
+
+        # =================================================
+        # UPDATE STATUS
+        # =================================================
+
+        cursor.execute("""
+            UPDATE student_applications
+
+            SET
+                status = %s,
+                updated_at = CURRENT_TIMESTAMP
+
+            WHERE id = %s
+        """, (
+            new_status,
+            application_id
+        ))
+
+
+        # =================================================
+        # COMMIT
+        # =================================================
+
+        conn.commit()
+
+
+        # =================================================
+        # SUCCESS
+        # =================================================
+
+        flash(
+            f"Application status changed to {new_status}.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_application_detail",
+                application_id=application_id
+            )
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("UPDATE APPLICATION STATUS DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update application status.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_application_detail",
+                application_id=application_id
+            )
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("UPDATE APPLICATION STATUS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update application status.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_application_detail",
+                application_id=application_id
+            )
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY - COLLEGES LIST
+# =========================================================
+
+@app.route("/industry/colleges")
+@industry_required
+def industry_colleges():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET REGISTERED COLLEGES
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.user_id,
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email,
+                c.phone,
+                c.address,
+                c.city,
+                c.state,
+                c.pincode,
+                c.website,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                u.name AS user_name,
+
+                COUNT(DISTINCT s.id) AS student_count
+
+            FROM colleges c
+
+            LEFT JOIN users u
+                ON c.user_id = u.id
+
+            LEFT JOIN students s
+                ON c.id = s.college_id
+
+            WHERE c.status = 'ACTIVE'
+
+            GROUP BY
+                c.id,
+                c.user_id,
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email,
+                c.phone,
+                c.address,
+                c.city,
+                c.state,
+                c.pincode,
+                c.website,
+                c.status,
+                c.created_at,
+                c.updated_at,
+                u.name
+
+            ORDER BY c.college_name ASC
+        """)
+
+        colleges = cursor.fetchall()
+
+
+        # =================================================
+        # STATES
+        # =================================================
+
+        cursor.execute("""
+            SELECT DISTINCT
+                state
+            FROM colleges
+
+            WHERE status = 'ACTIVE'
+
+              AND state IS NOT NULL
+
+              AND state != ''
+
+            ORDER BY state ASC
+        """)
+
+        states = [
+            row["state"]
+            for row in cursor.fetchall()
+        ]
+
+
+        # =================================================
+        # COLLABORATION COUNT
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM collaborations
+
+            WHERE industry_id = (
+                SELECT id
+                FROM industries
+                WHERE user_id = %s
+                LIMIT 1
+            )
+        """, (
+            user_id,
+        ))
+
+        collaboration_count = (
+            cursor.fetchone()["total"]
+        )
+
+
+        # =================================================
+        # COLLABORATION REQUEST COUNT
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM collaborations
+
+            WHERE industry_id = (
+                SELECT id
+                FROM industries
+                WHERE user_id = %s
+                LIMIT 1
+            )
+
+              AND status = 'PENDING'
+        """, (
+            user_id,
+        ))
+
+        collaboration_request_count = (
+            cursor.fetchone()["total"]
+        )
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "industry/colleges.html",
+
+            dashboard="colleges",
+
+            colleges=colleges,
+
+            states=states,
+
+            collaboration_count=collaboration_count,
+
+            collaboration_request_count=collaboration_request_count
+        )
+
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY COLLEGES DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load colleges.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY COLLEGES ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load colleges.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# INDUSTRY - COLLEGE DETAIL
+# =========================================================
+
+@app.route("/industry/colleges/<college_id>")
+@industry_required
+def industry_college_detail(college_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # GET COLLEGE
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.user_id,
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email,
+                c.phone,
+                c.address,
+                c.city,
+                c.state,
+                c.pincode,
+                c.website,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                u.name AS user_name,
+                u.email AS user_email,
+
+                COUNT(DISTINCT s.id) AS student_count
+
+            FROM colleges c
+
+            LEFT JOIN users u
+                ON c.user_id = u.id
+
+            LEFT JOIN students s
+                ON c.id = s.college_id
+
+            WHERE c.id = %s
+
+              AND c.status = 'ACTIVE'
+
+            GROUP BY
+                c.id,
+                c.user_id,
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email,
+                c.phone,
+                c.address,
+                c.city,
+                c.state,
+                c.pincode,
+                c.website,
+                c.status,
+                c.created_at,
+                c.updated_at,
+                u.name,
+                u.email
+
+            LIMIT 1
+        """, (
+            college_id,
+        ))
+
+        college = cursor.fetchone()
+
+
+        # =================================================
+        # NOT FOUND
+        # =================================================
+
+        if not college:
+
+            flash(
+                "College not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_colleges")
+            )
+
+
+        # =================================================
+        # CHECK EXISTING COLLABORATION
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                title,
+                collaboration_type,
+                status,
+                start_date,
+                end_date,
+                created_at
+
+            FROM collaborations
+
+            WHERE college_id = %s
+
+              AND industry_id = (
+                  SELECT id
+                  FROM industries
+                  WHERE user_id = %s
+                  LIMIT 1
+              )
+
+            ORDER BY created_at DESC
+
+            LIMIT 1
+        """, (
+            college_id,
+            user_id
+        ))
+
+        existing_collaboration = (
+            cursor.fetchone()
+        )
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "industry/college_detail.html",
+
+            dashboard="college_detail",
+
+            college=college,
+
+            existing_collaboration=existing_collaboration
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY COLLEGE DETAIL DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load college details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_colleges")
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY COLLEGE DETAIL ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load college details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_colleges")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY - COLLABORATION REQUESTS
+# =========================================================
+
+@app.route("/industry/collaboration")
+@industry_required
+def industry_collaboration_requests():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash("Industry session expired. Please login again.", "error")
+            return redirect(url_for("login"))
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(dictionary=True)
+
+        # =================================================
+        # CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+        if not industry:
+            flash("Industry profile not found.", "error")
+            return redirect(url_for("industry_dashboard"))
+
+        industry_id = industry["id"]
+
+        # =================================================
+        # GET COLLABORATION REQUESTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                c.id,
+                c.college_id,
+                c.industry_id,
+
+                c.title,
+                c.description,
+                c.collaboration_type,
+
+                c.start_date,
+                c.end_date,
+
+                c.status,
+
+                c.created_at,
+                c.updated_at,
+
+                cl.college_name,
+                cl.college_code,
+                cl.university_name,
+                cl.city,
+                cl.state,
+                cl.email AS college_email,
+                cl.phone AS college_phone
+
+            FROM collaborations c
+
+            INNER JOIN colleges cl
+                ON c.college_id = cl.id
+
+            WHERE c.industry_id = %s
+
+            ORDER BY c.created_at DESC
+        """, (
+            industry_id,
+        ))
+
+        requests = cursor.fetchall()
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "industry/collaboration_requests.html",
+
+            dashboard="collaboration",
+
+            requests=requests
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("INDUSTRY COLLABORATION DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load collaboration requests.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("INDUSTRY COLLABORATION ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load collaboration requests.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# INDUSTRY - SEND COLLABORATION REQUEST
+# =========================================================
+
+@app.route(
+    "/industry/colleges/<college_id>/collaboration",
+    methods=["POST"]
+)
+@industry_required
+def industry_send_collaboration_request(college_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash("Industry session expired. Please login again.", "error")
+            return redirect(url_for("login"))
+
+        # =================================================
+        # FORM DATA
+        # =================================================
+
+        title = request.form.get(
+            "title",
+            ""
+        ).strip()
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+        collaboration_type = request.form.get(
+            "collaboration_type",
+            ""
+        ).strip().upper()
+
+        # =================================================
+        # VALIDATION
+        # =================================================
+
+        if not title:
+
+            flash(
+                "Collaboration title is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_college_detail",
+                    college_id=college_id
+                )
+            )
+
+
+        if not collaboration_type:
+
+            flash(
+                "Please select a collaboration type.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_college_detail",
+                    college_id=college_id
+                )
+            )
+
+
+        allowed_types = [
+            "INTERNSHIP",
+            "LIVE_PROJECT",
+            "INDUSTRY_PROJECT",
+            "TRAINING",
+            "WORKSHOP",
+            "RESEARCH",
+            "PLACEMENT"
+        ]
+
+
+        if collaboration_type not in allowed_types:
+
+            flash(
+                "Invalid collaboration type.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_college_detail",
+                    college_id=college_id
+                )
+            )
+
+
+        # =================================================
+        # DATABASE
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # VERIFY COLLEGE
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                college_name,
+                status
+            FROM colleges
+            WHERE id = %s
+            LIMIT 1
+        """, (
+            college_id,
+        ))
+
+        college = cursor.fetchone()
+
+
+        if not college:
+
+            flash(
+                "College not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_colleges")
+            )
+
+
+        if college["status"] != "ACTIVE":
+
+            flash(
+                "Collaboration can only be requested from an active college.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_college_detail",
+                    college_id=college_id
+                )
+            )
+
+
+        # =================================================
+        # DUPLICATE ACTIVE/PENDING REQUEST CHECK
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                status
+
+            FROM collaborations
+
+            WHERE college_id = %s
+
+              AND industry_id = %s
+
+              AND status IN (
+                  'PENDING',
+                  'ACTIVE'
+              )
+
+            LIMIT 1
+        """, (
+            college_id,
+            industry_id
+        ))
+
+        existing = cursor.fetchone()
+
+
+        if existing:
+
+            if existing["status"] == "PENDING":
+
+                flash(
+                    "A collaboration request is already pending for this college.",
+                    "error"
+                )
+
+            else:
+
+                flash(
+                    "An active collaboration already exists with this college.",
+                    "error"
+                )
+
+
+            return redirect(
+                url_for(
+                    "industry_college_detail",
+                    college_id=college_id
+                )
+            )
+
+
+        # =================================================
+        # GENERATE UUID
+        # =================================================
+
+        collaboration_id = str(
+            uuid.uuid4()
+        )
+
+
+        # =================================================
+        # INSERT REQUEST
+        # =================================================
+
+        cursor.execute("""
+            INSERT INTO collaborations (
+                id,
+                college_id,
+                industry_id,
+                title,
+                description,
+                collaboration_type,
+                status
+            )
+
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                'PENDING'
+            )
+        """, (
+            collaboration_id,
+            college_id,
+            industry_id,
+            title,
+            description,
+            collaboration_type
+        ))
+
+
+        conn.commit()
+
+
+        flash(
+            "Collaboration request sent successfully.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_collaboration_requests"
+            )
+        )
+
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("SEND COLLABORATION REQUEST DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to send collaboration request.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_college_detail",
+                college_id=college_id
+            )
+        )
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("SEND COLLABORATION REQUEST ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to send collaboration request.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_college_detail",
+                college_id=college_id
+            )
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# INDUSTRY - CANCEL COLLABORATION REQUEST
+# =========================================================
+
+@app.route(
+    "/industry/collaboration/<collaboration_id>/cancel",
+    methods=["POST"]
+)
+@industry_required
+def industry_cancel_collaboration(
+    collaboration_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Industry session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # CURRENT INDUSTRY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_dashboard")
+            )
+
+
+        industry_id = industry["id"]
+
+
+        # =================================================
+        # VERIFY REQUEST OWNERSHIP
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                status
+
+            FROM collaborations
+
+            WHERE id = %s
+
+              AND industry_id = %s
+
+            LIMIT 1
+        """, (
+            collaboration_id,
+            industry_id
+        ))
+
+        collaboration = cursor.fetchone()
+
+
+        if not collaboration:
+
+            flash(
+                "Collaboration request not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_collaboration_requests"
+                )
+            )
+
+
+        # =================================================
+        # ONLY PENDING REQUEST CAN BE CANCELLED
+        # =================================================
+
+        if collaboration["status"] != "PENDING":
+
+            flash(
+                "Only pending collaboration requests can be cancelled.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_collaboration_requests"
+                )
+            )
+
+
+        # =================================================
+        # CANCEL
+        # =================================================
+
+        cursor.execute("""
+            UPDATE collaborations
+
+            SET
+                status = 'CANCELLED',
+                updated_at = CURRENT_TIMESTAMP
+
+            WHERE id = %s
+
+              AND industry_id = %s
+        """, (
+            collaboration_id,
+            industry_id
+        ))
+
+
+        conn.commit()
+
+
+        flash(
+            "Collaboration request cancelled successfully.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_collaboration_requests"
+            )
+        )
+
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("CANCEL COLLABORATION DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to cancel collaboration request.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_collaboration_requests"
+            )
+        )
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("CANCEL COLLABORATION ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to cancel collaboration request.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "industry_collaboration_requests"
+            )
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+@app.route("/industry/students")
+@industry_required
+def industry_students():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        search_query = request.args.get("q", "").strip()
+        selected_course = request.args.get("course", "").strip()
+        selected_branch = request.args.get("branch", "").strip()
+        selected_college = request.args.get("college_id", "").strip()
+
+
+        # ---------------------------------------------------------
+        # Dropdown values
+        # ---------------------------------------------------------
+
+        cursor.execute("""
+            SELECT DISTINCT course
+            FROM students
+            WHERE course IS NOT NULL
+              AND course != ''
+            ORDER BY course
+        """)
+
+        courses = [
+            row["course"]
+            for row in cursor.fetchall()
+        ]
+
+
+        cursor.execute("""
+            SELECT DISTINCT branch
+            FROM students
+            WHERE branch IS NOT NULL
+              AND branch != ''
+            ORDER BY branch
+        """)
+
+        branches = [
+            row["branch"]
+            for row in cursor.fetchall()
+        ]
+
+
+        cursor.execute("""
+            SELECT id, college_name
+            FROM colleges
+            WHERE status = 'ACTIVE'
+            ORDER BY college_name
+        """)
+
+        colleges = cursor.fetchall()
+
+
+        # ---------------------------------------------------------
+        # Main student query
+        # ---------------------------------------------------------
+
+        query = """
+            SELECT
+                s.id,
+                s.user_id,
+                s.college_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.phone,
+                s.dob,
+                s.gender,
+                s.address,
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+                s.linkedin_url,
+                s.github_url,
+                s.portfolio_url,
+                s.resume_url,
+                s.profile_completed,
+
+                u.name AS name,
+                u.email AS email,
+
+                c.college_name,
+                c.university_name,
+                c.city AS college_city,
+                c.state AS college_state
+
+            FROM students s
+
+            LEFT JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE 1 = 1
+        """
+
+        params = []
+
+
+        # Search
+        if search_query:
+
+            query += """
+                AND (
+                    u.name LIKE %s
+                    OR u.email LIKE %s
+                    OR s.enrollment_no LIKE %s
+                    OR s.course LIKE %s
+                    OR s.branch LIKE %s
+                )
+            """
+
+            search_value = f"%{search_query}%"
+
+            params.extend([
+                search_value,
+                search_value,
+                search_value,
+                search_value,
+                search_value
+            ])
+
+
+        # Course
+        if selected_course:
+
+            query += """
+                AND s.course = %s
+            """
+
+            params.append(selected_course)
+
+
+        # Branch
+        if selected_branch:
+
+            query += """
+                AND s.branch = %s
+            """
+
+            params.append(selected_branch)
+
+
+        # College
+        if selected_college:
+
+            query += """
+                AND s.college_id = %s
+            """
+
+            params.append(selected_college)
+
+
+        query += """
+            ORDER BY u.name ASC
+        """
+
+
+        cursor.execute(query, params)
+
+        students = cursor.fetchall()
+
+
+        # ---------------------------------------------------------
+        # Skill data
+        # ---------------------------------------------------------
+
+        student_ids = [
+            student["id"]
+            for student in students
+        ]
+
+
+        skills_by_student = {}
+
+        if student_ids:
+
+            placeholders = ", ".join(
+                ["%s"] * len(student_ids)
+            )
+
+            cursor.execute(
+                f"""
+                    SELECT
+                        student_id,
+                        skill_name,
+                        proficiency_level,
+                        assessment_percentage,
+                        verification_status,
+                        last_assessed_at
+
+                    FROM student_skills
+
+                    WHERE student_id IN ({placeholders})
+
+                    ORDER BY
+                        assessment_percentage DESC,
+                        skill_name ASC
+                """,
+                student_ids
+            )
+
+            skill_rows = cursor.fetchall()
+
+
+            for skill in skill_rows:
+
+                student_id = skill["student_id"]
+
+                if student_id not in skills_by_student:
+                    skills_by_student[student_id] = []
+
+                skills_by_student[student_id].append(skill)
+
+
+        # Attach skills to student records
+        for student in students:
+
+            student["skills"] = skills_by_student.get(
+                student["id"],
+                []
+            )
+
+
+        # ---------------------------------------------------------
+        # Statistics
+        # ---------------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+        """)
+
+        total_students = cursor.fetchone()["total"]
+
+
+        cursor.execute("""
+            SELECT COUNT(DISTINCT course) AS total
+            FROM students
+            WHERE course IS NOT NULL
+              AND course != ''
+        """)
+
+        total_courses = cursor.fetchone()["total"]
+
+
+        cursor.execute("""
+            SELECT COUNT(DISTINCT college_id) AS total
+            FROM students
+            WHERE college_id IS NOT NULL
+        """)
+
+        total_colleges = cursor.fetchone()["total"]
+
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE profile_completed = 1
+        """)
+
+        completed_profiles = cursor.fetchone()["total"]
+
+
+        return render_template(
+            "industry/students.html",
+
+            dashboard="students",
+
+            students=students,
+
+            courses=courses,
+            branches=branches,
+            colleges=colleges,
+
+            search_query=search_query,
+            selected_course=selected_course,
+            selected_branch=selected_branch,
+            selected_college=selected_college,
+
+            total_students=total_students,
+            total_courses=total_courses,
+            total_colleges=total_colleges,
+            completed_profiles=completed_profiles
+        )
+
+
+    except Exception as e:
+
+        print("Industry Students Error:", e)
+
+        flash(
+            "Unable to load student directory.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+@app.route("/industry/students/<student_id>")
+@industry_required
+def industry_student_detail(student_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+
+        # ---------------------------------------------------------
+        # Student details
+        # ---------------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                s.college_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.phone,
+                s.dob,
+                s.gender,
+                s.address,
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+                s.linkedin_url,
+                s.github_url,
+                s.portfolio_url,
+                s.resume_url,
+                s.profile_completed,
+
+                u.name AS name,
+                u.email AS email,
+
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email AS college_email,
+                c.phone AS college_phone,
+                c.address AS college_address,
+                c.city AS college_city,
+                c.state AS college_state,
+                c.pincode AS college_pincode,
+                c.website AS college_website
+
+            FROM students s
+
+            LEFT JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE s.id = %s
+
+            LIMIT 1
+        """, (student_id,))
+
+
+        student = cursor.fetchone()
+
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_students")
+            )
+
+
+        # ---------------------------------------------------------
+        # Student skill assessments
+        # ---------------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                skill_name,
+                proficiency_level,
+                assessment_percentage,
+                verification_status,
+                last_assessed_at,
+                created_at
+
+            FROM student_skills
+
+            WHERE student_id = %s
+
+            ORDER BY
+                assessment_percentage DESC,
+                skill_name ASC
+        """, (student_id,))
+
+
+        skills = cursor.fetchall()
+
+
+        return render_template(
+            "industry/student_detail.html",
+
+            dashboard="student_detail",
+
+            student=student,
+            skills=skills
+        )
+
+
+    except Exception as e:
+
+        print(
+            "Industry Student Detail Error:",
+            e
+        )
+
+        flash(
+            "Unable to load student profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_students")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
 # =========================================================
 # LOGOUT
 # =========================================================

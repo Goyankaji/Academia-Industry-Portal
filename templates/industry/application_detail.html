@@ -1,0 +1,671 @@
+{% extends "industry/base.html" %}
+
+{% block title %}
+Application Details | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-applications.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-application-detail-page">
+
+
+    <!-- =====================================================
+         BACK
+    ====================================================== -->
+
+    <a
+        href="{{ url_for('industry_applications') }}"
+        class="application-back-link">
+
+        ← Back to Applications
+
+    </a>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="application-detail-header">
+
+
+        <div class="application-detail-student">
+
+
+            <div class="detail-student-avatar">
+
+                {% if application.student_name %}
+
+                    {{ application.student_name[0]|upper }}
+
+                {% else %}
+
+                    S
+
+                {% endif %}
+
+            </div>
+
+
+            <div>
+
+                <span class="application-detail-eyebrow">
+                    APPLICATION
+                </span>
+
+                <h1>
+                    {{ application.student_name|default("Student") }}
+                </h1>
+
+                <p>
+                    {{ application.student_email|default("Email not available") }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="application-detail-header-actions">
+
+            <span
+                class="industry-application-status
+                       status-{{ application.status|default('PENDING')|lower }}">
+
+                {{ application.status|default("PENDING") }}
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DETAIL GRID
+    ====================================================== -->
+
+    <div class="application-detail-grid">
+
+
+        <!-- =================================================
+             MAIN
+        ================================================== -->
+
+        <div class="application-detail-main">
+
+
+            <!-- OPPORTUNITY -->
+
+            <section class="application-detail-panel">
+
+                <div class="application-panel-heading">
+
+                    <span>
+                        💼
+                    </span>
+
+                    <div>
+
+                        <span>
+                            OPPORTUNITY
+                        </span>
+
+                        <h2>
+                            {{ application.opportunity_title|default("Opportunity") }}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="application-opportunity-details">
+
+
+                    <div>
+
+                        <small>
+                            TYPE
+                        </small>
+
+                        <strong>
+                            {{ application.opportunity_type|default("—") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            LOCATION
+                        </small>
+
+                        <strong>
+                            {{ application.location|default("Not specified") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            WORK MODE
+                        </small>
+
+                        <strong>
+                            {{ application.work_mode|default("Not specified") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            APPLIED ON
+                        </small>
+
+                        <strong>
+
+                            {% if application.applied_at %}
+
+                                {{ application.applied_at.strftime('%d %b %Y, %I:%M %p') }}
+
+                            {% elif application.created_at %}
+
+                                {{ application.created_at.strftime('%d %b %Y, %I:%M %p') }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- STUDENT INFORMATION -->
+
+            <section class="application-detail-panel">
+
+                <div class="application-panel-heading">
+
+                    <span>
+                        👤
+                    </span>
+
+                    <div>
+
+                        <span>
+                            STUDENT INFORMATION
+                        </span>
+
+                        <h2>
+                            Profile
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="application-student-info-grid">
+
+
+                    <div>
+
+                        <small>
+                            FULL NAME
+                        </small>
+
+                        <strong>
+                            {{ application.student_name|default("—") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            EMAIL
+                        </small>
+
+                        <strong>
+                            {{ application.student_email|default("—") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            PHONE
+                        </small>
+
+                        <strong>
+                            {{ application.student_phone|default("—") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            COLLEGE
+                        </small>
+
+                        <strong>
+                            {{ application.college_name|default("—") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            BRANCH
+                        </small>
+
+                        <strong>
+                            {{ application.branch|default("—") }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            CGPA
+                        </small>
+
+                        <strong>
+                            {{ application.cgpa|default("—") }}
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+            <!-- SKILLS -->
+
+            <section class="application-detail-panel">
+
+                <div class="application-panel-heading">
+
+                    <span>
+                        🎯
+                    </span>
+
+                    <div>
+
+                        <span>
+                            SKILLS
+                        </span>
+
+                        <h2>
+                            Technical Skills
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                {% if application.skills %}
+
+                    <div class="application-detail-skills">
+
+                        {% for skill in application.skills.split(',') %}
+
+                            <span>
+                                {{ skill.strip() }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <p class="application-muted">
+                        No skills information available.
+                    </p>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- COVER LETTER / MESSAGE -->
+
+            {% if application.cover_letter or application.message %}
+
+                <section class="application-detail-panel">
+
+                    <div class="application-panel-heading">
+
+                        <span>
+                            📝
+                        </span>
+
+                        <div>
+
+                            <span>
+                                APPLICATION MESSAGE
+                            </span>
+
+                            <h2>
+                                Student Message
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="application-message">
+
+                        {{ application.cover_letter|default(application.message)|replace('\n', '<br>')|safe }}
+
+                    </div>
+
+                </section>
+
+            {% endif %}
+
+
+        </div>
+
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside class="application-detail-sidebar">
+
+
+            <!-- APPLICATION STATUS -->
+
+            <section class="application-detail-panel">
+
+                <div class="application-panel-heading">
+
+                    <span>
+                        📌
+                    </span>
+
+                    <div>
+
+                        <span>
+                            APPLICATION STATUS
+                        </span>
+
+                        <h2>
+                            Update Status
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="application-status-current">
+
+                    <span>
+                        Current Status
+                    </span>
+
+                    <strong
+                        class="status-text-{{ application.status|default('PENDING')|lower }}">
+
+                        {{ application.status|default("PENDING") }}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="application-status-actions">
+
+
+                    {% if application.status|upper != "SHORTLISTED" %}
+
+                        <button
+                            type="button"
+                            class="application-status-button shortlisted"
+                            data-status="SHORTLISTED">
+
+                            Shortlist
+
+                        </button>
+
+                    {% endif %}
+
+
+                    {% if application.status|upper != "SELECTED" %}
+
+                        <button
+                            type="button"
+                            class="application-status-button selected"
+                            data-status="SELECTED">
+
+                            Select
+
+                        </button>
+
+                    {% endif %}
+
+
+                    {% if application.status|upper != "REJECTED" %}
+
+                        <button
+                            type="button"
+                            class="application-status-button rejected"
+                            data-status="REJECTED">
+
+                            Reject
+
+                        </button>
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+
+            <!-- RESUME -->
+
+            <section class="application-detail-panel">
+
+                <div class="application-panel-heading">
+
+                    <span>
+                        📎
+                    </span>
+
+                    <div>
+
+                        <span>
+                            DOCUMENTS
+                        </span>
+
+                        <h2>
+                            Resume
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                {% if application.resume_url %}
+
+                    <a
+                        href="{{ application.resume_url }}"
+                        target="_blank"
+                        rel="noopener"
+                        class="application-document-button">
+
+                        View Resume
+
+                        <span>
+                            ↗
+                        </span>
+
+                    </a>
+
+                {% else %}
+
+                    <p class="application-muted">
+                        Resume not available.
+                    </p>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- APPLICATION TIMELINE -->
+
+            <section class="application-detail-panel">
+
+                <div class="application-panel-heading">
+
+                    <span>
+                        🕒
+                    </span>
+
+                    <div>
+
+                        <span>
+                            TIMELINE
+                        </span>
+
+                        <h2>
+                            Application Activity
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="application-timeline">
+
+
+                    <div class="application-timeline-item">
+
+                        <span class="application-timeline-dot"></span>
+
+                        <div>
+
+                            <small>
+                                APPLICATION SUBMITTED
+                            </small>
+
+                            <strong>
+
+                                {% if application.applied_at %}
+
+                                    {{ application.applied_at.strftime('%d %b %Y, %I:%M %p') }}
+
+                                {% elif application.created_at %}
+
+                                    {{ application.created_at.strftime('%d %b %Y, %I:%M %p') }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if application.updated_at %}
+
+                        <div class="application-timeline-item">
+
+                            <span class="application-timeline-dot"></span>
+
+                            <div>
+
+                                <small>
+                                    LAST UPDATED
+                                </small>
+
+                                <strong>
+                                    {{ application.updated_at.strftime('%d %b %Y, %I:%M %p') }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+        </aside>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+    window.INDUSTRY_APPLICATION_ID =
+        "{{ application.id|default('') }}";
+
+</script>
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/industry/industry-applications.js'
+    ) }}">
+</script>
+
+{% endblock %}

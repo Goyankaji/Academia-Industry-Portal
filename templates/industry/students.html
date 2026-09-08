@@ -1,0 +1,377 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Student Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+      filename='css/industry/industry-students.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="students-page">
+
+    <!-- Page Header -->
+    <div class="students-header">
+        <div>
+            <span class="page-eyebrow">TALENT DISCOVERY</span>
+            <h1>Student Directory</h1>
+            <p>
+                Discover students, review academic profiles and
+                identify relevant talent for industry opportunities.
+            </p>
+        </div>
+
+        <div class="students-header-count">
+            <div class="count-number">{{ students|length }}</div>
+            <div class="count-label">Students Found</div>
+        </div>
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="student-stats-grid">
+
+        <div class="student-stat-card">
+            <div class="stat-icon">👨‍🎓</div>
+            <div>
+                <span>Total Students</span>
+                <strong>{{ total_students }}</strong>
+            </div>
+        </div>
+
+        <div class="student-stat-card">
+            <div class="stat-icon">🎓</div>
+            <div>
+                <span>Courses</span>
+                <strong>{{ total_courses }}</strong>
+            </div>
+        </div>
+
+        <div class="student-stat-card">
+            <div class="stat-icon">🏫</div>
+            <div>
+                <span>Colleges</span>
+                <strong>{{ total_colleges }}</strong>
+            </div>
+        </div>
+
+        <div class="student-stat-card">
+            <div class="stat-icon">✓</div>
+            <div>
+                <span>Profiles Completed</span>
+                <strong>{{ completed_profiles }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Filters -->
+    <div class="student-filter-card">
+
+        <form method="GET"
+              action="{{ url_for('industry_students') }}"
+              id="studentFilterForm">
+
+            <div class="filter-search">
+
+                <label for="studentSearch">Search Students</label>
+
+                <div class="search-input-wrapper">
+                    <span class="search-icon">⌕</span>
+
+                    <input
+                        type="text"
+                        id="studentSearch"
+                        name="q"
+                        value="{{ search_query }}"
+                        placeholder="Search by name, enrollment number, course or branch...">
+                </div>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="courseFilter">Course</label>
+
+                <select id="courseFilter" name="course">
+
+                    <option value="">All Courses</option>
+
+                    {% for course in courses %}
+                    <option value="{{ course }}"
+                        {% if selected_course == course %}selected{% endif %}>
+                        {{ course }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="branchFilter">Branch</label>
+
+                <select id="branchFilter" name="branch">
+
+                    <option value="">All Branches</option>
+
+                    {% for branch in branches %}
+                    <option value="{{ branch }}"
+                        {% if selected_branch == branch %}selected{% endif %}>
+                        {{ branch }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="collegeFilter">College</label>
+
+                <select id="collegeFilter" name="college_id">
+
+                    <option value="">All Colleges</option>
+
+                    {% for college in colleges %}
+                    <option value="{{ college.id }}"
+                        {% if selected_college == college.id %}selected{% endif %}>
+                        {{ college.college_name }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-actions">
+
+                <button type="submit"
+                        class="btn-primary">
+                    Search
+                </button>
+
+                <a href="{{ url_for('industry_students') }}"
+                   class="btn-secondary"
+                   id="clearStudentFilters">
+                    Clear
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- Results -->
+    <div class="students-section-header">
+
+        <div>
+            <h2>Available Students</h2>
+
+            {% if students %}
+                <p>{{ students|length }} student(s) match your search.</p>
+            {% else %}
+                <p>No students match your current filters.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+
+    {% if students %}
+
+    <div class="students-grid">
+
+        {% for student in students %}
+
+        <article class="student-card">
+
+            <div class="student-card-top">
+
+                <div class="student-avatar">
+                    {{ (student.name or 'S')[0]|upper }}
+                </div>
+
+                <div class="student-basic">
+
+                    <h3>
+                        {{ student.name or 'Student' }}
+                    </h3>
+
+                    <p>
+                        {{ student.course }}
+                        {% if student.branch %}
+                            · {{ student.branch }}
+                        {% endif %}
+                    </p>
+
+                </div>
+
+                {% if student.profile_completed %}
+                    <span class="profile-badge completed">
+                        ✓ Profile Complete
+                    </span>
+                {% else %}
+                    <span class="profile-badge incomplete">
+                        Profile Incomplete
+                    </span>
+                {% endif %}
+
+            </div>
+
+
+            <div class="student-card-info">
+
+                <div class="info-item">
+                    <span>Enrollment No.</span>
+                    <strong>{{ student.enrollment_no }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Semester</span>
+                    <strong>
+                        {% if student.semester %}
+                            {{ student.semester }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>CGPA</span>
+                    <strong>
+                        {% if student.cgpa is not none %}
+                            {{ student.cgpa }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>College</span>
+                    <strong>
+                        {{ student.college_name or '—' }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            {% if student.skills %}
+
+            <div class="student-skills-preview">
+
+                <span class="skills-label">Assessed Skills</span>
+
+                <div class="skill-tags">
+
+                    {% for skill in student.skills[:4] %}
+
+                    <span class="skill-tag">
+
+                        {{ skill.skill_name }}
+
+                        {% if skill.assessment_percentage is not none %}
+                            <small>
+                                {{ skill.assessment_percentage|round(0)|int }}%
+                            </small>
+                        {% endif %}
+
+                    </span>
+
+                    {% endfor %}
+
+                    {% if student.skills|length > 4 %}
+                    <span class="skill-more">
+                        +{{ student.skills|length - 4 }}
+                    </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% else %}
+
+            <div class="no-skills">
+                No skill assessment available yet.
+            </div>
+
+            {% endif %}
+
+
+            <div class="student-card-footer">
+
+                <div class="student-location">
+
+                    {% if student.city %}
+                        📍 {{ student.city }}
+                    {% elif student.state %}
+                        📍 {{ student.state }}
+                    {% else %}
+                        📍 Location not available
+                    {% endif %}
+
+                </div>
+
+                <a href="{{ url_for(
+                    'industry_student_detail',
+                    student_id=student.id
+                ) }}"
+                   class="view-student-btn">
+                    View Profile →
+                </a>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-students">
+
+        <div class="empty-icon">🎓</div>
+
+        <h3>No Students Found</h3>
+
+        <p>
+            Try changing your search criteria or clearing the filters.
+        </p>
+
+        <a href="{{ url_for('industry_students') }}"
+           class="btn-primary">
+            View All Students
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-students.js'
+) }}"></script>
+{% endblock %}

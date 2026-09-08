@@ -1,0 +1,812 @@
+/* =========================================================
+   INDUSTRY PROFILE
+========================================================= */
+
+
+/* =========================================================
+   PROFILE HEADER
+========================================================= */
+
+.industry-profile-header {
+    padding: 24px 28px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 2px 10px rgba(15, 23, 42, 0.03);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.industry-profile-header-left {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    min-width: 0;
+}
+
+.industry-profile-company-icon {
+    width: 52px;
+    height: 52px;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    font-size: 24px;
+}
+
+.industry-profile-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #2563eb;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.industry-profile-header h2 {
+    font-size: 21px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.industry-profile-header p {
+    margin-top: 4px;
+
+    color: #6b7280;
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.industry-profile-header-action {
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   HEADER BUTTONS
+========================================================= */
+
+.industry-profile-edit-btn,
+.industry-profile-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 38px;
+
+    padding: 0 15px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.industry-profile-edit-btn {
+    background: #2563eb;
+
+    color: white;
+}
+
+.industry-profile-edit-btn:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+.industry-profile-secondary-btn {
+    background: white;
+
+    color: #374151;
+
+    border: 1px solid #e5e7eb;
+}
+
+.industry-profile-secondary-btn:hover {
+    background: #f9fafb;
+
+    border-color: #d1d5db;
+}
+
+
+/* =========================================================
+   PROFILE LAYOUT
+========================================================= */
+
+.industry-profile-layout {
+    margin-top: 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   PROFILE CARD
+========================================================= */
+
+.industry-profile-card {
+    padding: 22px 25px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 2px 10px rgba(15, 23, 42, 0.03);
+}
+
+.industry-profile-card-header {
+    padding-bottom: 15px;
+
+    margin-bottom: 5px;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.industry-profile-section-label {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #2563eb;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.9px;
+}
+
+.industry-profile-card-header h3,
+.industry-profile-form-heading h3 {
+    font-size: 16px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+/* =========================================================
+   PROFILE DETAILS
+========================================================= */
+
+.industry-profile-details-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    column-gap: 40px;
+    row-gap: 0;
+}
+
+.industry-profile-detail {
+    min-height: 68px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.industry-profile-detail:nth-last-child(-n + 2) {
+    border-bottom: none;
+}
+
+.industry-profile-detail-label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #9ca3af;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.industry-profile-detail strong {
+    display: block;
+
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    word-break: break-word;
+}
+
+.industry-profile-detail a {
+    display: block;
+
+    color: #2563eb;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    word-break: break-all;
+}
+
+.industry-profile-detail a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   LOCATION
+========================================================= */
+
+.industry-profile-location {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 15px;
+
+    padding-top: 12px;
+}
+
+.industry-profile-location-item {
+    min-height: 72px;
+
+    padding: 14px;
+
+    border: 1px solid #f1f5f9;
+
+    border-radius: 10px;
+
+    background: #fafbfc;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 11px;
+}
+
+.industry-profile-location-icon {
+    width: 32px;
+    height: 32px;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    font-size: 14px;
+}
+
+.industry-profile-location-item span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.industry-profile-location-item strong {
+    display: block;
+
+    color: #374151;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.industry-profile-description {
+    padding-top: 12px;
+}
+
+.industry-profile-description p {
+    color: #4b5563;
+
+    font-size: 12px;
+
+    line-height: 1.8;
+
+    white-space: pre-line;
+}
+
+.industry-profile-empty-description {
+    min-height: 60px;
+
+    padding: 14px;
+
+    border-radius: 9px;
+
+    background: #f8fafc;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.industry-profile-empty-description span {
+    font-size: 16px;
+}
+
+.industry-profile-empty-description p {
+    color: #9ca3af;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   ACCOUNT STATUS
+========================================================= */
+
+.industry-profile-status-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.industry-profile-status-left {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    min-width: 0;
+}
+
+.industry-profile-status-icon {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    background: #dcfce7;
+
+    color: #16a34a;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.industry-profile-status-left h3 {
+    font-size: 14px;
+
+    color: #111827;
+}
+
+.industry-profile-status-left p {
+    margin-top: 4px;
+
+    color: #6b7280;
+
+    font-size: 10px;
+}
+
+.industry-profile-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 68px;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-unknown {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+
+/* =========================================================
+   EDIT PROFILE CARD
+========================================================= */
+
+.industry-profile-edit-card {
+    margin-top: 20px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 2px 10px rgba(15, 23, 42, 0.03);
+
+    overflow: hidden;
+}
+
+.industry-profile-form {
+    width: 100%;
+}
+
+
+/* =========================================================
+   FORM SECTION
+========================================================= */
+
+.industry-profile-form-section {
+    padding: 25px;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.industry-profile-form-heading {
+    margin-bottom: 20px;
+}
+
+.industry-profile-form-heading p {
+    margin-top: 5px;
+
+    color: #9ca3af;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+.industry-profile-form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+.industry-profile-form-full {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
+
+.industry-profile-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.industry-profile-form-group label {
+    margin-bottom: 7px;
+
+    color: #374151;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.industry-profile-form-group label span {
+    color: #dc2626;
+}
+
+.industry-profile-form-group input,
+.industry-profile-form-group textarea,
+.industry-profile-form-group select {
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: #111827;
+
+    outline: none;
+
+    font-size: 11px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.industry-profile-form-group input {
+    height: 40px;
+}
+
+.industry-profile-form-group textarea {
+    resize: vertical;
+
+    min-height: 90px;
+
+    line-height: 1.6;
+}
+
+.industry-profile-form-group input::placeholder,
+.industry-profile-form-group textarea::placeholder {
+    color: #9ca3af;
+}
+
+.industry-profile-form-group input:focus,
+.industry-profile-form-group textarea:focus,
+.industry-profile-form-group select:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.industry-profile-form-group small {
+    margin-top: 6px;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+========================================================= */
+
+.industry-profile-form-actions {
+    padding: 18px 25px;
+
+    background: #fafbfc;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+.industry-profile-cancel-btn,
+.industry-profile-save-btn {
+    min-height: 38px;
+
+    padding: 0 16px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.industry-profile-cancel-btn {
+    background: white;
+
+    border: 1px solid #d1d5db;
+
+    color: #4b5563;
+}
+
+.industry-profile-cancel-btn:hover {
+    background: #f9fafb;
+
+    border-color: #9ca3af;
+}
+
+.industry-profile-save-btn {
+    border: 1px solid #2563eb;
+
+    background: #2563eb;
+
+    color: white;
+}
+
+.industry-profile-save-btn:hover {
+    background: #1d4ed8;
+
+    border-color: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+.industry-profile-save-btn:disabled {
+    opacity: 0.65;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .industry-profile-location {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .industry-profile-header {
+        padding: 20px;
+
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .industry-profile-header-action {
+        width: 100%;
+    }
+
+    .industry-profile-edit-btn,
+    .industry-profile-secondary-btn {
+        width: 100%;
+    }
+
+    .industry-profile-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .industry-profile-detail:nth-last-child(-n + 2) {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .industry-profile-detail:last-child {
+        border-bottom: none;
+    }
+
+    .industry-profile-location {
+        grid-template-columns: 1fr;
+    }
+
+    .industry-profile-status-card {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .industry-profile-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .industry-profile-form-full {
+        grid-column: auto;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .industry-profile-card {
+        padding: 18px;
+    }
+
+    .industry-profile-form-section {
+        padding: 18px;
+    }
+
+    .industry-profile-form-actions {
+        padding: 15px 18px;
+
+        flex-direction: column-reverse;
+
+        align-items: stretch;
+    }
+
+    .industry-profile-cancel-btn,
+    .industry-profile-save-btn {
+        width: 100%;
+    }
+
+    .industry-profile-company-icon {
+        width: 46px;
+        height: 46px;
+
+        font-size: 21px;
+    }
+
+    .industry-profile-header h2 {
+        font-size: 18px;
+    }
+
+}
+
+.industry-profile-input-error {
+    border-color: #dc2626 !important;
+
+    box-shadow:
+        0 0 0 3px rgba(220, 38, 38, 0.10) !important;
+}

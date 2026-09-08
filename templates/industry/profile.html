@@ -1,0 +1,483 @@
+{% extends "industry/base.html" %}
+
+
+{% block title %}
+My Profile | Industry Portal
+{% endblock %}
+
+
+{% block page_title %}
+My Profile
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-profile.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================================================
+     PROFILE HEADER
+========================================================= -->
+
+<section class="industry-profile-header">
+
+    <div class="industry-profile-header-left">
+
+        <div class="industry-profile-company-icon">
+            🏭
+        </div>
+
+        <div>
+
+            <span class="industry-profile-eyebrow">
+                INDUSTRY PROFILE
+            </span>
+
+            <h2>
+                {{ industry.company_name if industry else "Industry Company" }}
+            </h2>
+
+            <p>
+                Manage and view your organization information.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="industry-profile-header-action">
+
+        <a href="{{ url_for('industry_profile_edit') }}"
+           class="industry-profile-edit-btn">
+
+            <span>
+                ✎
+            </span>
+
+            Edit Profile
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROFILE CONTENT
+========================================================= -->
+
+<section class="industry-profile-layout">
+
+
+    <!-- =====================================================
+         COMPANY OVERVIEW
+    ====================================================== -->
+
+    <div class="industry-profile-card">
+
+        <div class="industry-profile-card-header">
+
+            <div>
+
+                <span class="industry-profile-section-label">
+                    COMPANY INFORMATION
+                </span>
+
+                <h3>
+                    Organization Details
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-profile-details-grid">
+
+
+            <!-- COMPANY NAME -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Company Name
+                </span>
+
+                <strong>
+                    {{ industry.company_name if industry and industry.company_name else "—" }}
+                </strong>
+
+            </div>
+
+
+            <!-- COMPANY TYPE -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Company Type
+                </span>
+
+                <strong>
+                    {{ industry.company_type if industry and industry.company_type else "—" }}
+                </strong>
+
+            </div>
+
+
+            <!-- INDUSTRY SECTOR -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Industry Sector
+                </span>
+
+                <strong>
+                    {{ industry.industry_sector if industry and industry.industry_sector else "—" }}
+                </strong>
+
+            </div>
+
+
+            <!-- WEBSITE -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Website
+                </span>
+
+                {% if industry and industry.website %}
+
+                    <a href="{{ industry.website }}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+
+                        {{ industry.website }}
+
+                    </a>
+
+                {% else %}
+
+                    <strong>
+                        —
+                    </strong>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTACT INFORMATION
+    ====================================================== -->
+
+    <div class="industry-profile-card">
+
+        <div class="industry-profile-card-header">
+
+            <div>
+
+                <span class="industry-profile-section-label">
+                    CONTACT INFORMATION
+                </span>
+
+                <h3>
+                    Primary Contact
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-profile-details-grid">
+
+
+            <!-- CONTACT PERSON -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Contact Person
+                </span>
+
+                <strong>
+                    {{ industry.contact_person if industry and industry.contact_person else "—" }}
+                </strong>
+
+            </div>
+
+
+            <!-- DESIGNATION -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Designation
+                </span>
+
+                <strong>
+                    {{ industry.designation if industry and industry.designation else "—" }}
+                </strong>
+
+            </div>
+
+
+            <!-- PHONE -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Phone Number
+                </span>
+
+                <strong>
+                    {{ industry.phone if industry and industry.phone else "—" }}
+                </strong>
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="industry-profile-detail">
+
+                <span class="industry-profile-detail-label">
+                    Email Address
+                </span>
+
+                <strong>
+                    {{ industry.email if industry and industry.email else "—" }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LOCATION
+    ====================================================== -->
+
+    <div class="industry-profile-card">
+
+        <div class="industry-profile-card-header">
+
+            <div>
+
+                <span class="industry-profile-section-label">
+                    LOCATION
+                </span>
+
+                <h3>
+                    Organization Address
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-profile-location">
+
+
+            <!-- ADDRESS -->
+
+            <div class="industry-profile-location-item">
+
+                <div class="industry-profile-location-icon">
+                    📍
+                </div>
+
+                <div>
+
+                    <span>
+                        Address
+                    </span>
+
+                    <strong>
+                        {{ industry.address if industry and industry.address else "—" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- CITY -->
+
+            <div class="industry-profile-location-item">
+
+                <div class="industry-profile-location-icon">
+                    🏙️
+                </div>
+
+                <div>
+
+                    <span>
+                        City
+                    </span>
+
+                    <strong>
+                        {{ industry.city if industry and industry.city else "—" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATE -->
+
+            <div class="industry-profile-location-item">
+
+                <div class="industry-profile-location-icon">
+                    📌
+                </div>
+
+                <div>
+
+                    <span>
+                        State
+                    </span>
+
+                    <strong>
+                        {{ industry.state if industry and industry.state else "—" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DESCRIPTION
+    ====================================================== -->
+
+    <div class="industry-profile-card">
+
+        <div class="industry-profile-card-header">
+
+            <div>
+
+                <span class="industry-profile-section-label">
+                    ABOUT ORGANIZATION
+                </span>
+
+                <h3>
+                    Company Description
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-profile-description">
+
+            {% if industry and industry.description %}
+
+                <p>
+                    {{ industry.description }}
+                </p>
+
+            {% else %}
+
+                <div class="industry-profile-empty-description">
+
+                    <span>
+                        ℹ️
+                    </span>
+
+                    <p>
+                        No company description has been added yet.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACCOUNT STATUS
+    ====================================================== -->
+
+    <div class="industry-profile-card industry-profile-status-card">
+
+        <div class="industry-profile-status-left">
+
+            <div class="industry-profile-status-icon">
+                ✓
+            </div>
+
+            <div>
+
+                <span class="industry-profile-section-label">
+                    ACCOUNT STATUS
+                </span>
+
+                <h3>
+                    Industry Account
+                </h3>
+
+                <p>
+                    Your industry account status is currently
+                    {{ industry.status if industry and industry.status else "—" }}.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="industry-profile-status-badge
+                    status-{{ industry.status|lower if industry and industry.status else 'unknown' }}">
+
+            {{ industry.status if industry and industry.status else "UNKNOWN" }}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-profile.js'
+) }}"></script>
+
+{% endblock %}

@@ -1,0 +1,467 @@
+{% extends "industry/base.html" %}
+
+{% block title %}
+Edit Requirement | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-requirements.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-requirement-form-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="industry-page-header">
+
+        <div>
+
+            <span class="industry-page-eyebrow">
+                OPPORTUNITIES
+            </span>
+
+            <h1>
+                Edit Requirement
+            </h1>
+
+            <p>
+                Update the details of your opportunity.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
+    <form
+        method="POST"
+        action="{{ url_for(
+            'industry_edit_requirement',
+            requirement_id=requirement.id
+        ) }}"
+        id="editRequirementForm"
+        class="industry-requirement-form">
+
+
+        <!-- =================================================
+             BASIC INFORMATION
+        ================================================== -->
+
+        <section class="requirement-form-section">
+
+            <div class="requirement-form-section-header">
+
+                <div class="form-section-icon">
+                    📋
+                </div>
+
+                <div>
+
+                    <h2>
+                        Basic Information
+                    </h2>
+
+                    <p>
+                        Update the main opportunity information.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="requirement-form-grid">
+
+
+                <!-- TITLE -->
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="title">
+                        Requirement Title
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value="{{ requirement.title or '' }}"
+                        maxlength="150"
+                        required>
+
+                </div>
+
+
+                <!-- TYPE -->
+
+                <div class="requirement-form-group">
+
+                    <label for="opportunity_type">
+                        Opportunity Type
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="opportunity_type"
+                        name="opportunity_type"
+                        required>
+
+                        <option value="JOB"
+                            {% if requirement.opportunity_type == "JOB" %}selected{% endif %}>
+                            Job
+                        </option>
+
+                        <option value="INTERNSHIP"
+                            {% if requirement.opportunity_type == "INTERNSHIP" %}selected{% endif %}>
+                            Internship
+                        </option>
+
+                        <option value="PROJECT"
+                            {% if requirement.opportunity_type == "PROJECT" %}selected{% endif %}>
+                            Project
+                        </option>
+
+                        <option value="TRAINING"
+                            {% if requirement.opportunity_type == "TRAINING" %}selected{% endif %}>
+                            Training
+                        </option>
+
+                        <option value="COLLABORATION"
+                            {% if requirement.opportunity_type == "COLLABORATION" %}selected{% endif %}>
+                            Collaboration
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="requirement-form-group">
+
+                    <label for="status">
+                        Status
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="status"
+                        name="status"
+                        required>
+
+                        <option value="OPEN"
+                            {% if requirement.status == "OPEN" %}selected{% endif %}>
+                            Open
+                        </option>
+
+                        <option value="DRAFT"
+                            {% if requirement.status == "DRAFT" %}selected{% endif %}>
+                            Draft
+                        </option>
+
+                        <option value="CLOSED"
+                            {% if requirement.status == "CLOSED" %}selected{% endif %}>
+                            Closed
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="description">
+                        Description
+                        <span>*</span>
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="7"
+                        maxlength="3000"
+                        required>{{ requirement.description or '' }}</textarea>
+
+                    <div class="textarea-footer">
+
+                        <small>
+                            Minimum 10 characters.
+                        </small>
+
+                        <span id="descriptionCounter">
+                            {{ (requirement.description or '')|length }} / 3000
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REQUIREMENTS
+        ================================================== -->
+
+        <section class="requirement-form-section">
+
+            <div class="requirement-form-section-header">
+
+                <div class="form-section-icon">
+                    🎯
+                </div>
+
+                <div>
+
+                    <h2>
+                        Candidate Requirements
+                    </h2>
+
+                    <p>
+                        Update required skills and eligibility.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="requirement-form-grid">
+
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="required_skills">
+                        Required Skills
+                    </label>
+
+                    <input
+                        type="text"
+                        id="required_skills"
+                        name="required_skills"
+                        value="{{ requirement.required_skills or '' }}"
+                        placeholder="Python, Java, SQL, Communication">
+
+                </div>
+
+
+                <div class="requirement-form-group full-width">
+
+                    <label for="eligibility_criteria">
+                        Eligibility Criteria
+                    </label>
+
+                    <textarea
+                        id="eligibility_criteria"
+                        name="eligibility_criteria"
+                        rows="5"
+                        maxlength="2000"
+                        placeholder="Enter eligibility criteria...">{{ requirement.eligibility_criteria or '' }}</textarea>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DETAILS
+        ================================================== -->
+
+        <section class="requirement-form-section">
+
+            <div class="requirement-form-section-header">
+
+                <div class="form-section-icon">
+                    📍
+                </div>
+
+                <div>
+
+                    <h2>
+                        Opportunity Details
+                    </h2>
+
+                    <p>
+                        Update location, work mode and compensation.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="requirement-form-grid">
+
+
+                <div class="requirement-form-group">
+
+                    <label for="location">
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        value="{{ requirement.location or '' }}">
+
+                </div>
+
+
+                <div class="requirement-form-group">
+
+                    <label for="work_mode">
+                        Work Mode
+                    </label>
+
+                    <select
+                        id="work_mode"
+                        name="work_mode">
+
+                        <option value=""
+                            {% if not requirement.work_mode %}selected{% endif %}>
+                            Select work mode
+                        </option>
+
+                        <option value="ONSITE"
+                            {% if requirement.work_mode == "ONSITE" %}selected{% endif %}>
+                            Onsite
+                        </option>
+
+                        <option value="REMOTE"
+                            {% if requirement.work_mode == "REMOTE" %}selected{% endif %}>
+                            Remote
+                        </option>
+
+                        <option value="HYBRID"
+                            {% if requirement.work_mode == "HYBRID" %}selected{% endif %}>
+                            Hybrid
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="requirement-form-group">
+
+                    <label for="stipend">
+                        Stipend
+                    </label>
+
+                    <input
+                        type="text"
+                        id="stipend"
+                        name="stipend"
+                        value="{{ requirement.stipend or '' }}">
+
+                </div>
+
+
+                <div class="requirement-form-group">
+
+                    <label for="package">
+                        Package
+                    </label>
+
+                    <input
+                        type="text"
+                        id="package"
+                        name="package"
+                        value="{{ requirement.package or '' }}">
+
+                </div>
+
+
+                <div class="requirement-form-group">
+
+                    <label for="application_deadline">
+                        Application Deadline
+                    </label>
+
+                    <input
+                        type="date"
+                        id="application_deadline"
+                        name="application_deadline"
+                        value="{{ requirement.application_deadline or '' }}">
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ACTIONS
+        ================================================== -->
+
+        <div class="requirement-form-actions">
+
+            <a
+                href="{{ url_for(
+                    'industry_requirement_detail',
+                    requirement_id=requirement.id
+                ) }}"
+                class="requirement-cancel-button">
+
+                Cancel
+
+            </a>
+
+
+            <button
+                type="submit"
+                class="industry-primary-button">
+
+                <span class="button-icon">
+                    ✓
+                </span>
+
+                Save Changes
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-requirements.js'
+) }}"></script>
+
+{% endblock %}

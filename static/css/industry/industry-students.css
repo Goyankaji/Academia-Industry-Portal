@@ -1,0 +1,904 @@
+/* =========================================================
+   INDUSTRY - STUDENT DIRECTORY
+   ========================================================= */
+
+.students-page,
+.student-detail-page {
+    padding: 28px;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.students-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 26px;
+}
+
+.page-eyebrow,
+.section-eyebrow {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    color: #64748b;
+    margin-bottom: 7px;
+}
+
+.students-header h1 {
+    margin: 0;
+    font-size: 30px;
+    color: #0f172a;
+}
+
+.students-header p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    max-width: 700px;
+    line-height: 1.6;
+}
+
+.students-header-count {
+    min-width: 150px;
+    padding: 18px 22px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.count-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.count-label {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   STATISTICS
+   ========================================================= */
+
+.student-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.student-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    font-size: 20px;
+}
+
+.student-stat-card span {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.student-stat-card strong {
+    display: block;
+    font-size: 22px;
+    color: #0f172a;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.student-filter-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 28px;
+}
+
+.student-filter-card form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr auto;
+    gap: 14px;
+    align-items: end;
+}
+
+.student-filter-card label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 7px;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.search-input-wrapper input,
+.student-filter-card select {
+    width: 100%;
+    height: 43px;
+    border: 1px solid #dbe2ea;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 0 12px;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.search-input-wrapper input {
+    padding-left: 38px;
+}
+
+.search-input-wrapper input:focus,
+.student-filter-card select:focus {
+    border-color: #64748b;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary {
+    height: 43px;
+    padding: 0 17px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #1e293b;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
+
+.students-section-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.students-section-header h2 {
+    margin: 0;
+    font-size: 19px;
+    color: #0f172a;
+}
+
+.students-section-header p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   STUDENT GRID
+   ========================================================= */
+
+.students-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.student-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 19px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.student-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.07);
+}
+
+.student-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.student-avatar,
+.large-student-avatar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.student-avatar {
+    width: 45px;
+    height: 45px;
+    font-size: 17px;
+}
+
+.student-basic {
+    min-width: 0;
+    flex: 1;
+}
+
+.student-basic h3 {
+    margin: 2px 0 4px;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.student-basic p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.profile-badge {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 5px 7px;
+    border-radius: 20px;
+}
+
+.profile-badge.completed {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.profile-badge.incomplete {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   STUDENT CARD INFO
+   ========================================================= */
+
+.student-card-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+    padding: 17px 0;
+    margin-top: 15px;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-item span {
+    display: block;
+    font-size: 10px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
+.info-item strong {
+    display: block;
+    font-size: 12px;
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   SKILLS
+   ========================================================= */
+
+.student-skills-preview {
+    padding: 15px 0;
+}
+
+.skills-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 9px;
+}
+
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.skill-tag,
+.skill-more {
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.skill-tag small {
+    color: #64748b;
+    margin-left: 3px;
+}
+
+.skill-more {
+    background: #e2e8f0;
+}
+
+.no-skills {
+    padding: 15px 0;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   CARD FOOTER
+   ========================================================= */
+
+.student-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.student-location {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.view-student-btn {
+    text-decoration: none;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.view-student-btn:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-students {
+    padding: 70px 20px;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.empty-students h3 {
+    margin: 0;
+    color: #0f172a;
+}
+
+.empty-students p {
+    color: #64748b;
+    font-size: 13px;
+    margin: 8px 0 20px;
+}
+
+
+/* =========================================================
+   DETAIL PAGE
+   ========================================================= */
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: #0f172a;
+}
+
+.student-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 25px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 17px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.profile-main {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+}
+
+.large-student-avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 27px;
+}
+
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.profile-heading h1 {
+    margin: 0;
+    font-size: 25px;
+    color: #0f172a;
+}
+
+.profile-course {
+    margin: 6px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.profile-college {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.verified-profile {
+    font-size: 10px;
+    font-weight: 800;
+    color: #047857;
+    background: #ecfdf5;
+    padding: 5px 8px;
+    border-radius: 20px;
+}
+
+.profile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.profile-action-btn {
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #334155;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.profile-action-btn.primary {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   DETAIL LAYOUT
+   ========================================================= */
+
+.student-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 20px;
+}
+
+.student-detail-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-section,
+.detail-side-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 22px;
+}
+
+.section-title {
+    margin-bottom: 20px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.section-title p {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   DETAIL INFO
+   ========================================================= */
+
+.detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 17px;
+}
+
+.detail-info-item {
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 9px;
+}
+
+.detail-info-item.detail-full {
+    grid-column: 1 / -1;
+}
+
+.detail-info-item span {
+    display: block;
+    font-size: 10px;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.detail-info-item strong {
+    display: block;
+    color: #334155;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   ASSESSMENT
+   ========================================================= */
+
+.assessment-skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.assessment-skill-card {
+    padding: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+}
+
+.assessment-skill-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.assessment-skill-header h3 {
+    margin: 0 0 5px;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.assessment-status {
+    font-size: 10px;
+    color: #64748b;
+}
+
+.skill-score {
+    text-align: right;
+}
+
+.skill-score strong {
+    display: block;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.skill-score span {
+    font-size: 10px;
+    font-weight: 800;
+    color: #64748b;
+}
+
+.skill-progress {
+    height: 7px;
+    margin-top: 12px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.skill-progress-bar {
+    height: 100%;
+    background: #0f172a;
+    border-radius: 10px;
+}
+
+.assessment-date {
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.no-assessment {
+    text-align: center;
+    padding: 35px 15px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.no-assessment-icon {
+    font-size: 30px;
+}
+
+.no-assessment h3 {
+    margin: 8px 0 5px;
+    font-size: 14px;
+    color: #334155;
+}
+
+.no-assessment p {
+    margin: 0;
+    font-size: 11px;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.student-detail-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detail-side-card h3 {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.detail-side-card p {
+    margin: 5px 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.side-location {
+    margin-top: 14px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.side-info {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.side-info span {
+    display: block;
+    color: #94a3b8;
+    font-size: 10px;
+    margin-bottom: 4px;
+}
+
+.side-info strong {
+    color: #334155;
+    font-size: 12px;
+}
+
+.academic-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 17px;
+}
+
+.summary-value {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.summary-value span {
+    display: block;
+    margin-top: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.summary-divider {
+    width: 1px;
+    height: 40px;
+    background: #e2e8f0;
+    margin: 0 24px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .student-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .students-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .student-filter-card form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filter-search {
+        grid-column: 1 / -1;
+    }
+
+    .filter-actions {
+        grid-column: 1 / -1;
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .student-detail-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .student-detail-sidebar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .student-profile-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .profile-actions {
+        justify-content: flex-start;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .students-page,
+    .student-detail-page {
+        padding: 17px;
+    }
+
+    .students-header {
+        flex-direction: column;
+    }
+
+    .students-header-count {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .student-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .students-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .student-filter-card form {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-search,
+    .filter-actions {
+        grid-column: auto;
+    }
+
+    .detail-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-info-item.detail-full {
+        grid-column: auto;
+    }
+
+    .student-detail-sidebar {
+        display: flex;
+    }
+
+    .profile-main {
+        align-items: flex-start;
+    }
+
+}
