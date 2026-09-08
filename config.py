@@ -1,6 +1,6 @@
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "arpit@2467",
+    "password": "#####",
     "database": "sih_portal"
 }
