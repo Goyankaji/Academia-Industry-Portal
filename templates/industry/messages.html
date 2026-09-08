@@ -1,0 +1,603 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-messages.css'
+      ) }}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="messages-page">
+
+    <!-- ================= PAGE HEADER ================= -->
+
+    <div class="messages-page-header">
+
+        <div>
+            <span class="industry-page-eyebrow">
+                COMMUNICATION
+            </span>
+
+            <h1>Messages</h1>
+
+            <p>
+                Communicate with students, colleges and placement cells.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="messages-primary-btn"
+            id="openComposeBtn"
+        >
+            <span>＋</span>
+            New Message
+        </button>
+
+    </div>
+
+
+    <!-- ================= STATS ================= -->
+
+    <div class="messages-stats-grid">
+
+        <div class="messages-stat-card">
+
+            <div class="messages-stat-icon blue">
+                ✉
+            </div>
+
+            <div>
+                <span>TOTAL MESSAGES</span>
+
+                <strong>
+                    {{ total_messages|default(messages|length if messages else 0) }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="messages-stat-card">
+
+            <div class="messages-stat-icon orange">
+                ●
+            </div>
+
+            <div>
+                <span>UNREAD</span>
+
+                <strong>
+                    {{ unread_count|default(0) }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="messages-stat-card">
+
+            <div class="messages-stat-icon purple">
+                ↗
+            </div>
+
+            <div>
+                <span>SENT</span>
+
+                <strong>
+                    {{ sent_count|default(0) }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="messages-stat-card">
+
+            <div class="messages-stat-icon green">
+                ↙
+            </div>
+
+            <div>
+                <span>RECEIVED</span>
+
+                <strong>
+                    {{ received_count|default(0) }}
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= MESSAGE PANEL ================= -->
+
+    <div class="messages-panel">
+
+        <!-- SIDEBAR -->
+
+        <aside class="messages-sidebar">
+
+            <button
+                type="button"
+                class="message-folder active"
+                data-folder="inbox"
+            >
+                <span class="folder-icon">📥</span>
+
+                <span class="folder-name">
+                    Inbox
+                </span>
+
+                {% if unread_count|default(0) > 0 %}
+                <span class="folder-count unread">
+                    {{ unread_count }}
+                </span>
+                {% endif %}
+
+            </button>
+
+
+            <button
+                type="button"
+                class="message-folder"
+                data-folder="sent"
+            >
+                <span class="folder-icon">📤</span>
+
+                <span class="folder-name">
+                    Sent
+                </span>
+
+                <span class="folder-count">
+                    {{ sent_count|default(0) }}
+                </span>
+
+            </button>
+
+
+            <div class="messages-sidebar-divider"></div>
+
+
+            <div class="messages-sidebar-label">
+                COMMUNICATION
+            </div>
+
+
+            <button
+                type="button"
+                class="message-folder"
+                data-folder="unread"
+            >
+                <span class="folder-icon">🔵</span>
+
+                <span class="folder-name">
+                    Unread
+                </span>
+
+                {% if unread_count|default(0) > 0 %}
+                <span class="folder-count unread">
+                    {{ unread_count }}
+                </span>
+                {% endif %}
+
+            </button>
+
+        </aside>
+
+
+        <!-- MAIN MESSAGE AREA -->
+
+        <section class="messages-main">
+
+            <!-- TOOLBAR -->
+
+            <div class="messages-toolbar">
+
+                <div>
+
+                    <h2 id="messageFolderTitle">
+                        Inbox
+                    </h2>
+
+                    <p id="messageFolderSubtitle">
+                        Messages received by your organization.
+                    </p>
+
+                </div>
+
+
+                <div class="messages-search">
+
+                    <span>⌕</span>
+
+                    <input
+                        type="text"
+                        id="messageSearch"
+                        placeholder="Search messages..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- MESSAGE LIST -->
+
+            <div
+                class="message-list"
+                id="messageList"
+            >
+
+                {% if messages %}
+
+                    {% for message in messages %}
+
+                    <article
+                        class="message-item
+                        {% if not message.is_read %}unread{% endif %}"
+                        data-folder="{% if message.sender_id == session.get('user_id') %}sent{% else %}inbox{% endif %}"
+                        data-search="
+                            {{ message.subject|default('')|lower }}
+                            {{ message.message|default('')|lower }}
+                            {{ message.sender_name|default('')|lower }}
+                            {{ message.receiver_name|default('')|lower }}
+                        "
+                    >
+
+                        <div class="message-avatar">
+
+                            {% if message.sender_name %}
+                                {{ message.sender_name[0]|upper }}
+                            {% else %}
+                                U
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="message-content">
+
+                            <div class="message-top-row">
+
+                                <div class="message-person">
+
+                                    <strong>
+                                        {% if message.sender_id == session.get('user_id') %}
+                                            To: {{ message.receiver_name|default('User') }}
+                                        {% else %}
+                                            {{ message.sender_name|default('User') }}
+                                        {% endif %}
+                                    </strong>
+
+                                    {% if not message.is_read %}
+                                        <span class="unread-dot"></span>
+                                    {% endif %}
+
+                                </div>
+
+
+                                <time>
+                                    {{ message.created_at|default('') }}
+                                </time>
+
+                            </div>
+
+
+                            <h3>
+                                {{ message.subject|default('No Subject') }}
+                            </h3>
+
+
+                            <p>
+                                {{ message.message|default('')|truncate(150) }}
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="message-open-btn"
+                            data-message-id="{{ message.id }}"
+                        >
+                            View
+                        </button>
+
+                    </article>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <!-- EMPTY STATE -->
+
+                    <div
+                        class="messages-empty-state"
+                        id="messagesEmptyState"
+                    >
+
+                        <div class="messages-empty-icon">
+                            ✉
+                        </div>
+
+                        <h3>
+                            No Messages
+                        </h3>
+
+                        <p>
+                            Received messages will appear here.
+                        </p>
+
+                        <button
+                            type="button"
+                            class="messages-outline-btn"
+                            id="emptyComposeBtn"
+                        >
+                            Send New Message
+                        </button>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- SEARCH EMPTY -->
+
+                <div
+                    class="messages-empty-state search-empty"
+                    id="messageSearchEmpty"
+                    style="display:none;"
+                >
+
+                    <div class="messages-empty-icon">
+                        ⌕
+                    </div>
+
+                    <h3>
+                        No Messages Found
+                    </h3>
+
+                    <p>
+                        Try a different search term.
+                    </p>
+
+                    <button
+                        type="button"
+                        class="messages-outline-btn"
+                        id="clearMessageSearch"
+                    >
+                        Clear Search
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<!-- ================= COMPOSE MODAL ================= -->
+
+<div
+    class="messages-modal"
+    id="composeModal"
+    style="display:none;"
+>
+
+    <div class="messages-modal-overlay"></div>
+
+
+    <div class="messages-modal-content">
+
+        <div class="messages-modal-header">
+
+            <div>
+                <h2>New Message</h2>
+
+                <p>
+                    Send a message to a registered user.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="messages-modal-close"
+                data-close-modal="composeModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            id="composeMessageForm"
+            method="POST"
+            action="#"
+        >
+
+            <div class="message-form-group">
+
+                <label for="receiver">
+                    Recipient
+                </label>
+
+                <select
+                    id="receiver"
+                    name="receiver_id"
+                    required
+                >
+
+                    <option value="">
+                        Select recipient
+                    </option>
+
+                    {% for user in users|default([]) %}
+
+                    <option value="{{ user.id }}">
+                        {{ user.name }} — {{ user.role|replace('_', ' ')|title }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="message-form-group">
+
+                <label for="subject">
+                    Subject
+                </label>
+
+                <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    maxlength="200"
+                    placeholder="Enter message subject"
+                    required
+                >
+
+            </div>
+
+
+            <div class="message-form-group">
+
+                <label for="message">
+                    Message
+                </label>
+
+                <textarea
+                    id="message"
+                    name="message"
+                    rows="6"
+                    placeholder="Write your message..."
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <div class="messages-modal-footer">
+
+                <button
+                    type="button"
+                    class="messages-outline-btn"
+                    data-close-modal="composeModal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="messages-primary-btn"
+                >
+                    Send Message
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ================= VIEW MESSAGE MODAL ================= -->
+
+<div
+    class="messages-modal"
+    id="viewMessageModal"
+    style="display:none;"
+>
+
+    <div class="messages-modal-overlay"></div>
+
+
+    <div class="messages-modal-content message-view-modal">
+
+        <div class="messages-modal-header">
+
+            <div>
+                <span class="message-view-label">
+                    MESSAGE
+                </span>
+
+                <h2 id="viewMessageSubject">
+                    Message
+                </h2>
+            </div>
+
+            <button
+                type="button"
+                class="messages-modal-close"
+                data-close-modal="viewMessageModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="message-view-body">
+
+            <div class="message-view-meta">
+
+                <div class="message-view-avatar"
+                     id="viewMessageAvatar">
+                    U
+                </div>
+
+                <div>
+
+                    <strong id="viewMessageSender">
+                        User
+                    </strong>
+
+                    <span id="viewMessageDate">
+                        —
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="message-view-text"
+                id="viewMessageText"
+            >
+                Message content.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-messages.js'
+) }}"></script>
+{% endblock %}

@@ -2,6 +2,8 @@ import os
 import uuid
 import re
 import mysql.connector
+import csv
+from io import StringIO
 
 from werkzeug.utils import secure_filename
 
@@ -12393,6 +12395,3156 @@ def industry_student_detail(student_id):
 
         return redirect(
             url_for("industry_students")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY - MESSAGES / COMMUNICATION
+# =========================================================
+
+@app.route("/industry/messages")
+@industry_required
+def industry_messages():
+
+    connection = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # TOTAL MESSAGES
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS total_messages
+            FROM messages
+            WHERE sender_id = %s
+               OR receiver_id = %s
+            """,
+            (user_id, user_id)
+        )
+
+        total_messages = cursor.fetchone()["total_messages"] or 0
+
+
+        # -------------------------------------------------
+        # UNREAD RECEIVED MESSAGES
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS unread_messages
+            FROM messages
+            WHERE receiver_id = %s
+              AND is_read = 0
+            """,
+            (user_id,)
+        )
+
+        unread_messages = cursor.fetchone()["unread_messages"] or 0
+
+
+        # -------------------------------------------------
+        # SENT MESSAGES
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS sent_messages
+            FROM messages
+            WHERE sender_id = %s
+            """,
+            (user_id,)
+        )
+
+        sent_messages = cursor.fetchone()["sent_messages"] or 0
+
+
+        # -------------------------------------------------
+        # RECEIVED MESSAGES
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS received_messages
+            FROM messages
+            WHERE receiver_id = %s
+            """,
+            (user_id,)
+        )
+
+        received_messages = cursor.fetchone()["received_messages"] or 0
+
+
+        # -------------------------------------------------
+        # MESSAGE LIST
+        #
+        # For every message:
+        # - if Industry sent it -> show receiver
+        # - if Industry received it -> show sender
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                m.id,
+                m.sender_id,
+                m.receiver_id,
+                m.subject,
+                m.message,
+                m.is_read,
+                m.created_at,
+                m.updated_at,
+
+                CASE
+                    WHEN m.sender_id = %s
+                        THEN receiver.name
+                    ELSE sender.name
+                END AS other_user_name,
+
+                CASE
+                    WHEN m.sender_id = %s
+                        THEN receiver.email
+                    ELSE sender.email
+                END AS other_user_email
+
+            FROM messages m
+
+            INNER JOIN users sender
+                ON sender.id = m.sender_id
+
+            INNER JOIN users receiver
+                ON receiver.id = m.receiver_id
+
+            WHERE m.sender_id = %s
+               OR m.receiver_id = %s
+
+            ORDER BY m.created_at DESC
+            """,
+            (
+                user_id,
+                user_id,
+                user_id,
+                user_id
+            )
+        )
+
+        messages = cursor.fetchall()
+
+
+        # -------------------------------------------------
+        # RECIPIENTS
+        #
+        # Industry can communicate with:
+        # STUDENT
+        # COLLEGE
+        # PLACEMENT CELL
+        #
+        # Exclude current Industry account.
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                name,
+                email,
+                role
+
+            FROM users
+
+            WHERE id != %s
+
+              AND role IN (
+                  'STUDENT',
+                  'COLLEGE',
+                  'PLACEMENT_CELL'
+              )
+
+            ORDER BY name ASC
+            """,
+            (user_id,)
+        )
+
+        recipients = cursor.fetchall()
+
+
+        return render_template(
+            "industry/messages.html",
+            dashboard="messages",
+            messages=messages,
+            recipients=recipients,
+            total_messages=total_messages,
+            unread_messages=unread_messages,
+            sent_messages=sent_messages,
+            received_messages=received_messages
+        )
+
+
+    except Exception as e:
+
+        print("Industry Messages Error:", e)
+
+        flash(
+            "Unable to load messages.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
+# INDUSTRY - SEND MESSAGE
+# =========================================================
+
+@app.route(
+    "/industry/messages/send",
+    methods=["POST"]
+)
+@industry_required
+def industry_send_message():
+
+    connection = None
+    cursor = None
+
+    try:
+
+        sender_id = session.get("user_id")
+
+        receiver_id = request.form.get(
+            "receiver_id",
+            ""
+        ).strip()
+
+        subject = request.form.get(
+            "subject",
+            ""
+        ).strip()
+
+        message = request.form.get(
+            "message",
+            ""
+        ).strip()
+
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not receiver_id:
+
+            flash(
+                "Please select a recipient.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_messages")
+            )
+
+
+        if not subject:
+
+            flash(
+                "Please enter a subject.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_messages")
+            )
+
+
+        if not message:
+
+            flash(
+                "Please enter a message.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_messages")
+            )
+
+
+        if len(subject) > 200:
+
+            flash(
+                "Subject cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_messages")
+            )
+
+
+        # -------------------------------------------------
+        # PREVENT SELF MESSAGE
+        # -------------------------------------------------
+
+        if sender_id == receiver_id:
+
+            flash(
+                "You cannot send a message to yourself.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_messages")
+            )
+
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+
+        # -------------------------------------------------
+        # VERIFY RECEIVER
+        #
+        # Only registered Student / College /
+        # Placement Cell users are allowed.
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                name,
+                role
+
+            FROM users
+
+            WHERE id = %s
+
+              AND role IN (
+                  'STUDENT',
+                  'COLLEGE',
+                  'PLACEMENT_CELL'
+              )
+            """,
+            (receiver_id,)
+        )
+
+        receiver = cursor.fetchone()
+
+
+        if not receiver:
+
+            flash(
+                "Invalid message recipient.",
+                "error"
+            )
+
+            return redirect(
+                url_for("industry_messages")
+            )
+
+
+        # -------------------------------------------------
+        # INSERT MESSAGE
+        # -------------------------------------------------
+
+        import uuid
+
+        message_id = str(uuid.uuid4())
+
+
+        cursor.execute(
+            """
+            INSERT INTO messages (
+                id,
+                sender_id,
+                receiver_id,
+                subject,
+                message,
+                is_read
+            )
+
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                0
+            )
+            """,
+            (
+                message_id,
+                sender_id,
+                receiver_id,
+                subject,
+                message
+            )
+        )
+
+
+        connection.commit()
+
+
+        flash(
+            "Message sent successfully.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for("industry_messages")
+        )
+
+
+    except Exception as e:
+
+        if connection:
+            connection.rollback()
+
+        print(
+            "Industry Send Message Error:",
+            e
+        )
+
+        flash(
+            "Unable to send message.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_messages")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
+# INDUSTRY - MARK MESSAGE AS READ
+# =========================================================
+
+@app.route(
+    "/industry/messages/<message_id>/read",
+    methods=["POST"]
+)
+@industry_required
+def industry_mark_message_read(message_id):
+
+    connection = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+
+        # -------------------------------------------------
+        # Only receiver can mark message as read.
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            UPDATE messages
+
+            SET is_read = 1
+
+            WHERE id = %s
+              AND receiver_id = %s
+            """,
+            (
+                message_id,
+                user_id
+            )
+        )
+
+
+        connection.commit()
+
+
+        return {
+            "success": True
+        }
+
+
+    except Exception as e:
+
+        if connection:
+            connection.rollback()
+
+        print(
+            "Industry Mark Message Read Error:",
+            e
+        )
+
+        return {
+            "success": False,
+            "message": "Unable to mark message as read."
+        }, 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+# ============================================================
+# INDUSTRY - NOTIFICATIONS
+# ============================================================
+
+@app.route("/industry/notifications")
+@industry_required
+def industry_notifications():
+
+    conn = None
+    cursor = None
+
+    try:
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # ----------------------------------------------------
+        # TOTAL NOTIFICATIONS
+        # ----------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM notifications
+            WHERE user_id = %s
+        """, (user_id,))
+
+        total_notifications = cursor.fetchone()["total"] or 0
+
+        # ----------------------------------------------------
+        # UNREAD NOTIFICATIONS
+        # ----------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS unread
+            FROM notifications
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        unread_notifications = cursor.fetchone()["unread"] or 0
+
+        # ----------------------------------------------------
+        # READ NOTIFICATIONS
+        # ----------------------------------------------------
+        read_notifications = total_notifications - unread_notifications
+
+        # ----------------------------------------------------
+        # ALL NOTIFICATIONS
+        # Latest first
+        # ----------------------------------------------------
+        cursor.execute("""
+            SELECT
+                id,
+                user_id,
+                title,
+                message,
+                notification_type,
+                is_read,
+                created_at
+            FROM notifications
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+        """, (user_id,))
+
+        notifications = cursor.fetchall()
+
+        return render_template(
+            "industry/notifications.html",
+            dashboard="notifications",
+            notifications=notifications,
+            total_notifications=total_notifications,
+            unread_notifications=unread_notifications,
+            read_notifications=read_notifications
+        )
+
+    except Exception as e:
+
+        print("Industry Notifications Error:", e)
+
+        flash(
+            "Unable to load notifications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# MARK SINGLE NOTIFICATION AS READ
+# ============================================================
+
+@app.route(
+    "/industry/notifications/<notification_id>/read",
+    methods=["POST"]
+)
+@industry_required
+def industry_mark_notification_read(notification_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # ----------------------------------------------------
+        # Make sure notification belongs to logged-in industry
+        # ----------------------------------------------------
+        cursor.execute("""
+            UPDATE notifications
+            SET is_read = 1
+            WHERE id = %s
+              AND user_id = %s
+        """, (
+            notification_id,
+            user_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Notification marked as read.",
+            "success"
+        )
+
+        return redirect(
+            url_for("industry_notifications")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "Mark Industry Notification Read Error:",
+            e
+        )
+
+        flash(
+            "Unable to update notification.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_notifications")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# MARK ALL NOTIFICATIONS AS READ
+# ============================================================
+
+@app.route(
+    "/industry/notifications/mark-all-read",
+    methods=["POST"]
+)
+@industry_required
+def industry_mark_all_notifications_read():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE notifications
+            SET is_read = 1
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        conn.commit()
+
+        flash(
+            "All notifications marked as read.",
+            "success"
+        )
+
+        return redirect(
+            url_for("industry_notifications")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "Mark All Industry Notifications Error:",
+            e
+        )
+
+        flash(
+            "Unable to update notifications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_notifications")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# ============================================================
+# NOTIFICATION HELPER
+# ============================================================
+
+def create_notification(
+    user_id,
+    title,
+    message,
+    notification_type=None
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        notification_id = str(uuid.uuid4())
+
+        cursor.execute("""
+            INSERT INTO notifications (
+                id,
+                user_id,
+                title,
+                message,
+                notification_type,
+                is_read
+            )
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                0
+            )
+        """, (
+            notification_id,
+            user_id,
+            title,
+            message,
+            notification_type
+        ))
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "Create Notification Error:",
+            e
+        )
+
+        return False
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# ============================================================
+# INDUSTRY REPORTS / ACTIVITY
+# ============================================================
+
+@app.route("/industry/reports")
+@industry_required
+def industry_reports():
+
+    connection = None
+    cursor = None
+
+    try:
+        user_id = session.get("user_id")
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # ----------------------------------------------------
+        # GET CURRENT INDUSTRY
+        # ----------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name,
+                company_type,
+                industry_sector,
+                contact_person,
+                email,
+                phone
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        industry = cursor.fetchone()
+
+        if not industry:
+            flash("Industry profile not found.", "error")
+            return redirect(url_for("industry_dashboard"))
+
+        industry_id = industry["id"]
+
+        # ====================================================
+        # REQUIREMENT STATISTICS
+        # ====================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE industry_id = %s
+        """, (industry_id,))
+
+        total_requirements = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE industry_id = %s
+              AND status = 'OPEN'
+        """, (industry_id,))
+
+        open_requirements = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE industry_id = %s
+              AND status = 'CLOSED'
+        """, (industry_id,))
+
+        closed_requirements = cursor.fetchone()["total"]
+
+        # ====================================================
+        # APPLICATION STATISTICS
+        # Applications are connected through opportunities
+        # ====================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+            WHERE o.industry_id = %s
+        """, (industry_id,))
+
+        total_applications = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+            WHERE o.industry_id = %s
+              AND sa.status = 'APPLIED'
+        """, (industry_id,))
+
+        applied_applications = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+            WHERE o.industry_id = %s
+              AND sa.status = 'SHORTLISTED'
+        """, (industry_id,))
+
+        shortlisted_applications = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+            WHERE o.industry_id = %s
+              AND sa.status = 'SELECTED'
+        """, (industry_id,))
+
+        selected_applications = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+            WHERE o.industry_id = %s
+              AND sa.status = 'REJECTED'
+        """, (industry_id,))
+
+        rejected_applications = cursor.fetchone()["total"]
+
+        # ====================================================
+        # COLLABORATION STATISTICS
+        # ====================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE industry_id = %s
+        """, (industry_id,))
+
+        total_collaborations = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE industry_id = %s
+              AND status = 'PENDING'
+        """, (industry_id,))
+
+        pending_collaborations = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE industry_id = %s
+              AND status = 'ACTIVE'
+        """, (industry_id,))
+
+        active_collaborations = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE industry_id = %s
+              AND status = 'COMPLETED'
+        """, (industry_id,))
+
+        completed_collaborations = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE industry_id = %s
+              AND status = 'REJECTED'
+        """, (industry_id,))
+
+        rejected_collaborations = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE industry_id = %s
+              AND status = 'CANCELLED'
+        """, (industry_id,))
+
+        cancelled_collaborations = cursor.fetchone()["total"]
+
+        # ====================================================
+        # MESSAGE STATISTICS
+        # ====================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM messages
+            WHERE sender_id = %s
+        """, (user_id,))
+
+        messages_sent = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM messages
+            WHERE receiver_id = %s
+        """, (user_id,))
+
+        messages_received = cursor.fetchone()["total"]
+
+        total_messages = messages_sent + messages_received
+
+        # ====================================================
+        # NOTIFICATION STATISTICS
+        # ====================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM notifications
+            WHERE user_id = %s
+        """, (user_id,))
+
+        total_notifications = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM notifications
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        unread_notifications = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM notifications
+            WHERE user_id = %s
+              AND is_read = 1
+        """, (user_id,))
+
+        read_notifications = cursor.fetchone()["total"]
+
+        # ====================================================
+        # RECENT ACTIVITY
+        # ====================================================
+        #
+        # Activity sources:
+        # 1. Requirements
+        # 2. Applications
+        # 3. Collaborations
+        # 4. Messages
+        # 5. Notifications
+        #
+        # Only current Industry's activity is returned.
+        # ====================================================
+
+        cursor.execute("""
+            SELECT *
+            FROM (
+                
+                SELECT
+                    o.id AS activity_id,
+                    o.created_at AS activity_date,
+                    'REQUIREMENT' AS activity_type,
+                    o.title AS activity_title,
+                    CONCAT(
+                        'Requirement created: ',
+                        o.title
+                    ) AS activity_description,
+                    o.status AS activity_status
+                FROM opportunities o
+                WHERE o.industry_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    sa.id AS activity_id,
+                    sa.application_date AS activity_date,
+                    'APPLICATION' AS activity_type,
+                    o.title AS activity_title,
+                    CONCAT(
+                        'Student application received for ',
+                        o.title
+                    ) AS activity_description,
+                    sa.status AS activity_status
+                FROM student_applications sa
+                INNER JOIN opportunities o
+                    ON sa.opportunity_id = o.id
+                WHERE o.industry_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    c.id AS activity_id,
+                    c.created_at AS activity_date,
+                    'COLLABORATION' AS activity_type,
+                    c.title AS activity_title,
+                    CONCAT(
+                        'Collaboration request: ',
+                        c.title
+                    ) AS activity_description,
+                    c.status AS activity_status
+                FROM collaborations c
+                WHERE c.industry_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    m.id AS activity_id,
+                    m.created_at AS activity_date,
+                    'MESSAGE' AS activity_type,
+                    m.subject AS activity_title,
+                    CONCAT(
+                        'Message: ',
+                        m.subject
+                    ) AS activity_description,
+                    CASE
+                        WHEN m.receiver_id = %s THEN 'RECEIVED'
+                        ELSE 'SENT'
+                    END AS activity_status
+                FROM messages m
+                WHERE
+                    m.sender_id = %s
+                    OR m.receiver_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    n.id AS activity_id,
+                    n.created_at AS activity_date,
+                    'NOTIFICATION' AS activity_type,
+                    n.title AS activity_title,
+                    n.message AS activity_description,
+                    CASE
+                        WHEN n.is_read = 1 THEN 'READ'
+                        ELSE 'UNREAD'
+                    END AS activity_status
+                FROM notifications n
+                WHERE n.user_id = %s
+
+            ) AS activity_data
+
+            ORDER BY activity_date DESC
+            LIMIT 50
+        """, (
+            industry_id,
+            industry_id,
+            industry_id,
+            user_id,
+            user_id,
+            user_id,
+            user_id
+        ))
+
+        recent_activities = cursor.fetchall()
+
+        # ====================================================
+        # REPORT DATA
+        # ====================================================
+
+        report_data = {
+            "requirements": {
+                "total": total_requirements,
+                "open": open_requirements,
+                "closed": closed_requirements
+            },
+
+            "applications": {
+                "total": total_applications,
+                "applied": applied_applications,
+                "shortlisted": shortlisted_applications,
+                "selected": selected_applications,
+                "rejected": rejected_applications
+            },
+
+            "collaborations": {
+                "total": total_collaborations,
+                "pending": pending_collaborations,
+                "active": active_collaborations,
+                "completed": completed_collaborations,
+                "rejected": rejected_collaborations,
+                "cancelled": cancelled_collaborations
+            },
+
+            "messages": {
+                "total": total_messages,
+                "sent": messages_sent,
+                "received": messages_received
+            },
+
+            "notifications": {
+                "total": total_notifications,
+                "unread": unread_notifications,
+                "read": read_notifications
+            }
+        }
+
+        return render_template(
+            "industry/reports.html",
+            dashboard="reports",
+            industry=industry,
+            report_data=report_data,
+            recent_activities=recent_activities
+        )
+
+    except Exception as e:
+
+        print("Industry Reports Error:", e)
+
+        flash(
+            "Unable to load reports right now.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# ============================================================
+# INDUSTRY REPORT EXPORT
+# ============================================================
+
+@app.route("/industry/reports/export")
+@industry_required
+def industry_reports_export():
+
+    connection = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # ----------------------------------------------------
+        # CURRENT INDUSTRY
+        # ----------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name,
+                company_type,
+                industry_sector,
+                contact_person,
+                email,
+                phone
+            FROM industries
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        industry = cursor.fetchone()
+
+        if not industry:
+            flash("Industry profile not found.", "error")
+            return redirect(url_for("industry_dashboard"))
+
+        industry_id = industry["id"]
+
+        # ----------------------------------------------------
+        # CSV OUTPUT
+        # ----------------------------------------------------
+
+        output = StringIO()
+
+        writer = csv.writer(output)
+
+        # ====================================================
+        # REPORT HEADER
+        # ====================================================
+
+        writer.writerow([
+            "SIH Academia-Industry Collaboration Portal"
+        ])
+
+        writer.writerow([
+            "Industry Activity Report"
+        ])
+
+        writer.writerow([])
+
+        # ====================================================
+        # INDUSTRY INFORMATION
+        # ====================================================
+
+        writer.writerow([
+            "INDUSTRY INFORMATION"
+        ])
+
+        writer.writerow([
+            "Company Name",
+            industry.get("company_name") or ""
+        ])
+
+        writer.writerow([
+            "Company Type",
+            industry.get("company_type") or ""
+        ])
+
+        writer.writerow([
+            "Industry Sector",
+            industry.get("industry_sector") or ""
+        ])
+
+        writer.writerow([
+            "Contact Person",
+            industry.get("contact_person") or ""
+        ])
+
+        writer.writerow([
+            "Email",
+            industry.get("email") or ""
+        ])
+
+        writer.writerow([
+            "Phone",
+            industry.get("phone") or ""
+        ])
+
+        writer.writerow([])
+
+        # ====================================================
+        # REQUIREMENTS
+        # ====================================================
+
+        writer.writerow([
+            "REQUIREMENTS"
+        ])
+
+        writer.writerow([
+            "Metric",
+            "Count"
+        ])
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE industry_id = %s
+        """, (industry_id,))
+
+        total_requirements = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE industry_id = %s
+              AND status = 'OPEN'
+        """, (industry_id,))
+
+        open_requirements = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE industry_id = %s
+              AND status = 'CLOSED'
+        """, (industry_id,))
+
+        closed_requirements = cursor.fetchone()["total"]
+
+        writer.writerow([
+            "Total Requirements",
+            total_requirements
+        ])
+
+        writer.writerow([
+            "Open Requirements",
+            open_requirements
+        ])
+
+        writer.writerow([
+            "Closed Requirements",
+            closed_requirements
+        ])
+
+        writer.writerow([])
+
+        # ====================================================
+        # APPLICATIONS
+        # ====================================================
+
+        writer.writerow([
+            "APPLICATIONS"
+        ])
+
+        writer.writerow([
+            "Metric",
+            "Count"
+        ])
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total,
+                SUM(sa.status = 'APPLIED') AS applied,
+                SUM(sa.status = 'SHORTLISTED') AS shortlisted,
+                SUM(sa.status = 'SELECTED') AS selected,
+                SUM(sa.status = 'REJECTED') AS rejected
+            FROM student_applications sa
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+            WHERE o.industry_id = %s
+        """, (industry_id,))
+
+        application_stats = cursor.fetchone()
+
+        writer.writerow([
+            "Total Applications",
+            application_stats["total"] or 0
+        ])
+
+        writer.writerow([
+            "Applied",
+            application_stats["applied"] or 0
+        ])
+
+        writer.writerow([
+            "Shortlisted",
+            application_stats["shortlisted"] or 0
+        ])
+
+        writer.writerow([
+            "Selected",
+            application_stats["selected"] or 0
+        ])
+
+        writer.writerow([
+            "Rejected",
+            application_stats["rejected"] or 0
+        ])
+
+        writer.writerow([])
+
+        # ====================================================
+        # COLLABORATIONS
+        # ====================================================
+
+        writer.writerow([
+            "COLLABORATIONS"
+        ])
+
+        writer.writerow([
+            "Metric",
+            "Count"
+        ])
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total,
+                SUM(status = 'PENDING') AS pending,
+                SUM(status = 'ACTIVE') AS active,
+                SUM(status = 'COMPLETED') AS completed,
+                SUM(status = 'REJECTED') AS rejected,
+                SUM(status = 'CANCELLED') AS cancelled
+            FROM collaborations
+            WHERE industry_id = %s
+        """, (industry_id,))
+
+        collaboration_stats = cursor.fetchone()
+
+        writer.writerow([
+            "Total Collaborations",
+            collaboration_stats["total"] or 0
+        ])
+
+        writer.writerow([
+            "Pending",
+            collaboration_stats["pending"] or 0
+        ])
+
+        writer.writerow([
+            "Active",
+            collaboration_stats["active"] or 0
+        ])
+
+        writer.writerow([
+            "Completed",
+            collaboration_stats["completed"] or 0
+        ])
+
+        writer.writerow([
+            "Rejected",
+            collaboration_stats["rejected"] or 0
+        ])
+
+        writer.writerow([
+            "Cancelled",
+            collaboration_stats["cancelled"] or 0
+        ])
+
+        writer.writerow([])
+
+        # ====================================================
+        # COMMUNICATION
+        # ====================================================
+
+        writer.writerow([
+            "COMMUNICATION"
+        ])
+
+        writer.writerow([
+            "Metric",
+            "Count"
+        ])
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM messages
+            WHERE sender_id = %s
+        """, (user_id,))
+
+        sent = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM messages
+            WHERE receiver_id = %s
+        """, (user_id,))
+
+        received = cursor.fetchone()["total"]
+
+        writer.writerow([
+            "Messages Sent",
+            sent
+        ])
+
+        writer.writerow([
+            "Messages Received",
+            received
+        ])
+
+        writer.writerow([
+            "Total Messages",
+            sent + received
+        ])
+
+        writer.writerow([])
+
+        # ====================================================
+        # NOTIFICATIONS
+        # ====================================================
+
+        writer.writerow([
+            "NOTIFICATIONS"
+        ])
+
+        writer.writerow([
+            "Metric",
+            "Count"
+        ])
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total,
+                SUM(is_read = 0) AS unread,
+                SUM(is_read = 1) AS read_count
+            FROM notifications
+            WHERE user_id = %s
+        """, (user_id,))
+
+        notification_stats = cursor.fetchone()
+
+        writer.writerow([
+            "Total Notifications",
+            notification_stats["total"] or 0
+        ])
+
+        writer.writerow([
+            "Unread",
+            notification_stats["unread"] or 0
+        ])
+
+        writer.writerow([
+            "Read",
+            notification_stats["read_count"] or 0
+        ])
+
+        writer.writerow([])
+
+        # ====================================================
+        # RECENT ACTIVITY
+        # ====================================================
+
+        writer.writerow([
+            "RECENT ACTIVITY"
+        ])
+
+        writer.writerow([
+            "Date",
+            "Type",
+            "Title",
+            "Description",
+            "Status"
+        ])
+
+        cursor.execute("""
+            SELECT *
+            FROM (
+
+                SELECT
+                    o.created_at AS activity_date,
+                    'REQUIREMENT' AS activity_type,
+                    o.title AS activity_title,
+                    CONCAT(
+                        'Requirement created: ',
+                        o.title
+                    ) AS activity_description,
+                    o.status AS activity_status
+                FROM opportunities o
+                WHERE o.industry_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    sa.application_date AS activity_date,
+                    'APPLICATION' AS activity_type,
+                    o.title AS activity_title,
+                    CONCAT(
+                        'Student application received for ',
+                        o.title
+                    ) AS activity_description,
+                    sa.status AS activity_status
+                FROM student_applications sa
+                INNER JOIN opportunities o
+                    ON sa.opportunity_id = o.id
+                WHERE o.industry_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    c.created_at AS activity_date,
+                    'COLLABORATION' AS activity_type,
+                    c.title AS activity_title,
+                    CONCAT(
+                        'Collaboration request: ',
+                        c.title
+                    ) AS activity_description,
+                    c.status AS activity_status
+                FROM collaborations c
+                WHERE c.industry_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    m.created_at AS activity_date,
+                    'MESSAGE' AS activity_type,
+                    m.subject AS activity_title,
+                    CONCAT(
+                        'Message: ',
+                        m.subject
+                    ) AS activity_description,
+                    CASE
+                        WHEN m.receiver_id = %s
+                        THEN 'RECEIVED'
+                        ELSE 'SENT'
+                    END AS activity_status
+                FROM messages m
+                WHERE
+                    m.sender_id = %s
+                    OR m.receiver_id = %s
+
+
+                UNION ALL
+
+
+                SELECT
+                    n.created_at AS activity_date,
+                    'NOTIFICATION' AS activity_type,
+                    n.title AS activity_title,
+                    n.message AS activity_description,
+                    CASE
+                        WHEN n.is_read = 1
+                        THEN 'READ'
+                        ELSE 'UNREAD'
+                    END AS activity_status
+                FROM notifications n
+                WHERE n.user_id = %s
+
+            ) AS activity_data
+
+            ORDER BY activity_date DESC
+            LIMIT 100
+        """, (
+            industry_id,
+            industry_id,
+            industry_id,
+            user_id,
+            user_id,
+            user_id,
+            user_id
+        ))
+
+        activities = cursor.fetchall()
+
+        for activity in activities:
+
+            writer.writerow([
+                activity["activity_date"],
+                activity["activity_type"],
+                activity["activity_title"],
+                activity["activity_description"],
+                activity["activity_status"]
+            ])
+
+        # ====================================================
+        # RESPONSE
+        # ====================================================
+
+        response = make_response(
+            output.getvalue()
+        )
+
+        response.headers["Content-Type"] = (
+            "text/csv; charset=utf-8"
+        )
+
+        response.headers["Content-Disposition"] = (
+            "attachment; filename=industry_activity_report.csv"
+        )
+
+        return response
+
+    except Exception as e:
+
+        print(
+            "Industry Reports Export Error:",
+            e
+        )
+
+        flash(
+            "Unable to export report right now.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_reports")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+# =========================================================
+# INDUSTRY SETTINGS
+# =========================================================
+
+@app.route("/industry/settings", methods=["GET", "POST"])
+@industry_required
+def industry_settings():
+
+    conn = None
+    cursor = None
+
+    industry_user_id = session.get("user_id")
+
+    if not industry_user_id:
+        flash("Please login first.", "error")
+        return redirect(url_for("login"))
+
+    try:
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # =================================================
+        # GET CURRENT USER
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                name,
+                email,
+                role,
+                status,
+                created_at
+            FROM users
+            WHERE id = %s
+            LIMIT 1
+        """, (industry_user_id,))
+
+        user = cursor.fetchone()
+
+        if not user:
+            flash("Industry account not found.", "error")
+            return redirect(url_for("login"))
+
+        # =================================================
+        # GET / CREATE INDUSTRY SETTINGS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                user_id,
+                language,
+                timezone,
+                date_format,
+                dashboard_view,
+
+                application_notifications,
+                collaboration_notifications,
+                message_notifications,
+                system_notifications,
+                email_notifications,
+
+                profile_visibility,
+                college_contact,
+                opportunity_visibility,
+
+                interface_density
+
+            FROM industry_settings
+
+            WHERE user_id = %s
+
+            LIMIT 1
+        """, (industry_user_id,))
+
+        settings = cursor.fetchone()
+
+        # -------------------------------------------------
+        # CREATE DEFAULT SETTINGS IF NOT EXISTS
+        # -------------------------------------------------
+
+        if not settings:
+
+            settings_id = str(uuid.uuid4())
+
+            cursor.execute("""
+                INSERT INTO industry_settings (
+
+                    id,
+                    user_id,
+
+                    language,
+                    timezone,
+                    date_format,
+                    dashboard_view,
+
+                    application_notifications,
+                    collaboration_notifications,
+                    message_notifications,
+                    system_notifications,
+                    email_notifications,
+
+                    profile_visibility,
+                    college_contact,
+                    opportunity_visibility,
+
+                    interface_density
+
+                )
+
+                VALUES (
+
+                    %s,
+                    %s,
+
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+
+                    %s,
+                    %s,
+                    %s,
+
+                    %s
+                )
+            """, (
+
+                settings_id,
+                industry_user_id,
+
+                "English",
+                "Asia/Kolkata",
+                "DD/MM/YYYY",
+                "overview",
+
+                True,
+                True,
+                True,
+                True,
+                True,
+
+                True,
+                True,
+                True,
+
+                "comfortable"
+            ))
+
+            conn.commit()
+
+            # Fetch again
+            cursor.execute("""
+                SELECT
+                    id,
+                    user_id,
+                    language,
+                    timezone,
+                    date_format,
+                    dashboard_view,
+
+                    application_notifications,
+                    collaboration_notifications,
+                    message_notifications,
+                    system_notifications,
+                    email_notifications,
+
+                    profile_visibility,
+                    college_contact,
+                    opportunity_visibility,
+
+                    interface_density
+
+                FROM industry_settings
+
+                WHERE user_id = %s
+
+                LIMIT 1
+            """, (industry_user_id,))
+
+            settings = cursor.fetchone()
+
+        # =================================================
+        # POST
+        # =================================================
+
+        if request.method == "POST":
+
+            # -------------------------------------------------
+            # New Settings Forms
+            # -------------------------------------------------
+
+            section = request.form.get(
+                "section",
+                ""
+            ).strip().lower()
+
+            # =================================================
+            # ACCOUNT PREFERENCES
+            # =================================================
+
+            if section == "account":
+
+                language = request.form.get(
+                    "language",
+                    "English"
+                ).strip()
+
+                timezone = request.form.get(
+                    "timezone",
+                    "Asia/Kolkata"
+                ).strip()
+
+                date_format = request.form.get(
+                    "date_format",
+                    "DD/MM/YYYY"
+                ).strip()
+
+                dashboard_view = request.form.get(
+                    "dashboard_view",
+                    "overview"
+                ).strip()
+
+                allowed_languages = [
+                    "English",
+                    "Hindi"
+                ]
+
+                allowed_timezones = [
+                    "Asia/Kolkata",
+                    "UTC"
+                ]
+
+                allowed_date_formats = [
+                    "DD/MM/YYYY",
+                    "MM/DD/YYYY",
+                    "YYYY-MM-DD"
+                ]
+
+                allowed_dashboard_views = [
+                    "overview",
+                    "requirements",
+                    "applications"
+                ]
+
+                if language not in allowed_languages:
+                    flash("Invalid language selected.", "error")
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if timezone not in allowed_timezones:
+                    flash("Invalid timezone selected.", "error")
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if date_format not in allowed_date_formats:
+                    flash("Invalid date format selected.", "error")
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if dashboard_view not in allowed_dashboard_views:
+                    flash("Invalid dashboard view selected.", "error")
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                cursor.execute("""
+                    UPDATE industry_settings
+
+                    SET
+                        language = %s,
+                        timezone = %s,
+                        date_format = %s,
+                        dashboard_view = %s
+
+                    WHERE user_id = %s
+                """, (
+                    language,
+                    timezone,
+                    date_format,
+                    dashboard_view,
+                    industry_user_id
+                ))
+
+                # Also update account information if supplied
+                name = request.form.get("name", "").strip()
+                email = request.form.get("email", "").strip().lower()
+
+                if name and email:
+
+                    if "@" not in email or "." not in email:
+                        flash(
+                            "Please enter a valid email address.",
+                            "error"
+                        )
+                        conn.rollback()
+
+                        return redirect(
+                            url_for("industry_settings")
+                        )
+
+                    cursor.execute("""
+                        SELECT id
+                        FROM users
+                        WHERE email = %s
+                          AND id <> %s
+                        LIMIT 1
+                    """, (
+                        email,
+                        industry_user_id
+                    ))
+
+                    existing_user = cursor.fetchone()
+
+                    if existing_user:
+                        flash(
+                            "This email address is already registered.",
+                            "error"
+                        )
+                        conn.rollback()
+
+                        return redirect(
+                            url_for("industry_settings")
+                        )
+
+                    cursor.execute("""
+                        UPDATE users
+                        SET
+                            name = %s,
+                            email = %s
+                        WHERE id = %s
+                    """, (
+                        name,
+                        email,
+                        industry_user_id
+                    ))
+
+                    session["user_name"] = name
+                    session["user_email"] = email
+
+                conn.commit()
+
+                flash(
+                    "Account preferences saved successfully.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("industry_settings") + "#account"
+                )
+
+            # =================================================
+            # NOTIFICATION PREFERENCES
+            # =================================================
+
+            elif section == "notifications":
+
+                application_notifications = (
+                    request.form.get(
+                        "application_notifications"
+                    ) is not None
+                )
+
+                collaboration_notifications = (
+                    request.form.get(
+                        "collaboration_notifications"
+                    ) is not None
+                )
+
+                message_notifications = (
+                    request.form.get(
+                        "message_notifications"
+                    ) is not None
+                )
+
+                system_notifications = (
+                    request.form.get(
+                        "system_notifications"
+                    ) is not None
+                )
+
+                email_notifications = (
+                    request.form.get(
+                        "email_notifications"
+                    ) is not None
+                )
+
+                cursor.execute("""
+                    UPDATE industry_settings
+
+                    SET
+                        application_notifications = %s,
+                        collaboration_notifications = %s,
+                        message_notifications = %s,
+                        system_notifications = %s,
+                        email_notifications = %s
+
+                    WHERE user_id = %s
+                """, (
+                    application_notifications,
+                    collaboration_notifications,
+                    message_notifications,
+                    system_notifications,
+                    email_notifications,
+                    industry_user_id
+                ))
+
+                conn.commit()
+
+                flash(
+                    "Notification preferences saved successfully.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("industry_settings") + "#notifications"
+                )
+
+            # =================================================
+            # PRIVACY
+            # =================================================
+
+            elif section == "privacy":
+
+                profile_visibility = (
+                    request.form.get(
+                        "profile_visibility"
+                    ) is not None
+                )
+
+                college_contact = (
+                    request.form.get(
+                        "college_contact"
+                    ) is not None
+                )
+
+                opportunity_visibility = (
+                    request.form.get(
+                        "opportunity_visibility"
+                    ) is not None
+                )
+
+                cursor.execute("""
+                    UPDATE industry_settings
+
+                    SET
+                        profile_visibility = %s,
+                        college_contact = %s,
+                        opportunity_visibility = %s
+
+                    WHERE user_id = %s
+                """, (
+                    profile_visibility,
+                    college_contact,
+                    opportunity_visibility,
+                    industry_user_id
+                ))
+
+                conn.commit()
+
+                flash(
+                    "Privacy settings saved successfully.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("industry_settings") + "#privacy"
+                )
+
+            # =================================================
+            # APPEARANCE
+            # =================================================
+
+            elif section == "appearance":
+
+                interface_density = request.form.get(
+                    "interface_density",
+                    "comfortable"
+                ).strip().lower()
+
+                if interface_density not in [
+                    "comfortable",
+                    "compact"
+                ]:
+                    flash(
+                        "Invalid interface density selected.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#appearance"
+                    )
+
+                cursor.execute("""
+                    UPDATE industry_settings
+
+                    SET
+                        interface_density = %s
+
+                    WHERE user_id = %s
+                """, (
+                    interface_density,
+                    industry_user_id
+                ))
+
+                conn.commit()
+
+                flash(
+                    "Appearance settings saved successfully.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("industry_settings") + "#appearance"
+                )
+
+            # =================================================
+            # SECURITY - CHANGE PASSWORD
+            # =================================================
+
+            elif section == "security":
+
+                current_password = request.form.get(
+                    "current_password",
+                    ""
+                ).strip()
+
+                new_password = request.form.get(
+                    "new_password",
+                    ""
+                ).strip()
+
+                confirm_password = request.form.get(
+                    "confirm_password",
+                    ""
+                ).strip()
+
+                if not current_password:
+                    flash(
+                        "Current password is required.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#security"
+                    )
+
+                if not new_password:
+                    flash(
+                        "New password is required.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#security"
+                    )
+
+                if len(new_password) < 6:
+                    flash(
+                        "New password must be at least 6 characters long.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#security"
+                    )
+
+                if new_password != confirm_password:
+                    flash(
+                        "New passwords do not match.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#security"
+                    )
+
+                # -------------------------------------------------
+                # CURRENT PROJECT PASSWORD SYSTEM
+                # -------------------------------------------------
+
+                cursor.execute("""
+                    SELECT password
+                    FROM users
+                    WHERE id = %s
+                    LIMIT 1
+                """, (
+                    industry_user_id,
+                ))
+
+                password_row = cursor.fetchone()
+
+                if not password_row:
+                    flash(
+                        "Unable to verify your account.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#security"
+                    )
+
+                stored_password = password_row["password"]
+
+                # Existing project stores password directly.
+                if current_password != stored_password:
+                    flash(
+                        "Current password is incorrect.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#security"
+                    )
+
+                if current_password == new_password:
+                    flash(
+                        "New password must be different from your current password.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings") + "#security"
+                    )
+
+                cursor.execute("""
+                    UPDATE users
+
+                    SET password = %s
+
+                    WHERE id = %s
+                """, (
+                    new_password,
+                    industry_user_id
+                ))
+
+                conn.commit()
+
+                flash(
+                    "Password changed successfully.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("industry_settings") + "#security"
+                )
+
+            # =================================================
+            # LEGACY ACCOUNT UPDATE
+            # =================================================
+
+            elif request.form.get("action") == "update_account":
+
+                name = request.form.get(
+                    "name",
+                    ""
+                ).strip()
+
+                email = request.form.get(
+                    "email",
+                    ""
+                ).strip().lower()
+
+                if not name:
+                    flash(
+                        "Name is required.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if not email:
+                    flash(
+                        "Email is required.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if "@" not in email or "." not in email:
+                    flash(
+                        "Please enter a valid email address.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                cursor.execute("""
+                    SELECT id
+                    FROM users
+                    WHERE email = %s
+                      AND id <> %s
+                    LIMIT 1
+                """, (
+                    email,
+                    industry_user_id
+                ))
+
+                existing_user = cursor.fetchone()
+
+                if existing_user:
+                    flash(
+                        "This email address is already registered.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                cursor.execute("""
+                    UPDATE users
+                    SET
+                        name = %s,
+                        email = %s
+                    WHERE id = %s
+                """, (
+                    name,
+                    email,
+                    industry_user_id
+                ))
+
+                conn.commit()
+
+                session["user_name"] = name
+                session["user_email"] = email
+
+                flash(
+                    "Account information updated successfully.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("industry_settings")
+                )
+
+            # =================================================
+            # LEGACY PASSWORD UPDATE
+            # =================================================
+
+            elif request.form.get("action") == "change_password":
+
+                current_password = request.form.get(
+                    "current_password",
+                    ""
+                ).strip()
+
+                new_password = request.form.get(
+                    "new_password",
+                    ""
+                ).strip()
+
+                confirm_password = request.form.get(
+                    "confirm_password",
+                    ""
+                ).strip()
+
+                if not current_password:
+                    flash(
+                        "Current password is required.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if not new_password:
+                    flash(
+                        "New password is required.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if not confirm_password:
+                    flash(
+                        "Please confirm your new password.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if new_password != confirm_password:
+                    flash(
+                        "New password and confirmation password do not match.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if len(new_password) < 6:
+                    flash(
+                        "New password must be at least 6 characters long.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                cursor.execute("""
+                    SELECT password
+                    FROM users
+                    WHERE id = %s
+                    LIMIT 1
+                """, (
+                    industry_user_id,
+                ))
+
+                password_row = cursor.fetchone()
+
+                if not password_row:
+                    flash(
+                        "Unable to verify your account.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                stored_password = password_row["password"]
+
+                if current_password != stored_password:
+                    flash(
+                        "Current password is incorrect.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                if current_password == new_password:
+                    flash(
+                        "New password must be different from your current password.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("industry_settings")
+                    )
+
+                cursor.execute("""
+                    UPDATE users
+                    SET password = %s
+                    WHERE id = %s
+                """, (
+                    new_password,
+                    industry_user_id
+                ))
+
+                conn.commit()
+
+                flash(
+                    "Password changed successfully.",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("industry_settings")
+                )
+
+            # =================================================
+            # INVALID ACTION
+            # =================================================
+
+            else:
+
+                flash(
+                    "Invalid settings action.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("industry_settings")
+                )
+
+        # =================================================
+        # GET ACCOUNT REQUEST STATUS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                request_type,
+                status,
+                reason,
+                created_at,
+                updated_at
+
+            FROM industry_account_requests
+
+            WHERE user_id = %s
+
+            ORDER BY created_at DESC
+
+            LIMIT 10
+        """, (
+            industry_user_id,
+        ))
+
+        account_requests = cursor.fetchall()
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "industry/settings.html",
+
+            dashboard="settings",
+
+            user=user,
+
+            settings=settings,
+
+            account_requests=account_requests
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("INDUSTRY SETTINGS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load or update settings.",
+            "error"
+        )
+
+        return redirect(
+            url_for("industry_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+# =========================================================
+# INDUSTRY DEACTIVATE ACCOUNT
+# =========================================================
+
+@app.route(
+    "/industry/settings/deactivate",
+    methods=["POST"]
+)
+@industry_required
+def industry_deactivate_account():
+
+    conn = None
+    cursor = None
+
+    industry_user_id = session.get(
+        "user_id"
+    )
+
+    try:
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # CHECK ACTIVE ACCOUNT
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                status
+
+            FROM users
+
+            WHERE id = %s
+
+            LIMIT 1
+        """, (
+            industry_user_id,
+        ))
+
+        user = cursor.fetchone()
+
+
+        if not user:
+
+            flash(
+                "Industry account not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_settings"
+                )
+            )
+
+
+        if user["status"] != "ACTIVE":
+
+            flash(
+                "Your account is already inactive.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_settings"
+                )
+            )
+
+
+        # =================================================
+        # CREATE DEACTIVATION REQUEST
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+
+            FROM industry_account_requests
+
+            WHERE user_id = %s
+
+              AND request_type = 'DEACTIVATE'
+
+              AND status = 'PENDING'
+
+            LIMIT 1
+        """, (
+            industry_user_id,
+        ))
+
+        existing_request = cursor.fetchone()
+
+
+        if existing_request:
+
+            flash(
+                "A deactivation request is already pending.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_settings"
+                ) + "#danger"
+            )
+
+
+        request_id = str(
+            uuid.uuid4()
+        )
+
+
+        cursor.execute("""
+            INSERT INTO industry_account_requests (
+
+                id,
+                user_id,
+                request_type,
+                status,
+                reason
+
+            )
+
+            VALUES (
+
+                %s,
+                %s,
+                'DEACTIVATE',
+                'PENDING',
+                %s
+
+            )
+        """, (
+
+            request_id,
+
+            industry_user_id,
+
+            "Industry account deactivation requested from Settings."
+
+        ))
+
+
+        conn.commit()
+
+
+        flash(
+            "Account deactivation request submitted.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_settings"
+            ) + "#danger"
+        )
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+
+        print(
+            "INDUSTRY DEACTIVATE ERROR:",
+            e
+        )
+
+
+        flash(
+            "Unable to submit deactivation request.",
+            "error"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_settings"
+            ) + "#danger"
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# INDUSTRY DELETE ACCOUNT REQUEST
+# =========================================================
+
+@app.route(
+    "/industry/settings/delete",
+    methods=["POST"]
+)
+@industry_required
+def industry_delete_account():
+
+    conn = None
+    cursor = None
+
+    industry_user_id = session.get(
+        "user_id"
+    )
+
+    try:
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # CHECK USER
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                status
+
+            FROM users
+
+            WHERE id = %s
+
+            LIMIT 1
+        """, (
+            industry_user_id,
+        ))
+
+        user = cursor.fetchone()
+
+
+        if not user:
+
+            flash(
+                "Industry account not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "login"
+                )
+            )
+
+
+        # =================================================
+        # CHECK EXISTING REQUEST
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+
+            FROM industry_account_requests
+
+            WHERE user_id = %s
+
+              AND request_type = 'DELETE'
+
+              AND status = 'PENDING'
+
+            LIMIT 1
+        """, (
+            industry_user_id,
+        ))
+
+        existing_request = cursor.fetchone()
+
+
+        if existing_request:
+
+            flash(
+                "An account deletion request is already pending.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "industry_settings"
+                ) + "#danger"
+            )
+
+
+        # =================================================
+        # CREATE DELETE REQUEST
+        # =================================================
+
+        request_id = str(
+            uuid.uuid4()
+        )
+
+
+        cursor.execute("""
+            INSERT INTO industry_account_requests (
+
+                id,
+                user_id,
+                request_type,
+                status,
+                reason
+
+            )
+
+            VALUES (
+
+                %s,
+                %s,
+                'DELETE',
+                'PENDING',
+                %s
+
+            )
+        """, (
+
+            request_id,
+
+            industry_user_id,
+
+            "Industry account deletion requested from Settings."
+
+        ))
+
+
+        conn.commit()
+
+
+        flash(
+            "Account deletion request submitted for review.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_settings"
+            ) + "#danger"
+        )
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+
+        print(
+            "INDUSTRY DELETE ACCOUNT ERROR:",
+            e
+        )
+
+
+        flash(
+            "Unable to submit account deletion request.",
+            "error"
+        )
+
+
+        return redirect(
+            url_for(
+                "industry_settings"
+            ) + "#danger"
         )
 
 

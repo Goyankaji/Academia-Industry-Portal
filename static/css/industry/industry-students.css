@@ -4,9 +4,9 @@
 
 .students-page,
 .student-detail-page {
-    padding: 28px;
-    max-width: 1500px;
-    margin: 0 auto;
+    padding: 0 0 28px;
+    max-width: none;
+    margin: 0;
 }
 
 
@@ -20,6 +20,7 @@
     align-items: flex-start;
     gap: 24px;
     margin-bottom: 26px;
+    padding-top: 0;
 }
 
 .page-eyebrow,
@@ -856,7 +857,7 @@
 
     .students-page,
     .student-detail-page {
-        padding: 17px;
+        padding: 0 16px 20px;
     }
 
     .students-header {

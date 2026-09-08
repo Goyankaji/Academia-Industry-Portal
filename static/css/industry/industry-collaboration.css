@@ -1,6 +1,7 @@
 .industry-page {
     width: 100%;
     padding: 34px 36px 50px;
+    margin: 0;
     box-sizing: border-box;
 }
 
@@ -946,5 +947,29 @@
 
     .industry-collaboration-actions .industry-btn {
         width: 100%;
+    }
+}
+
+/* ================= FINAL PAGE SPACING FIX ================= */
+
+.industry-page {
+    margin-top: -43px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+@media (max-width: 800px) {
+    .industry-page {
+        margin-top: -25px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .industry-page {
+        margin-top: -20px;
+        padding-left: 0;
+        padding-right: 0;
     }
 }

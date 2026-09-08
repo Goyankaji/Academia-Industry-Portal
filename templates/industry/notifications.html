@@ -1,0 +1,633 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{{ url_for(
+          'static',
+          filename='css/industry/industry-notifications.css'
+      ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-page notifications-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="notifications-page-header">
+
+        <div class="notifications-header-content">
+
+            <span class="industry-page-eyebrow">
+                MANAGEMENT
+            </span>
+
+            <h1>
+                Notifications
+            </h1>
+
+            <p>
+                Stay updated with important activities,
+                applications and collaboration updates.
+            </p>
+
+        </div>
+
+
+        {% if unread_notifications > 0 %}
+
+        <div class="notifications-header-action">
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'industry_mark_all_notifications_read'
+                ) }}"
+            >
+
+                <button
+                    type="submit"
+                    class="industry-btn industry-btn-outline"
+                >
+                    ✓ Mark All as Read
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <!-- =====================================================
+         KPI / STAT CARDS
+    ====================================================== -->
+
+    <div class="notifications-stats-grid">
+
+
+        <!-- TOTAL NOTIFICATIONS -->
+
+        <div class="notifications-stat-card">
+
+            <div class="notifications-stat-icon blue">
+                ✉
+            </div>
+
+            <div class="notifications-stat-content">
+
+                <span class="notifications-stat-label">
+                    TOTAL NOTIFICATIONS
+                </span>
+
+                <strong class="notifications-stat-value">
+                    {{ total_notifications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- UNREAD -->
+
+        <div class="notifications-stat-card">
+
+            <div class="notifications-stat-icon orange">
+                ●
+            </div>
+
+            <div class="notifications-stat-content">
+
+                <span class="notifications-stat-label">
+                    UNREAD
+                </span>
+
+                <strong
+                    class="notifications-stat-value"
+                    id="unreadCount"
+                >
+                    {{ unread_notifications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- READ -->
+
+        <div class="notifications-stat-card">
+
+            <div class="notifications-stat-icon green">
+                ✓
+            </div>
+
+            <div class="notifications-stat-content">
+
+                <span class="notifications-stat-label">
+                    READ
+                </span>
+
+                <strong class="notifications-stat-value">
+                    {{ read_notifications|default(0) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- STATUS -->
+
+        <div class="notifications-stat-card">
+
+            <div class="notifications-stat-icon purple">
+                🔔
+            </div>
+
+            <div class="notifications-stat-content">
+
+                <span class="notifications-stat-label">
+                    STATUS
+                </span>
+
+                <strong class="notifications-stat-value notifications-status-text">
+
+                    {% if unread_notifications > 0 %}
+                        New
+                    {% else %}
+                        Clear
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAIN NOTIFICATIONS PANEL
+    ====================================================== -->
+
+    <div class="notifications-panel">
+
+
+        <!-- =================================================
+             LEFT FILTER SIDEBAR
+        ================================================== -->
+
+        <aside class="notifications-sidebar">
+
+
+            <!-- ALL -->
+
+            <button
+                type="button"
+                class="notifications-side-item active"
+                data-filter="all"
+            >
+
+                <span class="notifications-side-icon">
+                    ✉
+                </span>
+
+                <span>
+                    All Notifications
+                </span>
+
+                <span class="notifications-side-count">
+                    {{ total_notifications|default(0) }}
+                </span>
+
+            </button>
+
+
+
+            <!-- UNREAD -->
+
+            <button
+                type="button"
+                class="notifications-side-item"
+                data-filter="unread"
+            >
+
+                <span class="notifications-side-icon">
+                    ●
+                </span>
+
+                <span>
+                    Unread
+                </span>
+
+                <span
+                    class="notifications-side-count"
+                    id="sidebarUnreadCount"
+                >
+                    {{ unread_notifications|default(0) }}
+                </span>
+
+            </button>
+
+
+
+            <!-- READ -->
+
+            <button
+                type="button"
+                class="notifications-side-item"
+                data-filter="read"
+            >
+
+                <span class="notifications-side-icon">
+                    ✓
+                </span>
+
+                <span>
+                    Read
+                </span>
+
+                <span class="notifications-side-count">
+                    {{ read_notifications|default(0) }}
+                </span>
+
+            </button>
+
+
+
+            <div class="notifications-sidebar-divider"></div>
+
+
+
+            <!-- TYPE -->
+
+            <div class="notifications-sidebar-label">
+                NOTIFICATION TYPES
+            </div>
+
+
+
+            <button
+                type="button"
+                class="notifications-type-item"
+                data-type="COLLABORATION"
+            >
+
+                <span class="type-dot collaboration"></span>
+
+                <span>
+                    Collaboration
+                </span>
+
+            </button>
+
+
+
+            <button
+                type="button"
+                class="notifications-type-item"
+                data-type="APPLICATION"
+            >
+
+                <span class="type-dot application"></span>
+
+                <span>
+                    Applications
+                </span>
+
+            </button>
+
+
+
+            <button
+                type="button"
+                class="notifications-type-item"
+                data-type="SYSTEM"
+            >
+
+                <span class="type-dot system"></span>
+
+                <span>
+                    System
+                </span>
+
+            </button>
+
+
+        </aside>
+
+
+
+        <!-- =================================================
+             MAIN CONTENT
+        ================================================== -->
+
+        <section class="notifications-main">
+
+
+            <!-- MAIN HEADER -->
+
+            <div class="notifications-main-header">
+
+                <div class="notifications-main-heading">
+
+                    <h2 id="notificationSectionTitle">
+                        All Notifications
+                    </h2>
+
+                    <p id="notificationSectionSubtitle">
+                        All notifications received by your organization.
+                    </p>
+
+                </div>
+
+
+
+                <!-- SEARCH -->
+
+                <div class="notifications-search">
+
+                    <span class="notifications-search-icon">
+                        ⌕
+                    </span>
+
+                    <input
+                        type="text"
+                        id="notificationSearch"
+                        placeholder="Search notifications..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 NOTIFICATION LIST
+            ================================================== -->
+
+            <div
+                class="notifications-list"
+                id="notificationsList"
+            >
+
+
+                {% if notifications %}
+
+
+                    {% for notification in notifications %}
+
+                    <article
+                        class="notification-card
+                        {% if not notification.is_read %}
+                            unread
+                        {% endif %}"
+                        data-read="{{ notification.is_read }}"
+                        data-type="{{ notification.notification_type|default('SYSTEM')|upper }}"
+                        data-search="{{ (
+                            notification.title ~ ' ' ~
+                            notification.message ~ ' ' ~
+                            notification.notification_type|default('')
+                        )|lower }}"
+                    >
+
+
+                        <!-- UNREAD INDICATOR -->
+
+                        <div class="notification-indicator">
+
+                            {% if not notification.is_read %}
+                                <span></span>
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- NOTIFICATION ICON -->
+
+                        <div
+                            class="notification-icon
+                            {% if notification.notification_type == 'COLLABORATION' %}
+                                collaboration
+                            {% elif notification.notification_type == 'APPLICATION' %}
+                                application
+                            {% elif notification.notification_type == 'SYSTEM' %}
+                                system
+                            {% else %}
+                                default
+                            {% endif %}"
+                        >
+
+                            {% if notification.notification_type == 'COLLABORATION' %}
+
+                                🔗
+
+                            {% elif notification.notification_type == 'APPLICATION' %}
+
+                                📄
+
+                            {% elif notification.notification_type == 'SYSTEM' %}
+
+                                ⚙
+
+                            {% else %}
+
+                                🔔
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- CONTENT -->
+
+                        <div class="notification-content">
+
+
+                            <div class="notification-top-row">
+
+                                <div class="notification-title-area">
+
+                                    <h3>
+                                        {{ notification.title }}
+                                    </h3>
+
+
+                                    {% if notification.notification_type %}
+
+                                    <span class="notification-type">
+                                        {{ notification.notification_type }}
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <time
+                                    class="notification-time"
+                                    datetime="{{ notification.created_at }}"
+                                >
+
+                                    {{ notification.created_at.strftime(
+                                        '%d %b %Y, %I:%M %p'
+                                    ) if notification.created_at else '' }}
+
+                                </time>
+
+                            </div>
+
+
+
+                            <p class="notification-message">
+                                {{ notification.message }}
+                            </p>
+
+
+
+                            <!-- ACTION -->
+
+                            <div class="notification-actions">
+
+                                {% if not notification.is_read %}
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for(
+                                        'industry_mark_notification_read',
+                                        notification_id=notification.id
+                                    ) }}"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="notification-read-btn"
+                                    >
+                                        ✓ Mark as Read
+                                    </button>
+
+                                </form>
+
+                                {% else %}
+
+                                <span class="notification-read-status">
+                                    ✓ Read
+                                </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                        </div>
+
+                    </article>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+
+                    <!-- EMPTY STATE -->
+
+                    <div class="notifications-empty-state">
+
+                        <div class="notifications-empty-icon">
+                            ✉
+                        </div>
+
+                        <h3>
+                            No Notifications
+                        </h3>
+
+                        <p>
+                            You don't have any notifications right now.
+                            Important updates will appear here.
+                        </p>
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 FILTER / SEARCH EMPTY
+            ================================================== -->
+
+            <div
+                class="notifications-empty-state notifications-filter-empty"
+                id="notificationNoResults"
+                style="display:none;"
+            >
+
+                <div class="notifications-empty-icon">
+                    ⌕
+                </div>
+
+                <h3>
+                    No Notifications Found
+                </h3>
+
+                <p>
+                    Try changing your search or selected filter.
+                </p>
+
+                <button
+                    type="button"
+                    class="industry-btn industry-btn-outline"
+                    id="clearNotificationFilters"
+                >
+                    Clear Filters
+                </button>
+
+            </div>
+
+
+        </section>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-notifications.js'
+) }}"></script>
+
+{% endblock %}

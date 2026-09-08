@@ -1,0 +1,948 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+      filename='css/industry/industry-reports.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-page reports-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="reports-header">
+
+        <div class="reports-header-content">
+
+            <span class="industry-page-eyebrow">
+                MANAGEMENT
+            </span>
+
+            <h1>Reports & Activity</h1>
+
+            <p>
+                Monitor your organization's requirements,
+                applications, collaborations and communication activity.
+            </p>
+
+        </div>
+
+
+        <div class="reports-header-actions">
+
+            <button
+                type="button"
+                class="industry-btn industry-btn-primary reports-export-btn"
+                id="exportReportBtn"
+            >
+                <span>↓</span>
+                Export Report
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI CARDS
+    ====================================================== -->
+
+    <div class="reports-stats-grid">
+
+
+        <!-- Requirements -->
+
+        <div class="reports-stat-card">
+
+            <div class="reports-stat-icon reports-icon-blue">
+                <span>▣</span>
+            </div>
+
+            <div class="reports-stat-content">
+
+                <span class="reports-stat-label">
+                    REQUIREMENTS
+                </span>
+
+                <strong>
+                    {{ report_data.requirements.total|default(0) }}
+                </strong>
+
+                <span class="reports-stat-meta">
+                    {{ report_data.requirements.open|default(0) }} open
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Applications -->
+
+        <div class="reports-stat-card">
+
+            <div class="reports-stat-icon reports-icon-purple">
+                <span>▤</span>
+            </div>
+
+            <div class="reports-stat-content">
+
+                <span class="reports-stat-label">
+                    APPLICATIONS
+                </span>
+
+                <strong>
+                    {{ report_data.applications.total|default(0) }}
+                </strong>
+
+                <span class="reports-stat-meta">
+                    {{ report_data.applications.shortlisted|default(0) }}
+                    shortlisted
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Collaborations -->
+
+        <div class="reports-stat-card">
+
+            <div class="reports-stat-icon reports-icon-green">
+                <span>↗</span>
+            </div>
+
+            <div class="reports-stat-content">
+
+                <span class="reports-stat-label">
+                    COLLABORATIONS
+                </span>
+
+                <strong>
+                    {{ report_data.collaborations.total|default(0) }}
+                </strong>
+
+                <span class="reports-stat-meta">
+                    {{ report_data.collaborations.active|default(0) }}
+                    active
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Messages -->
+
+        <div class="reports-stat-card">
+
+            <div class="reports-stat-icon reports-icon-orange">
+                <span>✉</span>
+            </div>
+
+            <div class="reports-stat-content">
+
+                <span class="reports-stat-label">
+                    MESSAGES
+                </span>
+
+                <strong>
+                    {{ report_data.messages.total|default(0) }}
+                </strong>
+
+                <span class="reports-stat-meta">
+                    {{ report_data.messages.unread|default(0) }}
+                    unread
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTER BAR
+    ====================================================== -->
+
+    <div class="reports-filter-card">
+
+        <div class="reports-filter-left">
+
+            <div class="reports-filter-title">
+                <span>Report Overview</span>
+
+                <small>
+                    Current platform activity
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="reports-filter-right">
+
+            <select
+                id="reportPeriodFilter"
+                class="reports-select"
+            >
+
+                <option value="all">
+                    All Time
+                </option>
+
+                <option value="month">
+                    This Month
+                </option>
+
+                <option value="quarter">
+                    This Quarter
+                </option>
+
+                <option value="year">
+                    This Year
+                </option>
+
+            </select>
+
+
+            <button
+                type="button"
+                class="reports-reset-btn"
+                id="resetReportFilters"
+            >
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN REPORT GRID
+    ====================================================== -->
+
+    <div class="reports-main-grid">
+
+
+        <!-- =================================================
+             REQUIREMENTS OVERVIEW
+        ================================================== -->
+
+        <section class="reports-panel">
+
+            <div class="reports-panel-header">
+
+                <div>
+
+                    <span class="reports-panel-eyebrow">
+                        OPPORTUNITIES
+                    </span>
+
+                    <h2>Requirements Overview</h2>
+
+                    <p>
+                        Current status of your posted requirements.
+                    </p>
+
+                </div>
+
+                <span class="reports-panel-icon blue">
+                    ▣
+                </span>
+
+            </div>
+
+
+            <div class="reports-overview-grid">
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Total
+                    </span>
+
+                    <strong>
+                        {{ report_data.requirements.total|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Open
+                    </span>
+
+                    <strong class="text-green">
+                        {{ report_data.requirements.open|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Closed
+                    </span>
+
+                    <strong class="text-red">
+                        {{ report_data.requirements.closed|default(0) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="reports-progress-list">
+
+
+                <!-- Open -->
+
+                <div class="reports-progress-row">
+
+                    <div class="reports-progress-info">
+
+                        <span>Open Requirements</span>
+
+                        <strong>
+                            {{ report_data.requirements.open|default(0) }}
+                        </strong>
+
+                    </div>
+
+                    <div class="reports-progress-track">
+
+                        <div
+                            class="reports-progress-fill blue"
+                            data-value="{{ report_data.requirements.open|default(0) }}"
+                            data-total="{{ report_data.requirements.total|default(0) }}"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Closed -->
+
+                <div class="reports-progress-row">
+
+                    <div class="reports-progress-info">
+
+                        <span>Closed Requirements</span>
+
+                        <strong>
+                            {{ report_data.requirements.closed|default(0) }}
+                        </strong>
+
+                    </div>
+
+                    <div class="reports-progress-track">
+
+                        <div
+                            class="reports-progress-fill red"
+                            data-value="{{ report_data.requirements.closed|default(0) }}"
+                            data-total="{{ report_data.requirements.total|default(0) }}"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             APPLICATION OVERVIEW
+        ================================================== -->
+
+        <section class="reports-panel">
+
+            <div class="reports-panel-header">
+
+                <div>
+
+                    <span class="reports-panel-eyebrow">
+                        RECRUITMENT
+                    </span>
+
+                    <h2>Applications Overview</h2>
+
+                    <p>
+                        Track applications received for your requirements.
+                    </p>
+
+                </div>
+
+                <span class="reports-panel-icon purple">
+                    ▤
+                </span>
+
+            </div>
+
+
+            <div class="reports-overview-grid">
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Total
+                    </span>
+
+                    <strong>
+                        {{ report_data.applications.total|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Shortlisted
+                    </span>
+
+                    <strong class="text-purple">
+                        {{ report_data.applications.shortlisted|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Selected
+                    </span>
+
+                    <strong class="text-green">
+                        {{ report_data.applications.selected|default(0) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="reports-progress-list">
+
+
+                <div class="reports-progress-row">
+
+                    <div class="reports-progress-info">
+
+                        <span>Shortlisted</span>
+
+                        <strong>
+                            {{ report_data.applications.shortlisted|default(0) }}
+                        </strong>
+
+                    </div>
+
+                    <div class="reports-progress-track">
+
+                        <div
+                            class="reports-progress-fill purple"
+                            data-value="{{ report_data.applications.shortlisted|default(0) }}"
+                            data-total="{{ report_data.applications.total|default(0) }}"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="reports-progress-row">
+
+                    <div class="reports-progress-info">
+
+                        <span>Selected</span>
+
+                        <strong>
+                            {{ report_data.applications.selected|default(0) }}
+                        </strong>
+
+                    </div>
+
+                    <div class="reports-progress-track">
+
+                        <div
+                            class="reports-progress-fill green"
+                            data-value="{{ report_data.applications.selected|default(0) }}"
+                            data-total="{{ report_data.applications.total|default(0) }}"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         COLLABORATION + COMMUNICATION
+    ====================================================== -->
+
+    <div class="reports-main-grid">
+
+
+        <!-- Collaborations -->
+
+        <section class="reports-panel">
+
+            <div class="reports-panel-header">
+
+                <div>
+
+                    <span class="reports-panel-eyebrow">
+                        PARTNERSHIPS
+                    </span>
+
+                    <h2>Collaboration Activity</h2>
+
+                    <p>
+                        Overview of your college collaboration activity.
+                    </p>
+
+                </div>
+
+                <span class="reports-panel-icon green">
+                    ↗
+                </span>
+
+            </div>
+
+
+            <div class="reports-overview-grid">
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Total
+                    </span>
+
+                    <strong>
+                        {{ report_data.collaborations.total|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Active
+                    </span>
+
+                    <strong class="text-green">
+                        {{ report_data.collaborations.active|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Pending
+                    </span>
+
+                    <strong class="text-orange">
+                        {{ report_data.collaborations.pending|default(0) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="reports-collaboration-status">
+
+
+                <div class="reports-status-line">
+
+                    <span>
+                        Active collaborations
+                    </span>
+
+                    <strong>
+                        {{ report_data.collaborations.active|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-status-line">
+
+                    <span>
+                        Completed collaborations
+                    </span>
+
+                    <strong>
+                        {{ report_data.collaborations.completed|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-status-line">
+
+                    <span>
+                        Pending requests
+                    </span>
+
+                    <strong>
+                        {{ report_data.collaborations.pending|default(0) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- Messages -->
+
+        <section class="reports-panel">
+
+            <div class="reports-panel-header">
+
+                <div>
+
+                    <span class="reports-panel-eyebrow">
+                        COMMUNICATION
+                    </span>
+
+                    <h2>Communication Activity</h2>
+
+                    <p>
+                        Overview of messages exchanged through the portal.
+                    </p>
+
+                </div>
+
+                <span class="reports-panel-icon orange">
+                    ✉
+                </span>
+
+            </div>
+
+
+            <div class="reports-overview-grid">
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Total
+                    </span>
+
+                    <strong>
+                        {{ report_data.messages.total|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Sent
+                    </span>
+
+                    <strong>
+                        {{ report_data.messages.sent|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-overview-card">
+
+                    <span class="reports-overview-label">
+                        Received
+                    </span>
+
+                    <strong>
+                        {{ report_data.messages.received|default(0) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="reports-message-summary">
+
+                <div class="reports-message-item">
+
+                    <span class="reports-message-dot blue"></span>
+
+                    <span>
+                        Sent Messages
+                    </span>
+
+                    <strong>
+                        {{ report_data.messages.sent|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-message-item">
+
+                    <span class="reports-message-dot green"></span>
+
+                    <span>
+                        Received Messages
+                    </span>
+
+                    <strong>
+                        {{ report_data.messages.received|default(0) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reports-message-item">
+
+                    <span class="reports-message-dot orange"></span>
+
+                    <span>
+                        Unread Messages
+                    </span>
+
+                    <strong>
+                        {{ report_data.messages.unread|default(0) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         RECENT ACTIVITY
+    ====================================================== -->
+
+    <section class="reports-panel reports-activity-panel">
+
+        <div class="reports-panel-header reports-activity-header">
+
+            <div>
+
+                <span class="reports-panel-eyebrow">
+                    ACTIVITY
+                </span>
+
+                <h2>Recent Activity</h2>
+
+                <p>
+                    Latest activity associated with your organization.
+                </p>
+
+            </div>
+
+
+            <span
+                class="reports-activity-count"
+                id="activityCount"
+            >
+                {{ report_data.activities|length if report_data.activities else 0 }}
+                activities
+            </span>
+
+        </div>
+
+
+        <div
+            class="reports-activity-list"
+            id="activityList"
+        >
+
+            {% if report_data.activities %}
+
+                {% for activity in report_data.activities %}
+
+                <div
+                    class="reports-activity-item"
+                    data-search="
+                        {{ activity.title|default('')|lower }}
+                        {{ activity.description|default('')|lower }}
+                        {{ activity.type|default('')|lower }}
+                    "
+                >
+
+                    <div class="reports-activity-icon
+                        {% if activity.type|default('')|upper == 'APPLICATION' %}
+                            purple
+                        {% elif activity.type|default('')|upper == 'COLLABORATION' %}
+                            green
+                        {% elif activity.type|default('')|upper == 'MESSAGE' %}
+                            orange
+                        {% else %}
+                            blue
+                        {% endif %}
+                    ">
+
+                        {% if activity.type|default('')|upper == 'APPLICATION' %}
+                            ▤
+                        {% elif activity.type|default('')|upper == 'COLLABORATION' %}
+                            ↗
+                        {% elif activity.type|default('')|upper == 'MESSAGE' %}
+                            ✉
+                        {% else %}
+                            •
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="reports-activity-content">
+
+                        <div class="reports-activity-title-row">
+
+                            <h3>
+                                {{ activity.title|default('Activity Update') }}
+                            </h3>
+
+                            {% if activity.type %}
+                            <span class="reports-activity-type">
+                                {{ activity.type }}
+                            </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <p>
+                            {{ activity.description|default('Recent activity on the portal.') }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="reports-activity-date">
+
+                        {{ activity.created_at|default('') }}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="reports-empty-state">
+
+                    <div class="reports-empty-icon">
+                        ✓
+                    </div>
+
+                    <h3>No Recent Activity</h3>
+
+                    <p>
+                        Your latest requirements, applications,
+                        collaborations and messages will appear here.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <div
+            class="reports-search-empty"
+            id="activitySearchEmpty"
+            style="display:none;"
+        >
+
+            <div class="reports-empty-icon">
+                ⌕
+            </div>
+
+            <h3>No Activity Found</h3>
+
+            <p>
+                Try changing your search or filter.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ACTIVITY SEARCH
+    ====================================================== -->
+
+    <div class="reports-activity-search">
+
+        <div class="reports-search-wrapper">
+
+            <span class="reports-search-icon">
+                ⌕
+            </span>
+
+            <input
+                type="text"
+                id="activitySearch"
+                placeholder="Search recent activity..."
+                autocomplete="off"
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-reports.js'
+) }}"></script>
+
+{% endblock %}

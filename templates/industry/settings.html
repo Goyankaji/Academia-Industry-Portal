@@ -1,0 +1,1373 @@
+{% extends "industry/base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+      filename='css/industry/industry-settings.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-page settings-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="settings-header">
+
+        <div class="settings-header-content">
+
+            <span class="industry-page-eyebrow">
+                MANAGEMENT
+            </span>
+
+            <h1>Settings</h1>
+
+            <p>
+                Manage your account preferences, notifications,
+                security and privacy settings.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SETTINGS LAYOUT
+    ====================================================== -->
+
+    <div class="settings-layout">
+
+
+        <!-- =================================================
+             SETTINGS SIDEBAR
+        ================================================== -->
+
+        <aside class="settings-navigation">
+
+            <div class="settings-nav-title">
+                SETTINGS
+            </div>
+
+
+            <button
+                type="button"
+                class="settings-nav-item active"
+                data-section="account"
+            >
+                <span class="settings-nav-icon">⚙</span>
+
+                <span class="settings-nav-text">
+                    <strong>Account Preferences</strong>
+                    <small>General preferences</small>
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="settings-nav-item"
+                data-section="notifications"
+            >
+                <span class="settings-nav-icon">♢</span>
+
+                <span class="settings-nav-text">
+                    <strong>Notifications</strong>
+                    <small>Notification preferences</small>
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="settings-nav-item"
+                data-section="security"
+            >
+                <span class="settings-nav-icon">🔒</span>
+
+                <span class="settings-nav-text">
+                    <strong>Security</strong>
+                    <small>Password and account security</small>
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="settings-nav-item"
+                data-section="privacy"
+            >
+                <span class="settings-nav-icon">◉</span>
+
+                <span class="settings-nav-text">
+                    <strong>Privacy</strong>
+                    <small>Visibility and contact controls</small>
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="settings-nav-item"
+                data-section="appearance"
+            >
+                <span class="settings-nav-icon">◐</span>
+
+                <span class="settings-nav-text">
+                    <strong>Appearance</strong>
+                    <small>Interface preferences</small>
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="settings-nav-item"
+                data-section="sessions"
+            >
+                <span class="settings-nav-icon">▣</span>
+
+                <span class="settings-nav-text">
+                    <strong>Sessions</strong>
+                    <small>Active login sessions</small>
+                </span>
+            </button>
+
+
+            <div class="settings-nav-divider"></div>
+
+
+            <button
+                type="button"
+                class="settings-nav-item danger-nav-item"
+                data-section="danger"
+            >
+                <span class="settings-nav-icon">⚠</span>
+
+                <span class="settings-nav-text">
+                    <strong>Danger Zone</strong>
+                    <small>Account deactivation</small>
+                </span>
+            </button>
+
+        </aside>
+
+
+        <!-- =================================================
+             SETTINGS CONTENT
+        ================================================== -->
+
+        <main class="settings-content">
+
+
+            <!-- =================================================
+                 ACCOUNT PREFERENCES
+            ================================================== -->
+
+            <section
+                class="settings-section active"
+                id="settings-account"
+            >
+
+                <div class="settings-section-header">
+
+                    <div>
+                        <span class="settings-section-eyebrow">
+                            PREFERENCES
+                        </span>
+
+                        <h2>Account Preferences</h2>
+
+                        <p>
+                            Customize how the portal works for you.
+                        </p>
+                    </div>
+
+                    <div class="settings-section-icon blue">
+                        ⚙
+                    </div>
+
+                </div>
+
+
+                <form
+                    class="settings-form"
+                    method="POST"
+                    action="{{ url_for('industry_settings') }}"
+                    data-settings-form
+                >
+
+                    <input
+                        type="hidden"
+                        name="section"
+                        value="account"
+                    >
+
+
+                    <div class="settings-form-grid">
+
+
+                        <div class="settings-field">
+
+                            <label for="language">
+                                Language
+                            </label>
+
+                            <select
+                                id="language"
+                                name="language"
+                            >
+                                <option value="English">
+                                    English
+                                </option>
+
+                                <option value="Hindi">
+                                    Hindi
+                                </option>
+                            </select>
+
+                            <small>
+                                Choose your preferred portal language.
+                            </small>
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="timezone">
+                                Time Zone
+                            </label>
+
+                            <select
+                                id="timezone"
+                                name="timezone"
+                            >
+                                <option value="Asia/Kolkata">
+                                    India Standard Time (IST)
+                                </option>
+
+                                <option value="UTC">
+                                    Coordinated Universal Time (UTC)
+                                </option>
+                            </select>
+
+                            <small>
+                                Used for dates, times and activity records.
+                            </small>
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="dateFormat">
+                                Date Format
+                            </label>
+
+                            <select
+                                id="dateFormat"
+                                name="date_format"
+                            >
+                                <option value="DD/MM/YYYY">
+                                    DD/MM/YYYY
+                                </option>
+
+                                <option value="MM/DD/YYYY">
+                                    MM/DD/YYYY
+                                </option>
+
+                                <option value="YYYY-MM-DD">
+                                    YYYY-MM-DD
+                                </option>
+                            </select>
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="dashboardView">
+                                Default Dashboard View
+                            </label>
+
+                            <select
+                                id="dashboardView"
+                                name="dashboard_view"
+                            >
+                                <option value="overview">
+                                    Overview
+                                </option>
+
+                                <option value="requirements">
+                                    Requirements
+                                </option>
+
+                                <option value="applications">
+                                    Applications
+                                </option>
+                            </select>
+
+                            <small>
+                                Choose the section you prefer to see first.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="settings-form-footer">
+
+                        <span class="settings-save-message">
+                            Changes are saved to your account.
+                        </span>
+
+                        <button
+                            type="submit"
+                            class="settings-primary-btn"
+                        >
+                            Save Preferences
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 NOTIFICATIONS
+            ================================================== -->
+
+            <section
+                class="settings-section"
+                id="settings-notifications"
+            >
+
+                <div class="settings-section-header">
+
+                    <div>
+                        <span class="settings-section-eyebrow">
+                            COMMUNICATION
+                        </span>
+
+                        <h2>Notification Preferences</h2>
+
+                        <p>
+                            Control which updates you receive from the portal.
+                        </p>
+                    </div>
+
+                    <div class="settings-section-icon purple">
+                        ♢
+                    </div>
+
+                </div>
+
+
+                <form
+                    class="settings-form"
+                    method="POST"
+                    action="{{ url_for('industry_settings') }}"
+                    data-settings-form
+                >
+
+                    <input
+                        type="hidden"
+                        name="section"
+                        value="notifications"
+                    >
+
+
+                    <div class="settings-options-card">
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon blue">
+                                    ▤
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Application Updates
+                                    </strong>
+
+                                    <p>
+                                        Receive notifications when students
+                                        apply to your opportunities.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="application_notifications"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon green">
+                                    ↗
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Collaboration Updates
+                                    </strong>
+
+                                    <p>
+                                        Get updates about college collaboration
+                                        requests and status changes.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="collaboration_notifications"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon orange">
+                                    ✉
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Message Notifications
+                                    </strong>
+
+                                    <p>
+                                        Notify you when new portal messages
+                                        are received.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="message_notifications"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon gray">
+                                    ◉
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        System Notifications
+                                    </strong>
+
+                                    <p>
+                                        Receive important system and account
+                                        notifications.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="system_notifications"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon purple">
+                                    @
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Email Notifications
+                                    </strong>
+
+                                    <p>
+                                        Receive important portal updates
+                                        through your registered email.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="email_notifications"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="settings-form-footer">
+
+                        <span class="settings-save-message">
+                            Notification preferences can be changed anytime.
+                        </span>
+
+                        <button
+                            type="submit"
+                            class="settings-primary-btn"
+                        >
+                            Save Notifications
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 SECURITY
+            ================================================== -->
+
+            <section
+                class="settings-section"
+                id="settings-security"
+            >
+
+                <div class="settings-section-header">
+
+                    <div>
+                        <span class="settings-section-eyebrow">
+                            ACCOUNT SECURITY
+                        </span>
+
+                        <h2>Security</h2>
+
+                        <p>
+                            Keep your Industry account secure.
+                        </p>
+                    </div>
+
+                    <div class="settings-section-icon red">
+                        🔒
+                    </div>
+
+                </div>
+
+
+                <div class="security-info-card">
+
+                    <div class="security-status-icon">
+                        ✓
+                    </div>
+
+                    <div>
+                        <strong>
+                            Your account is protected
+                        </strong>
+
+                        <p>
+                            Keep your password private and use a strong
+                            password that is difficult to guess.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <form
+                    class="settings-form"
+                    method="POST"
+                    action="{{ url_for('industry_settings') }}"
+                    data-settings-form
+                    id="passwordForm"
+                >
+
+                    <input
+                        type="hidden"
+                        name="section"
+                        value="security"
+                    >
+
+
+                    <div class="settings-subheading">
+                        Change Password
+                    </div>
+
+
+                    <div class="settings-form-grid">
+
+
+                        <div class="settings-field full-width">
+
+                            <label for="currentPassword">
+                                Current Password
+                            </label>
+
+                            <div class="password-field">
+
+                                <input
+                                    type="password"
+                                    id="currentPassword"
+                                    name="current_password"
+                                    autocomplete="current-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    data-password-target="currentPassword"
+                                >
+                                    Show
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="newPassword">
+                                New Password
+                            </label>
+
+                            <div class="password-field">
+
+                                <input
+                                    type="password"
+                                    id="newPassword"
+                                    name="new_password"
+                                    autocomplete="new-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    data-password-target="newPassword"
+                                >
+                                    Show
+                                </button>
+
+                            </div>
+
+                            <small>
+                                Use at least 8 characters.
+                            </small>
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="confirmPassword">
+                                Confirm New Password
+                            </label>
+
+                            <div class="password-field">
+
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    name="confirm_password"
+                                    autocomplete="new-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    data-password-target="confirmPassword"
+                                >
+                                    Show
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="password-error"
+                        id="passwordError"
+                    ></div>
+
+
+                    <div class="settings-form-footer">
+
+                        <span class="settings-save-message">
+                            Never share your password with anyone.
+                        </span>
+
+                        <button
+                            type="submit"
+                            class="settings-primary-btn"
+                        >
+                            Update Password
+                        </button>
+
+                    </div>
+
+                </form>
+
+
+                <div class="security-detail-card">
+
+                    <div>
+                        <span>Last password update</span>
+                        <strong>
+                            Not available
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Account status</span>
+                        <strong class="status-active">
+                            Active
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 PRIVACY
+            ================================================== -->
+
+            <section
+                class="settings-section"
+                id="settings-privacy"
+            >
+
+                <div class="settings-section-header">
+
+                    <div>
+                        <span class="settings-section-eyebrow">
+                            PRIVACY
+                        </span>
+
+                        <h2>Privacy</h2>
+
+                        <p>
+                            Control how your organization appears across the portal.
+                        </p>
+                    </div>
+
+                    <div class="settings-section-icon green">
+                        ◉
+                    </div>
+
+                </div>
+
+
+                <form
+                    class="settings-form"
+                    method="POST"
+                    action="{{ url_for('industry_settings') }}"
+                    data-settings-form
+                >
+
+                    <input
+                        type="hidden"
+                        name="section"
+                        value="privacy"
+                    >
+
+
+                    <div class="settings-options-card">
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon blue">
+                                    ◉
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Company Profile Visibility
+                                    </strong>
+
+                                    <p>
+                                        Allow registered colleges and students
+                                        to discover your company profile.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="profile_visibility"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon green">
+                                    @
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Allow College Contact
+                                    </strong>
+
+                                    <p>
+                                        Allow verified colleges to contact your
+                                        organization through the portal.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="college_contact"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+
+                        <div class="settings-option-row">
+
+                            <div class="settings-option-info">
+
+                                <div class="settings-option-icon purple">
+                                    ▣
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Opportunity Visibility
+                                    </strong>
+
+                                    <p>
+                                        Allow students to view your published
+                                        opportunities.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <label class="settings-switch">
+                                <input
+                                    type="checkbox"
+                                    name="opportunity_visibility"
+                                    checked
+                                >
+                                <span></span>
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="settings-form-footer">
+
+                        <span class="settings-save-message">
+                            Privacy controls affect your portal visibility.
+                        </span>
+
+                        <button
+                            type="submit"
+                            class="settings-primary-btn"
+                        >
+                            Save Privacy Settings
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 APPEARANCE
+            ================================================== -->
+
+            <section
+                class="settings-section"
+                id="settings-appearance"
+            >
+
+                <div class="settings-section-header">
+
+                    <div>
+                        <span class="settings-section-eyebrow">
+                            INTERFACE
+                        </span>
+
+                        <h2>Appearance</h2>
+
+                        <p>
+                            Customize your portal interface preferences.
+                        </p>
+                    </div>
+
+                    <div class="settings-section-icon orange">
+                        ◐
+                    </div>
+
+                </div>
+
+
+                <form
+                    class="settings-form"
+                    method="POST"
+                    action="{{ url_for('industry_settings') }}"
+                    data-settings-form
+                >
+
+                    <input
+                        type="hidden"
+                        name="section"
+                        value="appearance"
+                    >
+
+
+                    <div class="settings-subheading">
+                        Interface Density
+                    </div>
+
+
+                    <div class="appearance-options">
+
+
+                        <label class="appearance-option">
+
+                            <input
+                                type="radio"
+                                name="interface_density"
+                                value="comfortable"
+                                checked
+                            >
+
+                            <div class="appearance-preview comfortable-preview">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Comfortable
+                                </strong>
+
+                                <small>
+                                    Recommended for everyday use.
+                                </small>
+                            </div>
+
+                        </label>
+
+
+                        <label class="appearance-option">
+
+                            <input
+                                type="radio"
+                                name="interface_density"
+                                value="compact"
+                            >
+
+                            <div class="appearance-preview compact-preview">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Compact
+                                </strong>
+
+                                <small>
+                                    Display more information on screen.
+                                </small>
+                            </div>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="appearance-note">
+                        <span>i</span>
+
+                        <p>
+                            Appearance settings apply only to your Industry
+                            portal experience.
+                        </p>
+                    </div>
+
+
+                    <div class="settings-form-footer">
+
+                        <span class="settings-save-message">
+                            Choose the interface density you prefer.
+                        </span>
+
+                        <button
+                            type="submit"
+                            class="settings-primary-btn"
+                        >
+                            Save Appearance
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 SESSIONS
+            ================================================== -->
+
+            <section
+                class="settings-section"
+                id="settings-sessions"
+            >
+
+                <div class="settings-section-header">
+
+                    <div>
+                        <span class="settings-section-eyebrow">
+                            ACCOUNT ACCESS
+                        </span>
+
+                        <h2>Sessions</h2>
+
+                        <p>
+                            Review and manage your active portal sessions.
+                        </p>
+                    </div>
+
+                    <div class="settings-section-icon blue">
+                        ▣
+                    </div>
+
+                </div>
+
+
+                <div class="session-card current-session">
+
+                    <div class="session-device-icon">
+                        ▣
+                    </div>
+
+                    <div class="session-info">
+
+                        <div class="session-title-row">
+
+                            <strong>
+                                Current Session
+                            </strong>
+
+                            <span class="session-current">
+                                Active
+                            </span>
+
+                        </div>
+
+                        <p>
+                            This browser session
+                        </p>
+
+                        <small>
+                            Your current Industry portal login.
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="session-security-note">
+
+                    <span>🔒</span>
+
+                    <div>
+                        <strong>
+                            Keep your account secure
+                        </strong>
+
+                        <p>
+                            If you notice suspicious activity, change your
+                            password immediately and log out from other sessions.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="session-actions">
+
+                    <button
+                        type="button"
+                        class="settings-secondary-btn"
+                        id="logoutOtherSessions"
+                    >
+                        Log Out Other Sessions
+                    </button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DANGER ZONE
+            ================================================== -->
+
+            <section
+                class="settings-section"
+                id="settings-danger"
+            >
+
+                <div class="settings-section-header">
+
+                    <div>
+                        <span class="settings-section-eyebrow danger-text">
+                            ACCOUNT MANAGEMENT
+                        </span>
+
+                        <h2>Danger Zone</h2>
+
+                        <p>
+                            Actions in this section can affect your account access.
+                        </p>
+                    </div>
+
+                    <div class="settings-section-icon danger">
+                        ⚠
+                    </div>
+
+                </div>
+
+
+                <div class="danger-card">
+
+                    <div class="danger-card-header">
+
+                        <div class="danger-warning-icon">
+                            !
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Deactivate Account
+                            </h3>
+
+                            <p>
+                                Temporarily disable access to your Industry
+                                account. Your organization data will remain
+                                stored in the portal.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="danger-action-btn"
+                        id="deactivateAccountBtn"
+                    >
+                        Deactivate Account
+                    </button>
+
+                </div>
+
+
+                <div class="danger-card delete-card">
+
+                    <div class="danger-card-header">
+
+                        <div class="danger-warning-icon">
+                            !
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Request Account Deletion
+                            </h3>
+
+                            <p>
+                                Request permanent deletion of your Industry
+                                account and associated portal data.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="danger-action-btn"
+                        id="deleteAccountBtn"
+                    >
+                        Request Account Deletion
+                    </button>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONFIRMATION MODAL
+    ====================================================== -->
+
+    <div
+        class="settings-modal"
+        id="settingsConfirmModal"
+    >
+
+        <div class="settings-modal-overlay"></div>
+
+        <div class="settings-modal-box">
+
+            <button
+                type="button"
+                class="settings-modal-close"
+                id="closeSettingsModal"
+            >
+                ×
+            </button>
+
+            <div class="settings-modal-icon">
+                ⚠
+            </div>
+
+            <h3 id="settingsModalTitle">
+                Confirm Action
+            </h3>
+
+            <p id="settingsModalMessage">
+                Are you sure you want to continue?
+            </p>
+
+            <div class="settings-modal-actions">
+
+                <button
+                    type="button"
+                    class="settings-secondary-btn"
+                    id="cancelSettingsModal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="danger-action-btn"
+                    id="confirmSettingsAction"
+                >
+                    Confirm
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/industry/industry-settings.js'
+) }}"></script>
+
+{% endblock %}
