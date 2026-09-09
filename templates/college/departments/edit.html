@@ -1,0 +1,210 @@
+{% extends "college/base.html" %}
+
+{% block title %}Edit Department{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/departments/edit.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="department-page">
+
+    <div class="page-header">
+
+        <a href="{{ url_for('college_department_detail', department_id=department.id) }}"
+           class="back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Department
+        </a>
+
+        <div class="title-row">
+
+            <div class="title-icon">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </div>
+
+            <div>
+                <h1>Edit Department</h1>
+                <p>Update department information and status.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="edit-layout">
+
+        <div class="form-card">
+
+            <div class="card-header">
+                <div>
+                    <h2>Department Details</h2>
+                    <p>Modify the information below.</p>
+                </div>
+            </div>
+
+            <form method="POST" id="departmentEditForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="department_name">
+                            Department Name <span>*</span>
+                        </label>
+
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-building"></i>
+
+                            <input
+                                type="text"
+                                id="department_name"
+                                name="department_name"
+                                value="{{ department.department_name }}"
+                                maxlength="150"
+                                required
+                            >
+                        </div>
+
+                        <small class="field-error" id="nameError"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department_code">
+                            Department Code <span>*</span>
+                        </label>
+
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-hashtag"></i>
+
+                            <input
+                                type="text"
+                                id="department_code"
+                                name="department_code"
+                                value="{{ department.department_code }}"
+                                maxlength="50"
+                                required
+                            >
+                        </div>
+
+                        <small>
+                            Must be unique within your college.
+                        </small>
+
+                        <small class="field-error" id="codeError"></small>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="description">
+                            Description
+                        </label>
+
+                        <div class="textarea-wrapper">
+                            <i class="fa-solid fa-align-left"></i>
+
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="6"
+                                maxlength="1000"
+                            >{{ department.description or '' }}</textarea>
+                        </div>
+
+                        <div class="character-count">
+                            <span id="descriptionCount">
+                                {{ department.description|length if department.description else 0 }}
+                            </span>/1000
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">
+                            Status <span>*</span>
+                        </label>
+
+                        <div class="select-wrapper">
+                            <i class="fa-solid fa-toggle-on"></i>
+
+                            <select id="status" name="status" required>
+                                <option value="ACTIVE"
+                                    {% if department.status == 'ACTIVE' %}selected{% endif %}>
+                                    Active
+                                </option>
+
+                                <option value="INACTIVE"
+                                    {% if department.status == 'INACTIVE' %}selected{% endif %}>
+                                    Inactive
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-footer">
+
+                    <a href="{{ url_for('college_department_detail', department_id=department.id) }}"
+                       class="btn btn-secondary">
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn btn-primary" id="updateBtn">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <div class="side-card">
+
+            <div class="side-icon">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+
+            <h3>{{ department.department_name }}</h3>
+
+            <div class="code-badge">
+                <i class="fa-solid fa-hashtag"></i>
+                {{ department.department_code }}
+            </div>
+
+            <div class="side-divider"></div>
+
+            <div class="meta-row">
+                <span>Status</span>
+
+                {% if department.status == 'ACTIVE' %}
+                    <strong class="active">Active</strong>
+                {% else %}
+                    <strong class="inactive">Inactive</strong>
+                {% endif %}
+            </div>
+
+            <div class="meta-row">
+                <span>Students</span>
+                <strong>{{ department.student_count or 0 }}</strong>
+            </div>
+
+            <div class="meta-row">
+                <span>Created</span>
+                <strong>
+                    {{ department.created_at.strftime('%d %b %Y') if department.created_at else '—' }}
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/departments/edit.js') }}"></script>
+{% endblock %}

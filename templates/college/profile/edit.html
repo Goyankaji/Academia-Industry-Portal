@@ -1,0 +1,510 @@
+{% extends "college/base.html" %}
+
+{% block title %}Edit College Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/profile/edit.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="edit-profile-page">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="edit-page-header">
+
+        <div>
+
+            <span class="page-eyebrow">
+                COLLEGE MANAGEMENT
+            </span>
+
+            <h1>Edit College Profile</h1>
+
+            <p>
+                Update your institution information and contact details.
+            </p>
+
+        </div>
+
+
+        <a href="{{ url_for('college_profile') }}"
+           class="back-btn">
+
+            <i class="fas fa-arrow-left"></i>
+
+            Back to Profile
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
+    <form
+        method="POST"
+        action="{{ url_for('college_profile_edit') }}"
+        id="collegeProfileForm"
+        novalidate>
+
+
+        <!-- =================================================
+             BASIC INFORMATION
+        ================================================== -->
+
+        <section class="edit-section">
+
+            <div class="section-heading">
+
+                <div class="section-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+
+                <div>
+
+                    <h2>Institution Information</h2>
+
+                    <p>
+                        Basic identity details of your college.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+                <!-- College Name -->
+
+                <div class="form-group full-width">
+
+                    <label for="college_name">
+                        College Name
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-building"></i>
+
+                        <input
+                            type="text"
+                            id="college_name"
+                            name="college_name"
+                            value="{{ college.college_name or '' }}"
+                            maxlength="200"
+                            required>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="collegeNameError"></small>
+
+                </div>
+
+
+                <!-- College Code -->
+
+                <div class="form-group">
+
+                    <label for="college_code">
+                        College Code
+                    </label>
+
+                    <div class="input-wrapper readonly">
+
+                        <i class="fas fa-hashtag"></i>
+
+                        <input
+                            type="text"
+                            id="college_code"
+                            value="{{ college.college_code or '' }}"
+                            readonly>
+
+                        <i class="fas fa-lock lock-icon"></i>
+
+                    </div>
+
+                    <small class="field-hint">
+                        College code cannot be changed.
+                    </small>
+
+                </div>
+
+
+                <!-- University -->
+
+                <div class="form-group">
+
+                    <label for="university_name">
+                        University
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-university"></i>
+
+                        <input
+                            type="text"
+                            id="university_name"
+                            name="university_name"
+                            value="{{ college.university_name or '' }}"
+                            maxlength="200"
+                            required>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="universityError"></small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONTACT INFORMATION
+        ================================================== -->
+
+        <section class="edit-section">
+
+            <div class="section-heading">
+
+                <div class="section-icon">
+                    <i class="fas fa-address-book"></i>
+                </div>
+
+                <div>
+
+                    <h2>Contact Information</h2>
+
+                    <p>
+                        Primary contact details for your institution.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+                <!-- Contact Person -->
+
+                <div class="form-group">
+
+                    <label for="contact_person">
+                        Contact Person
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-user"></i>
+
+                        <input
+                            type="text"
+                            id="contact_person"
+                            name="contact_person"
+                            value="{{ college.contact_person or '' }}"
+                            maxlength="150"
+                            required>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="contactPersonError"></small>
+
+                </div>
+
+
+                <!-- Phone -->
+
+                <div class="form-group">
+
+                    <label for="phone">
+                        Phone Number
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-phone"></i>
+
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            value="{{ college.phone or '' }}"
+                            maxlength="10"
+                            inputmode="numeric"
+                            required>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="phoneError"></small>
+
+                </div>
+
+
+                <!-- Email -->
+
+                <div class="form-group full-width">
+
+                    <label for="email">
+                        Official Email
+                    </label>
+
+                    <div class="input-wrapper readonly">
+
+                        <i class="fas fa-envelope"></i>
+
+                        <input
+                            type="email"
+                            id="email"
+                            value="{{ college.email or college.account_email or '' }}"
+                            readonly>
+
+                        <i class="fas fa-lock lock-icon"></i>
+
+                    </div>
+
+                    <small class="field-hint">
+                        Registered account email cannot be changed here.
+                    </small>
+
+                </div>
+
+
+                <!-- Address -->
+
+                <div class="form-group full-width">
+
+                    <label for="address">
+                        Address
+                        <span>*</span>
+                    </label>
+
+                    <div class="textarea-wrapper">
+
+                        <i class="fas fa-location-dot"></i>
+
+                        <textarea
+                            id="address"
+                            name="address"
+                            rows="3"
+                            maxlength="500"
+                            required>{{ college.address or '' }}</textarea>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="addressError"></small>
+
+                </div>
+
+
+                <!-- City -->
+
+                <div class="form-group">
+
+                    <label for="city">
+                        City
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-city"></i>
+
+                        <input
+                            type="text"
+                            id="city"
+                            name="city"
+                            value="{{ college.city or '' }}"
+                            maxlength="100"
+                            required>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="cityError"></small>
+
+                </div>
+
+
+                <!-- State -->
+
+                <div class="form-group">
+
+                    <label for="state">
+                        State
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-map"></i>
+
+                        <input
+                            type="text"
+                            id="state"
+                            name="state"
+                            value="{{ college.state or '' }}"
+                            maxlength="100"
+                            required>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="stateError"></small>
+
+                </div>
+
+
+                <!-- Pincode -->
+
+                <div class="form-group">
+
+                    <label for="pincode">
+                        Pincode
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-location-crosshairs"></i>
+
+                        <input
+                            type="text"
+                            id="pincode"
+                            name="pincode"
+                            value="{{ college.pincode or '' }}"
+                            maxlength="6"
+                            inputmode="numeric"
+                            required>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="pincodeError"></small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             WEBSITE
+        ================================================== -->
+
+        <section class="edit-section">
+
+            <div class="section-heading">
+
+                <div class="section-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+
+                <div>
+
+                    <h2>Online Presence</h2>
+
+                    <p>
+                        Add your institution's official website.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+
+                    <label for="website">
+                        Official Website
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <i class="fas fa-globe"></i>
+
+                        <input
+                            type="url"
+                            id="website"
+                            name="website"
+                            value="{{ college.website or '' }}"
+                            placeholder="https://www.example.edu.in"
+                            maxlength="255">
+
+                    </div>
+
+                    <small class="field-hint">
+                        Include https:// or http://
+                    </small>
+
+                    <small class="field-error"
+                           id="websiteError"></small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ACTION BAR
+        ================================================== -->
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('college_profile') }}"
+                class="cancel-btn">
+
+                Cancel
+
+            </a>
+
+
+            <button
+                type="submit"
+                class="save-btn"
+                id="saveProfileBtn">
+
+                <i class="fas fa-check"></i>
+
+                <span>Save Changes</span>
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/profile/edit.js') }}"></script>
+{% endblock %}

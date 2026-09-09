@@ -1,0 +1,500 @@
+{% extends "college/base.html" %}
+
+{% block title %}Collaboration Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/collaborations/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="collaboration-detail-page">
+
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+        <div>
+
+            <span class="page-eyebrow">
+                ACADEMIA–INDUSTRY COLLABORATION
+            </span>
+
+            <h1>
+                Collaboration Details
+            </h1>
+
+            <p>
+                View complete information about this collaboration.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('college_collaborations') }}"
+            class="back-btn"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back to Collaborations
+
+        </a>
+
+    </div>
+
+
+    <!-- HERO -->
+
+    <div class="collaboration-hero">
+
+        <div class="hero-icon">
+
+            <i class="fa-solid fa-handshake"></i>
+
+        </div>
+
+
+        <div class="hero-content">
+
+            <div class="hero-title-row">
+
+                <div>
+
+                    <span class="collaboration-type">
+
+                        {{ collaboration.collaboration_type
+                           |replace('_', ' ') }}
+
+                    </span>
+
+                    <h2>
+                        {{ collaboration.title }}
+                    </h2>
+
+                </div>
+
+
+                <span class="status-badge {{ collaboration.status|lower }}">
+
+                    <span class="status-dot"></span>
+
+                    {{ collaboration.status }}
+
+                </span>
+
+            </div>
+
+
+            <div class="hero-company">
+
+                <i class="fa-solid fa-building"></i>
+
+                {{ collaboration.company_name }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DETAILS -->
+
+    <div class="details-grid">
+
+
+        <!-- COLLABORATION INFORMATION -->
+
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon">
+
+                    <i class="fa-solid fa-handshake"></i>
+
+                </div>
+
+                <div>
+
+                    <span>COLLABORATION</span>
+
+                    <h2>
+                        Collaboration Information
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="info-list">
+
+                <div class="info-item">
+
+                    <span>Title</span>
+
+                    <strong>
+                        {{ collaboration.title }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Collaboration Type</span>
+
+                    <strong>
+                        {{ collaboration.collaboration_type
+                           |replace('_', ' ') }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Status</span>
+
+                    <strong>
+                        {{ collaboration.status }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Initiated By</span>
+
+                    <strong>
+                        {{ collaboration.initiated_by }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Start Date</span>
+
+                    <strong>
+                        {{ collaboration.start_date.strftime('%d %b %Y')
+                           if collaboration.start_date else '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>End Date</span>
+
+                    <strong>
+                        {{ collaboration.end_date.strftime('%d %b %Y')
+                           if collaboration.end_date else '—' }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- INDUSTRY -->
+
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon industry">
+
+                    <i class="fa-solid fa-building"></i>
+
+                </div>
+
+                <div>
+
+                    <span>INDUSTRY</span>
+
+                    <h2>
+                        Industry Information
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="info-list">
+
+                <div class="info-item">
+
+                    <span>Company Name</span>
+
+                    <strong>
+                        {{ collaboration.company_name }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Company Type</span>
+
+                    <strong>
+                        {{ collaboration.company_type or '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Industry Sector</span>
+
+                    <strong>
+                        {{ collaboration.industry_sector or '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Contact Person</span>
+
+                    <strong>
+                        {{ collaboration.contact_person or '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Designation</span>
+
+                    <strong>
+                        {{ collaboration.designation or '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>Phone</span>
+
+                    <strong>
+                        {{ collaboration.industry_phone or '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item full-width">
+
+                    <span>Email</span>
+
+                    <strong>
+                        {{ collaboration.industry_email or '—' }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- DESCRIPTION -->
+
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon description">
+
+                    <i class="fa-solid fa-align-left"></i>
+
+                </div>
+
+                <div>
+
+                    <span>DESCRIPTION</span>
+
+                    <h2>
+                        Collaboration Description
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="description-box">
+
+                {% if collaboration.description %}
+
+                    <p>
+                        {{ collaboration.description }}
+                    </p>
+
+                {% else %}
+
+                    <p class="empty-description">
+                        No description has been provided.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- LOCATION -->
+
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon location">
+
+                    <i class="fa-solid fa-location-dot"></i>
+
+                </div>
+
+                <div>
+
+                    <span>LOCATION</span>
+
+                    <h2>
+                        Industry Location
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="info-list">
+
+                <div class="info-item full-width">
+
+                    <span>Address</span>
+
+                    <strong>
+                        {{ collaboration.industry_address or '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>City</span>
+
+                    <strong>
+                        {{ collaboration.industry_city or '—' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>State</span>
+
+                    <strong>
+                        {{ collaboration.industry_state or '—' }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- TIMELINE -->
+
+    <div class="timeline-card">
+
+        <div class="timeline-item">
+
+            <div class="timeline-icon">
+
+                <i class="fa-solid fa-plus"></i>
+
+            </div>
+
+            <div>
+
+                <span>CREATED</span>
+
+                <strong>
+
+                    {{ collaboration.created_at.strftime(
+                        '%d %b %Y, %I:%M %p'
+                    ) if collaboration.created_at else '—' }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="timeline-divider"></div>
+
+
+        <div class="timeline-item">
+
+            <div class="timeline-icon updated">
+
+                <i class="fa-solid fa-clock-rotate-left"></i>
+
+            </div>
+
+            <div>
+
+                <span>LAST UPDATED</span>
+
+                <strong>
+
+                    {{ collaboration.updated_at.strftime(
+                        '%d %b %Y, %I:%M %p'
+                    ) if collaboration.updated_at else '—' }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/college/collaborations/detail.js'
+) }}"></script>
+
+{% endblock %}

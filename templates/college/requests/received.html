@@ -1,0 +1,205 @@
+{% extends "college/base.html" %}
+
+{% block title %}Received Requests{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/requests/received.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="requests-page">
+
+    <div class="page-header">
+        <div>
+            <span class="page-eyebrow">COLLABORATION REQUESTS</span>
+            <h1>Received Requests</h1>
+            <p>Review collaboration requests received from registered industries.</p>
+        </div>
+    </div>
+
+    <div class="request-stats">
+
+        <div class="request-stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-inbox"></i>
+            </div>
+            <div>
+                <span>TOTAL RECEIVED</span>
+                <strong>{{ total_requests }}</strong>
+            </div>
+        </div>
+
+        <div class="request-stat">
+            <div class="stat-icon pending">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+            <div>
+                <span>PENDING</span>
+                <strong>{{ pending_requests }}</strong>
+            </div>
+        </div>
+
+        <div class="request-stat">
+            <div class="stat-icon active">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <span>ACTIVE</span>
+                <strong>{{ active_requests }}</strong>
+            </div>
+        </div>
+
+        <div class="request-stat">
+            <div class="stat-icon completed">
+                <i class="fa-solid fa-check-double"></i>
+            </div>
+            <div>
+                <span>COMPLETED</span>
+                <strong>{{ completed_requests }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="request-toolbar">
+
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+                type="text"
+                id="requestSearch"
+                placeholder="Search by company, title or collaboration type..."
+            >
+        </div>
+
+        <select id="statusFilter" class="status-filter">
+            <option value="">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="ACTIVE">Active</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="REJECTED">Rejected</option>
+        </select>
+
+    </div>
+
+    {% if requests %}
+
+    <div class="requests-list" id="requestsList">
+
+        {% for request in requests %}
+
+        <div
+            class="request-card"
+            data-company="{{ request.company_name|lower }}"
+            data-title="{{ request.title|lower }}"
+            data-type="{{ request.collaboration_type|lower }}"
+            data-status="{{ request.status|lower }}"
+        >
+
+            <div class="request-card-main">
+
+                <div class="request-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+
+                <div class="request-content">
+
+                    <div class="request-top">
+
+                        <div>
+                            <span class="request-type">
+                                {{ request.collaboration_type|replace('_', ' ') }}
+                            </span>
+
+                            <h2>{{ request.title }}</h2>
+                        </div>
+
+                        <span class="status-badge {{ request.status|lower }}">
+                            <span class="status-dot"></span>
+                            {{ request.status }}
+                        </span>
+
+                    </div>
+
+                    <div class="company-name">
+                        <i class="fa-solid fa-building"></i>
+                        {{ request.company_name }}
+                    </div>
+
+                    {% if request.description %}
+                    <p class="request-description">
+                        {{ request.description }}
+                    </p>
+                    {% endif %}
+
+                    <div class="request-meta">
+
+                        {% if request.start_date %}
+                        <span>
+                            <i class="fa-regular fa-calendar"></i>
+                            {{ request.start_date.strftime('%d %b %Y') }}
+                        </span>
+                        {% endif %}
+
+                        {% if request.end_date %}
+                        <span>
+                            <i class="fa-regular fa-calendar-check"></i>
+                            {{ request.end_date.strftime('%d %b %Y') }}
+                        </span>
+                        {% endif %}
+
+                        <span>
+                            <i class="fa-regular fa-clock"></i>
+                            {{ request.created_at.strftime('%d %b %Y') if request.created_at else '—' }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="request-action">
+                    <a
+                        href="{{ url_for('college_request_detail', request_id=request.id) }}"
+                        class="view-btn"
+                        title="View Request"
+                    >
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <div id="noResults" class="empty-state hidden">
+        <div class="empty-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <h2>No requests found</h2>
+        <p>Try changing your search or status filter.</p>
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fa-solid fa-inbox"></i>
+        </div>
+        <h2>No received requests</h2>
+        <p>Your college has not received any collaboration requests yet.</p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/requests/received.js') }}"></script>
+{% endblock %}

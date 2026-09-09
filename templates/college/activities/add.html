@@ -1,0 +1,251 @@
+{% extends "college/base.html" %}
+
+{% block title %}Add Project{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/activities/add.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="activity-form-page">
+
+    <!-- Header -->
+    <div class="page-header">
+
+        <div>
+            <span class="page-eyebrow">PROJECT MANAGEMENT</span>
+            <h1>Add Project</h1>
+            <p>Create a new student project or academic activity.</p>
+        </div>
+
+        <a href="{{ url_for('college_activities') }}" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Projects
+        </a>
+
+    </div>
+
+
+    <!-- Form -->
+    <form
+        method="POST"
+        action="{{ url_for('college_activity_add') }}"
+        class="activity-form"
+        id="projectForm"
+    >
+
+        <!-- Project Details -->
+        <section class="form-card">
+
+            <div class="form-card-header">
+                <div class="section-icon">
+                    <i class="fa-solid fa-diagram-project"></i>
+                </div>
+
+                <div>
+                    <h2>Project Information</h2>
+                    <p>Enter the basic details of the student project.</p>
+                </div>
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group full">
+                    <label for="title">
+                        Project Title
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        maxlength="200"
+                        placeholder="Enter project title"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="student_id">
+                        Student
+                        <span>*</span>
+                    </label>
+
+                    <select id="student_id" name="student_id" required>
+                        <option value="">Select Student</option>
+
+                        {% for student in students %}
+                        <option value="{{ student.id }}">
+                            {{ student.student_name }}
+                            — {{ student.enrollment_no }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    {% if not students %}
+                    <small class="field-note">
+                        No students are currently registered under this college.
+                    </small>
+                    {% endif %}
+                </div>
+
+
+                <div class="form-group">
+                    <label for="industry_id">
+                        Associated Industry
+                    </label>
+
+                    <select id="industry_id" name="industry_id">
+                        <option value="">No Industry / Not Applicable</option>
+
+                        {% for industry in industries %}
+                        <option value="{{ industry.id }}">
+                            {{ industry.company_name }}
+                            {% if industry.industry_sector %}
+                                — {{ industry.industry_sector }}
+                            {% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="status">Project Status</label>
+
+                    <select id="status" name="status">
+                        <option value="ONGOING" selected>Ongoing</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="technology_stack">
+                        Technology Stack
+                    </label>
+
+                    <input
+                        type="text"
+                        id="technology_stack"
+                        name="technology_stack"
+                        placeholder="e.g. Python, Flask, MySQL"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+
+                    <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+
+                    <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                    >
+                </div>
+
+
+                <div class="form-group full">
+                    <label for="description">Description</label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="5"
+                        placeholder="Describe the project, objectives, outcomes or activities..."
+                    ></textarea>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Links -->
+        <section class="form-card">
+
+            <div class="form-card-header">
+                <div class="section-icon links">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+
+                <div>
+                    <h2>Project Links</h2>
+                    <p>Optionally provide project and report URLs.</p>
+                </div>
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="project_url">Project URL</label>
+
+                    <input
+                        type="url"
+                        id="project_url"
+                        name="project_url"
+                        placeholder="https://example.com/project"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="report_url">Report URL</label>
+
+                    <input
+                        type="url"
+                        id="report_url"
+                        name="report_url"
+                        placeholder="https://example.com/report"
+                    >
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Actions -->
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('college_activities') }}"
+                class="secondary-btn"
+            >
+                Cancel
+            </a>
+
+            <button type="submit" class="primary-btn">
+                <i class="fa-solid fa-check"></i>
+                Add Project
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/activities/add.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,247 @@
+.activity-form-page {
+    width: 100%;
+}
+
+
+/* HEADER */
+
+.page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.page-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #8994a4;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.page-header h1 {
+    margin: 0 0 5px;
+    color: #172235;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.page-header p {
+    margin: 0;
+    color: #8b95a5;
+    font-size: 12px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid #e0e6ec;
+    border-radius: 9px;
+    background: #fff;
+    color: #647286;
+    font-size: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: .2s ease;
+}
+
+.back-btn:hover {
+    background: #f7f9fb;
+    color: #1769aa;
+}
+
+
+/* FORM CARD */
+
+.form-card {
+    margin-bottom: 18px;
+    padding: 22px;
+    border: 1px solid #e7edf3;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(20, 40, 70, .04);
+}
+
+.form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.section-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: #edf5ff;
+    color: #2877c7;
+    font-size: 14px;
+}
+
+.section-icon.links {
+    background: #f3efff;
+    color: #7055b8;
+}
+
+.form-card-header h2 {
+    margin: 0 0 4px;
+    color: #263347;
+    font-size: 14px;
+}
+
+.form-card-header p {
+    margin: 0;
+    color: #939daa;
+    font-size: 9px;
+}
+
+
+/* GRID */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 17px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 7px;
+    color: #455267;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.form-group label span {
+    color: #c44d56;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #dfe5eb;
+    border-radius: 9px;
+    background: #fff;
+    color: #344155;
+    font-family: inherit;
+    font-size: 10px;
+    outline: none;
+    transition: .2s ease;
+}
+
+.form-group input,
+.form-group select {
+    height: 40px;
+    padding: 0 12px;
+}
+
+.form-group textarea {
+    min-height: 110px;
+    padding: 11px 12px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #3b8cc4;
+    box-shadow: 0 0 0 3px rgba(59, 140, 196, .08);
+}
+
+
+/* ACTIONS */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.primary-btn,
+.secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 17px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.primary-btn {
+    border: 0;
+    background: #1769aa;
+    color: #fff;
+}
+
+.primary-btn:hover {
+    background: #125b94;
+}
+
+.secondary-btn {
+    border: 1px solid #dfe5eb;
+    background: #fff;
+    color: #647286;
+}
+
+.secondary-btn:hover {
+    background: #f5f7f9;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+        width: 100%;
+    }
+}

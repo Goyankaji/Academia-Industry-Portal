@@ -1,0 +1,784 @@
+{% extends "college/base.html" %}
+
+{% block title %}College Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="college-dashboard">
+
+    <!-- =====================================================
+         WELCOME HEADER
+    ====================================================== -->
+    <section class="dashboard-welcome">
+
+        <div class="welcome-content">
+
+            <span class="welcome-label">
+                COLLEGE ADMINISTRATION
+            </span>
+
+            <h1>
+                Welcome,
+                {{ college.college_name }}
+            </h1>
+
+            <p>
+                Manage your institution, departments, students,
+                placement activities and industry collaborations
+                from one place.
+            </p>
+
+            <div class="college-meta">
+
+                <span>
+                    <i class="fas fa-building"></i>
+                    {{ college.college_code }}
+                </span>
+
+                {% if college.city and college.state %}
+                <span>
+                    <i class="fas fa-location-dot"></i>
+                    {{ college.city }}, {{ college.state }}
+                </span>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="welcome-visual">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+
+            <div class="visual-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN STAT CARDS
+    ====================================================== -->
+    <section class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-icon students-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+
+            <div class="stat-content">
+                <span>Total Students</span>
+                <strong data-count="{{ total_students }}">
+                    {{ total_students }}
+                </strong>
+                <small>Registered students</small>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon department-icon">
+                <i class="fas fa-sitemap"></i>
+            </div>
+
+            <div class="stat-content">
+                <span>Departments</span>
+                <strong data-count="{{ total_departments }}">
+                    {{ total_departments }}
+                </strong>
+                <small>
+                    {{ active_departments }} active
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon placement-icon">
+                <i class="fas fa-briefcase"></i>
+            </div>
+
+            <div class="stat-content">
+                <span>Placement Cells</span>
+                <strong data-count="{{ total_placement_cells }}">
+                    {{ total_placement_cells }}
+                </strong>
+                <small>Institution placement units</small>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon collaboration-icon">
+                <i class="fas fa-handshake"></i>
+            </div>
+
+            <div class="stat-content">
+                <span>Collaborations</span>
+                <strong data-count="{{ total_collaborations }}">
+                    {{ total_collaborations }}
+                </strong>
+                <small>
+                    {{ active_collaborations }} active
+                </small>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PROFILE + QUICK OVERVIEW
+    ====================================================== -->
+    <section class="dashboard-two-column">
+
+        <!-- PROFILE -->
+        <div class="dashboard-panel profile-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">COLLEGE PROFILE</span>
+                    <h2>Profile Overview</h2>
+                </div>
+
+                <span class="status-badge active">
+                    <span class="status-dot"></span>
+                    {{ college.status }}
+                </span>
+
+            </div>
+
+
+            <div class="profile-progress-wrapper">
+
+                <div class="progress-header">
+                    <span>Profile Completion</span>
+                    <strong>{{ profile_completion }}%</strong>
+                </div>
+
+                <div class="progress-track">
+                    <div
+                        class="progress-fill"
+                        data-progress="{{ profile_completion }}">
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="profile-details">
+
+                <div class="profile-detail">
+                    <span>University</span>
+                    <strong>
+                        {{ college.university_name or 'Not provided' }}
+                    </strong>
+                </div>
+
+                <div class="profile-detail">
+                    <span>Contact Person</span>
+                    <strong>
+                        {{ college.contact_person or 'Not provided' }}
+                    </strong>
+                </div>
+
+                <div class="profile-detail">
+                    <span>Email</span>
+                    <strong>
+                        {{ college.email or college.account_email or 'Not provided' }}
+                    </strong>
+                </div>
+
+                <div class="profile-detail">
+                    <span>Phone</span>
+                    <strong>
+                        {{ college.phone or 'Not provided' }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- QUICK OVERVIEW -->
+        <div class="dashboard-panel overview-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">ACTIVITY</span>
+                    <h2>Quick Overview</h2>
+                </div>
+
+            </div>
+
+
+            <div class="overview-grid">
+
+                <div class="overview-item">
+                    <div class="overview-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div>
+                        <strong>{{ total_departments }}</strong>
+                        <span>Departments</span>
+                    </div>
+                </div>
+
+
+                <div class="overview-item">
+                    <div class="overview-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <strong>{{ open_opportunities }}</strong>
+                        <span>Open Opportunities</span>
+                    </div>
+                </div>
+
+
+                <div class="overview-item">
+                    <div class="overview-icon">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div>
+                        <strong>{{ total_applications }}</strong>
+                        <span>Applications</span>
+                    </div>
+                </div>
+
+
+                <div class="overview-item">
+                    <div class="overview-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                        <strong>{{ unread_messages }}</strong>
+                        <span>Unread Messages</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DEPARTMENT OVERVIEW
+    ====================================================== -->
+    <section class="dashboard-panel department-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <span class="panel-eyebrow">ACADEMIC STRUCTURE</span>
+                <h2>Department Overview</h2>
+                <p>
+                    Departments and their registered students.
+                </p>
+            </div>
+
+            <a href="/college/departments"
+               class="panel-action">
+                Manage Departments
+                <i class="fas fa-arrow-right"></i>
+            </a>
+
+        </div>
+
+
+        {% if department_overview %}
+
+        <div class="department-grid">
+
+            {% for department in department_overview %}
+
+            <div class="department-card">
+
+                <div class="department-card-top">
+
+                    <div class="department-symbol">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+
+                    <span class="department-status
+                        {{ department.status|lower }}">
+                        {{ department.status }}
+                    </span>
+
+                </div>
+
+
+                <div class="department-info">
+
+                    <h3>
+                        {{ department.department_name }}
+                    </h3>
+
+                    <span class="department-code">
+                        {{ department.department_code }}
+                    </span>
+
+                    {% if department.description %}
+                    <p>
+                        {{ department.description|truncate(90) }}
+                    </p>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="department-footer">
+
+                    <div>
+                        <strong>
+                            {{ department.student_count }}
+                        </strong>
+                        <span>Students</span>
+                    </div>
+
+                    <i class="fas fa-user-graduate"></i>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                <i class="fas fa-sitemap"></i>
+            </div>
+
+            <h3>No departments added yet</h3>
+
+            <p>
+                Add your college departments to organize students
+                and maintain your academic structure.
+            </p>
+
+            <a href="/college/departments"
+               class="empty-action">
+                Add Department
+                <i class="fas fa-plus"></i>
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         RECENT COLLABORATIONS + OPPORTUNITIES
+    ====================================================== -->
+    <section class="dashboard-two-column">
+
+
+        <!-- RECENT COLLABORATIONS -->
+        <div class="dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">INDUSTRY CONNECT</span>
+                    <h2>Recent Collaborations</h2>
+                </div>
+
+                <a href="/college/collaborations"
+                   class="panel-action">
+                    View All
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+
+            </div>
+
+
+            {% if recent_collaborations %}
+
+            <div class="activity-list">
+
+                {% for collaboration in recent_collaborations %}
+
+                <div class="activity-item">
+
+                    <div class="activity-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+
+                    <div class="activity-content">
+
+                        <h3>
+                            {{ collaboration.title }}
+                        </h3>
+
+                        <p>
+                            {{ collaboration.industry_name }}
+                        </p>
+
+                        <small>
+                            {% if collaboration.created_at %}
+                                {{ collaboration.created_at.strftime('%d %b %Y') }}
+                            {% endif %}
+                        </small>
+
+                    </div>
+
+                    <span class="status-badge
+                        {{ collaboration.status|lower }}">
+                        {{ collaboration.status }}
+                    </span>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="small-empty">
+                <i class="fas fa-handshake"></i>
+                <span>No collaborations available.</span>
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- OPPORTUNITIES -->
+        <div class="dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <span class="panel-eyebrow">INDUSTRY OPPORTUNITIES</span>
+                    <h2>Latest Opportunities</h2>
+                </div>
+
+                <span class="count-label">
+                    {{ open_opportunities }} Open
+                </span>
+
+            </div>
+
+
+            {% if recent_opportunities %}
+
+            <div class="activity-list">
+
+                {% for opportunity in recent_opportunities %}
+
+                <div class="activity-item">
+
+                    <div class="activity-icon opportunity">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+
+                    <div class="activity-content">
+
+                        <h3>
+                            {{ opportunity.title }}
+                        </h3>
+
+                        <p>
+                            {{ opportunity.industry_name }}
+                        </p>
+
+                        <small>
+                            {{ opportunity.work_mode or 'Mode not specified' }}
+                        </small>
+
+                    </div>
+
+                    <span class="status-badge open">
+                        OPEN
+                    </span>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="small-empty">
+                <i class="fas fa-briefcase"></i>
+                <span>No open opportunities available.</span>
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RECENT STUDENTS
+    ====================================================== -->
+    <section class="dashboard-panel students-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <span class="panel-eyebrow">STUDENT MANAGEMENT</span>
+                <h2>Recently Registered Students</h2>
+            </div>
+
+            <a href="/college/students"
+               class="panel-action">
+                View Students
+                <i class="fas fa-arrow-right"></i>
+            </a>
+
+        </div>
+
+
+        {% if recent_students %}
+
+        <div class="students-table-wrapper">
+
+            <table class="students-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Student</th>
+                        <th>Enrollment</th>
+                        <th>Department</th>
+                        <th>Course / Branch</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for student in recent_students %}
+
+                    <tr>
+
+                        <td>
+
+                            <div class="student-cell">
+
+                                <div class="student-avatar">
+                                    {{ (student.name or 'S')[0]|upper }}
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        {{ student.name }}
+                                    </strong>
+                                    <span>
+                                        {{ student.email }}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{ student.enrollment_no or '—' }}
+                        </td>
+
+
+                        <td>
+
+                            {% if student.department_name %}
+
+                            <div class="department-mini">
+
+                                <strong>
+                                    {{ student.department_name }}
+                                </strong>
+
+                                <span>
+                                    {{ student.department_code }}
+                                </span>
+
+                            </div>
+
+                            {% else %}
+
+                            <span class="not-assigned">
+                                Not Assigned
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="course-cell">
+
+                                <strong>
+                                    {{ student.course or '—' }}
+                                </strong>
+
+                                <span>
+                                    {{ student.branch or '—' }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status-badge
+                                {{ student.user_status|lower }}">
+                                {{ student.user_status }}
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state compact">
+
+            <div class="empty-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+
+            <h3>No students registered yet</h3>
+
+            <p>
+                Student records associated with this college
+                will appear here.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         COLLABORATION SUMMARY
+    ====================================================== -->
+    <section class="dashboard-panel collaboration-summary">
+
+        <div class="panel-header">
+
+            <div>
+                <span class="panel-eyebrow">COLLABORATION STATUS</span>
+                <h2>Collaboration Summary</h2>
+            </div>
+
+        </div>
+
+
+        <div class="summary-grid">
+
+            <div class="summary-item pending">
+
+                <div class="summary-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+
+                <div>
+                    <strong>{{ pending_collaborations }}</strong>
+                    <span>Pending Requests</span>
+                </div>
+
+            </div>
+
+
+            <div class="summary-item active">
+
+                <div class="summary-icon">
+                    <i class="fas fa-circle-check"></i>
+                </div>
+
+                <div>
+                    <strong>{{ active_collaborations }}</strong>
+                    <span>Active Collaborations</span>
+                </div>
+
+            </div>
+
+
+            <div class="summary-item completed">
+
+                <div class="summary-icon">
+                    <i class="fas fa-flag-checkered"></i>
+                </div>
+
+                <div>
+                    <strong>{{ completed_collaborations }}</strong>
+                    <span>Completed</span>
+                </div>
+
+            </div>
+
+
+            <div class="summary-item selected">
+
+                <div class="summary-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+
+                <div>
+                    <strong>{{ selected_applications }}</strong>
+                    <span>Selected Applications</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/dashboard.js') }}"></script>
+{% endblock %}

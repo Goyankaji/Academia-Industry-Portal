@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="SIH Academia–Industry Collaboration Portal - College">
+
+    <title>
+        {% block title %}
+            College Portal | SIH
+        {% endblock %}
+    </title>
+
+
+    <!-- =====================================================
+         FONT AWESOME
+    ====================================================== -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- =====================================================
+         COLLEGE COMMON CSS
+    ====================================================== -->
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/college/base.css'
+          ) }}">
+
+
+    <!-- =====================================================
+         PAGE SPECIFIC CSS
+    ====================================================== -->
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     MOBILE SIDEBAR OVERLAY
+========================================================= -->
+
+<div class="college-sidebar-overlay"
+     id="collegeSidebarOverlay">
+</div>
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="college-sidebar"
+       id="collegeSidebar">
+
+
+    <!-- =====================================================
+         SIDEBAR HEADER
+    ====================================================== -->
+
+    <div class="college-sidebar-header">
+
+        <div class="college-brand">
+
+            <div class="college-brand-logo">
+                <span>SIH</span>
+            </div>
+
+            <div class="college-brand-text">
+
+                <h2>
+                    SIH Portal
+                </h2>
+
+                <span>
+                    College
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- MOBILE CLOSE -->
+
+        <button type="button"
+                class="college-sidebar-close"
+                id="collegeSidebarClose"
+                aria-label="Close sidebar">
+
+            ×
+
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
+
+    <nav class="college-navigation">
+
+
+        <!-- =================================================
+             MAIN
+        ================================================== -->
+
+        <div class="college-nav-section">
+
+            <p class="college-nav-label">
+                MAIN
+            </p>
+
+
+            <!-- =================================================
+                 DASHBOARD
+            ================================================== -->
+
+            <a href="{{ url_for('college_dashboard') }}"
+               class="college-nav-item
+               {% if dashboard == 'dashboard' %}
+                   active
+               {% endif %}">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <rect x="3"
+                              y="3"
+                              width="7"
+                              height="7"
+                              rx="1"></rect>
+
+                        <rect x="14"
+                              y="3"
+                              width="7"
+                              height="7"
+                              rx="1"></rect>
+
+                        <rect x="3"
+                              y="14"
+                              width="7"
+                              height="7"
+                              rx="1"></rect>
+
+                        <rect x="14"
+                              y="14"
+                              width="7"
+                              height="7"
+                              rx="1"></rect>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 PROFILE
+            ================================================== -->
+
+            <a href="{{ url_for('college_profile') }}"
+               class="college-nav-item
+               {% if profile == 'profile' %}
+                   active
+               {% endif %}">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <circle cx="12"
+                                cy="8"
+                                r="4"></circle>
+
+                        <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"></path>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Profile
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 DEPARTMENTS
+            ================================================== -->
+
+            <a href="{{ url_for('college_departments') }}"
+               class="college-nav-item
+               {% if dashboard == 'departments' %}
+                   active
+               {% endif %}">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M3 10.5L12 4l9 6.5"></path>
+
+                        <path d="M5 10v9h14v-9"></path>
+
+                        <path d="M9 19v-5h6v5"></path>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Departments
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 STUDENTS
+            ================================================== -->
+
+            <a href="{{ url_for('college_students') }}"
+               class="college-nav-item
+               {% if dashboard == 'students' %}
+                   active
+               {% endif %}">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+
+                        <circle cx="9"
+                                cy="7"
+                                r="4"></circle>
+
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Students
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 INDUSTRIES
+            ================================================== -->
+
+            <a href="{{ url_for('college_industries') }}"
+               class="college-nav-item
+               {% if dashboard == 'industries' %}
+                   active
+               {% endif %}">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M3 21h18"></path>
+
+                        <path d="M5 21V7l7-4 7 4v14"></path>
+
+                        <path d="M9 21v-5h6v5"></path>
+
+                        <path d="M9 9h.01"></path>
+
+                        <path d="M15 9h.01"></path>
+
+                        <path d="M9 12h.01"></path>
+
+                        <path d="M15 12h.01"></path>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Industries
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 COLLABORATION REQUESTS
+            ================================================== -->
+
+            <div class="college-nav-group">
+
+                <a href="{{ url_for('college_sent_requests') }}"
+                   class="college-nav-item
+                   {% if dashboard == 'requests' %}
+                       active
+                   {% endif %}">
+
+                    <span class="college-nav-icon">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <path d="M21 11.5a8.38 8.38 0 0 1-9 8.3 8.5 8.5 0 0 1-4-.98L3 21l1.9-4.7A8.3 8.3 0 0 1 3 11.5a8.5 8.5 0 1 1 18 0z"></path>
+
+                            <path d="M8 11h8"></path>
+
+                            <path d="M12 7v8"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="college-nav-text">
+                        Collaboration Requests
+                    </span>
+
+                </a>
+
+
+                {% if dashboard == 'requests' %}
+
+                <div class="college-subnav">
+
+                    <!-- SENT REQUESTS -->
+
+                    <a href="{{ url_for('college_sent_requests') }}"
+                       class="college-subnav-item
+                       {% if request.endpoint == 'college_sent_requests' %}
+                           active
+                       {% endif %}">
+
+                        <i class="fa-solid fa-paper-plane"></i>
+
+                        <span>
+                            Sent Requests
+                        </span>
+
+                    </a>
+
+
+                    <!-- RECEIVED REQUESTS -->
+
+                    <a href="{{ url_for('college_received_requests') }}"
+                       class="college-subnav-item
+                       {% if request.endpoint == 'college_received_requests' %}
+                           active
+                       {% endif %}">
+
+                        <i class="fa-solid fa-inbox"></i>
+
+                        <span>
+                            Received Requests
+                        </span>
+
+                    </a>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 COLLABORATIONS
+                 Future Module
+            ================================================== -->
+
+            <a href="{{ url_for('college_collaborations') }}"
+               class="college-nav-item college-nav-disabled">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Collaborations
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 ACTIVITIES
+                 Future Module
+            ================================================== -->
+
+            <a href="{{ url_for('college_activities') }}"
+               class="college-nav-item college-nav-disabled">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M12 20h9"></path>
+
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Activities
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 NOTIFICATIONS
+                 Future Module
+            ================================================== -->
+
+            <a href="{{ url_for('college_notifications') }}"
+               class="college-nav-item college-nav-disabled">
+
+                <span class="college-nav-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+
+                    </svg>
+
+                </span>
+
+                <span class="college-nav-text">
+                    Notifications
+                </span>
+
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         SIDEBAR FOOTER
+    ====================================================== -->
+
+    <div class="college-sidebar-footer">
+
+        <div class="college-sidebar-user">
+
+            <div class="college-sidebar-avatar">
+
+                {{ session.get(
+                    "user_name",
+                    "C"
+                )[0]|upper }}
+
+            </div>
+
+
+            <div class="college-sidebar-user-info">
+
+                <strong>
+                    {{ session.get(
+                        "user_name",
+                        "College User"
+                    ) }}
+                </strong>
+
+                <span>
+                    College
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOGOUT -->
+
+        <a href="{{ url_for('logout') }}"
+           class="college-logout"
+           id="collegeLogoutLink">
+
+            <span class="college-nav-icon">
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2">
+
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+
+                    <polyline points="16 17 21 12 16 7"></polyline>
+
+                    <line x1="21"
+                          y1="12"
+                          x2="9"
+                          y2="12"></line>
+
+                </svg>
+
+            </span>
+
+            <span>
+                Logout
+            </span>
+
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN WRAPPER
+========================================================= -->
+
+<div class="college-main"
+     id="collegeMain">
+
+
+    <!-- =====================================================
+         TOP NAVBAR
+    ====================================================== -->
+
+    <header class="college-topbar">
+
+
+        <!-- MOBILE MENU -->
+
+        <button type="button"
+                class="college-menu-toggle"
+                id="collegeMenuToggle"
+                aria-label="Open menu">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
+
+        <!-- =================================================
+             TOPBAR LEFT
+        ================================================== -->
+
+        <div class="college-topbar-left">
+
+            <div class="college-heading">
+
+                <!-- BREADCRUMB -->
+
+                <div class="college-breadcrumb">
+
+                    <span>
+                        SIH Portal
+                    </span>
+
+                    <span class="college-breadcrumb-separator">
+                        /
+                    </span>
+
+                    <span class="college-breadcrumb-current">
+
+                        {% if dashboard == 'dashboard' %}
+
+                            Dashboard
+
+                        {% elif profile == 'profile' %}
+
+                            My Profile
+
+                        {% elif dashboard == 'departments' %}
+
+                            Departments
+
+                        {% elif dashboard == 'students' %}
+
+                            Students
+
+                        {% elif dashboard == 'industries' %}
+
+                            Industries
+
+                        {% elif dashboard == 'requests' %}
+
+                            Collaboration Requests
+
+                        {% elif dashboard == 'collaborations' %}
+
+                            Collaborations
+
+                        {% elif dashboard == 'activities' %}
+
+                            Activities
+
+                        {% elif dashboard == 'notifications' %}
+
+                            Notifications
+
+                        {% else %}
+
+                            College Portal
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- PAGE TITLE -->
+
+                <h1>
+
+                    {% if dashboard == 'dashboard' %}
+
+                        College Dashboard
+
+                    {% elif profile == 'profile' %}
+
+                        My Profile
+
+                    {% elif dashboard == 'departments' %}
+
+                        Departments
+
+                    {% elif dashboard == 'students' %}
+
+                        Students
+
+                    {% elif dashboard == 'industries' %}
+
+                        Industries
+
+                    {% elif dashboard == 'requests' %}
+
+                        Collaboration Requests
+
+                    {% elif dashboard == 'collaborations' %}
+
+                        Collaborations
+
+                    {% elif dashboard == 'activities' %}
+
+                        Projects & Activities
+
+                    {% elif dashboard == 'notifications' %}
+
+                        Notifications
+
+                    {% else %}
+
+                        College Portal
+
+                    {% endif %}
+
+                </h1>
+
+
+                <p>
+                    SIH Academia–Industry Collaboration Portal
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TOPBAR RIGHT
+        ================================================== -->
+
+        <div class="college-topbar-right">
+
+
+            <!-- NOTIFICATION -->
+
+            <button type="button"
+                    class="college-notification-button"
+                    id="collegeNotificationButton"
+                    aria-label="Notifications">
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2">
+
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+
+                    <path d="M13.73 21a2 2 0 0 0-3.46 0"></path>
+
+                </svg>
+
+                <span class="college-notification-count"
+                      id="collegeNotificationCount">
+
+                    0
+
+                </span>
+
+            </button>
+
+
+            <!-- USER -->
+
+            <div class="college-user">
+
+                <div class="college-user-avatar">
+
+                    {{ session.get(
+                        "user_name",
+                        "C"
+                    )[0]|upper }}
+
+                </div>
+
+
+                <div class="college-user-details">
+
+                    <strong>
+                        {{ session.get(
+                            "user_name",
+                            "College User"
+                        ) }}
+                    </strong>
+
+                    <span>
+                        College
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         FLASH MESSAGES
+    ====================================================== -->
+
+    {% with messages = get_flashed_messages(
+        with_categories=true
+    ) %}
+
+        {% if messages %}
+
+            <div class="college-flash-wrapper">
+
+                {% for category, message in messages %}
+
+                    <div class="college-flash
+                                college-flash-{{ category }}">
+
+                        <span>
+                            {{ message }}
+                        </span>
+
+                        <button type="button"
+                                class="college-flash-close"
+                                aria-label="Close message">
+
+                            ×
+
+                        </button>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =====================================================
+         PAGE CONTENT
+    ====================================================== -->
+
+    <main class="college-page-content">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+
+</div>
+
+
+<!-- =========================================================
+     COLLEGE COMMON JS
+========================================================= -->
+
+<script src="{{ url_for(
+    'static',
+    filename='js/college/base.js'
+) }}"></script>
+
+
+<!-- =========================================================
+     PAGE SPECIFIC JS
+========================================================= -->
+
+{% block extra_js %}
+{% endblock %}
+
+
+</body>
+
+</html>

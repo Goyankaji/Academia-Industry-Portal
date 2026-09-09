@@ -1,0 +1,518 @@
+{% extends "college/base.html" %}
+
+{% block title %}Project Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/activities/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="activity-detail-page">
+
+    <!-- Header -->
+    <div class="page-header">
+
+        <div>
+            <span class="page-eyebrow">PROJECT DETAILS</span>
+            <h1>{{ project.title }}</h1>
+            <p>Complete information about this student project.</p>
+        </div>
+
+        <div class="header-actions">
+
+            <a
+                href="{{ url_for('college_activities') }}"
+                class="back-btn"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back
+            </a>
+
+            <a
+                href="{{ url_for('college_activity_edit', activity_id=project.id) }}"
+                class="edit-btn"
+            >
+                <i class="fa-solid fa-pen"></i>
+                Edit
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Hero -->
+    <section class="project-hero">
+
+        <div class="hero-icon">
+            <i class="fa-solid fa-code"></i>
+        </div>
+
+        <div class="hero-content">
+
+            <span class="hero-label">STUDENT PROJECT</span>
+
+            <h2>{{ project.title }}</h2>
+
+            <div class="hero-meta">
+
+                <span>
+                    <i class="fa-solid fa-user-graduate"></i>
+                    {{ project.student_name }}
+                </span>
+
+                {% if project.department_name %}
+                <span>
+                    <i class="fa-solid fa-building-columns"></i>
+                    {{ project.department_name }}
+                </span>
+                {% endif %}
+
+                {% if project.company_name %}
+                <span>
+                    <i class="fa-solid fa-building"></i>
+                    {{ project.company_name }}
+                </span>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="hero-status">
+
+            {% if project.status == 'ONGOING' %}
+                <span class="status-badge ongoing">
+                    <span class="status-dot"></span>
+                    Ongoing
+                </span>
+            {% elif project.status == 'COMPLETED' %}
+                <span class="status-badge completed">
+                    <span class="status-dot"></span>
+                    Completed
+                </span>
+            {% else %}
+                <span class="status-badge cancelled">
+                    <span class="status-dot"></span>
+                    Cancelled
+                </span>
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- Main Grid -->
+    <div class="detail-grid">
+
+        <!-- Project Information -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon">
+                    <i class="fa-solid fa-diagram-project"></i>
+                </div>
+
+                <div>
+                    <h2>Project Information</h2>
+                    <p>Core project details</p>
+                </div>
+
+            </div>
+
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span>Project Title</span>
+                    <strong>{{ project.title }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Status</span>
+
+                    <strong class="status-text">
+                        {{ project.status|title }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Start Date</span>
+
+                    <strong>
+                        {% if project.start_date %}
+                            {{ project.start_date.strftime('%d %b %Y') }}
+                        {% else %}
+                            Not specified
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>End Date</span>
+
+                    <strong>
+                        {% if project.end_date %}
+                            {{ project.end_date.strftime('%d %b %Y') }}
+                        {% else %}
+                            Not specified
+                        {% endif %}
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Student Information -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon student">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+
+                <div>
+                    <h2>Student Information</h2>
+                    <p>Student associated with this project</p>
+                </div>
+
+            </div>
+
+
+            <div class="info-list">
+
+                <div class="info-row">
+                    <span>Name</span>
+                    <strong>{{ project.student_name }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Enrollment No.</span>
+                    <strong>{{ project.enrollment_no }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Email</span>
+                    <strong>{{ project.student_email }}</strong>
+                </div>
+
+                {% if project.phone %}
+                <div class="info-row">
+                    <span>Phone</span>
+                    <strong>{{ project.phone }}</strong>
+                </div>
+                {% endif %}
+
+                <div class="info-row">
+                    <span>Course</span>
+                    <strong>{{ project.course or 'Not specified' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Branch</span>
+                    <strong>{{ project.branch or 'Not specified' }}</strong>
+                </div>
+
+                {% if project.department_name %}
+                <div class="info-row">
+                    <span>Department</span>
+                    <strong>
+                        {{ project.department_name }}
+                        {% if project.department_code %}
+                            ({{ project.department_code }})
+                        {% endif %}
+                    </strong>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- Technology -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon technology">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+
+                <div>
+                    <h2>Technology Stack</h2>
+                    <p>Technologies used in the project</p>
+                </div>
+
+            </div>
+
+
+            <div class="technology-content">
+
+                {% if project.technology_stack %}
+
+                    <div class="technology-box">
+                        {{ project.technology_stack }}
+                    </div>
+
+                {% else %}
+
+                    <div class="not-available">
+                        <i class="fa-solid fa-minus"></i>
+                        Technology stack not provided.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- Industry -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon industry">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+
+                <div>
+                    <h2>Industry Association</h2>
+                    <p>Industry linked with the project</p>
+                </div>
+
+            </div>
+
+
+            {% if project.company_name %}
+
+            <div class="industry-profile">
+
+                <div class="company-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+
+                <div>
+                    <h3>{{ project.company_name }}</h3>
+
+                    {% if project.industry_sector %}
+                    <span>{{ project.industry_sector }}</span>
+                    {% endif %}
+                </div>
+
+            </div>
+
+
+            <div class="info-list">
+
+                {% if project.contact_person %}
+                <div class="info-row">
+                    <span>Contact Person</span>
+                    <strong>{{ project.contact_person }}</strong>
+                </div>
+                {% endif %}
+
+                {% if project.designation %}
+                <div class="info-row">
+                    <span>Designation</span>
+                    <strong>{{ project.designation }}</strong>
+                </div>
+                {% endif %}
+
+                {% if project.industry_email %}
+                <div class="info-row">
+                    <span>Email</span>
+                    <strong>{{ project.industry_email }}</strong>
+                </div>
+                {% endif %}
+
+                {% if project.industry_phone %}
+                <div class="info-row">
+                    <span>Phone</span>
+                    <strong>{{ project.industry_phone }}</strong>
+                </div>
+                {% endif %}
+
+            </div>
+
+            {% else %}
+
+            <div class="not-available">
+                <i class="fa-solid fa-building-circle-xmark"></i>
+                No industry is associated with this project.
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- Description -->
+        <section class="detail-card full-width">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon description">
+                    <i class="fa-solid fa-align-left"></i>
+                </div>
+
+                <div>
+                    <h2>Project Description</h2>
+                    <p>Project overview and objectives</p>
+                </div>
+
+            </div>
+
+
+            {% if project.description %}
+
+            <div class="description-content">
+                {{ project.description }}
+            </div>
+
+            {% else %}
+
+            <div class="not-available">
+                <i class="fa-solid fa-file-circle-minus"></i>
+                No description has been provided for this project.
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- Links -->
+        <section class="detail-card full-width">
+
+            <div class="detail-card-header">
+
+                <div class="section-icon links">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+
+                <div>
+                    <h2>Project Resources</h2>
+                    <p>Project and report links</p>
+                </div>
+
+            </div>
+
+
+            <div class="resource-links">
+
+                {% if project.project_url %}
+
+                <a
+                    href="{{ project.project_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="resource-btn"
+                >
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    Open Project
+                </a>
+
+                {% endif %}
+
+
+                {% if project.report_url %}
+
+                <a
+                    href="{{ project.report_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="resource-btn report"
+                >
+                    <i class="fa-solid fa-file-lines"></i>
+                    View Report
+                </a>
+
+                {% endif %}
+
+
+                {% if not project.project_url and not project.report_url %}
+
+                <span class="not-available">
+                    <i class="fa-solid fa-link-slash"></i>
+                    No project resources available.
+                </span>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- Footer Metadata -->
+    <div class="metadata-card">
+
+        <div>
+            <span>Created</span>
+
+            <strong>
+                {% if project.created_at %}
+                    {{ project.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+        </div>
+
+        <div>
+            <span>Last Updated</span>
+
+            <strong>
+                {% if project.updated_at %}
+                    {{ project.updated_at.strftime('%d %b %Y, %I:%M %p') }}
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+        </div>
+
+    </div>
+
+
+    <!-- Delete -->
+    <div class="danger-zone">
+
+        <div>
+            <span>Delete Project</span>
+            <p>
+                This action permanently removes this project record.
+            </p>
+        </div>
+
+        <form
+            method="POST"
+            action="{{ url_for('college_activity_delete', activity_id=project.id) }}"
+            id="deleteProjectForm"
+        >
+            <button type="submit" class="delete-btn">
+                <i class="fa-solid fa-trash"></i>
+                Delete Project
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/activities/detail.js') }}"></script>
+{% endblock %}

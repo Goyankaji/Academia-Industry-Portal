@@ -1,0 +1,269 @@
+{% extends "college/base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/notifications/list.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="notifications-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+
+        <div>
+            <span class="page-eyebrow">COLLEGE UPDATES</span>
+            <h1>Notifications</h1>
+            <p>Stay updated with important activities and system notifications.</p>
+        </div>
+
+        {% if unread_count > 0 %}
+        <form
+            method="POST"
+            action="{{ url_for('college_notifications_mark_all_read') }}"
+        >
+            <button type="submit" class="mark-all-btn">
+                <i class="fa-solid fa-check-double"></i>
+                Mark All as Read
+            </button>
+        </form>
+        {% endif %}
+
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="notification-stats">
+
+        <div class="notification-stat">
+
+            <div class="stat-icon">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+
+            <div>
+                <span>Total Notifications</span>
+                <strong>{{ total_count }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="notification-stat">
+
+            <div class="stat-icon unread">
+                <i class="fa-solid fa-envelope"></i>
+            </div>
+
+            <div>
+                <span>Unread</span>
+                <strong>{{ unread_count }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="notification-stat">
+
+            <div class="stat-icon read">
+                <i class="fa-solid fa-envelope-open"></i>
+            </div>
+
+            <div>
+                <span>Read</span>
+                <strong>{{ total_count - unread_count }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Notification Toolbar -->
+    {% if notifications %}
+
+    <div class="notification-toolbar">
+
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+                type="text"
+                id="notificationSearch"
+                placeholder="Search notifications..."
+                autocomplete="off"
+            >
+        </div>
+
+        <select id="notificationFilter" class="notification-filter">
+            <option value="ALL">All Notifications</option>
+            <option value="UNREAD">Unread</option>
+            <option value="READ">Read</option>
+        </select>
+
+    </div>
+
+
+    <!-- Notifications -->
+    <div class="notification-list" id="notificationList">
+
+        {% for notification in notifications %}
+
+        <article
+            class="notification-card {% if not notification.is_read %}unread{% endif %}"
+            data-status="{% if notification.is_read %}READ{% else %}UNREAD{% endif %}"
+            data-search="
+                {{ notification.title|lower }}
+                {{ notification.message|lower }}
+                {{ notification.notification_type|default('', true)|lower }}
+            "
+        >
+
+            <div class="notification-icon
+                {% if notification.notification_type %}
+                    {{ notification.notification_type|lower|replace('_', '-') }}
+                {% endif %}
+            ">
+
+                {% if notification.notification_type == 'COLLABORATION' %}
+                    <i class="fa-solid fa-handshake"></i>
+
+                {% elif notification.notification_type == 'PROJECT' %}
+                    <i class="fa-solid fa-diagram-project"></i>
+
+                {% elif notification.notification_type == 'REQUEST' %}
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                {% elif notification.notification_type == 'MESSAGE' %}
+                    <i class="fa-solid fa-message"></i>
+
+                {% elif notification.notification_type == 'SYSTEM' %}
+                    <i class="fa-solid fa-circle-info"></i>
+
+                {% else %}
+                    <i class="fa-solid fa-bell"></i>
+                {% endif %}
+
+            </div>
+
+
+            <div class="notification-content">
+
+                <div class="notification-top">
+
+                    <div>
+                        <h2>{{ notification.title }}</h2>
+
+                        {% if notification.notification_type %}
+                        <span class="notification-type">
+                            {{ notification.notification_type|replace('_', ' ')|title }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if not notification.is_read %}
+                    <span class="unread-badge">
+                        <span></span>
+                        New
+                    </span>
+                    {% endif %}
+
+                </div>
+
+
+                <p>{{ notification.message }}</p>
+
+
+                <div class="notification-footer">
+
+                    <span class="notification-time">
+                        <i class="fa-regular fa-clock"></i>
+
+                        {% if notification.created_at %}
+                            {{ notification.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                        {% endif %}
+                    </span>
+
+
+                    {% if not notification.is_read %}
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'college_notification_mark_read',
+                            notification_id=notification.id
+                        ) }}"
+                        class="read-form"
+                    >
+                        <button type="submit" class="read-btn">
+                            <i class="fa-solid fa-check"></i>
+                            Mark as Read
+                        </button>
+                    </form>
+
+                    {% else %}
+
+                    <span class="read-label">
+                        <i class="fa-solid fa-check"></i>
+                        Read
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- Filter Empty -->
+    <div class="filter-empty" id="filterEmpty" style="display:none;">
+
+        <div class="empty-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+
+        <h2>No Notifications Found</h2>
+
+        <p>
+            Try changing your search or notification filter.
+        </p>
+
+    </div>
+
+
+    {% else %}
+
+    <!-- Empty State -->
+    <div class="empty-state">
+
+        <div class="empty-icon">
+            <i class="fa-regular fa-bell-slash"></i>
+        </div>
+
+        <h2>No Notifications</h2>
+
+        <p>
+            You are all caught up. New notifications will appear here.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/notifications/list.js') }}"></script>
+{% endblock %}

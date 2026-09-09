@@ -87,6 +87,40 @@ def industry_required(f):
 
     return decorated_function
 
+# =========================================================
+# COLLEGE AUTHENTICATION DECORATOR
+# =========================================================
+
+def college_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        if "user_id" not in session:
+
+            flash(
+                "Please login first.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        if session.get("role") != "COLLEGE":
+
+            flash(
+                "College access required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 
 # =========================================================
 # HOME
@@ -205,6 +239,16 @@ def login():
 
                 return redirect(
                     url_for("industry_dashboard")
+                )
+
+            # -------------------------------------------------
+            # COLLEGE
+            # -------------------------------------------------
+
+            if user["role"] == "COLLEGE":
+
+                return redirect(
+                    url_for("college_dashboard")
                 )
 
 
@@ -15168,6 +15212,7 @@ def industry_settings():
 
         if conn:
             conn.close()
+
 # =========================================================
 # INDUSTRY DEACTIVATE ACCOUNT
 # =========================================================
@@ -15556,6 +15601,3361 @@ def industry_delete_account():
         if conn:
             conn.close()
 
+# =========================================================
+# COLLEGE DASHBOARD
+# =========================================================
+
+@app.route("/college/dashboard")
+@college_required
+def college_dashboard():
+    conn = None
+    cursor = None
+
+    try:
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash("College session expired. Please login again.", "error")
+            return redirect(url_for("login"))
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # =========================================================
+        # COLLEGE PROFILE
+        # =========================================================
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.user_id,
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email,
+                c.phone,
+                c.address,
+                c.city,
+                c.state,
+                c.pincode,
+                c.website,
+                c.status,
+                c.created_at,
+                c.updated_at,
+                u.name AS contact_person,
+                u.email AS account_email
+            FROM colleges c
+            INNER JOIN users u
+                ON c.user_id = u.id
+            WHERE c.user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("login"))
+
+        college_id = college["id"]
+
+        # =========================================================
+        # ACCOUNT STATUS
+        # =========================================================
+        if college["status"] != "ACTIVE":
+            session.clear()
+            flash("Your college account is not active.", "error")
+            return redirect(url_for("login"))
+
+        # =========================================================
+        # PROFILE COMPLETION
+        # =========================================================
+        profile_fields = [
+            "college_name",
+            "college_code",
+            "university_name",
+            "email",
+            "phone",
+            "address",
+            "city",
+            "state",
+            "pincode",
+            "website"
+        ]
+
+        completed_fields = 0
+
+        for field in profile_fields:
+            value = college.get(field)
+
+            if value is not None and str(value).strip():
+                completed_fields += 1
+
+        profile_completion = round(
+            (completed_fields / len(profile_fields)) * 100
+        )
+
+        # =========================================================
+        # TOTAL STUDENTS
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+        """, (college_id,))
+
+        total_students = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # TOTAL DEPARTMENTS
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM departments
+            WHERE college_id = %s
+        """, (college_id,))
+
+        total_departments = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # ACTIVE DEPARTMENTS
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM departments
+            WHERE college_id = %s
+              AND status = 'ACTIVE'
+        """, (college_id,))
+
+        active_departments = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # PLACEMENT CELLS
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM placement_cells
+            WHERE college_id = %s
+        """, (college_id,))
+
+        total_placement_cells = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # COLLABORATIONS
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE college_id = %s
+        """, (college_id,))
+
+        total_collaborations = cursor.fetchone()["total"] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE college_id = %s
+              AND status = 'ACTIVE'
+        """, (college_id,))
+
+        active_collaborations = cursor.fetchone()["total"] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE college_id = %s
+              AND status = 'PENDING'
+        """, (college_id,))
+
+        pending_collaborations = cursor.fetchone()["total"] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM collaborations
+            WHERE college_id = %s
+              AND status = 'COMPLETED'
+        """, (college_id,))
+
+        completed_collaborations = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # OPEN INDUSTRY OPPORTUNITIES
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE status = 'OPEN'
+        """)
+
+        open_opportunities = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # STUDENT APPLICATIONS
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+            INNER JOIN students s
+                ON sa.student_id = s.id
+            WHERE s.college_id = %s
+        """, (college_id,))
+
+        total_applications = cursor.fetchone()["total"] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications sa
+            INNER JOIN students s
+                ON sa.student_id = s.id
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+        """, (college_id,))
+
+        selected_applications = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # UNREAD NOTIFICATIONS
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM notifications
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        unread_notifications = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # UNREAD MESSAGES
+        # =========================================================
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM messages
+            WHERE receiver_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        unread_messages = cursor.fetchone()["total"] or 0
+
+        # =========================================================
+        # DEPARTMENT OVERVIEW
+        # =========================================================
+        cursor.execute("""
+            SELECT
+                d.id,
+                d.department_name,
+                d.department_code,
+                d.description,
+                d.status,
+                d.created_at,
+                COUNT(s.id) AS student_count
+            FROM departments d
+            LEFT JOIN students s
+                ON s.department_id = d.id
+            WHERE d.college_id = %s
+            GROUP BY
+                d.id,
+                d.department_name,
+                d.department_code,
+                d.description,
+                d.status,
+                d.created_at
+            ORDER BY
+                d.status = 'ACTIVE' DESC,
+                d.department_name ASC
+            LIMIT 8
+        """, (college_id,))
+
+        department_overview = cursor.fetchall()
+
+        # =========================================================
+        # RECENT COLLABORATIONS
+        # =========================================================
+        cursor.execute("""
+            SELECT
+                col.id,
+                col.title,
+                col.description,
+                col.collaboration_type,
+                col.start_date,
+                col.end_date,
+                col.status,
+                col.created_at,
+                i.company_name AS industry_name
+            FROM collaborations col
+            INNER JOIN industries i
+                ON col.industry_id = i.id
+            WHERE col.college_id = %s
+            ORDER BY col.created_at DESC
+            LIMIT 5
+        """, (college_id,))
+
+        recent_collaborations = cursor.fetchall()
+
+        # =========================================================
+        # RECENT OPEN OPPORTUNITIES
+        # =========================================================
+        cursor.execute("""
+            SELECT
+                o.id,
+                o.title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+                o.application_deadline,
+                o.status,
+                o.created_at,
+                i.company_name AS industry_name
+            FROM opportunities o
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+            WHERE o.status = 'OPEN'
+            ORDER BY o.created_at DESC
+            LIMIT 5
+        """)
+
+        recent_opportunities = cursor.fetchall()
+
+        # =========================================================
+        # RECENT STUDENTS
+        # =========================================================
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.phone,
+                s.created_at,
+                s.department_id,
+                u.name,
+                u.email,
+                u.status AS user_status,
+                d.department_name,
+                d.department_code
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            LEFT JOIN departments d
+                ON s.department_id = d.id
+            WHERE s.college_id = %s
+            ORDER BY s.created_at DESC
+            LIMIT 6
+        """, (college_id,))
+
+        recent_students = cursor.fetchall()
+
+        # =========================================================
+        # DASHBOARD
+        # =========================================================
+        return render_template(
+            "college/dashboard.html",
+
+            dashboard="dashboard",
+
+            college=college,
+
+            profile_completion=profile_completion,
+
+            total_students=total_students,
+            total_departments=total_departments,
+            active_departments=active_departments,
+            total_placement_cells=total_placement_cells,
+
+            total_collaborations=total_collaborations,
+            active_collaborations=active_collaborations,
+            pending_collaborations=pending_collaborations,
+            completed_collaborations=completed_collaborations,
+
+            open_opportunities=open_opportunities,
+
+            total_applications=total_applications,
+            selected_applications=selected_applications,
+
+            unread_notifications=unread_notifications,
+            unread_messages=unread_messages,
+
+            department_overview=department_overview,
+            recent_collaborations=recent_collaborations,
+            recent_opportunities=recent_opportunities,
+            recent_students=recent_students
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("COLLEGE DASHBOARD DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash("Unable to load college dashboard.", "error")
+        return redirect(url_for("login"))
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("COLLEGE DASHBOARD ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash("Unable to load college dashboard.", "error")
+        return redirect(url_for("login"))
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# ============================================================
+# COLLEGE PROFILE
+# ============================================================
+
+@app.route("/college/profile")
+@college_required
+def college_profile():
+    conn = None
+    cursor = None
+
+    try:
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash("College session expired. Please login again.", "error")
+            return redirect(url_for("login"))
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.user_id,
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email,
+                c.phone,
+                c.address,
+                c.city,
+                c.state,
+                c.pincode,
+                c.website,
+                c.status,
+                c.created_at,
+                c.updated_at,
+                u.name AS contact_person,
+                u.email AS account_email,
+                u.status AS account_status
+            FROM colleges c
+            INNER JOIN users u
+                ON c.user_id = u.id
+            WHERE c.user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("login"))
+
+        if college["status"] != "ACTIVE":
+            session.clear()
+            flash("Your college account is not active.", "error")
+            return redirect(url_for("login"))
+
+        # --------------------------------------------------------
+        # PROFILE COMPLETION
+        # --------------------------------------------------------
+
+        profile_fields = [
+            "college_name",
+            "college_code",
+            "university_name",
+            "email",
+            "phone",
+            "address",
+            "city",
+            "state",
+            "pincode",
+            "website"
+        ]
+
+        completed_fields = 0
+
+        for field in profile_fields:
+            value = college.get(field)
+
+            if value is not None and str(value).strip():
+                completed_fields += 1
+
+        profile_completion = round(
+            (completed_fields / len(profile_fields)) * 100
+        )
+
+        return render_template(
+            "college/profile/view.html",
+            college=college,
+            profile_completion=profile_completion,
+            profile="profile"
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("COLLEGE PROFILE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash("Unable to load college profile.", "error")
+        return redirect(url_for("college_dashboard"))
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("COLLEGE PROFILE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash("Unable to load college profile.", "error")
+        return redirect(url_for("college_dashboard"))
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# EDIT COLLEGE PROFILE
+# ============================================================
+
+@app.route("/college/profile/edit", methods=["GET", "POST"])
+@college_required
+def college_profile_edit():
+    conn = None
+    cursor = None
+
+    try:
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash("College session expired. Please login again.", "error")
+            return redirect(url_for("login"))
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # --------------------------------------------------------
+        # GET CURRENT PROFILE
+        # --------------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.user_id,
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.email,
+                c.phone,
+                c.address,
+                c.city,
+                c.state,
+                c.pincode,
+                c.website,
+                c.status,
+                c.created_at,
+                c.updated_at,
+                u.name AS contact_person,
+                u.email AS account_email
+            FROM colleges c
+            INNER JOIN users u
+                ON c.user_id = u.id
+            WHERE c.user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("login"))
+
+        if college["status"] != "ACTIVE":
+            session.clear()
+            flash("Your college account is not active.", "error")
+            return redirect(url_for("login"))
+
+        # --------------------------------------------------------
+        # SAVE CHANGES
+        # --------------------------------------------------------
+
+        if request.method == "POST":
+
+            college_name = request.form.get(
+                "college_name", ""
+            ).strip()
+
+            university_name = request.form.get(
+                "university_name", ""
+            ).strip()
+
+            contact_person = request.form.get(
+                "contact_person", ""
+            ).strip()
+
+            phone = request.form.get(
+                "phone", ""
+            ).strip()
+
+            address = request.form.get(
+                "address", ""
+            ).strip()
+
+            city = request.form.get(
+                "city", ""
+            ).strip()
+
+            state = request.form.get(
+                "state", ""
+            ).strip()
+
+            pincode = request.form.get(
+                "pincode", ""
+            ).strip()
+
+            website = request.form.get(
+                "website", ""
+            ).strip()
+
+            # ----------------------------------------------------
+            # VALIDATION
+            # ----------------------------------------------------
+
+            errors = []
+
+            if not college_name:
+                errors.append("College name is required.")
+
+            if not university_name:
+                errors.append("University name is required.")
+
+            if not contact_person:
+                errors.append("Contact person is required.")
+
+            if not phone:
+                errors.append("Phone number is required.")
+
+            elif not phone.isdigit() or len(phone) != 10:
+                errors.append(
+                    "Phone number must contain exactly 10 digits."
+                )
+
+            if not address:
+                errors.append("Address is required.")
+
+            if not city:
+                errors.append("City is required.")
+
+            if not state:
+                errors.append("State is required.")
+
+            if not pincode:
+                errors.append("Pincode is required.")
+
+            elif not pincode.isdigit() or len(pincode) != 6:
+                errors.append(
+                    "Pincode must contain exactly 6 digits."
+                )
+
+            if website and not (
+                website.startswith("http://")
+                or website.startswith("https://")
+            ):
+                errors.append(
+                    "Website must start with http:// or https://."
+                )
+
+            # ----------------------------------------------------
+            # SHOW ERRORS
+            # ----------------------------------------------------
+
+            if errors:
+
+                for error in errors:
+                    flash(error, "error")
+
+                # Keep entered values in the form
+                college["college_name"] = college_name
+                college["university_name"] = university_name
+                college["contact_person"] = contact_person
+                college["phone"] = phone
+                college["address"] = address
+                college["city"] = city
+                college["state"] = state
+                college["pincode"] = pincode
+                college["website"] = website
+
+                return render_template(
+                    "college/profile/edit.html",
+                    college=college,
+                    profile="profile"
+                )
+
+            # ----------------------------------------------------
+            # UPDATE COLLEGE
+            # ----------------------------------------------------
+
+            cursor.execute("""
+                UPDATE colleges
+                SET
+                    college_name = %s,
+                    university_name = %s,
+                    phone = %s,
+                    address = %s,
+                    city = %s,
+                    state = %s,
+                    pincode = %s,
+                    website = %s
+                WHERE user_id = %s
+            """, (
+                college_name,
+                university_name,
+                phone,
+                address,
+                city,
+                state,
+                pincode,
+                website,
+                user_id
+            ))
+
+            # ----------------------------------------------------
+            # UPDATE CONTACT PERSON
+            # ----------------------------------------------------
+
+            cursor.execute("""
+                UPDATE users
+                SET name = %s
+                WHERE id = %s
+                  AND role = 'COLLEGE'
+            """, (
+                contact_person,
+                user_id
+            ))
+
+            conn.commit()
+
+            # Keep session name synchronized
+            session["user_name"] = contact_person
+            session["name"] = contact_person
+
+            flash(
+                "College profile updated successfully.",
+                "success"
+            )
+
+            return redirect(url_for("college_profile"))
+
+        # --------------------------------------------------------
+        # GET REQUEST
+        # --------------------------------------------------------
+
+        return render_template(
+            "college/profile/edit.html",
+            college=college,
+            profile="profile"
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("COLLEGE PROFILE UPDATE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update college profile.",
+            "error"
+        )
+
+        return redirect(url_for("college_profile"))
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("COLLEGE PROFILE UPDATE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update college profile.",
+            "error"
+        )
+
+        return redirect(url_for("college_profile"))
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# ============================================================
+# COLLEGE DEPARTMENTS
+# ============================================================
+
+@app.route("/college/departments")
+@college_required
+def college_departments():
+    conn = None
+    cursor = None
+
+    try:
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Get current college
+        cursor.execute("""
+            SELECT id, college_name, college_code, status
+            FROM colleges
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("login"))
+
+        if college["status"] != "ACTIVE":
+            session.clear()
+            flash("Your college account is not active.", "error")
+            return redirect(url_for("login"))
+
+        college_id = college["id"]
+
+        # Department list with student count
+        cursor.execute("""
+            SELECT
+                d.id,
+                d.department_name,
+                d.department_code,
+                d.description,
+                d.status,
+                d.created_at,
+                d.updated_at,
+                COUNT(s.id) AS student_count
+            FROM departments d
+            LEFT JOIN students s
+                ON s.department_id = d.id
+            WHERE d.college_id = %s
+            GROUP BY
+                d.id,
+                d.department_name,
+                d.department_code,
+                d.description,
+                d.status,
+                d.created_at,
+                d.updated_at
+            ORDER BY d.department_name ASC
+        """, (college_id,))
+
+        departments = cursor.fetchall()
+
+        # Statistics
+        total_departments = len(departments)
+
+        active_departments = sum(
+            1 for d in departments
+            if d["status"] == "ACTIVE"
+        )
+
+        inactive_departments = sum(
+            1 for d in departments
+            if d["status"] == "INACTIVE"
+        )
+
+        total_department_students = sum(
+            d["student_count"] or 0
+            for d in departments
+        )
+
+        return render_template(
+            "college/departments/list.html",
+            dashboard="departments",
+            college=college,
+            departments=departments,
+            total_departments=total_departments,
+            active_departments=active_departments,
+            inactive_departments=inactive_departments,
+            total_department_students=total_department_students
+        )
+
+    except mysql.connector.Error as e:
+
+        print("COLLEGE DEPARTMENTS DATABASE ERROR:", e)
+
+        flash(
+            "Unable to load departments.",
+            "error"
+        )
+
+        return redirect(url_for("college_dashboard"))
+
+    except Exception as e:
+
+        print("COLLEGE DEPARTMENTS ERROR:", e)
+
+        flash(
+            "Unable to load departments.",
+            "error"
+        )
+
+        return redirect(url_for("college_dashboard"))
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# ADD DEPARTMENT
+# ============================================================
+
+@app.route("/college/departments/add", methods=["GET", "POST"])
+@college_required
+def college_department_add():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, college_name, college_code, status
+            FROM colleges
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("login"))
+
+        if college["status"] != "ACTIVE":
+            session.clear()
+            flash("Your college account is not active.", "error")
+            return redirect(url_for("login"))
+
+        if request.method == "POST":
+
+            department_name = request.form.get(
+                "department_name", ""
+            ).strip()
+
+            department_code = request.form.get(
+                "department_code", ""
+            ).strip().upper()
+
+            description = request.form.get(
+                "description", ""
+            ).strip()
+
+            status = request.form.get(
+                "status",
+                "ACTIVE"
+            ).strip().upper()
+
+            errors = []
+
+            if not department_name:
+                errors.append(
+                    "Department name is required."
+                )
+
+            if not department_code:
+                errors.append(
+                    "Department code is required."
+                )
+
+            elif not department_code.replace("-", "").replace("_", "").isalnum():
+                errors.append(
+                    "Department code contains invalid characters."
+                )
+
+            if status not in ["ACTIVE", "INACTIVE"]:
+                errors.append(
+                    "Invalid department status."
+                )
+
+            # Duplicate code within same college
+            cursor.execute("""
+                SELECT id
+                FROM departments
+                WHERE college_id = %s
+                  AND department_code = %s
+                LIMIT 1
+            """, (
+                college["id"],
+                department_code
+            ))
+
+            existing = cursor.fetchone()
+
+            if existing:
+                errors.append(
+                    "This department code already exists."
+                )
+
+            if errors:
+
+                for error in errors:
+                    flash(error, "error")
+
+                department = {
+                    "department_name": department_name,
+                    "department_code": department_code,
+                    "description": description,
+                    "status": status
+                }
+
+                return render_template(
+                    "college/departments/add.html",
+                    dashboard="departments",
+                    college=college,
+                    department=department
+                )
+
+            cursor.execute("""
+                INSERT INTO departments
+                (
+                    id,
+                    college_id,
+                    department_name,
+                    department_code,
+                    description,
+                    status
+                )
+                VALUES
+                (
+                    UUID(),
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+            """, (
+                college["id"],
+                department_name,
+                department_code,
+                description or None,
+                status
+            ))
+
+            conn.commit()
+
+            flash(
+                "Department added successfully.",
+                "success"
+            )
+
+            return redirect(
+                url_for("college_departments")
+            )
+
+        return render_template(
+            "college/departments/add.html",
+            dashboard="departments",
+            college=college,
+            department={}
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("ADD DEPARTMENT DATABASE ERROR:", e)
+
+        flash(
+            "Unable to add department.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("ADD DEPARTMENT ERROR:", e)
+
+        flash(
+            "Unable to add department.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# EDIT DEPARTMENT
+# ============================================================
+
+@app.route(
+    "/college/departments/<string:department_id>/edit",
+    methods=["GET", "POST"]
+)
+@college_required
+def college_department_edit(department_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Current college
+        cursor.execute("""
+            SELECT id, college_name, college_code, status
+            FROM colleges
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("login"))
+
+        # Department must belong to current college
+        cursor.execute("""
+            SELECT
+                id,
+                college_id,
+                department_name,
+                department_code,
+                description,
+                status,
+                created_at,
+                updated_at
+            FROM departments
+            WHERE id = %s
+              AND college_id = %s
+            LIMIT 1
+        """, (
+            department_id,
+            college["id"]
+        ))
+
+        department = cursor.fetchone()
+
+        if not department:
+            flash(
+                "Department not found.",
+                "error"
+            )
+            return redirect(
+                url_for("college_departments")
+            )
+
+        if request.method == "POST":
+
+            department_name = request.form.get(
+                "department_name", ""
+            ).strip()
+
+            department_code = request.form.get(
+                "department_code", ""
+            ).strip().upper()
+
+            description = request.form.get(
+                "description", ""
+            ).strip()
+
+            status = request.form.get(
+                "status",
+                "ACTIVE"
+            ).strip().upper()
+
+            errors = []
+
+            if not department_name:
+                errors.append(
+                    "Department name is required."
+                )
+
+            if not department_code:
+                errors.append(
+                    "Department code is required."
+                )
+
+            if status not in [
+                "ACTIVE",
+                "INACTIVE"
+            ]:
+                errors.append(
+                    "Invalid department status."
+                )
+
+            # Duplicate code excluding current department
+            cursor.execute("""
+                SELECT id
+                FROM departments
+                WHERE college_id = %s
+                  AND department_code = %s
+                  AND id != %s
+                LIMIT 1
+            """, (
+                college["id"],
+                department_code,
+                department_id
+            ))
+
+            duplicate = cursor.fetchone()
+
+            if duplicate:
+                errors.append(
+                    "Another department already uses this code."
+                )
+
+            if errors:
+
+                for error in errors:
+                    flash(error, "error")
+
+                department["department_name"] = department_name
+                department["department_code"] = department_code
+                department["description"] = description
+                department["status"] = status
+
+                return render_template(
+                    "college/departments/edit.html",
+                    dashboard="departments",
+                    college=college,
+                    department=department
+                )
+
+            cursor.execute("""
+                UPDATE departments
+                SET
+                    department_name = %s,
+                    department_code = %s,
+                    description = %s,
+                    status = %s
+                WHERE id = %s
+                  AND college_id = %s
+            """, (
+                department_name,
+                department_code,
+                description or None,
+                status,
+                department_id,
+                college["id"]
+            ))
+
+            conn.commit()
+
+            flash(
+                "Department updated successfully.",
+                "success"
+            )
+
+            return redirect(
+                url_for(
+                    "college_department_detail",
+                    department_id=department_id
+                )
+            )
+
+        return render_template(
+            "college/departments/edit.html",
+            dashboard="departments",
+            college=college,
+            department=department
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("EDIT DEPARTMENT DATABASE ERROR:", e)
+
+        flash(
+            "Unable to update department.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("EDIT DEPARTMENT ERROR:", e)
+
+        flash(
+            "Unable to update department.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# DEPARTMENT DETAIL
+# ============================================================
+
+@app.route(
+    "/college/departments/<string:department_id>"
+)
+@college_required
+def college_department_detail(department_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Current college
+        cursor.execute("""
+            SELECT
+                id,
+                college_name,
+                college_code,
+                status
+            FROM colleges
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash(
+                "College profile not found.",
+                "error"
+            )
+            return redirect(url_for("login"))
+
+        # Department
+        cursor.execute("""
+            SELECT
+                d.id,
+                d.college_id,
+                d.department_name,
+                d.department_code,
+                d.description,
+                d.status,
+                d.created_at,
+                d.updated_at,
+                COUNT(s.id) AS student_count
+            FROM departments d
+            LEFT JOIN students s
+                ON s.department_id = d.id
+            WHERE d.id = %s
+              AND d.college_id = %s
+            GROUP BY
+                d.id,
+                d.college_id,
+                d.department_name,
+                d.department_code,
+                d.description,
+                d.status,
+                d.created_at,
+                d.updated_at
+            LIMIT 1
+        """, (
+            department_id,
+            college["id"]
+        ))
+
+        department = cursor.fetchone()
+
+        if not department:
+
+            flash(
+                "Department not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("college_departments")
+            )
+
+        # Students of department
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.phone,
+                s.created_at,
+                u.name,
+                u.email,
+                u.status AS user_status
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.college_id = %s
+              AND s.department_id = %s
+            ORDER BY s.created_at DESC
+        """, (
+            college["id"],
+            department_id
+        ))
+
+        students = cursor.fetchall()
+
+        return render_template(
+            "college/departments/detail.html",
+            dashboard="departments",
+            college=college,
+            department=department,
+            students=students
+        )
+
+    except mysql.connector.Error as e:
+
+        print(
+            "DEPARTMENT DETAIL DATABASE ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load department details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    except Exception as e:
+
+        print(
+            "DEPARTMENT DETAIL ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load department details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# DELETE DEPARTMENT
+# ============================================================
+
+@app.route(
+    "/college/departments/<string:department_id>/delete",
+    methods=["POST"]
+)
+@college_required
+def college_department_delete(department_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Current college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash(
+                "College profile not found.",
+                "error"
+            )
+            return redirect(url_for("login"))
+
+        college_id = college["id"]
+
+        # Check department
+        cursor.execute("""
+            SELECT
+                id,
+                department_name
+            FROM departments
+            WHERE id = %s
+              AND college_id = %s
+            LIMIT 1
+        """, (
+            department_id,
+            college_id
+        ))
+
+        department = cursor.fetchone()
+
+        if not department:
+
+            flash(
+                "Department not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("college_departments")
+            )
+
+        # Don't delete if students are assigned
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE department_id = %s
+        """, (department_id,))
+
+        student_count = cursor.fetchone()["total"] or 0
+
+        if student_count > 0:
+
+            flash(
+                "Department cannot be deleted because "
+                f"{student_count} student(s) are assigned to it. "
+                "Reassign the students first.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "college_department_detail",
+                    department_id=department_id
+                )
+            )
+
+        cursor.execute("""
+            DELETE FROM departments
+            WHERE id = %s
+              AND college_id = %s
+        """, (
+            department_id,
+            college_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Department deleted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "DELETE DEPARTMENT DATABASE ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to delete department.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "DELETE DEPARTMENT ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to delete department.",
+            "error"
+        )
+
+        return redirect(
+            url_for("college_departments")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# STUDENTS
+# =========================================================
+@app.route("/college/students")
+@college_required
+def college_students():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Student statistics
+        cursor.execute("""
+            SELECT COUNT(*) AS total_students
+            FROM students
+            WHERE college_id = %s
+        """, (college_id,))
+
+        total_students = cursor.fetchone()["total_students"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS active_students
+            FROM students s
+            INNER JOIN users u ON s.user_id = u.id
+            WHERE s.college_id = %s
+              AND u.status = 'ACTIVE'
+        """, (college_id,))
+
+        active_students = cursor.fetchone()["active_students"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS inactive_students
+            FROM students s
+            INNER JOIN users u ON s.user_id = u.id
+            WHERE s.college_id = %s
+              AND u.status != 'ACTIVE'
+        """, (college_id,))
+
+        inactive_students = cursor.fetchone()["inactive_students"]
+
+        # Department count
+        cursor.execute("""
+            SELECT COUNT(DISTINCT department_id) AS department_count
+            FROM students
+            WHERE college_id = %s
+              AND department_id IS NOT NULL
+        """, (college_id,))
+
+        department_count = cursor.fetchone()["department_count"]
+
+        # Students list
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.phone,
+                s.department_id,
+                s.created_at,
+
+                u.name,
+                u.email,
+                u.status AS user_status,
+
+                d.department_name,
+                d.department_code
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN departments d
+                ON s.department_id = d.id
+                AND d.college_id = %s
+
+            WHERE s.college_id = %s
+
+            ORDER BY s.created_at DESC
+        """, (college_id, college_id))
+
+        students = cursor.fetchall()
+
+        return render_template(
+            "college/students/list.html",
+            students=students,
+            total_students=total_students,
+            active_students=active_students,
+            inactive_students=inactive_students,
+            department_count=department_count,
+            dashboard="students"
+        )
+
+    except Exception as e:
+        print("College Students Error:", e)
+        flash("Unable to load students.", "error")
+        return redirect(url_for("college_dashboard"))
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/college/students/<string:student_id>")
+@college_required
+def college_student_detail(student_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Student detail
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.phone,
+                s.department_id,
+                s.created_at,
+
+                u.name,
+                u.email,
+                u.status AS user_status,
+
+                d.department_name,
+                d.department_code
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN departments d
+                ON s.department_id = d.id
+                AND d.college_id = %s
+
+            WHERE s.id = %s
+              AND s.college_id = %s
+
+            LIMIT 1
+        """, (college_id, student_id, college_id))
+
+        student = cursor.fetchone()
+
+        if not student:
+            flash("Student not found.", "error")
+            return redirect(url_for("college_students"))
+
+        return render_template(
+            "college/students/detail.html",
+            student=student,
+            dashboard="students"
+        )
+
+    except Exception as e:
+        print("College Student Detail Error:", e)
+        flash("Unable to load student details.", "error")
+        return redirect(url_for("college_students"))
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/college/industries")
+@college_required
+def college_industries():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        # Existing active industries
+        cursor.execute("""
+            SELECT
+                i.id,
+                i.user_id,
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.phone,
+                i.email,
+                i.website,
+                i.address,
+                i.city,
+                i.state,
+                i.description,
+                i.status,
+                i.created_at,
+                i.updated_at,
+
+                u.name AS account_name,
+                u.email AS account_email,
+                u.status AS user_status
+
+            FROM industries i
+
+            INNER JOIN users u
+                ON i.user_id = u.id
+
+            WHERE i.status = 'ACTIVE'
+
+            ORDER BY i.company_name ASC
+        """)
+
+        industries = cursor.fetchall()
+
+        # Total active industries
+        total_industries = len(industries)
+
+        # Company / industry types
+        cursor.execute("""
+            SELECT COUNT(DISTINCT company_type) AS total_types
+            FROM industries
+            WHERE status = 'ACTIVE'
+              AND company_type IS NOT NULL
+              AND company_type != ''
+        """)
+
+        total_types = cursor.fetchone()["total_types"]
+
+        # Cities represented
+        cursor.execute("""
+            SELECT COUNT(DISTINCT city) AS total_cities
+            FROM industries
+            WHERE status = 'ACTIVE'
+              AND city IS NOT NULL
+              AND city != ''
+        """)
+
+        total_cities = cursor.fetchone()["total_cities"]
+
+        # Industries with website
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM industries
+            WHERE status = 'ACTIVE'
+              AND website IS NOT NULL
+              AND website != ''
+        """)
+
+        industries_with_website = cursor.fetchone()["total"]
+
+        return render_template(
+            "college/industries/list.html",
+            industries=industries,
+            total_industries=total_industries,
+            total_types=total_types,
+            total_cities=total_cities,
+            industries_with_website=industries_with_website,
+            dashboard="industries"
+        )
+
+    except Exception as e:
+        print("College Industries Error:", repr(e))
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/college/industries/<string:industry_id>")
+@college_required
+def college_industry_detail(industry_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        # Existing active industry
+        cursor.execute("""
+            SELECT
+                i.id,
+                i.user_id,
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.phone,
+                i.email,
+                i.website,
+                i.address,
+                i.city,
+                i.state,
+                i.description,
+                i.status,
+                i.created_at,
+                i.updated_at,
+
+                u.name AS account_name,
+                u.email AS account_email,
+                u.status AS user_status
+
+            FROM industries i
+
+            INNER JOIN users u
+                ON i.user_id = u.id
+
+            WHERE i.id = %s
+              AND i.status = 'ACTIVE'
+
+            LIMIT 1
+        """, (industry_id,))
+
+        industry = cursor.fetchone()
+
+        if not industry:
+            flash("Industry not found.", "error")
+            return redirect(url_for("college_industries"))
+
+        return render_template(
+            "college/industries/detail.html",
+            industry=industry,
+            dashboard="industries"
+        )
+
+    except Exception as e:
+        print("College Industry Detail Error:", repr(e))
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+#------------------------------
+#REQUESTS
+#------------------------------
+@app.route("/college/requests/sent")
+@college_required
+def college_sent_requests():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Requests initiated by this college
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.college_id,
+                c.industry_id,
+                c.initiated_by,
+                c.title,
+                c.description,
+                c.collaboration_type,
+                c.start_date,
+                c.end_date,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.email AS industry_email,
+                i.phone AS industry_phone,
+                i.city AS industry_city,
+                i.state AS industry_state
+
+            FROM collaborations c
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE c.college_id = %s
+              AND c.initiated_by = 'COLLEGE'
+
+            ORDER BY c.created_at DESC
+        """, (college_id,))
+
+        requests = cursor.fetchall()
+
+        # Statistics
+        total_requests = len(requests)
+        pending_requests = sum(
+            1 for request in requests
+            if request["status"] == "PENDING"
+        )
+        active_requests = sum(
+            1 for request in requests
+            if request["status"] == "ACTIVE"
+        )
+        completed_requests = sum(
+            1 for request in requests
+            if request["status"] == "COMPLETED"
+        )
+
+        return render_template(
+            "college/requests/sent.html",
+            requests=requests,
+            total_requests=total_requests,
+            pending_requests=pending_requests,
+            active_requests=active_requests,
+            completed_requests=completed_requests,
+            dashboard="requests"
+        )
+
+    except Exception as e:
+        print("College Sent Requests Error:", repr(e))
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/college/requests/received")
+@college_required
+def college_received_requests():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Requests initiated by industries
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.college_id,
+                c.industry_id,
+                c.initiated_by,
+                c.title,
+                c.description,
+                c.collaboration_type,
+                c.start_date,
+                c.end_date,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.email AS industry_email,
+                i.phone AS industry_phone,
+                i.city AS industry_city,
+                i.state AS industry_state
+
+            FROM collaborations c
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE c.college_id = %s
+              AND c.initiated_by = 'INDUSTRY'
+
+            ORDER BY c.created_at DESC
+        """, (college_id,))
+
+        requests = cursor.fetchall()
+
+        # Statistics
+        total_requests = len(requests)
+        pending_requests = sum(
+            1 for request in requests
+            if request["status"] == "PENDING"
+        )
+        active_requests = sum(
+            1 for request in requests
+            if request["status"] == "ACTIVE"
+        )
+        completed_requests = sum(
+            1 for request in requests
+            if request["status"] == "COMPLETED"
+        )
+
+        return render_template(
+            "college/requests/received.html",
+            requests=requests,
+            total_requests=total_requests,
+            pending_requests=pending_requests,
+            active_requests=active_requests,
+            completed_requests=completed_requests,
+            dashboard="requests"
+        )
+
+    except Exception as e:
+        print("College Received Requests Error:", repr(e))
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/college/requests/<string:request_id>")
+@college_required
+def college_request_detail(request_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.college_name
+            FROM colleges c
+            WHERE c.user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Get request belonging to this college
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.college_id,
+                c.industry_id,
+                c.initiated_by,
+                c.title,
+                c.description,
+                c.collaboration_type,
+                c.start_date,
+                c.end_date,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.phone AS industry_phone,
+                i.email AS industry_email,
+                i.website AS industry_website,
+                i.address AS industry_address,
+                i.city AS industry_city,
+                i.state AS industry_state,
+                i.description AS industry_description
+
+            FROM collaborations c
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE c.id = %s
+              AND c.college_id = %s
+
+            LIMIT 1
+        """, (request_id, college_id))
+
+        request = cursor.fetchone()
+
+        if not request:
+            flash("Collaboration request not found.", "error")
+            return redirect(url_for("college_sent_requests"))
+
+        return render_template(
+            "college/requests/detail.html",
+            request=request,
+            dashboard="requests"
+        )
+
+    except Exception as e:
+        print("College Request Detail Error:", repr(e))
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/college/collaborations")
+@college_required
+def college_collaborations():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Get collaborations belonging to this college
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.college_id,
+                c.industry_id,
+                c.initiated_by,
+                c.title,
+                c.description,
+                c.collaboration_type,
+                c.start_date,
+                c.end_date,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.phone AS industry_phone,
+                i.email AS industry_email,
+                i.website,
+                i.address AS industry_address,
+                i.city AS industry_city,
+                i.state AS industry_state
+
+            FROM collaborations c
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE c.college_id = %s
+
+            ORDER BY c.created_at DESC
+        """, (college_id,))
+
+        collaborations = cursor.fetchall()
+
+        # Stats
+        total_collaborations = len(collaborations)
+
+        active_collaborations = sum(
+            1 for c in collaborations
+            if c["status"] == "ACTIVE"
+        )
+
+        completed_collaborations = sum(
+            1 for c in collaborations
+            if c["status"] == "COMPLETED"
+        )
+
+        pending_collaborations = sum(
+            1 for c in collaborations
+            if c["status"] == "PENDING"
+        )
+
+        return render_template(
+            "college/collaborations/list.html",
+            collaborations=collaborations,
+            total_collaborations=total_collaborations,
+            active_collaborations=active_collaborations,
+            completed_collaborations=completed_collaborations,
+            pending_collaborations=pending_collaborations,
+            dashboard="collaborations"
+        )
+
+    except Exception as e:
+        print("College Collaborations Error:", e)
+        flash("Unable to load collaborations.", "error")
+        return redirect(url_for("college_dashboard"))
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/college/collaborations/<string:collaboration_id>")
+@college_required
+def college_collaboration_detail(collaboration_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get logged-in college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (session["user_id"],))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Get collaboration
+        cursor.execute("""
+            SELECT
+                c.id,
+                c.college_id,
+                c.industry_id,
+                c.initiated_by,
+                c.title,
+                c.description,
+                c.collaboration_type,
+                c.start_date,
+                c.end_date,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.phone AS industry_phone,
+                i.email AS industry_email,
+                i.website,
+                i.address AS industry_address,
+                i.city AS industry_city,
+                i.state AS industry_state
+
+            FROM collaborations c
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE c.id = %s
+              AND c.college_id = %s
+
+            LIMIT 1
+        """, (collaboration_id, college_id))
+
+        collaboration = cursor.fetchone()
+
+        if not collaboration:
+            flash("Collaboration not found.", "error")
+            return redirect(url_for("college_collaborations"))
+
+        return render_template(
+            "college/collaborations/detail.html",
+            collaboration=collaboration,
+            dashboard="collaborations"
+        )
+
+    except Exception as e:
+        print("College Collaboration Detail Error:", e)
+        flash("Unable to load collaboration details.", "error")
+        return redirect(url_for("college_collaborations"))
+
+    finally:
+        cursor.close()
+        conn.close()
+
+# ============================================================
+# COLLEGE — PROJECTS & ACTIVITIES
+# ============================================================
+
+@app.route("/college/activities")
+@college_required
+def college_activities():
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get current college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Get all projects belonging to students of this college
+        cursor.execute("""
+            SELECT
+                p.id,
+                p.student_id,
+                p.industry_id,
+                p.title,
+                p.description,
+                p.technology_stack,
+                p.start_date,
+                p.end_date,
+                p.status,
+                p.project_url,
+                p.report_url,
+                p.created_at,
+                p.updated_at,
+
+                s.enrollment_no,
+                s.course,
+                s.branch,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                d.department_name,
+                d.department_code,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector
+
+            FROM student_projects p
+
+            INNER JOIN students s
+                ON p.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN departments d
+                ON s.department_id = d.id
+                AND d.college_id = %s
+
+            LEFT JOIN industries i
+                ON p.industry_id = i.id
+
+            WHERE s.college_id = %s
+
+            ORDER BY p.created_at DESC
+        """, (college_id, college_id))
+
+        projects = cursor.fetchall()
+
+        # ----------------------------------------------------
+        # Statistics
+        # ----------------------------------------------------
+
+        total_projects = len(projects)
+
+        ongoing_projects = sum(
+            1 for p in projects
+            if p["status"] == "ONGOING"
+        )
+
+        completed_projects = sum(
+            1 for p in projects
+            if p["status"] == "COMPLETED"
+        )
+
+        cancelled_projects = sum(
+            1 for p in projects
+            if p["status"] == "CANCELLED"
+        )
+
+        return render_template(
+            "college/activities/list.html",
+            dashboard="activities",
+            projects=projects,
+            total_projects=total_projects,
+            ongoing_projects=ongoing_projects,
+            completed_projects=completed_projects,
+            cancelled_projects=cancelled_projects
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================================================
+# ADD PROJECT
+# ============================================================
+
+@app.route("/college/activities/add", methods=["GET", "POST"])
+@college_required
+def college_activity_add():
+
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get current college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # ----------------------------------------------------
+        # POST
+        # ----------------------------------------------------
+
+        if request.method == "POST":
+
+            student_id = request.form.get("student_id", "").strip()
+            industry_id = request.form.get("industry_id", "").strip() or None
+            title = request.form.get("title", "").strip()
+            description = request.form.get("description", "").strip()
+            technology_stack = request.form.get("technology_stack", "").strip()
+            start_date = request.form.get("start_date", "").strip() or None
+            end_date = request.form.get("end_date", "").strip() or None
+            status = request.form.get("status", "ONGOING").strip()
+            project_url = request.form.get("project_url", "").strip() or None
+            report_url = request.form.get("report_url", "").strip() or None
+
+            # Required field validation
+            if not student_id or not title:
+                flash("Student and project title are required.", "error")
+                return redirect(url_for("college_activity_add"))
+
+            # Validate student belongs to current college
+            cursor.execute("""
+                SELECT id
+                FROM students
+                WHERE id = %s
+                AND college_id = %s
+            """, (student_id, college_id))
+
+            student = cursor.fetchone()
+
+            if not student:
+                flash("Invalid student selected.", "error")
+                return redirect(url_for("college_activity_add"))
+
+            # Validate industry if provided
+            if industry_id:
+
+                cursor.execute("""
+                    SELECT id
+                    FROM industries
+                    WHERE id = %s
+                    AND status = 'ACTIVE'
+                """, (industry_id,))
+
+                industry = cursor.fetchone()
+
+                if not industry:
+                    flash("Invalid industry selected.", "error")
+                    return redirect(url_for("college_activity_add"))
+
+            # Validate status
+            allowed_statuses = {
+                "ONGOING",
+                "COMPLETED",
+                "CANCELLED"
+            }
+
+            if status not in allowed_statuses:
+                flash("Invalid project status.", "error")
+                return redirect(url_for("college_activity_add"))
+
+            # Validate dates
+            if start_date and end_date and end_date < start_date:
+                flash("End date cannot be before start date.", "error")
+                return redirect(url_for("college_activity_add"))
+
+            # Insert project
+            project_id = str(uuid.uuid4())
+
+            cursor.execute("""
+                INSERT INTO student_projects (
+                    id,
+                    student_id,
+                    industry_id,
+                    title,
+                    description,
+                    technology_stack,
+                    start_date,
+                    end_date,
+                    status,
+                    project_url,
+                    report_url
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s
+                )
+            """, (
+                project_id,
+                student_id,
+                industry_id,
+                title,
+                description or None,
+                technology_stack or None,
+                start_date,
+                end_date,
+                status,
+                project_url,
+                report_url
+            ))
+
+            conn.commit()
+
+            flash("Project added successfully.", "success")
+
+            return redirect(
+                url_for(
+                    "college_activity_detail",
+                    activity_id=project_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # GET — Students
+        # ----------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                u.name AS student_name
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.college_id = %s
+            ORDER BY u.name ASC
+        """, (college_id,))
+
+        students = cursor.fetchall()
+
+        # ----------------------------------------------------
+        # GET — Active Industries
+        # ----------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name,
+                company_type,
+                industry_sector
+            FROM industries
+            WHERE status = 'ACTIVE'
+            ORDER BY company_name ASC
+        """)
+
+        industries = cursor.fetchall()
+
+        return render_template(
+            "college/activities/add.html",
+            dashboard="activities",
+            students=students,
+            industries=industries
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================================================
+# EDIT PROJECT
+# ============================================================
+
+@app.route(
+    "/college/activities/<string:activity_id>/edit",
+    methods=["GET", "POST"]
+)
+@college_required
+def college_activity_edit(activity_id):
+
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get current college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Get project and verify ownership through student
+        cursor.execute("""
+            SELECT
+                p.*
+            FROM student_projects p
+            INNER JOIN students s
+                ON p.student_id = s.id
+            WHERE p.id = %s
+            AND s.college_id = %s
+        """, (activity_id, college_id))
+
+        project = cursor.fetchone()
+
+        if not project:
+            flash("Project not found.", "error")
+            return redirect(url_for("college_activities"))
+
+        # ----------------------------------------------------
+        # POST
+        # ----------------------------------------------------
+
+        if request.method == "POST":
+
+            student_id = request.form.get("student_id", "").strip()
+            industry_id = request.form.get("industry_id", "").strip() or None
+            title = request.form.get("title", "").strip()
+            description = request.form.get("description", "").strip()
+            technology_stack = request.form.get("technology_stack", "").strip()
+            start_date = request.form.get("start_date", "").strip() or None
+            end_date = request.form.get("end_date", "").strip() or None
+            status = request.form.get("status", "ONGOING").strip()
+            project_url = request.form.get("project_url", "").strip() or None
+            report_url = request.form.get("report_url", "").strip() or None
+
+            if not student_id or not title:
+                flash("Student and project title are required.", "error")
+                return redirect(
+                    url_for(
+                        "college_activity_edit",
+                        activity_id=activity_id
+                    )
+                )
+
+            # Student must belong to this college
+            cursor.execute("""
+                SELECT id
+                FROM students
+                WHERE id = %s
+                AND college_id = %s
+            """, (student_id, college_id))
+
+            if not cursor.fetchone():
+                flash("Invalid student selected.", "error")
+                return redirect(
+                    url_for(
+                        "college_activity_edit",
+                        activity_id=activity_id
+                    )
+                )
+
+            # Industry validation
+            if industry_id:
+
+                cursor.execute("""
+                    SELECT id
+                    FROM industries
+                    WHERE id = %s
+                    AND status = 'ACTIVE'
+                """, (industry_id,))
+
+                if not cursor.fetchone():
+                    flash("Invalid industry selected.", "error")
+                    return redirect(
+                        url_for(
+                            "college_activity_edit",
+                            activity_id=activity_id
+                        )
+                    )
+
+            allowed_statuses = {
+                "ONGOING",
+                "COMPLETED",
+                "CANCELLED"
+            }
+
+            if status not in allowed_statuses:
+                flash("Invalid project status.", "error")
+                return redirect(
+                    url_for(
+                        "college_activity_edit",
+                        activity_id=activity_id
+                    )
+                )
+
+            if start_date and end_date and end_date < start_date:
+                flash("End date cannot be before start date.", "error")
+                return redirect(
+                    url_for(
+                        "college_activity_edit",
+                        activity_id=activity_id
+                    )
+                )
+
+            # Update
+            cursor.execute("""
+                UPDATE student_projects
+                SET
+                    student_id = %s,
+                    industry_id = %s,
+                    title = %s,
+                    description = %s,
+                    technology_stack = %s,
+                    start_date = %s,
+                    end_date = %s,
+                    status = %s,
+                    project_url = %s,
+                    report_url = %s
+                WHERE id = %s
+            """, (
+                student_id,
+                industry_id,
+                title,
+                description or None,
+                technology_stack or None,
+                start_date,
+                end_date,
+                status,
+                project_url,
+                report_url,
+                activity_id
+            ))
+
+            conn.commit()
+
+            flash("Project updated successfully.", "success")
+
+            return redirect(
+                url_for(
+                    "college_activity_detail",
+                    activity_id=activity_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # GET — Students
+        # ----------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                u.name AS student_name
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.college_id = %s
+            ORDER BY u.name ASC
+        """, (college_id,))
+
+        students = cursor.fetchall()
+
+        # ----------------------------------------------------
+        # GET — Industries
+        # ----------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name,
+                company_type,
+                industry_sector
+            FROM industries
+            WHERE status = 'ACTIVE'
+            ORDER BY company_name ASC
+        """)
+
+        industries = cursor.fetchall()
+
+        return render_template(
+            "college/activities/edit.html",
+            dashboard="activities",
+            project=project,
+            students=students,
+            industries=industries
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================================================
+# PROJECT DETAIL
+# ============================================================
+
+@app.route("/college/activities/<string:activity_id>")
+@college_required
+def college_activity_detail(activity_id):
+
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Current college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Project detail with student + department + industry
+        cursor.execute("""
+            SELECT
+                p.id,
+                p.student_id,
+                p.industry_id,
+                p.title,
+                p.description,
+                p.technology_stack,
+                p.start_date,
+                p.end_date,
+                p.status,
+                p.project_url,
+                p.report_url,
+                p.created_at,
+                p.updated_at,
+
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.phone,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                d.department_name,
+                d.department_code,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.email AS industry_email,
+                i.phone AS industry_phone,
+                i.website,
+                i.address AS industry_address,
+                i.city AS industry_city,
+                i.state AS industry_state
+
+            FROM student_projects p
+
+            INNER JOIN students s
+                ON p.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN departments d
+                ON s.department_id = d.id
+                AND d.college_id = %s
+
+            LEFT JOIN industries i
+                ON p.industry_id = i.id
+
+            WHERE p.id = %s
+            AND s.college_id = %s
+        """, (college_id, activity_id, college_id))
+
+        project = cursor.fetchone()
+
+        if not project:
+            flash("Project not found.", "error")
+            return redirect(url_for("college_activities"))
+
+        return render_template(
+            "college/activities/detail.html",
+            dashboard="activities",
+            project=project
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================================================
+# DELETE PROJECT
+# ============================================================
+
+@app.route(
+    "/college/activities/<string:activity_id>/delete",
+    methods=["POST"]
+)
+@college_required
+def college_activity_delete(activity_id):
+
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Current college
+        cursor.execute("""
+            SELECT id
+            FROM colleges
+            WHERE user_id = %s
+        """, (user_id,))
+
+        college = cursor.fetchone()
+
+        if not college:
+            flash("College profile not found.", "error")
+            return redirect(url_for("college_dashboard"))
+
+        college_id = college["id"]
+
+        # Verify ownership
+        cursor.execute("""
+            SELECT p.id
+            FROM student_projects p
+            INNER JOIN students s
+                ON p.student_id = s.id
+            WHERE p.id = %s
+            AND s.college_id = %s
+        """, (activity_id, college_id))
+
+        project = cursor.fetchone()
+
+        if not project:
+            flash("Project not found.", "error")
+            return redirect(url_for("college_activities"))
+
+        cursor.execute("""
+            DELETE FROM student_projects
+            WHERE id = %s
+        """, (activity_id,))
+
+        conn.commit()
+
+        flash("Project deleted successfully.", "success")
+
+        return redirect(url_for("college_activities"))
+
+    finally:
+        cursor.close()
+        conn.close()
+
+# ============================================================
+# COLLEGE — NOTIFICATIONS
+# ============================================================
+
+@app.route("/college/notifications")
+@college_required
+def college_notifications():
+
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                id,
+                user_id,
+                title,
+                message,
+                notification_type,
+                is_read,
+                created_at
+            FROM notifications
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+        """, (user_id,))
+
+        notifications = cursor.fetchall()
+
+        unread_count = sum(
+            1 for notification in notifications
+            if not notification["is_read"]
+        )
+
+        total_count = len(notifications)
+
+        return render_template(
+            "college/notifications/list.html",
+            dashboard="notifications",
+            notifications=notifications,
+            unread_count=unread_count,
+            total_count=total_count
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================================================
+# MARK SINGLE NOTIFICATION AS READ
+# ============================================================
+
+@app.route(
+    "/college/notifications/<string:notification_id>/read",
+    methods=["POST"]
+)
+@college_required
+def college_notification_mark_read(notification_id):
+
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            UPDATE notifications
+            SET is_read = 1
+            WHERE id = %s
+            AND user_id = %s
+        """, (notification_id, user_id))
+
+        conn.commit()
+
+        return redirect(
+            url_for("college_notifications")
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================================================
+# MARK ALL NOTIFICATIONS AS READ
+# ============================================================
+
+@app.route(
+    "/college/notifications/mark-all-read",
+    methods=["POST"]
+)
+@college_required
+def college_notifications_mark_all_read():
+
+    user_id = session["user_id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE notifications
+            SET is_read = 1
+            WHERE user_id = %s
+            AND is_read = 0
+        """, (user_id,))
+
+        conn.commit()
+
+        flash("All notifications marked as read.", "success")
+
+        return redirect(
+            url_for("college_notifications")
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
 
 # =========================================================
 # LOGOUT

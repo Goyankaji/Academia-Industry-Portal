@@ -1,0 +1,253 @@
+{% extends "college/base.html" %}
+
+{% block title %}Industry Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/industries/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="industry-detail-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <span class="page-eyebrow">INDUSTRY PROFILE</span>
+            <h1>{{ industry.company_name }}</h1>
+            <p>View detailed information about this registered industry.</p>
+        </div>
+
+        <a href="{{ url_for('college_industries') }}" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Industries
+        </a>
+    </div>
+
+    <!-- PROFILE HERO -->
+    <div class="industry-profile-card">
+
+        <div class="profile-icon">
+            <i class="fa-solid fa-building"></i>
+        </div>
+
+        <div class="profile-main">
+            <div class="profile-title-row">
+                <h2>{{ industry.company_name }}</h2>
+
+                <span class="status-badge">
+                    <span class="status-dot"></span>
+                    {{ industry.status }}
+                </span>
+            </div>
+
+            <p class="profile-type">
+                <i class="fa-solid fa-briefcase"></i>
+                {{ industry.company_type or "Industry" }}
+            </p>
+
+            {% if industry.industry_sector %}
+            <p class="profile-sector">
+                <i class="fa-solid fa-layer-group"></i>
+                {{ industry.industry_sector }}
+            </p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- INFORMATION GRID -->
+    <div class="details-grid">
+
+        <!-- COMPANY INFORMATION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+
+                <div>
+                    <span>COMPANY</span>
+                    <h2>Company Information</h2>
+                </div>
+            </div>
+
+            <div class="info-list">
+
+                <div class="info-item">
+                    <span class="info-label">Company Name</span>
+                    <strong>{{ industry.company_name or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Company Type</span>
+                    <strong>{{ industry.company_type or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Industry Sector</span>
+                    <strong>{{ industry.industry_sector or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Website</span>
+
+                    {% if industry.website %}
+                    <a
+                        href="{{ industry.website }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="website-link"
+                    >
+                        {{ industry.website }}
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                    {% else %}
+                    <strong>—</strong>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- CONTACT INFORMATION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon contact">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div>
+                    <span>CONTACT</span>
+                    <h2>Contact Information</h2>
+                </div>
+            </div>
+
+            <div class="info-list">
+
+                <div class="info-item">
+                    <span class="info-label">Contact Person</span>
+                    <strong>{{ industry.contact_person or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Designation</span>
+                    <strong>{{ industry.designation or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Phone</span>
+                    <strong>{{ industry.phone or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <strong>{{ industry.email or industry.account_email or "—" }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- LOCATION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon location">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <div>
+                    <span>LOCATION</span>
+                    <h2>Address Information</h2>
+                </div>
+            </div>
+
+            <div class="info-list">
+
+                <div class="info-item full-width">
+                    <span class="info-label">Address</span>
+                    <strong>{{ industry.address or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">City</span>
+                    <strong>{{ industry.city or "—" }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">State</span>
+                    <strong>{{ industry.state or "—" }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- DESCRIPTION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon description">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+                <div>
+                    <span>ABOUT</span>
+                    <h2>Industry Description</h2>
+                </div>
+            </div>
+
+            <div class="description-box">
+                {% if industry.description %}
+                    <p>{{ industry.description }}</p>
+                {% else %}
+                    <p class="empty-description">
+                        No description has been provided by this industry.
+                    </p>
+                {% endif %}
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- REGISTRATION INFO -->
+    <div class="registration-card">
+
+        <div class="registration-item">
+            <i class="fa-solid fa-calendar-plus"></i>
+
+            <div>
+                <span>REGISTERED ON</span>
+                <strong>
+                    {{ industry.created_at.strftime('%d %b %Y') if industry.created_at else '—' }}
+                </strong>
+            </div>
+        </div>
+
+        <div class="registration-divider"></div>
+
+        <div class="registration-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+
+            <div>
+                <span>LAST UPDATED</span>
+                <strong>
+                    {{ industry.updated_at.strftime('%d %b %Y') if industry.updated_at else '—' }}
+                </strong>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/industries/detail.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "college/base.html" %}
+
+{% block title %}Add Department{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/departments/add.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="department-page">
+
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ url_for('college_departments') }}" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Departments
+            </a>
+
+            <div class="title-row">
+                <div class="title-icon">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+
+                <div>
+                    <h1>Add Department</h1>
+                    <p>Create a new academic department for your college.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-banner">
+        <div class="info-icon">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div>
+            <strong>Department Information</strong>
+            <p>
+                Add accurate department details. The department code must be unique
+                within your college.
+            </p>
+        </div>
+    </div>
+
+    <div class="form-layout">
+
+        <div class="form-card">
+
+            <div class="card-header">
+                <div>
+                    <h2>Department Details</h2>
+                    <p>Enter the basic information for this department.</p>
+                </div>
+                <span class="required-note">
+                    * Required
+                </span>
+            </div>
+
+            <form method="POST" id="departmentForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="department_name">
+                            Department Name <span>*</span>
+                        </label>
+
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-building"></i>
+                            <input
+                                type="text"
+                                id="department_name"
+                                name="department_name"
+                                placeholder="e.g. Information Technology"
+                                maxlength="150"
+                                required
+                            >
+                        </div>
+
+                        <small class="field-error" id="nameError"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department_code">
+                            Department Code <span>*</span>
+                        </label>
+
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <input
+                                type="text"
+                                id="department_code"
+                                name="department_code"
+                                placeholder="e.g. IT"
+                                maxlength="50"
+                                required
+                            >
+                        </div>
+
+                        <small>
+                            Use letters, numbers, hyphen or underscore.
+                        </small>
+
+                        <small class="field-error" id="codeError"></small>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="description">
+                            Description
+                        </label>
+
+                        <div class="textarea-wrapper">
+                            <i class="fa-solid fa-align-left"></i>
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="5"
+                                maxlength="1000"
+                                placeholder="Briefly describe the department..."
+                            ></textarea>
+                        </div>
+
+                        <div class="character-count">
+                            <span id="descriptionCount">0</span>/1000
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">
+                            Status <span>*</span>
+                        </label>
+
+                        <div class="select-wrapper">
+                            <i class="fa-solid fa-toggle-on"></i>
+                            <select id="status" name="status" required>
+                                <option value="ACTIVE" selected>Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-footer">
+
+                    <a href="{{ url_for('college_departments') }}"
+                       class="btn btn-secondary">
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Add Department
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+
+        <div class="preview-card">
+
+            <div class="preview-header">
+                <i class="fa-solid fa-eye"></i>
+                <div>
+                    <h3>Preview</h3>
+                    <p>How the department will appear.</p>
+                </div>
+            </div>
+
+            <div class="department-preview">
+
+                <div class="preview-icon">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+
+                <div class="preview-content">
+
+                    <span class="preview-status">
+                        <span></span>
+                        Active
+                    </span>
+
+                    <h3 id="previewName">
+                        Department Name
+                    </h3>
+
+                    <div class="preview-code">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <span id="previewCode">CODE</span>
+                    </div>
+
+                    <p id="previewDescription">
+                        Department description will appear here.
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/departments/add.js') }}"></script>
+{% endblock %}

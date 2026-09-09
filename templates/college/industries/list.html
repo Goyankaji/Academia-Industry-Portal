@@ -1,0 +1,192 @@
+{% extends "college/base.html" %}
+
+{% block title %}Industries{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/industries/list.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="industries-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <span class="page-eyebrow">INDUSTRY DIRECTORY</span>
+            <h1>Industries</h1>
+            <p>Explore active industries registered on the SIH Academia–Industry Portal.</p>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="industry-stats">
+
+        <div class="industry-stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+            <div>
+                <span>ACTIVE INDUSTRIES</span>
+                <strong>{{ total_industries }}</strong>
+            </div>
+        </div>
+
+        <div class="industry-stat">
+            <div class="stat-icon types">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+                <span>INDUSTRY TYPES</span>
+                <strong>{{ total_types }}</strong>
+            </div>
+        </div>
+
+        <div class="industry-stat">
+            <div class="stat-icon cities">
+                <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div>
+                <span>CITIES</span>
+                <strong>{{ total_cities }}</strong>
+            </div>
+        </div>
+
+        <div class="industry-stat">
+            <div class="stat-icon website">
+                <i class="fa-solid fa-globe"></i>
+            </div>
+            <div>
+                <span>WITH WEBSITE</span>
+                <strong>{{ industries_with_website }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="industry-toolbar">
+
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+                type="text"
+                id="industrySearch"
+                placeholder="Search by industry name, code, type or city..."
+            >
+        </div>
+
+        <select id="typeFilter" class="type-filter">
+            <option value="">All Types</option>
+
+            {% for industry in industries %}
+                {% if industry.industry_type %}
+                    <option value="{{ industry.company_type }}">
+                        {{ industry.company_type }}
+                    </option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+    </div>
+
+    <!-- INDUSTRIES -->
+    {% if industries %}
+
+    <div class="industries-grid" id="industriesGrid">
+
+        {% for industry in industries %}
+
+        <div
+            class="industry-card"
+            data-name="{{ industry.industry_name|lower }}"
+            data-code="{{ industry.industry_code|lower }}"
+            data-type="{{ (industry.company_type or '')|lower }}"
+            data-city="{{ (industry.city or '')|lower }}"
+        >
+
+            <div class="industry-card-header">
+
+                <div class="industry-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+
+                <span class="status-badge">
+                    <span class="status-dot"></span>
+                    ACTIVE
+                </span>
+
+            </div>
+
+            <div class="industry-card-body">
+
+                <span class="industry-code">
+                    {{ industry.industry_code }}
+                </span>
+
+                <h2>{{ industry.industry_name }}</h2>
+
+                <p class="industry-type">
+                    <i class="fa-solid fa-briefcase"></i>
+                    {{ industry.industry_type or 'Industry' }}
+                </p>
+
+                {% if industry.city or industry.state %}
+                <p class="industry-location">
+                    <i class="fa-solid fa-location-dot"></i>
+                    {{ industry.city or '' }}{% if industry.city and industry.state %}, {% endif %}{{ industry.state or '' }}
+                </p>
+                {% endif %}
+
+            </div>
+
+            <div class="industry-card-footer">
+
+                <div class="contact-info">
+                    <i class="fa-solid fa-user"></i>
+                    <span>{{ industry.contact_person or 'Contact Person' }}</span>
+                </div>
+
+                <a
+                    href="{{ url_for('college_industry_detail', industry_id=industry.id) }}"
+                    class="icon-btn"
+                    title="View Industry"
+                >
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <div id="noResults" class="empty-state hidden">
+        <div class="empty-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <h2>No industries found</h2>
+        <p>Try changing your search or filter.</p>
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fa-solid fa-building"></i>
+        </div>
+        <h2>No active industries</h2>
+        <p>There are currently no active industries available.</p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/industries/list.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,507 @@
+{% extends "college/base.html" %}
+
+{% block title %}College Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/profile/view.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="profile-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="profile-page-header">
+
+        <div>
+            <span class="page-eyebrow">COLLEGE MANAGEMENT</span>
+
+            <h1>College Profile</h1>
+
+            <p>
+                View and manage your institution information.
+            </p>
+        </div>
+
+        <a href="{{ url_for('college_profile_edit') }}"
+           class="edit-profile-btn">
+
+            <i class="fas fa-pen"></i>
+
+            Edit Profile
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         PROFILE HERO
+    ====================================================== -->
+
+    <section class="profile-hero">
+
+        <div class="profile-identity">
+
+            <div class="college-avatar">
+
+                <i class="fas fa-building-columns"></i>
+
+            </div>
+
+            <div class="identity-content">
+
+                <span class="identity-label">
+                    REGISTERED COLLEGE
+                </span>
+
+                <h2>
+                    {{ college.college_name }}
+                </h2>
+
+                <div class="identity-meta">
+
+                    <span>
+                        <i class="fas fa-hashtag"></i>
+                        {{ college.college_code }}
+                    </span>
+
+                    {% if college.city and college.state %}
+
+                    <span>
+                        <i class="fas fa-location-dot"></i>
+                        {{ college.city }}, {{ college.state }}
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="profile-status">
+
+            <span class="status-label">
+                ACCOUNT STATUS
+            </span>
+
+            <span class="status-badge {{ college.status|lower }}">
+
+                <span class="status-dot"></span>
+
+                {{ college.status }}
+
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PROFILE COMPLETION
+    ====================================================== -->
+
+    <section class="completion-card">
+
+        <div class="completion-info">
+
+            <div class="completion-icon">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+
+            <div>
+
+                <span class="completion-label">
+                    PROFILE COMPLETION
+                </span>
+
+                <h3>
+                    Keep your college profile up to date
+                </h3>
+
+                <p>
+                    Complete your institution information to
+                    maintain accurate portal records.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="completion-progress">
+
+            <div class="completion-percent">
+                {{ profile_completion }}%
+            </div>
+
+            <div class="completion-track">
+
+                <div
+                    class="completion-fill"
+                    data-progress="{{ profile_completion }}">
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INSTITUTION INFORMATION
+    ====================================================== -->
+
+    <section class="profile-section">
+
+        <div class="section-heading">
+
+            <div class="section-icon">
+                <i class="fas fa-building"></i>
+            </div>
+
+            <div>
+                <h2>Institution Information</h2>
+
+                <p>
+                    Basic information about your college.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="details-grid">
+
+            <div class="detail-card">
+
+                <span>College Name</span>
+
+                <strong>
+                    {{ college.college_name or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>College Code</span>
+
+                <strong>
+                    {{ college.college_code or 'Not provided' }}
+                </strong>
+
+                <small>
+                    Institution identifier
+                </small>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>University</span>
+
+                <strong>
+                    {{ college.university_name or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>Official Email</span>
+
+                <strong>
+                    {{ college.email or college.account_email or 'Not provided' }}
+                </strong>
+
+                <small>
+                    Registered account email
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CONTACT INFORMATION
+    ====================================================== -->
+
+    <section class="profile-section">
+
+        <div class="section-heading">
+
+            <div class="section-icon">
+                <i class="fas fa-address-book"></i>
+            </div>
+
+            <div>
+                <h2>Contact Information</h2>
+
+                <p>
+                    Primary contact details for your institution.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="details-grid">
+
+            <div class="detail-card">
+
+                <span>Contact Person</span>
+
+                <strong>
+                    {{ college.contact_person or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>Phone Number</span>
+
+                <strong>
+                    {{ college.phone or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card detail-card-wide">
+
+                <span>Address</span>
+
+                <strong>
+                    {{ college.address or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>City</span>
+
+                <strong>
+                    {{ college.city or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>State</span>
+
+                <strong>
+                    {{ college.state or 'Not provided' }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>Pincode</span>
+
+                <strong>
+                    {{ college.pincode or 'Not provided' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WEBSITE
+    ====================================================== -->
+
+    <section class="profile-section">
+
+        <div class="section-heading">
+
+            <div class="section-icon">
+                <i class="fas fa-globe"></i>
+            </div>
+
+            <div>
+                <h2>Online Presence</h2>
+
+                <p>
+                    Official website of the institution.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="website-card">
+
+            {% if college.website %}
+
+            <div class="website-icon">
+                <i class="fas fa-link"></i>
+            </div>
+
+            <div class="website-content">
+
+                <span>Official Website</span>
+
+                <strong>
+                    {{ college.website }}
+                </strong>
+
+            </div>
+
+            <a href="{{ college.website }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="website-btn">
+
+                Visit Website
+
+                <i class="fas fa-arrow-up-right-from-square"></i>
+
+            </a>
+
+            {% else %}
+
+            <div class="website-icon empty">
+                <i class="fas fa-globe"></i>
+            </div>
+
+            <div class="website-content">
+
+                <span>Official Website</span>
+
+                <strong>
+                    Website not provided
+                </strong>
+
+            </div>
+
+            <a href="{{ url_for('college_profile_edit') }}"
+               class="website-btn">
+
+                Add Website
+
+                <i class="fas fa-plus"></i>
+
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ACCOUNT INFORMATION
+    ====================================================== -->
+
+    <section class="profile-section account-section">
+
+        <div class="section-heading">
+
+            <div class="section-icon">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+
+            <div>
+                <h2>Account Information</h2>
+
+                <p>
+                    Portal registration and account details.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="account-grid">
+
+            <div class="account-item">
+
+                <span>Account Role</span>
+
+                <strong>
+                    COLLEGE
+                </strong>
+
+            </div>
+
+
+            <div class="account-item">
+
+                <span>Account Status</span>
+
+                <strong class="account-active">
+                    {{ college.account_status or college.status }}
+                </strong>
+
+            </div>
+
+
+            <div class="account-item">
+
+                <span>Profile Created</span>
+
+                <strong>
+                    {% if college.created_at %}
+                        {{ college.created_at.strftime('%d %b %Y') }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+
+            </div>
+
+
+            <div class="account-item">
+
+                <span>Last Updated</span>
+
+                <strong>
+                    {% if college.updated_at %}
+                        {{ college.updated_at.strftime('%d %b %Y, %I:%M %p') }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/profile/view.js') }}"></script>
+{% endblock %}

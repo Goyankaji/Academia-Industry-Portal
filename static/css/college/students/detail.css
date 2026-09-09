@@ -1,0 +1,294 @@
+.student-page {
+    padding: 30px 32px;
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 26px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.back-link:hover {
+    color: #2563eb;
+}
+
+.student-heading {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.student-avatar-large {
+    width: 66px;
+    height: 66px;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.title-row h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+}
+
+.student-title p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+
+/* Status */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.status-badge span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.status-badge.active {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.status-badge.active span {
+    background: #22c55e;
+}
+
+.status-badge.inactive {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.status-badge.inactive span {
+    background: #94a3b8;
+}
+
+
+/* Cards */
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.detail-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    padding: 23px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.section-icon {
+    width: 41px;
+    height: 41px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-icon.academic {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.card-header h2 {
+    margin: 0 0 3px;
+    color: #0f172a;
+    font-size: 17px;
+}
+
+.card-header p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* Info */
+
+.info-list {
+    padding-top: 7px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+}
+
+.info-row:last-child {
+    border-bottom: 0;
+}
+
+.info-row > span {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.info-row > strong {
+    color: #334155;
+    text-align: right;
+    word-break: break-word;
+}
+
+.text-active {
+    color: #15803d !important;
+}
+
+.text-inactive {
+    color: #64748b !important;
+}
+
+.department-value {
+    text-align: right;
+}
+
+.department-value strong {
+    display: block;
+    color: #334155;
+}
+
+.department-value small {
+    display: block;
+    color: #94a3b8;
+    margin-top: 3px;
+    font-size: 11px;
+}
+
+.not-assigned {
+    color: #94a3b8 !important;
+    font-style: italic;
+}
+
+
+/* Registration */
+
+.registration-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    padding: 21px 23px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
+}
+
+.registration-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: #f0fdf4;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.registration-card span {
+    display: block;
+    color: #94a3b8;
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.registration-card strong {
+    color: #334155;
+    font-size: 14px;
+}
+
+
+/* Responsive */
+
+@media (max-width: 800px) {
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .student-page {
+        padding: 20px 16px;
+    }
+
+    .student-heading {
+        align-items: flex-start;
+    }
+
+    .student-avatar-large {
+        width: 54px;
+        height: 54px;
+        font-size: 21px;
+    }
+
+    .title-row h1 {
+        font-size: 23px;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-row > strong,
+    .department-value {
+        text-align: left;
+    }
+
+}

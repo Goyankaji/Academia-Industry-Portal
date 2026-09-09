@@ -1,0 +1,255 @@
+{% extends "college/base.html" %}
+
+{% block title %}Projects & Activities{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/activities/list.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="activities-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <span class="page-eyebrow">PROJECT MANAGEMENT</span>
+            <h1>Projects & Activities</h1>
+            <p>View and manage projects completed by students of your college.</p>
+        </div>
+
+        <a href="{{ url_for('college_activity_add') }}" class="primary-btn">
+            <i class="fa-solid fa-plus"></i>
+            Add Project
+        </a>
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="activity-stats">
+
+        <div class="activity-stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div>
+                <span>Total Projects</span>
+                <strong>{{ total_projects }}</strong>
+            </div>
+        </div>
+
+        <div class="activity-stat">
+            <div class="stat-icon ongoing">
+                <i class="fa-solid fa-spinner"></i>
+            </div>
+            <div>
+                <span>Ongoing</span>
+                <strong>{{ ongoing_projects }}</strong>
+            </div>
+        </div>
+
+        <div class="activity-stat">
+            <div class="stat-icon completed">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <span>Completed</span>
+                <strong>{{ completed_projects }}</strong>
+            </div>
+        </div>
+
+        <div class="activity-stat">
+            <div class="stat-icon cancelled">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <div>
+                <span>Cancelled</span>
+                <strong>{{ cancelled_projects }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Toolbar -->
+    <div class="activity-toolbar">
+
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+                type="text"
+                id="projectSearch"
+                placeholder="Search by project, student or industry..."
+                autocomplete="off"
+            >
+        </div>
+
+        <select id="statusFilter" class="status-filter">
+            <option value="ALL">All Status</option>
+            <option value="ONGOING">Ongoing</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+        </select>
+
+    </div>
+
+
+    {% if projects %}
+
+    <!-- Projects Grid -->
+    <div class="activities-grid" id="projectsGrid">
+
+        {% for project in projects %}
+
+        <article
+            class="activity-card"
+            data-status="{{ project.status }}"
+            data-search="
+                {{ project.title|lower }}
+                {{ project.student_name|lower }}
+                {{ project.company_name|default('', true)|lower }}
+                {{ project.department_name|default('', true)|lower }}
+                {{ project.technology_stack|default('', true)|lower }}
+            "
+        >
+
+            <div class="activity-card-header">
+
+                <div class="activity-icon">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+
+                {% if project.status == 'ONGOING' %}
+                    <span class="status-badge ongoing">
+                        <span class="status-dot"></span>
+                        Ongoing
+                    </span>
+                {% elif project.status == 'COMPLETED' %}
+                    <span class="status-badge completed">
+                        <span class="status-dot"></span>
+                        Completed
+                    </span>
+                {% else %}
+                    <span class="status-badge cancelled">
+                        <span class="status-dot"></span>
+                        Cancelled
+                    </span>
+                {% endif %}
+
+            </div>
+
+
+            <div class="activity-card-body">
+
+                <span class="project-label">STUDENT PROJECT</span>
+
+                <h2>{{ project.title }}</h2>
+
+                <div class="student-info">
+                    <div class="student-avatar">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+
+                    <div>
+                        <strong>{{ project.student_name }}</strong>
+
+                        <span>
+                            {{ project.enrollment_no }}
+                            {% if project.department_name %}
+                                · {{ project.department_name }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                {% if project.description %}
+                    <p class="project-description">
+                        {{ project.description|truncate(125, true, '...') }}
+                    </p>
+                {% else %}
+                    <p class="project-description no-description">
+                        No project description provided.
+                    </p>
+                {% endif %}
+
+                {% if project.company_name %}
+                <div class="industry-info">
+                    <i class="fa-solid fa-building"></i>
+                    <span>{{ project.company_name }}</span>
+                </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="activity-card-footer">
+
+                <div class="project-date">
+                    <i class="fa-regular fa-calendar"></i>
+
+                    {% if project.start_date %}
+                        {{ project.start_date.strftime('%d %b %Y') }}
+                    {% else %}
+                        Date not specified
+                    {% endif %}
+                </div>
+
+                <a
+                    href="{{ url_for('college_activity_detail', activity_id=project.id) }}"
+                    class="icon-btn"
+                    title="View Project"
+                >
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- No Search Result -->
+    <div class="filter-empty" id="filterEmpty" style="display:none;">
+        <div class="empty-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+
+        <h2>No projects found</h2>
+        <p>Try changing your search or status filter.</p>
+    </div>
+
+    {% else %}
+
+    <!-- Empty State -->
+    <div class="empty-state">
+
+        <div class="empty-icon">
+            <i class="fa-solid fa-diagram-project"></i>
+        </div>
+
+        <h2>No Projects Yet</h2>
+
+        <p>
+            Start adding student projects and activities to your college.
+        </p>
+
+        <a href="{{ url_for('college_activity_add') }}" class="primary-btn">
+            <i class="fa-solid fa-plus"></i>
+            Add First Project
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/activities/list.js') }}"></script>
+{% endblock %}

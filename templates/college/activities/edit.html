@@ -1,0 +1,322 @@
+{% extends "college/base.html" %}
+
+{% block title %}Edit Project{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/activities/edit.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="activity-form-page">
+
+    <!-- Header -->
+    <div class="page-header">
+
+        <div>
+            <span class="page-eyebrow">PROJECT MANAGEMENT</span>
+            <h1>Edit Project</h1>
+            <p>Update the details of this student project.</p>
+        </div>
+
+        <a
+            href="{{ url_for('college_activity_detail', activity_id=project.id) }}"
+            class="back-btn"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Project
+        </a>
+
+    </div>
+
+
+    <form
+        method="POST"
+        action="{{ url_for('college_activity_edit', activity_id=project.id) }}"
+        class="activity-form"
+        id="projectForm"
+    >
+
+        <!-- Project Information -->
+        <section class="form-card">
+
+            <div class="form-card-header">
+
+                <div class="section-icon">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+
+                <div>
+                    <h2>Project Information</h2>
+                    <p>Update the basic details of the student project.</p>
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group full">
+                    <label for="title">
+                        Project Title
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        maxlength="200"
+                        value="{{ project.title }}"
+                        placeholder="Enter project title"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="student_id">
+                        Student
+                        <span>*</span>
+                    </label>
+
+                    <select id="student_id" name="student_id" required>
+
+                        <option value="">Select Student</option>
+
+                        {% for student in students %}
+
+                        <option
+                            value="{{ student.id }}"
+                            {% if student.id == project.student_id %}selected{% endif %}
+                        >
+                            {{ student.student_name }}
+                            — {{ student.enrollment_no }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="industry_id">
+                        Associated Industry
+                    </label>
+
+                    <select id="industry_id" name="industry_id">
+
+                        <option value="">
+                            No Industry / Not Applicable
+                        </option>
+
+                        {% for industry in industries %}
+
+                        <option
+                            value="{{ industry.id }}"
+                            {% if industry.id == project.industry_id %}selected{% endif %}
+                        >
+                            {{ industry.company_name }}
+                            {% if industry.industry_sector %}
+                                — {{ industry.industry_sector }}
+                            {% endif %}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="status">
+                        Project Status
+                    </label>
+
+                    <select id="status" name="status">
+
+                        <option
+                            value="ONGOING"
+                            {% if project.status == 'ONGOING' %}selected{% endif %}
+                        >
+                            Ongoing
+                        </option>
+
+                        <option
+                            value="COMPLETED"
+                            {% if project.status == 'COMPLETED' %}selected{% endif %}
+                        >
+                            Completed
+                        </option>
+
+                        <option
+                            value="CANCELLED"
+                            {% if project.status == 'CANCELLED' %}selected{% endif %}
+                        >
+                            Cancelled
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="technology_stack">
+                        Technology Stack
+                    </label>
+
+                    <input
+                        type="text"
+                        id="technology_stack"
+                        name="technology_stack"
+                        value="{{ project.technology_stack or '' }}"
+                        placeholder="e.g. Python, Flask, MySQL"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="start_date">
+                        Start Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        value="{{ project.start_date.strftime('%Y-%m-%d') if project.start_date else '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="end_date">
+                        End Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        value="{{ project.end_date.strftime('%Y-%m-%d') if project.end_date else '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="5"
+                        placeholder="Describe the project..."
+                    >{{ project.description or '' }}</textarea>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Links -->
+        <section class="form-card">
+
+            <div class="form-card-header">
+
+                <div class="section-icon links">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+
+                <div>
+                    <h2>Project Links</h2>
+                    <p>Update project and report URLs.</p>
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="project_url">
+                        Project URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="project_url"
+                        name="project_url"
+                        value="{{ project.project_url or '' }}"
+                        placeholder="https://example.com/project"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="report_url">
+                        Report URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="report_url"
+                        name="report_url"
+                        value="{{ project.report_url or '' }}"
+                        placeholder="https://example.com/report"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Actions -->
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('college_activity_detail', activity_id=project.id) }}"
+                class="secondary-btn"
+            >
+                Cancel
+            </a>
+
+            <button type="submit" class="primary-btn">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Changes
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/activities/edit.js') }}"></script>
+{% endblock %}

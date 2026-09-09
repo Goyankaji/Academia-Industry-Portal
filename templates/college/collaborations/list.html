@@ -1,0 +1,288 @@
+{% extends "college/base.html" %}
+
+{% block title %}Collaborations{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/collaborations/list.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="collaborations-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <span class="page-eyebrow">ACADEMIA–INDUSTRY COLLABORATION</span>
+            <h1>Collaborations</h1>
+            <p>View and track active and completed collaborations with industries.</p>
+        </div>
+    </div>
+
+
+    <!-- STATS -->
+    <div class="collaboration-stats">
+
+        <div class="collaboration-stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-handshake"></i>
+            </div>
+
+            <div>
+                <span>TOTAL COLLABORATIONS</span>
+                <strong>{{ total_collaborations }}</strong>
+            </div>
+        </div>
+
+
+        <div class="collaboration-stat">
+            <div class="stat-icon active">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+                <span>ACTIVE</span>
+                <strong>{{ active_collaborations }}</strong>
+            </div>
+        </div>
+
+
+        <div class="collaboration-stat">
+            <div class="stat-icon pending">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+
+            <div>
+                <span>PENDING</span>
+                <strong>{{ pending_collaborations }}</strong>
+            </div>
+        </div>
+
+
+        <div class="collaboration-stat">
+            <div class="stat-icon completed">
+                <i class="fa-solid fa-check-double"></i>
+            </div>
+
+            <div>
+                <span>COMPLETED</span>
+                <strong>{{ completed_collaborations }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- TOOLBAR -->
+    <div class="collaboration-toolbar">
+
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+                type="text"
+                id="collaborationSearch"
+                placeholder="Search by company, title or collaboration type..."
+            >
+        </div>
+
+
+        <select id="statusFilter"
+                class="status-filter">
+
+            <option value="">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="ACTIVE">Active</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="REJECTED">Rejected</option>
+
+        </select>
+
+    </div>
+
+
+    <!-- COLLABORATIONS -->
+    {% if collaborations %}
+
+    <div class="collaborations-grid"
+         id="collaborationsGrid">
+
+        {% for collaboration in collaborations %}
+
+        <div class="collaboration-card"
+             data-company="{{ collaboration.company_name|lower }}"
+             data-title="{{ collaboration.title|lower }}"
+             data-type="{{ collaboration.collaboration_type|lower }}"
+             data-status="{{ collaboration.status|lower }}">
+
+
+            <!-- CARD HEADER -->
+
+            <div class="collaboration-card-header">
+
+                <div class="collaboration-icon">
+                    <i class="fa-solid fa-handshake"></i>
+                </div>
+
+
+                <span class="status-badge {{ collaboration.status|lower }}">
+
+                    <span class="status-dot"></span>
+
+                    {{ collaboration.status }}
+
+                </span>
+
+            </div>
+
+
+            <!-- CARD BODY -->
+
+            <div class="collaboration-card-body">
+
+                <span class="collaboration-type">
+
+                    {{ collaboration.collaboration_type
+                       |replace('_', ' ') }}
+
+                </span>
+
+
+                <h2>
+                    {{ collaboration.title }}
+                </h2>
+
+
+                <div class="company-name">
+
+                    <i class="fa-solid fa-building"></i>
+
+                    {{ collaboration.company_name }}
+
+                </div>
+
+
+                {% if collaboration.description %}
+
+                <p>
+                    {{ collaboration.description }}
+                </p>
+
+                {% else %}
+
+                <p class="no-description">
+                    No description provided.
+                </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- CARD FOOTER -->
+
+            <div class="collaboration-card-footer">
+
+                <div class="collaboration-dates">
+
+                    {% if collaboration.start_date %}
+
+                    <span>
+                        <i class="fa-regular fa-calendar"></i>
+
+                        {{ collaboration.start_date.strftime('%d %b %Y') }}
+
+                    </span>
+
+                    {% endif %}
+
+
+                    {% if collaboration.end_date %}
+
+                    <span>
+                        <i class="fa-regular fa-calendar-check"></i>
+
+                        {{ collaboration.end_date.strftime('%d %b %Y') }}
+
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <a
+                    href="{{ url_for(
+                        'college_collaboration_detail',
+                        collaboration_id=collaboration.id
+                    ) }}"
+                    class="icon-btn"
+                    title="View Collaboration"
+                >
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- NO SEARCH RESULTS -->
+
+    <div id="noResults"
+         class="empty-state hidden">
+
+        <div class="empty-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+
+        <h2>No collaborations found</h2>
+
+        <p>
+            Try changing your search or status filter.
+        </p>
+
+    </div>
+
+
+    {% else %}
+
+
+    <!-- EMPTY -->
+
+    <div class="empty-state">
+
+        <div class="empty-icon">
+            <i class="fa-solid fa-handshake"></i>
+        </div>
+
+        <h2>No collaborations yet</h2>
+
+        <p>
+            Your college does not have any collaborations with industries yet.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for(
+    'static',
+    filename='js/college/collaborations/list.js'
+) }}"></script>
+
+{% endblock %}

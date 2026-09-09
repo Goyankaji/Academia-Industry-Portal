@@ -1,0 +1,213 @@
+{% extends "college/base.html" %}
+
+{% block title %}Student Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/students/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="student-page">
+
+    <!-- Header -->
+
+    <div class="page-header">
+
+        <a href="{{ url_for('college_students') }}" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Students
+        </a>
+
+
+        <div class="student-heading">
+
+            <div class="student-avatar-large">
+                {{ (student.name or 'S')[0]|upper }}
+            </div>
+
+            <div class="student-title">
+
+                <div class="title-row">
+
+                    <h1>{{ student.name or 'Student' }}</h1>
+
+                    {% if student.user_status == 'ACTIVE' %}
+
+                        <span class="status-badge active">
+                            <span></span>
+                            Active
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-badge inactive">
+                            <span></span>
+                            Inactive
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+                <p>
+                    {{ student.enrollment_no or 'Enrollment number not available' }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Main Information -->
+
+    <div class="details-grid">
+
+        <!-- Personal / Account -->
+
+        <div class="detail-card">
+
+            <div class="card-header">
+
+                <div class="section-icon">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div>
+                    <h2>Student Information</h2>
+                    <p>Basic registered student details.</p>
+                </div>
+
+            </div>
+
+
+            <div class="info-list">
+
+                <div class="info-row">
+                    <span>Full Name</span>
+                    <strong>{{ student.name or '—' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Email</span>
+                    <strong>{{ student.email or '—' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Phone</span>
+                    <strong>{{ student.phone or '—' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Account Status</span>
+
+                    {% if student.user_status == 'ACTIVE' %}
+                        <strong class="text-active">Active</strong>
+                    {% else %}
+                        <strong class="text-inactive">Inactive</strong>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Academic -->
+
+        <div class="detail-card">
+
+            <div class="card-header">
+
+                <div class="section-icon academic">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+
+                <div>
+                    <h2>Academic Information</h2>
+                    <p>Student's academic association.</p>
+                </div>
+
+            </div>
+
+
+            <div class="info-list">
+
+                <div class="info-row">
+                    <span>Enrollment No.</span>
+                    <strong>{{ student.enrollment_no or '—' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Course</span>
+                    <strong>{{ student.course or '—' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Branch</span>
+                    <strong>{{ student.branch or '—' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Department</span>
+
+                    {% if student.department_name %}
+
+                        <div class="department-value">
+                            <strong>{{ student.department_name }}</strong>
+
+                            {% if student.department_code %}
+                                <small>{{ student.department_code }}</small>
+                            {% endif %}
+                        </div>
+
+                    {% else %}
+
+                        <strong class="not-assigned">
+                            Not Assigned
+                        </strong>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Registration Information -->
+
+    <div class="registration-card">
+
+        <div class="registration-icon">
+            <i class="fa-regular fa-calendar-check"></i>
+        </div>
+
+        <div>
+
+            <span>Registered With College</span>
+
+            <strong>
+                {{ student.created_at.strftime('%d %B %Y, %I:%M %p')
+                   if student.created_at else 'Date not available' }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/students/detail.js') }}"></script>
+{% endblock %}

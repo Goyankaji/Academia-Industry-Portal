@@ -1,0 +1,281 @@
+{% extends "college/base.html" %}
+
+{% block title %}Request Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/requests/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="request-detail-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <span class="page-eyebrow">COLLABORATION REQUEST</span>
+            <h1>Request Details</h1>
+            <p>View complete information about this collaboration request.</p>
+        </div>
+
+        <a
+            href="{% if request.initiated_by == 'INDUSTRY' %}{{ url_for('college_received_requests') }}{% else %}{{ url_for('college_sent_requests') }}{% endif %}"
+            class="back-btn"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Requests
+        </a>
+    </div>
+
+    <!-- REQUEST HERO -->
+    <div class="request-hero">
+
+        <div class="request-hero-icon">
+            <i class="fa-solid fa-handshake"></i>
+        </div>
+
+        <div class="request-hero-content">
+
+            <div class="hero-title-row">
+                <div>
+                    <span class="request-type">
+                        {{ request.collaboration_type|replace('_', ' ') }}
+                    </span>
+
+                    <h2>{{ request.title }}</h2>
+                </div>
+
+                <span class="status-badge {{ request.status|lower }}">
+                    <span class="status-dot"></span>
+                    {{ request.status }}
+                </span>
+            </div>
+
+            <div class="hero-company">
+                <i class="fa-solid fa-building"></i>
+                {{ request.company_name }}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DETAILS -->
+    <div class="details-grid">
+
+        <!-- REQUEST INFORMATION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+                <div>
+                    <span>REQUEST</span>
+                    <h2>Request Information</h2>
+                </div>
+            </div>
+
+            <div class="info-list">
+
+                <div class="info-item">
+                    <span>Request Title</span>
+                    <strong>{{ request.title }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Collaboration Type</span>
+                    <strong>
+                        {{ request.collaboration_type|replace('_', ' ') }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Request Status</span>
+                    <strong>{{ request.status }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Initiated By</span>
+                    <strong>{{ request.initiated_by }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Start Date</span>
+                    <strong>
+                        {{ request.start_date.strftime('%d %b %Y') if request.start_date else '—' }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>End Date</span>
+                    <strong>
+                        {{ request.end_date.strftime('%d %b %Y') if request.end_date else '—' }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- INDUSTRY INFORMATION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon industry">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+
+                <div>
+                    <span>INDUSTRY</span>
+                    <h2>Industry Information</h2>
+                </div>
+            </div>
+
+            <div class="info-list">
+
+                <div class="info-item">
+                    <span>Company Name</span>
+                    <strong>{{ request.company_name }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Company Type</span>
+                    <strong>{{ request.company_type or '—' }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Industry Sector</span>
+                    <strong>{{ request.industry_sector or '—' }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Contact Person</span>
+                    <strong>{{ request.contact_person or '—' }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Designation</span>
+                    <strong>{{ request.designation or '—' }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Phone</span>
+                    <strong>{{ request.industry_phone or '—' }}</strong>
+                </div>
+
+                <div class="info-item full-width">
+                    <span>Email</span>
+                    <strong>{{ request.industry_email or '—' }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- DESCRIPTION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon description">
+                    <i class="fa-solid fa-align-left"></i>
+                </div>
+
+                <div>
+                    <span>DESCRIPTION</span>
+                    <h2>Collaboration Description</h2>
+                </div>
+            </div>
+
+            <div class="description-box">
+
+                {% if request.description %}
+                    <p>{{ request.description }}</p>
+                {% else %}
+                    <p class="empty-description">
+                        No description has been provided for this request.
+                    </p>
+                {% endif %}
+
+            </div>
+
+        </section>
+
+        <!-- INDUSTRY LOCATION -->
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+                <div class="section-icon location">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <div>
+                    <span>LOCATION</span>
+                    <h2>Industry Location</h2>
+                </div>
+            </div>
+
+            <div class="info-list">
+
+                <div class="info-item full-width">
+                    <span>Address</span>
+                    <strong>{{ request.industry_address or '—' }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>City</span>
+                    <strong>{{ request.industry_city or '—' }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>State</span>
+                    <strong>{{ request.industry_state or '—' }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-card">
+
+        <div class="timeline-item">
+            <div class="timeline-icon">
+                <i class="fa-solid fa-paper-plane"></i>
+            </div>
+
+            <div>
+                <span>REQUEST CREATED</span>
+                <strong>
+                    {{ request.created_at.strftime('%d %b %Y, %I:%M %p') if request.created_at else '—' }}
+                </strong>
+            </div>
+        </div>
+
+        <div class="timeline-divider"></div>
+
+        <div class="timeline-item">
+            <div class="timeline-icon updated">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+
+            <div>
+                <span>LAST UPDATED</span>
+                <strong>
+                    {{ request.updated_at.strftime('%d %b %Y, %I:%M %p') if request.updated_at else '—' }}
+                </strong>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/requests/detail.js') }}"></script>
+{% endblock %}

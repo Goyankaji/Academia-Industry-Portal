@@ -1,0 +1,409 @@
+{% extends "college/base.html" %}
+
+{% block title %}Students{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/college/students/list.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="students-page">
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+
+    <div>
+        <span class="page-eyebrow">STUDENT MANAGEMENT</span>
+
+        <h1>Students</h1>
+
+        <p>
+            View and manage students registered under your college.
+        </p>
+    </div>
+
+</div>
+
+
+    <!-- STATISTICS -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-icon total">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+
+            <div>
+                <span>Total Students</span>
+                <strong>{{ total_students }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon active">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+                <span>Active</span>
+                <strong>{{ active_students }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon inactive">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+
+            <div>
+                <span>Inactive</span>
+                <strong>{{ inactive_students }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon departments">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+
+            <div>
+                <span>Departments</span>
+                <strong>{{ department_count }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+    <div class="filter-card">
+
+        <div class="search-box">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+                type="text"
+                id="studentSearch"
+                placeholder="Search by name, enrollment, email or branch..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <div class="filter-select">
+
+            <i class="fa-solid fa-building-columns"></i>
+
+            <select id="departmentFilter">
+
+                <option value="all">
+                    All Departments
+                </option>
+
+                {% set department_names = [] %}
+
+                {% for student in students %}
+
+                    {% if student.department_name
+                          and student.department_name not in department_names %}
+
+                        {% set _ = department_names.append(student.department_name) %}
+
+                    {% endif %}
+
+                {% endfor %}
+
+                {% for department in department_names|sort %}
+
+                    <option value="{{ department|lower }}">
+                        {{ department }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-select">
+
+            <i class="fa-solid fa-filter"></i>
+
+            <select id="statusFilter">
+
+                <option value="all">All Status</option>
+
+                <option value="active">
+                    Active
+                </option>
+
+                <option value="inactive">
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <!-- REGISTERED STUDENTS -->
+    <div class="students-card">
+
+        <div class="students-card-header">
+
+            <div>
+
+                <h2>Registered Students</h2>
+
+                <p>
+                    Students associated with your college.
+                </p>
+
+            </div>
+
+            <span class="result-count" id="resultCount">
+                {{ students|length }}
+                {{ 'Student' if students|length == 1 else 'Students' }}
+            </span>
+
+        </div>
+
+
+        {% if students %}
+
+            <div class="table-wrapper">
+
+                <table class="students-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Student</th>
+                            <th>Enrollment No.</th>
+                            <th>Department</th>
+                            <th>Course</th>
+                            <th>Branch</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="studentsTableBody">
+
+                        {% for student in students %}
+
+                            <tr
+                                class="student-row"
+
+                                data-name="{{ (student.name or '')|lower }}"
+
+                                data-enrollment="{{ (student.enrollment_no or '')|lower }}"
+
+                                data-email="{{ (student.email or '')|lower }}"
+
+                                data-branch="{{ (student.branch or '')|lower }}"
+
+                                data-department="{{ (student.department_name or '')|lower }}"
+
+                                data-status="{{ 'active' if student.user_status == 'ACTIVE' else 'inactive' }}"
+                            >
+
+                                <!-- STUDENT -->
+                                <td>
+
+                                    <div class="student-info">
+
+                                        <div class="student-avatar">
+                                            {{ (student.name or 'S')[0]|upper }}
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ student.name or '—' }}
+                                            </strong>
+
+                                            <small>
+                                                {{ student.email or '—' }}
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ENROLLMENT -->
+                                <td>
+
+                                    <span class="enrollment">
+                                        {{ student.enrollment_no or '—' }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- DEPARTMENT -->
+                                <td>
+
+                                    {% if student.department_name %}
+
+                                        <div class="department-info">
+
+                                            <strong>
+                                                {{ student.department_name }}
+                                            </strong>
+
+                                            {% if student.department_code %}
+
+                                                <small>
+                                                    {{ student.department_code }}
+                                                </small>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <span class="not-assigned">
+                                            Not Assigned
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- COURSE -->
+                                <td>
+                                    {{ student.course or '—' }}
+                                </td>
+
+
+                                <!-- BRANCH -->
+                                <td>
+                                    {{ student.branch or '—' }}
+                                </td>
+
+
+                                <!-- STATUS -->
+                                <td>
+
+                                    {% if student.user_status == 'ACTIVE' %}
+
+                                        <span class="status-badge active">
+                                            <span></span>
+                                            Active
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge inactive">
+                                            <span></span>
+                                            Inactive
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- ACTION -->
+                                <td>
+
+                                    <a
+                                        href="{{ url_for(
+                                            'college_student_detail',
+                                            student_id=student.id
+                                        ) }}"
+                                        class="view-btn"
+                                    >
+                                        View
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- FILTER EMPTY -->
+            <div class="filter-empty" id="filterEmpty">
+
+                <div class="empty-icon">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+
+                <h3>No matching students</h3>
+
+                <p>
+                    Try changing your search or filters.
+                </p>
+
+            </div>
+
+
+        {% else %}
+
+            <!-- NO STUDENTS -->
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+
+                <h3>No Students Registered</h3>
+
+                <p>
+                    There are currently no students registered under your college.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/college/students/list.js'
+    ) }}">
+</script>
+{% endblock %}

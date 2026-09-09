@@ -1,0 +1,321 @@
+{% extends "college/base.html" %}
+
+{% block title %}{{ department.department_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/college/departments/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="department-page">
+
+    <div class="page-header">
+
+        <a href="{{ url_for('college_departments') }}" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Departments
+        </a>
+
+        <div class="header-main">
+
+            <div class="department-heading">
+
+                <div class="department-icon">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+
+                <div>
+                    <div class="title-line">
+
+                        <h1>{{ department.department_name }}</h1>
+
+                        {% if department.status == 'ACTIVE' %}
+                            <span class="status-badge active">
+                                <span></span>
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="status-badge inactive">
+                                <span></span>
+                                Inactive
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="department-code">
+                        <i class="fa-solid fa-hashtag"></i>
+                        {{ department.department_code }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="header-actions">
+
+                <a href="{{ url_for('college_department_edit', department_id=department.id) }}"
+                   class="btn btn-primary">
+                    <i class="fa-solid fa-pen"></i>
+                    Edit
+                </a>
+
+                <form method="POST"
+                      action="{{ url_for('college_department_delete', department_id=department.id) }}"
+                      id="deleteDepartmentForm">
+
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon students">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+
+            <div>
+                <span>Total Students</span>
+                <strong>{{ department.student_count or 0 }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon status">
+                <i class="fa-solid fa-toggle-on"></i>
+            </div>
+
+            <div>
+                <span>Department Status</span>
+                <strong>{{ department.status|title }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon date">
+                <i class="fa-regular fa-calendar"></i>
+            </div>
+
+            <div>
+                <span>Created On</span>
+                <strong>
+                    {{ department.created_at.strftime('%d %b %Y') if department.created_at else '—' }}
+                </strong>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="content-grid">
+
+        <div class="description-card">
+
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fa-solid fa-align-left"></i>
+                </div>
+
+                <div>
+                    <h2>About Department</h2>
+                    <p>Department information and description.</p>
+                </div>
+            </div>
+
+            <div class="description-content">
+
+                {% if department.description %}
+                    <p>{{ department.description }}</p>
+                {% else %}
+                    <div class="no-description">
+                        <i class="fa-regular fa-file-lines"></i>
+                        <span>No description has been added for this department.</span>
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="info-card">
+
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+
+                <div>
+                    <h2>Department Info</h2>
+                    <p>Basic department details.</p>
+                </div>
+            </div>
+
+            <div class="info-list">
+
+                <div class="info-row">
+                    <span>Department Name</span>
+                    <strong>{{ department.department_name }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Department Code</span>
+                    <strong>{{ department.department_code }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Status</span>
+                    <strong>{{ department.status|title }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Last Updated</span>
+                    <strong>
+                        {{ department.updated_at.strftime('%d %b %Y, %I:%M %p')
+                           if department.updated_at else '—' }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="students-card">
+
+        <div class="students-header">
+
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+
+                <div>
+                    <h2>Department Students</h2>
+                    <p>
+                        Students currently assigned to this department.
+                    </p>
+                </div>
+            </div>
+
+            <span class="student-count">
+                {{ students|length }} Student{% if students|length != 1 %}s{% endif %}
+            </span>
+
+        </div>
+
+        {% if students %}
+
+        <div class="table-wrapper">
+
+            <table class="students-table">
+
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Enrollment No.</th>
+                        <th>Course</th>
+                        <th>Branch</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for student in students %}
+
+                    <tr>
+
+                        <td>
+                            <div class="student-cell">
+
+                                <div class="student-avatar">
+                                    {{ (student.name or 'S')[0]|upper }}
+                                </div>
+
+                                <div>
+                                    <strong>{{ student.name or '—' }}</strong>
+                                    <small>{{ student.email or '—' }}</small>
+                                </div>
+
+                            </div>
+                        </td>
+
+                        <td>
+                            {{ student.enrollment_no or '—' }}
+                        </td>
+
+                        <td>
+                            {{ student.course or '—' }}
+                        </td>
+
+                        <td>
+                            {{ student.branch or '—' }}
+                        </td>
+
+                        <td>
+                            {{ student.phone or '—' }}
+                        </td>
+
+                        <td>
+
+                            {% if student.user_status == 'ACTIVE' %}
+                                <span class="student-status active">
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="student-status inactive">
+                                    {{ student.user_status|title if student.user_status else 'Inactive' }}
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-students">
+
+            <div class="empty-icon">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+
+            <h3>No Students Assigned</h3>
+
+            <p>
+                There are currently no students assigned to this department.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/college/departments/detail.js') }}"></script>
+{% endblock %}
