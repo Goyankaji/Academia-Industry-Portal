@@ -1,0 +1,667 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Industry Details | Placement Cell
+{% endblock %}
+
+{% block page_title %}
+Industry Details
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/industry-details.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industry-details-page">
+
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <a
+                href="{{ url_for('placement_industries') }}"
+                class="back-link"
+            >
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back to Industries
+
+            </a>
+
+
+            <span class="page-eyebrow">
+                INDUSTRY PROFILE
+            </span>
+
+
+            <h1>
+                {{ industry.company_name }}
+            </h1>
+
+
+            <p>
+
+                {% if industry.industry_sector %}
+                    {{ industry.industry_sector }}
+                {% endif %}
+
+                {% if industry.industry_sector and industry.company_type %}
+                    ·
+                {% endif %}
+
+                {% if industry.company_type %}
+                    {{ industry.company_type }}
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <div class="active-badge">
+
+            <i class="fa-solid fa-circle-check"></i>
+
+            ACTIVE
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         COMPANY INFORMATION
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+
+                <i class="fa-solid fa-building"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    COMPANY
+                </span>
+
+                <h2>
+                    Company Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span>
+                    Company Name
+                </span>
+
+                <strong>
+                    {{ industry.company_name }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Company Type
+                </span>
+
+                <strong>
+                    {{ industry.company_type or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Industry Sector
+                </span>
+
+                <strong>
+                    {{ industry.industry_sector or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Website
+                </span>
+
+                {% if industry.website %}
+
+                    <a
+                        href="{{ industry.website }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Visit Website
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+
+                {% else %}
+
+                    <strong>
+                        —
+                    </strong>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        {% if industry.description %}
+
+            <div class="text-section">
+
+                <h3>
+                    About the Company
+                </h3>
+
+                <p>
+                    {{ industry.description }}
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =================================================
+         CONTACT INFORMATION
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+
+                <i class="fa-solid fa-address-card"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    CONTACT
+                </span>
+
+                <h2>
+                    Contact Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span>
+                    Contact Person
+                </span>
+
+                <strong>
+                    {{ industry.contact_person or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Designation
+                </span>
+
+                <strong>
+                    {{ industry.designation or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    {{ industry.email or industry.user_email or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Phone
+                </span>
+
+                <strong>
+                    {{ industry.phone or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         LOCATION
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+
+                <i class="fa-solid fa-location-dot"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    LOCATION
+                </span>
+
+                <h2>
+                    Company Location
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span>
+                    Address
+                </span>
+
+                <strong>
+                    {{ industry.address or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    City
+                </span>
+
+                <strong>
+                    {{ industry.city or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    State
+                </span>
+
+                <strong>
+                    {{ industry.state or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         QUICK STATS
+    ================================================== -->
+
+    <section class="quick-stats">
+
+        <div class="quick-stat-card">
+
+            <div class="quick-stat-icon">
+
+                <i class="fa-solid fa-briefcase"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    {{ opportunity_count }}
+                </strong>
+
+                <span>
+                    Open Opportunities
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-stat-card">
+
+            <div class="quick-stat-icon">
+
+                <i class="fa-solid fa-handshake"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    {{ collaboration_count }}
+                </strong>
+
+                <span>
+                    Collaborations
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         OPPORTUNITIES
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+
+                <i class="fa-solid fa-briefcase"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    HIRING
+                </span>
+
+                <h2>
+                    Open Opportunities
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        {% if opportunities %}
+
+            <div class="opportunity-list">
+
+                {% for opportunity in opportunities %}
+
+                    <div class="opportunity-item">
+
+                        <div class="opportunity-main">
+
+                            <strong>
+                                {{ opportunity.title }}
+                            </strong>
+
+                            <span>
+
+                                {{ opportunity.opportunity_type or 'Opportunity' }}
+
+                                {% if opportunity.work_mode %}
+                                    · {{ opportunity.work_mode }}
+                                {% endif %}
+
+                                {% if opportunity.location %}
+                                    · {{ opportunity.location }}
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="opportunity-meta">
+
+                            {% if opportunity.package %}
+
+                                <strong>
+                                    {{ opportunity.package }}
+                                </strong>
+
+                            {% elif opportunity.stipend %}
+
+                                <strong>
+                                    {{ opportunity.stipend }}
+                                </strong>
+
+                            {% else %}
+
+                                <strong>
+                                    —
+                                </strong>
+
+                            {% endif %}
+
+
+                            {% if opportunity.application_deadline %}
+
+                                <span>
+
+                                    Deadline:
+                                    {{ opportunity.application_deadline.strftime(
+                                        '%d %b %Y'
+                                    ) }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="section-empty">
+
+                <i class="fa-solid fa-briefcase"></i>
+
+                <p>
+                    This industry currently has no open opportunities.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =================================================
+         COLLABORATIONS
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+
+                <i class="fa-solid fa-handshake"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    COLLABORATION
+                </span>
+
+                <h2>
+                    Collaboration Activity
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        {% if collaborations %}
+
+            <div class="collaboration-list">
+
+                {% for collaboration in collaborations %}
+
+                    <div class="collaboration-item">
+
+                        <div>
+
+                            <strong>
+                                {{ collaboration.title }}
+                            </strong>
+
+                            <span>
+
+                                {{ collaboration.college_name }}
+
+                                {% if collaboration.city %}
+                                    · {{ collaboration.city }}
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="collaboration-meta">
+
+                            <span
+                                class="status-badge status-{{ collaboration.status|lower }}"
+                            >
+                                {{ collaboration.status|replace('_', ' ') }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="section-empty">
+
+                <i class="fa-solid fa-handshake"></i>
+
+                <p>
+                    No collaboration activity is available
+                    for this industry.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =================================================
+         BACK
+    ================================================== -->
+
+    <div class="bottom-actions">
+
+        <a
+            href="{{ url_for('placement_industries') }}"
+            class="back-button"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back to Industries
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/industry-details.js'
+    ) }}"
+></script>
+
+{% endblock %}

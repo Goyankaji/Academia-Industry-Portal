@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        Placement Cell | SIH Academia–Industry Portal
+        {% endblock %}
+    </title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Base CSS -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/placement/base.css') }}"
+    >
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="placement-layout" id="placementLayout">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="placement-sidebar" id="placementSidebar">
+
+        <!-- Brand -->
+        <div class="sidebar-brand">
+
+            <div class="brand-logo">
+                SIH
+            </div>
+
+            <div class="brand-text">
+                <h2>SIH Portal</h2>
+                <span>Placement Cell</span>
+            </div>
+
+        </div>
+
+
+        <!-- College Context -->
+        <div class="college-context">
+
+            <div class="college-icon">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+
+            <div class="college-info">
+
+                <span class="context-label">
+                    College
+                </span>
+
+                <strong>
+                    {{ session.get('college_name', 'Your College') }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+
+            <!-- =================================================
+                 MAIN
+            ================================================== -->
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    MAIN
+                </span>
+
+
+                <!-- Dashboard -->
+                <a
+                    href="{{ url_for('placement_dashboard') }}"
+                    class="nav-item {% if request.endpoint == 'placement_dashboard' %}active{% endif %}"
+                >
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Dashboard
+                    </span>
+                </a>
+
+
+                <!-- Students -->
+                <a
+                    href="{{ url_for('placement_students') }}"
+                    class="nav-item {% if request.endpoint == 'placement_students' %}active{% endif %}"
+                >
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Students
+                    </span>
+                </a>
+
+
+                <!-- Opportunities -->
+                <a
+                    href="{{ url_for('placement_opportunities') }}"
+                    class="nav-item {% if request.endpoint == 'placement_opportunities' %}active{% endif %}"
+                >
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Opportunities
+                    </span>
+                </a>
+
+
+                <!-- Applications -->
+                <a
+                    href="{{ url_for('placement_applications') }}"
+                    class="nav-item {% if request.endpoint == 'placement_applications' %}active{% endif %}"
+                >
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Applications
+                    </span>
+                </a>
+
+
+                <!-- Placements -->
+                <a
+                    href="{{ url_for('placement_placements') }}"
+                    class="nav-item {% if request.endpoint == 'placement_placements' %}active{% endif %}"
+                >
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-award"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Placements
+                    </span>
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 COLLABORATION
+            ================================================== -->
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    COLLABORATION
+                </span>
+
+
+                <!-- Industries -->
+                <a
+                    href="{{ url_for('placement_industries') }}"
+                    class="nav-item {% if request.endpoint == 'placement_industries' %}active{% endif %}"
+                >
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-building"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Industries
+                    </span>
+                </a>
+
+
+                <!-- Collaborations -->
+                <div class="nav-dropdown">
+
+                    <button
+                        type="button"
+                        class="nav-item nav-dropdown-toggle
+                        {% if request.endpoint in [
+                            'placement_send_collaboration',
+                            'placement_receive_collaborations'
+                        ] %}active{% endif %}"
+                        id="collaborationToggle"
+                        aria-expanded="{% if request.endpoint in [
+                            'placement_send_collaboration',
+                            'placement_receive_collaborations'
+                        ] %}true{% else %}false{% endif %}"
+                    >
+
+                        <span class="nav-icon">
+                            <i class="fa-solid fa-handshake"></i>
+                        </span>
+
+                        <span class="nav-label">
+                            Collaborations
+                        </span>
+
+                        <span class="nav-chevron">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="nav-submenu
+                        {% if request.endpoint in [
+                            'placement_send_collaboration',
+                            'placement_receive_collaborations'
+                        ] %}open{% endif %}"
+                        id="collaborationSubmenu"
+                    >
+
+                        <!-- Send Collaboration -->
+                        <a
+                            href="{{ url_for('placement_send_collaboration') }}"
+                            class="nav-subitem
+                            {% if request.endpoint == 'placement_send_collaboration' %}active{% endif %}"
+                        >
+
+                            <span class="subitem-icon">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </span>
+
+                            <span>
+                                Send Collaboration
+                            </span>
+
+                        </a>
+
+
+                        <!-- Receive Collaboration -->
+                        <a
+                            href="{{ url_for('placement_receive_collaborations') }}"
+                            class="nav-subitem
+                            {% if request.endpoint == 'placement_receive_collaborations' %}active{% endif %}"
+                        >
+
+                            <span class="subitem-icon">
+                                <i class="fa-solid fa-inbox"></i>
+                            </span>
+
+                            <span>
+                                Receive Collaboration
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Notifications -->
+                <a
+                    href="{{ url_for('placement_notifications') }}"
+                    class="nav-item {% if request.endpoint == 'placement_notifications' %}active{% endif %}"
+                >
+
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-bell"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Notifications
+                    </span>
+
+                    <span class="notification-badge">
+                        0
+                    </span>
+
+                </a>
+
+
+                <!-- Reports -->
+                <a
+                    href="{{ url_for('placement_reports') }}"
+                    class="nav-item {% if request.endpoint == 'placement_reports' %}active{% endif %}"
+                >
+
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-chart-column"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Reports
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACCOUNT
+            ================================================== -->
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    ACCOUNT
+                </span>
+
+
+                <!-- Profile -->
+                <a
+                    href="{{ url_for('placement_profile') }}"
+                    class="nav-item {% if request.endpoint == 'placement_profile' %}active{% endif %}"
+                >
+
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Profile
+                    </span>
+
+                </a>
+
+
+                <!-- Messages -->
+                <a
+                    href="{{ url_for('placement_messages') }}"
+                    class="nav-item"
+                >
+
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-message"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Messages
+                    </span>
+
+                </a>
+
+
+                <!-- Settings -->
+                <a
+                    href="{{ url_for('placement_settings') }}"
+                    class="nav-item"
+                >
+
+                    <span class="nav-icon">
+                        <i class="fa-solid fa-gear"></i>
+                    </span>
+
+                    <span class="nav-label">
+                        Settings
+                    </span>
+
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        <!-- =================================================
+             SIDEBAR BOTTOM
+        ================================================== -->
+
+        <div class="sidebar-bottom">
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout-link"
+            >
+
+                <span class="nav-icon">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </span>
+
+                <span class="nav-label">
+                    Logout
+                </span>
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN AREA
+    ====================================================== -->
+
+    <main class="placement-main">
+
+        <!-- TOP HEADER -->
+        <header class="placement-header">
+
+            <div class="header-left">
+
+                <button
+                    type="button"
+                    class="sidebar-toggle"
+                    id="sidebarToggle"
+                    aria-label="Toggle sidebar"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+
+                <div class="page-heading">
+
+                    <span class="page-eyebrow">
+                        PLACEMENT CELL
+                    </span>
+
+                    <h1>
+                        {% block page_title %}
+                        Dashboard
+                        {% endblock %}
+                    </h1>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <!-- Notification -->
+                <button
+                    type="button"
+                    class="header-icon-btn"
+                    title="Notifications"
+                >
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span class="header-notification-dot"></span>
+
+                </button>
+
+
+                <!-- User -->
+                <div class="header-user">
+
+                    <div class="user-avatar">
+
+                        {{
+                            session.get('user_name', 'P')
+                            |string
+                            |first
+                            |upper
+                        }}
+
+                    </div>
+
+
+                    <div class="user-details">
+
+                        <strong>
+                            {{ session.get('user_name', 'Placement Cell') }}
+                        </strong>
+
+                        <span>
+                            Placement Cell
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             FLASH MESSAGES
+        ================================================== -->
+
+        <div class="flash-container">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% if messages %}
+
+                    {% for category, message in messages %}
+
+                        <div
+                            class="flash-message flash-{{ category }}"
+                            data-auto-dismiss="true"
+                        >
+
+                            <span class="flash-icon">
+
+                                {% if category == 'success' %}
+
+                                    <i class="fa-solid fa-circle-check"></i>
+
+                                {% elif category == 'error' %}
+
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+
+                                {% elif category == 'warning' %}
+
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                                {% else %}
+
+                                    <i class="fa-solid fa-circle-info"></i>
+
+                                {% endif %}
+
+                            </span>
+
+
+                            <span class="flash-text">
+                                {{ message }}
+                            </span>
+
+
+                            <button
+                                type="button"
+                                class="flash-close"
+                                aria-label="Close"
+                            >
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            {% endwith %}
+
+        </div>
+
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <section class="placement-content">
+
+            {% block content %}
+            {% endblock %}
+
+        </section>
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="placement-footer">
+
+            <span>
+                © 2026 SIH Academia–Industry Collaboration Portal
+            </span>
+
+            <span>
+                Placement Cell
+            </span>
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     FONT AWESOME
+====================================================== -->
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+></script>
+
+
+<!-- =====================================================
+     BASE JS
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/placement/base.js') }}"
+></script>
+
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

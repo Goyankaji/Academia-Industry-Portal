@@ -1,0 +1,192 @@
+.opportunity-details-page {
+    max-width: 1400px;
+    margin: auto;
+}
+
+.back-opportunities,
+.back-link {
+    display: inline-flex;
+    gap: 7px;
+    margin-bottom: 17px;
+    color: #2554d9;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.opportunity-detail-hero {
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 15px;
+    margin-bottom: 18px;
+}
+
+.hero-company-icon {
+    width: 62px;
+    height: 62px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: #eaf0ff;
+    color: #2859d7;
+    font-size: 21px;
+}
+
+.hero-opportunity-info {
+    flex: 1;
+}
+
+.hero-opportunity-info > span {
+    font-size: 8px;
+    font-weight: 800;
+    color: #2554d9;
+}
+
+.hero-opportunity-info h2 {
+    margin: 4px 0;
+    font-size: 23px;
+}
+
+.hero-opportunity-info p {
+    color: #707b90;
+    font-size: 10px;
+}
+
+.hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    margin-top: 9px;
+}
+
+.hero-meta span {
+    font-size: 8px;
+    color: #7f899b;
+}
+
+.hero-open {
+    color: #218653 !important;
+}
+
+.hero-actions a {
+    display: inline-flex;
+    gap: 7px;
+    align-items: center;
+    padding: 10px 13px;
+    border-radius: 9px;
+    background: #2554d9;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.opportunity-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.detail-card {
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.detail-card-heading {
+    padding: 17px 20px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.detail-card-heading span {
+    font-size: 8px;
+    font-weight: 800;
+    color: #929bad;
+    letter-spacing: .8px;
+}
+
+.detail-card-heading h3 {
+    margin-top: 4px;
+    font-size: 14px;
+}
+
+.detail-body {
+    padding: 20px;
+}
+
+.description,
+.text-box {
+    color: #606c82;
+    font-size: 10px;
+    line-height: 1.8;
+    white-space: pre-line;
+}
+
+.detail-info-list {
+    padding: 5px 20px 15px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.detail-info-list div {
+    padding: 12px 6px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.detail-info-list span {
+    display: block;
+    font-size: 8px;
+    color: #9aa3b3;
+}
+
+.detail-info-list strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    color: #34405a;
+}
+
+.company-card {
+    grid-column: 1 / -1;
+}
+
+.company-information {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.company-information strong {
+    font-size: 13px;
+    color: #2b354c;
+}
+
+.company-information span {
+    font-size: 9px;
+    color: #8b95a7;
+}
+
+@media (max-width: 800px) {
+    .opportunity-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .company-card {
+        grid-column: auto;
+    }
+
+    .opportunity-detail-hero {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .hero-actions {
+        width: 100%;
+    }
+}

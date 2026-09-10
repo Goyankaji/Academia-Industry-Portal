@@ -1,0 +1,258 @@
+{% extends "placement/base.html" %}
+
+{% block title %}Send Collaboration{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/placement/send-collaboration.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="send-collaboration-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="breadcrumb">
+                <span>Placement Cell</span>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Collaborations</span>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Send Collaboration</span>
+            </div>
+
+            <h1>
+                <i class="fa-solid fa-paper-plane"></i>
+                Send Collaboration
+            </h1>
+
+            <p>
+                Send a collaboration proposal to an industry partner.
+            </p>
+        </div>
+
+        <a href="{{ url_for('placement_receive_collaborations') }}"
+           class="secondary-btn">
+            <i class="fa-solid fa-inbox"></i>
+            Receive Collaboration
+        </a>
+    </div>
+
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+
+        <div class="form-card-header">
+            <div class="header-icon">
+                <i class="fa-solid fa-handshake"></i>
+            </div>
+
+            <div>
+                <h2>Collaboration Proposal</h2>
+                <p>
+                    Provide the details of the collaboration you want to propose.
+                </p>
+            </div>
+        </div>
+
+
+        <form method="POST"
+              action="{{ url_for('placement_send_collaboration') }}"
+              class="collaboration-form">
+
+            <!-- INDUSTRY -->
+            <div class="form-group full-width">
+                <label for="industry_id">
+                    Select Industry
+                    <span class="required">*</span>
+                </label>
+
+                <select id="industry_id"
+                        name="industry_id"
+                        required>
+
+                    <option value="">
+                        Select an industry
+                    </option>
+
+                    {% for industry in industries %}
+                        <option value="{{ industry.id }}"
+                            {% if request.form.get('industry_id') == industry.id|string %}
+                                selected
+                            {% endif %}>
+                            {{ industry.company_name }}
+                            {% if industry.industry_sector %}
+                                — {{ industry.industry_sector }}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+                {% if not industries %}
+                    <small class="field-warning">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        No active industries are currently available.
+                    </small>
+                {% endif %}
+            </div>
+
+
+            <!-- TITLE -->
+            <div class="form-group full-width">
+                <label for="title">
+                    Collaboration Title
+                    <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="e.g. Industry Internship & Placement Collaboration"
+                    value="{{ request.form.get('title', '') }}"
+                    maxlength="255"
+                    required
+                >
+            </div>
+
+
+            <!-- COLLABORATION TYPE -->
+            <div class="form-group">
+                <label for="collaboration_type">
+                    Collaboration Type
+                    <span class="required">*</span>
+                </label>
+
+                <select id="collaboration_type"
+                        name="collaboration_type"
+                        required>
+
+                    <option value="">
+                        Select collaboration type
+                    </option>
+
+                    {% set selected_type = request.form.get('collaboration_type', '') %}
+
+                    <option value="INTERNSHIP"
+                        {% if selected_type == 'INTERNSHIP' %}selected{% endif %}>
+                        Internship
+                    </option>
+
+                    <option value="PLACEMENT"
+                        {% if selected_type == 'PLACEMENT' %}selected{% endif %}>
+                        Placement
+                    </option>
+
+                    <option value="TRAINING"
+                        {% if selected_type == 'TRAINING' %}selected{% endif %}>
+                        Training & Skill Development
+                    </option>
+
+                    <option value="PROJECT"
+                        {% if selected_type == 'PROJECT' %}selected{% endif %}>
+                        Industry Project
+                    </option>
+
+                    <option value="RESEARCH"
+                        {% if selected_type == 'RESEARCH' %}selected{% endif %}>
+                        Research Collaboration
+                    </option>
+
+                    <option value="WORKSHOP"
+                        {% if selected_type == 'WORKSHOP' %}selected{% endif %}>
+                        Workshop / Seminar
+                    </option>
+
+                    <option value="OTHER"
+                        {% if selected_type == 'OTHER' %}selected{% endif %}>
+                        Other
+                    </option>
+
+                </select>
+            </div>
+
+
+            <!-- START DATE -->
+            <div class="form-group">
+                <label for="start_date">
+                    Proposed Start Date
+                </label>
+
+                <input
+                    type="date"
+                    id="start_date"
+                    name="start_date"
+                    value="{{ request.form.get('start_date', '') }}"
+                >
+            </div>
+
+
+            <!-- END DATE -->
+            <div class="form-group">
+                <label for="end_date">
+                    Proposed End Date
+                </label>
+
+                <input
+                    type="date"
+                    id="end_date"
+                    name="end_date"
+                    value="{{ request.form.get('end_date', '') }}"
+                >
+            </div>
+
+
+            <!-- DESCRIPTION -->
+            <div class="form-group full-width">
+                <label for="description">
+                    Description
+                    <span class="required">*</span>
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="7"
+                    maxlength="2000"
+                    placeholder="Describe the purpose, expected activities, requirements and outcomes of this collaboration..."
+                    required
+                >{{ request.form.get('description', '') }}</textarea>
+
+                <div class="character-info">
+                    <span>Maximum 2000 characters</span>
+                    <span id="descriptionCounter">0 / 2000</span>
+                </div>
+            </div>
+
+
+            <!-- ACTIONS -->
+            <div class="form-actions">
+
+                <a href="{{ url_for('placement_receive_collaborations') }}"
+                   class="cancel-btn">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="submit-btn"
+                        {% if not industries %}disabled{% endif %}>
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Send Collaboration Request
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/placement/send-collaboration.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+{{ opportunity.title }} | Opportunity | SIH Portal
+{% endblock %}
+
+{% block page_title %}
+Opportunity Details
+{% endblock %}
+
+{% block content %}
+
+<div class="opportunity-details-page">
+
+    <a
+        href="{{ url_for('placement_opportunities') }}"
+        class="back-opportunities"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Opportunities
+    </a>
+
+
+    <section class="opportunity-detail-hero">
+
+        <div class="hero-company-icon">
+            <i class="fa-solid fa-building"></i>
+        </div>
+
+        <div class="hero-opportunity-info">
+
+            <span>
+                {{ opportunity.opportunity_type }}
+            </span>
+
+            <h2>
+                {{ opportunity.title }}
+            </h2>
+
+            <p>
+                {{ opportunity.company_name }}
+            </p>
+
+            <div class="hero-meta">
+
+                {% if opportunity.location %}
+                    <span>
+                        <i class="fa-solid fa-location-dot"></i>
+                        {{ opportunity.location }}
+                    </span>
+                {% endif %}
+
+                {% if opportunity.work_mode %}
+                    <span>
+                        <i class="fa-solid fa-laptop"></i>
+                        {{ opportunity.work_mode }}
+                    </span>
+                {% endif %}
+
+                <span class="hero-open">
+                    <i class="fa-solid fa-circle"></i>
+                    {{ opportunity.status }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-actions">
+
+            <a
+                href="{{ url_for(
+                    'placement_eligible_students',
+                    opportunity_id=opportunity.id
+                ) }}"
+                class="eligible-btn"
+            >
+                <i class="fa-solid fa-user-check"></i>
+                Eligible Students
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <div class="opportunity-detail-grid">
+
+
+        <section class="detail-card">
+
+            <div class="detail-card-heading">
+                <span>OPPORTUNITY</span>
+                <h3>Overview</h3>
+            </div>
+
+            <div class="detail-body">
+
+                <div class="description">
+                    {{ opportunity.description or "No description provided." }}
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="detail-card">
+
+            <div class="detail-card-heading">
+                <span>RECRUITMENT</span>
+                <h3>Key Information</h3>
+            </div>
+
+            <div class="detail-info-list">
+
+                <div>
+                    <span>Company</span>
+                    <strong>{{ opportunity.company_name }}</strong>
+                </div>
+
+                <div>
+                    <span>Type</span>
+                    <strong>{{ opportunity.opportunity_type }}</strong>
+                </div>
+
+                <div>
+                    <span>Location</span>
+                    <strong>{{ opportunity.location or "—" }}</strong>
+                </div>
+
+                <div>
+                    <span>Work Mode</span>
+                    <strong>{{ opportunity.work_mode or "—" }}</strong>
+                </div>
+
+                <div>
+                    <span>Package</span>
+                    <strong>{{ opportunity.package or "—" }}</strong>
+                </div>
+
+                <div>
+                    <span>Stipend</span>
+                    <strong>{{ opportunity.stipend or "—" }}</strong>
+                </div>
+
+                <div>
+                    <span>Application Deadline</span>
+                    <strong>
+                        {% if opportunity.application_deadline %}
+                            {{ opportunity.application_deadline.strftime("%d %b %Y") }}
+                        {% else %}
+                            No deadline
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Applications from College</span>
+                    <strong>{{ application_count }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="detail-card">
+
+            <div class="detail-card-heading">
+                <span>ELIGIBILITY</span>
+                <h3>Required Skills</h3>
+            </div>
+
+            <div class="detail-body">
+
+                <div class="text-box">
+                    {{ opportunity.required_skills or "No specific skills listed." }}
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="detail-card">
+
+            <div class="detail-card-heading">
+                <span>ELIGIBILITY</span>
+                <h3>Eligibility Criteria</h3>
+            </div>
+
+            <div class="detail-body">
+
+                <div class="text-box">
+                    {{ opportunity.eligibility_criteria or "No specific eligibility criteria provided." }}
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="detail-card company-card">
+
+            <div class="detail-card-heading">
+                <span>INDUSTRY</span>
+                <h3>Company Information</h3>
+            </div>
+
+            <div class="company-information">
+
+                <strong>
+                    {{ opportunity.company_name }}
+                </strong>
+
+                {% if opportunity.company_type %}
+                    <span>{{ opportunity.company_type }}</span>
+                {% endif %}
+
+                {% if opportunity.industry_sector %}
+                    <span>{{ opportunity.industry_sector }}</span>
+                {% endif %}
+
+                {% if opportunity.city or opportunity.state %}
+                    <span>
+                        {{ opportunity.city or "" }}
+                        {% if opportunity.city and opportunity.state %}, {% endif %}
+                        {{ opportunity.state or "" }}
+                    </span>
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/opportunity-details.css'
+    ) }}"
+>
+
+{% endblock %}

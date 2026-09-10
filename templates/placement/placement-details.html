@@ -1,0 +1,635 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Placement Details | Placement Cell
+{% endblock %}
+
+{% block page_title %}
+Placement Details
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/placement-details.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="placement-details-page">
+
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+        <div>
+
+            <a
+                href="{{ url_for('placement_placements') }}"
+                class="back-link"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Placements
+            </a>
+
+            <span class="page-eyebrow">
+                PLACEMENT RECORD
+            </span>
+
+            <h1>
+                {{ placement.student_name }}
+            </h1>
+
+            <p>
+                Selected at
+                <strong>
+                    {{ placement.company_name }}
+                </strong>
+                for
+                <strong>
+                    {{ placement.opportunity_title }}
+                </strong>
+            </p>
+
+        </div>
+
+
+        <div class="selected-badge">
+
+            <i class="fa-solid fa-circle-check"></i>
+
+            SELECTED
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         STUDENT INFORMATION
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    STUDENT
+                </span>
+
+                <h2>
+                    Student Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span>
+                    Name
+                </span>
+
+                <strong>
+                    {{ placement.student_name }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    {{ placement.student_email }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Enrollment No.
+                </span>
+
+                <strong>
+                    {{ placement.enrollment_no or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Course
+                </span>
+
+                <strong>
+                    {{ placement.course or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Branch
+                </span>
+
+                <strong>
+                    {{ placement.branch or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Semester
+                </span>
+
+                <strong>
+                    {{ placement.semester or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    CGPA
+                </span>
+
+                <strong>
+                    {{ placement.cgpa or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Active Backlogs
+                </span>
+
+                <strong>
+                    {{ placement.active_backlogs or 0 }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="profile-links">
+
+            {% if placement.resume_url %}
+
+                <a
+                    href="{{ placement.resume_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-solid fa-file-pdf"></i>
+                    Resume
+                </a>
+
+            {% endif %}
+
+
+            {% if placement.linkedin_url %}
+
+                <a
+                    href="{{ placement.linkedin_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-linkedin"></i>
+                    LinkedIn
+                </a>
+
+            {% endif %}
+
+
+            {% if placement.github_url %}
+
+                <a
+                    href="{{ placement.github_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-github"></i>
+                    GitHub
+                </a>
+
+            {% endif %}
+
+
+            {% if placement.portfolio_url %}
+
+                <a
+                    href="{{ placement.portfolio_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-solid fa-globe"></i>
+                    Portfolio
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         COMPANY INFORMATION
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    COMPANY
+                </span>
+
+                <h2>
+                    Company Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span>
+                    Company
+                </span>
+
+                <strong>
+                    {{ placement.company_name }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Company Type
+                </span>
+
+                <strong>
+                    {{ placement.company_type or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Industry Sector
+                </span>
+
+                <strong>
+                    {{ placement.industry_sector or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Contact Person
+                </span>
+
+                <strong>
+                    {{ placement.contact_person or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         OPPORTUNITY / OFFER
+    ================================================== -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    OPPORTUNITY
+                </span>
+
+                <h2>
+                    Offer Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span>
+                    Opportunity
+                </span>
+
+                <strong>
+                    {{ placement.opportunity_title }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Opportunity Type
+                </span>
+
+                <strong>
+                    {{ placement.opportunity_type or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Package
+                </span>
+
+                <strong class="highlight-value">
+                    {{ placement.package or 'Not specified' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Stipend
+                </span>
+
+                <strong>
+                    {{ placement.stipend or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Location
+                </span>
+
+                <strong>
+                    {{ placement.location or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Work Mode
+                </span>
+
+                <strong>
+                    {{ placement.work_mode or '—' }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Application Date
+                </span>
+
+                <strong>
+
+                    {% if placement.application_date %}
+
+                        {{ placement.application_date.strftime(
+                            '%d %b %Y, %I:%M %p'
+                        ) }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Selection Updated
+                </span>
+
+                <strong>
+
+                    {% if placement.updated_at %}
+
+                        {{ placement.updated_at.strftime(
+                            '%d %b %Y, %I:%M %p'
+                        ) }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        {% if placement.description %}
+
+            <div class="text-section">
+
+                <h3>
+                    Opportunity Description
+                </h3>
+
+                <p>
+                    {{ placement.description }}
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =================================================
+         SKILLS
+    ================================================== -->
+
+    {% if skills %}
+
+        <section class="details-card">
+
+            <div class="card-heading">
+
+                <div class="heading-icon">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        PROFILE
+                    </span>
+
+                    <h2>
+                        Student Skills
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="skills-list">
+
+                {% for skill in skills %}
+
+                    <div class="skill-row">
+
+                        <div>
+
+                            <strong>
+                                {{ skill.skill_name }}
+                            </strong>
+
+                            {% if skill.proficiency_level %}
+
+                                <span>
+                                    {{ skill.proficiency_level }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if skill.assessment_percentage is not none %}
+
+                            <strong>
+                                {{ skill.assessment_percentage }}%
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- BACK -->
+
+    <div class="bottom-actions">
+
+        <a
+            href="{{ url_for('placement_placements') }}"
+            class="back-button"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Placements
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/placement-details.js'
+    ) }}"
+></script>
+
+{% endblock %}

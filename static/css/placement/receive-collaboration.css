@@ -1,0 +1,586 @@
+/* ============================================================
+   RECEIVE COLLABORATION
+   ============================================================ */
+
+.receive-collaboration-page {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* =========================
+   PAGE HEADER
+   ========================= */
+
+.receive-collaboration-page .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 26px;
+}
+
+.receive-collaboration-page .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.receive-collaboration-page .breadcrumb i {
+    font-size: 9px;
+    color: #94a3b8;
+}
+
+.receive-collaboration-page .page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.receive-collaboration-page .page-header h1 i {
+    color: #2563eb;
+    font-size: 24px;
+}
+
+.receive-collaboration-page .page-header p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+.receive-collaboration-page .primary-btn,
+.receive-collaboration-page .filter-btn,
+.receive-collaboration-page .clear-btn,
+.receive-collaboration-page .empty-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.receive-collaboration-page .primary-btn {
+    padding: 11px 17px;
+    color: #ffffff;
+    background: #2563eb;
+    border: 1px solid #2563eb;
+}
+
+.receive-collaboration-page .primary-btn:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+/* =========================
+   STATS
+   ========================= */
+
+.receive-collaboration-page .collaboration-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.receive-collaboration-page .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+.receive-collaboration-page .stat-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 17px;
+}
+
+.receive-collaboration-page .stat-icon.total {
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.receive-collaboration-page .stat-icon.pending {
+    color: #d97706;
+    background: #fffbeb;
+}
+
+.receive-collaboration-page .stat-icon.active {
+    color: #059669;
+    background: #ecfdf5;
+}
+
+.receive-collaboration-page .stat-icon.completed {
+    color: #7c3aed;
+    background: #f5f3ff;
+}
+
+.receive-collaboration-page .stat-label {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.receive-collaboration-page .stat-content strong {
+    color: #0f172a;
+    font-size: 23px;
+    line-height: 1;
+}
+
+/* =========================
+   FILTERS
+   ========================= */
+
+.receive-collaboration-page .filters-card {
+    padding: 15px;
+    margin-bottom: 26px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+}
+
+.receive-collaboration-page .filters-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.receive-collaboration-page .search-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.receive-collaboration-page .search-wrapper > i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.receive-collaboration-page .search-wrapper input,
+.receive-collaboration-page .filter-group select {
+    height: 42px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #334155;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.receive-collaboration-page .search-wrapper input {
+    width: 100%;
+    padding: 0 13px 0 37px;
+}
+
+.receive-collaboration-page .filter-group select {
+    min-width: 165px;
+    padding: 0 32px 0 12px;
+}
+
+.receive-collaboration-page .search-wrapper input:focus,
+.receive-collaboration-page .filter-group select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+.receive-collaboration-page .filter-btn {
+    height: 42px;
+    padding: 0 16px;
+    color: #ffffff;
+    background: #2563eb;
+    border: 1px solid #2563eb;
+}
+
+.receive-collaboration-page .filter-btn:hover {
+    background: #1d4ed8;
+}
+
+.receive-collaboration-page .clear-btn {
+    height: 42px;
+    padding: 0 13px;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.receive-collaboration-page .clear-btn:hover {
+    color: #334155;
+    background: #f8fafc;
+}
+
+/* =========================
+   SECTION HEADING
+   ========================= */
+
+.receive-collaboration-page .section-heading {
+    margin-bottom: 14px;
+}
+
+.receive-collaboration-page .section-heading h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.receive-collaboration-page .section-heading p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* =========================
+   COLLABORATION LIST
+   ========================= */
+
+.receive-collaboration-page .collaboration-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.receive-collaboration-page .collaboration-card {
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.receive-collaboration-page .collaboration-card:hover {
+    box-shadow: 0 7px 20px rgba(15, 23, 42, 0.07);
+    transform: translateY(-1px);
+}
+
+/* =========================
+   CARD TOP
+   ========================= */
+
+.receive-collaboration-page .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.receive-collaboration-page .company-info {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.receive-collaboration-page .company-logo {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    background: #eff6ff;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.receive-collaboration-page .company-info h3 {
+    margin: 0 0 4px;
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.receive-collaboration-page .company-name {
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.receive-collaboration-page .sector {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 3px 8px;
+    color: #64748b;
+    background: #f8fafc;
+    border-radius: 5px;
+    font-size: 10px;
+}
+
+.receive-collaboration-page .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.receive-collaboration-page .status-pending {
+    color: #b45309;
+    background: #fffbeb;
+}
+
+.receive-collaboration-page .status-active {
+    color: #047857;
+    background: #ecfdf5;
+}
+
+.receive-collaboration-page .status-completed {
+    color: #6d28d9;
+    background: #f5f3ff;
+}
+
+.receive-collaboration-page .status-rejected,
+.receive-collaboration-page .status-cancelled {
+    color: #b91c1c;
+    background: #fef2f2;
+}
+
+/* =========================
+   META
+   ========================= */
+
+.receive-collaboration-page .card-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 19px;
+    padding: 15px 0;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.receive-collaboration-page .meta-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.receive-collaboration-page .meta-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.receive-collaboration-page .meta-value i {
+    color: #64748b;
+    font-size: 11px;
+}
+
+/* =========================
+   DESCRIPTION
+   ========================= */
+
+.receive-collaboration-page .description-section {
+    padding: 15px 0 3px;
+}
+
+.receive-collaboration-page .description-section p {
+    margin: 7px 0 0;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+/* =========================
+   CARD BOTTOM
+   ========================= */
+
+.receive-collaboration-page .card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 15px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.receive-collaboration-page .date-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.receive-collaboration-page .date-info span,
+.receive-collaboration-page .received-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.receive-collaboration-page .date-info i,
+.receive-collaboration-page .received-info i {
+    color: #94a3b8;
+}
+
+/* =========================
+   EMPTY STATE
+   ========================= */
+
+.receive-collaboration-page .empty-state {
+    padding: 60px 25px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.receive-collaboration-page .empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    background: #f1f5f9;
+    border-radius: 50%;
+    font-size: 25px;
+}
+
+.receive-collaboration-page .empty-state h3 {
+    margin: 0;
+    color: #334155;
+    font-size: 17px;
+}
+
+.receive-collaboration-page .empty-state p {
+    max-width: 500px;
+    margin: 8px auto 18px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.receive-collaboration-page .empty-action {
+    padding: 9px 15px;
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 1000px) {
+
+    .receive-collaboration-page .collaboration-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .receive-collaboration-page .card-meta {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .receive-collaboration-page .filters-form {
+        flex-wrap: wrap;
+    }
+
+    .receive-collaboration-page .search-wrapper {
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .receive-collaboration-page {
+        padding: 18px;
+    }
+
+    .receive-collaboration-page .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .receive-collaboration-page .collaboration-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .receive-collaboration-page .card-top {
+        flex-direction: column;
+    }
+
+    .receive-collaboration-page .status-badge {
+        align-self: flex-start;
+    }
+
+    .receive-collaboration-page .card-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .receive-collaboration-page {
+        padding: 14px;
+    }
+
+    .receive-collaboration-page .collaboration-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .receive-collaboration-page .card-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .receive-collaboration-page .filters-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .receive-collaboration-page .filter-group,
+    .receive-collaboration-page .filter-group select,
+    .receive-collaboration-page .filter-btn,
+    .receive-collaboration-page .clear-btn {
+        width: 100%;
+    }
+
+    .receive-collaboration-page .page-header h1 {
+        font-size: 23px;
+    }
+}

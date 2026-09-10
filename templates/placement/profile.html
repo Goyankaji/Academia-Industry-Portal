@@ -1,0 +1,350 @@
+{% extends "placement/base.html" %}
+
+{% block title %}Profile | Placement Cell{% endblock %}
+
+{% block page_title %}Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/placement/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="profile-page">
+
+    <!-- PAGE HEADER -->
+    <div class="profile-heading">
+        <div>
+            <span class="page-section-label">ACCOUNT</span>
+            <h2>Profile</h2>
+            <p>View and manage your Placement Cell profile information.</p>
+        </div>
+
+        <button type="button" class="edit-profile-btn" id="editProfileBtn">
+            <i class="fas fa-pen"></i>
+            Edit Profile
+        </button>
+    </div>
+
+
+    <!-- PROFILE OVERVIEW -->
+    <div class="profile-overview-card">
+
+        <div class="profile-avatar">
+            <span>
+                {{ (profile.representative_name or profile.full_name or "P")[0]|upper }}
+            </span>
+        </div>
+
+        <div class="profile-overview-info">
+
+            <h3>
+                {{ profile.representative_name or profile.full_name or "Placement Cell" }}
+            </h3>
+
+            <p>
+                {{ profile.designation or "Placement Cell Representative" }}
+            </p>
+
+            <div class="profile-meta">
+
+                <span>
+                    <i class="fas fa-university"></i>
+                    {{ profile.college_name or "College" }}
+                </span>
+
+                {% if profile.college_code %}
+                <span>
+                    <i class="fas fa-id-card"></i>
+                    {{ profile.college_code }}
+                </span>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="account-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                {{ profile.status or "ACTIVE" }}
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- PROFILE CONTENT -->
+    <div class="profile-grid">
+
+        <!-- PERSONAL INFORMATION -->
+        <div class="profile-card">
+
+            <div class="profile-card-header">
+                <div>
+                    <span class="card-section-label">PERSONAL INFORMATION</span>
+                    <h3>Contact Details</h3>
+                </div>
+            </div>
+
+            <div class="profile-details">
+
+                <div class="detail-item">
+                    <span class="detail-label">Representative Name</span>
+                    <strong>
+                        {{ profile.representative_name or profile.full_name or "—" }}
+                    </strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Designation</span>
+                    <strong>
+                        {{ profile.designation or "—" }}
+                    </strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Email Address</span>
+                    <strong>
+                        {{ profile.placement_email or "—" }}
+                    </strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Phone Number</span>
+                    <strong>
+                        {{ profile.phone or "—" }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- COLLEGE INFORMATION -->
+        <div class="profile-card">
+
+            <div class="profile-card-header">
+                <div>
+                    <span class="card-section-label">COLLEGE INFORMATION</span>
+                    <h3>Associated College</h3>
+                </div>
+            </div>
+
+            <div class="college-info">
+
+                <div class="college-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+
+                <div class="college-details">
+
+                    <span class="detail-label">College Name</span>
+
+                    <strong>
+                        {{ profile.college_name or "—" }}
+                    </strong>
+
+                    {% if profile.college_code %}
+                    <span class="college-code">
+                        Code: {{ profile.college_code }}
+                    </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="college-access-note">
+                <i class="fas fa-info-circle"></i>
+                <span>
+                    This Placement Cell account is associated with the above college.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACCOUNT INFORMATION -->
+    <div class="profile-card account-card">
+
+        <div class="profile-card-header">
+            <div>
+                <span class="card-section-label">ACCOUNT INFORMATION</span>
+                <h3>Account Details</h3>
+            </div>
+        </div>
+
+        <div class="account-details-grid">
+
+            <div class="detail-item">
+                <span class="detail-label">Username</span>
+                <strong>{{ profile.username or "—" }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <strong>{{ profile.placement_email or "—" }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Role</span>
+                <strong>{{ profile.role or "PLACEMENT_CELL" }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Account Status</span>
+                <span class="active-badge">
+                    {{ profile.status or "ACTIVE" }}
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- EDIT PROFILE MODAL -->
+    <div class="profile-modal" id="profileModal">
+
+        <div class="modal-overlay" id="modalOverlay"></div>
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <div>
+                    <span class="card-section-label">PROFILE SETTINGS</span>
+                    <h3>Edit Profile</h3>
+                </div>
+
+                <button type="button"
+                        class="modal-close"
+                        id="closeProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
+
+            </div>
+
+
+            <form method="POST"
+                  action="{{ url_for('placement_update_profile') }}"
+                  id="profileForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="representative_name">
+                            Representative Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="representative_name"
+                            name="representative_name"
+                            value="{{ profile.representative_name or profile.full_name or '' }}"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="email">
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ profile.placement_email or '' }}"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="designation">
+                            Designation
+                        </label>
+
+                        <input
+                            type="text"
+                            id="designation"
+                            name="designation"
+                            value="{{ profile.designation or '' }}"
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="phone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="text"
+                            id="phone"
+                            name="phone"
+                            value="{{ profile.phone or '' }}"
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="readonly-section">
+
+                    <div class="readonly-item">
+                        <span>Associated College</span>
+                        <strong>
+                            {{ profile.college_name or "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="readonly-item">
+                        <span>Username</span>
+                        <strong>
+                            {{ profile.username or "—" }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button type="button"
+                            class="cancel-btn"
+                            id="cancelProfileEdit">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="save-profile-btn">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/placement/profile.js') }}"></script>
+{% endblock %}

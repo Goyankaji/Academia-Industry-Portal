@@ -1,0 +1,598 @@
+{% extends "placement/base.html" %}
+
+{% block title %}Settings | Placement Cell{% endblock %}
+
+{% block page_title %}Settings{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/placement/settings.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="settings-page">
+
+    <!-- ==========================================
+         PAGE HEADER
+    =========================================== -->
+    <div class="settings-header">
+
+        <div>
+            <span class="section-label">ACCOUNT</span>
+
+            <h1>Settings</h1>
+
+            <p>
+                Manage your Placement Cell account,
+                notifications and security preferences.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         ACCOUNT INFORMATION
+    =========================================== -->
+    <section class="settings-section">
+
+        <div class="section-heading">
+
+            <div>
+                <span class="section-label">ACCOUNT</span>
+                <h2>Account Information</h2>
+                <p>Your current portal account information.</p>
+            </div>
+
+        </div>
+
+
+        <div class="settings-card account-card">
+
+            <div class="account-avatar">
+                {{ (account.name or 'U')[0]|upper }}
+            </div>
+
+
+            <div class="account-info">
+
+                <div class="account-name">
+                    {{ account.name }}
+                </div>
+
+                <div class="account-email">
+                    {{ account.email }}
+                </div>
+
+                <div class="account-meta">
+
+                    <span class="account-role">
+                        {{ account.role|replace('_', ' ')|title }}
+                    </span>
+
+                    <span class="account-status
+                        {% if account.status == 'ACTIVE' %}
+                            active
+                        {% else %}
+                            inactive
+                        {% endif %}">
+                        {{ account.status }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="account-created">
+
+                <span>Account Created</span>
+
+                <strong>
+                    {{ account.created_at.strftime('%d %b %Y')
+                       if account.created_at else '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         NOTIFICATION PREFERENCES
+    =========================================== -->
+    <section class="settings-section">
+
+        <div class="section-heading">
+
+            <div>
+                <span class="section-label">PREFERENCES</span>
+
+                <h2>Notification Preferences</h2>
+
+                <p>
+                    Choose which activities you want to be
+                    notified about.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="settings-card">
+
+            <form id="notificationSettingsForm">
+
+                <!-- Messages -->
+                <div class="setting-row">
+
+                    <div class="setting-content">
+
+                        <div class="setting-icon">
+                            ✉
+                        </div>
+
+                        <div>
+
+                            <h3>Message Notifications</h3>
+
+                            <p>
+                                Receive notifications when you
+                                receive new messages.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="toggle">
+
+                        <input
+                            type="checkbox"
+                            name="notify_messages"
+                            value="true"
+                            {% if settings.notify_messages %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <span class="toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <!-- Opportunities -->
+                <div class="setting-row">
+
+                    <div class="setting-content">
+
+                        <div class="setting-icon">
+                            💼
+                        </div>
+
+                        <div>
+
+                            <h3>Opportunity Notifications</h3>
+
+                            <p>
+                                Get notified about new industry
+                                opportunities and hiring updates.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="toggle">
+
+                        <input
+                            type="checkbox"
+                            name="notify_opportunities"
+                            value="true"
+                            {% if settings.notify_opportunities %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <span class="toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <!-- Collaborations -->
+                <div class="setting-row">
+
+                    <div class="setting-content">
+
+                        <div class="setting-icon">
+                            🤝
+                        </div>
+
+                        <div>
+
+                            <h3>Collaboration Notifications</h3>
+
+                            <p>
+                                Receive updates about college,
+                                industry and collaboration activities.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="toggle">
+
+                        <input
+                            type="checkbox"
+                            name="notify_collaborations"
+                            value="true"
+                            {% if settings.notify_collaborations %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <span class="toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="settings-save-row">
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        id="saveNotificationBtn">
+
+                        Save Preferences
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         APPEARANCE
+    =========================================== -->
+    <section class="settings-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="section-label">
+                    APPEARANCE
+                </span>
+
+                <h2>Appearance</h2>
+
+                <p>
+                    Choose how the Placement Cell portal
+                    should appear.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="settings-card">
+
+            <form id="appearanceSettingsForm">
+
+                <div class="appearance-options">
+
+                    <label class="appearance-option">
+
+                        <input
+                            type="radio"
+                            name="theme"
+                            value="light"
+                            {% if settings.theme_preference == 'light' %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <div class="appearance-box">
+
+                            <div class="appearance-preview light-preview">
+
+                                <div class="preview-top"></div>
+
+                                <div class="preview-body">
+
+                                    <div class="preview-sidebar"></div>
+
+                                    <div class="preview-content">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <strong>Light</strong>
+
+                            <small>
+                                Use the standard light interface.
+                            </small>
+
+                        </div>
+
+                    </label>
+
+
+                    <label class="appearance-option">
+
+                        <input
+                            type="radio"
+                            name="theme"
+                            value="dark"
+                            {% if settings.theme_preference == 'dark' %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <div class="appearance-box">
+
+                            <div class="appearance-preview dark-preview">
+
+                                <div class="preview-top"></div>
+
+                                <div class="preview-body">
+
+                                    <div class="preview-sidebar"></div>
+
+                                    <div class="preview-content">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <strong>Dark</strong>
+
+                            <small>
+                                Use a darker interface.
+                            </small>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+                <div class="settings-save-row">
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        id="saveAppearanceBtn">
+
+                        Save Appearance
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         SECURITY
+    =========================================== -->
+    <section class="settings-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="section-label">
+                    SECURITY
+                </span>
+
+                <h2>Change Password</h2>
+
+                <p>
+                    Update your Placement Cell account password.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="settings-card">
+
+            <form id="passwordSettingsForm">
+
+                <div class="password-grid">
+
+                    <div class="form-group">
+
+                        <label for="current_password">
+                            Current Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="current_password"
+                            name="current_password"
+                            placeholder="Enter current password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div></div>
+
+
+                    <div class="form-group">
+
+                        <label for="new_password">
+                            New Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="new_password"
+                            name="new_password"
+                            minlength="6"
+                            placeholder="Enter new password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm New Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            minlength="6"
+                            placeholder="Confirm new password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="password-note">
+
+                    <span>ⓘ</span>
+
+                    <p>
+                        Password must contain at least
+                        6 characters.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-save-row">
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        id="changePasswordBtn">
+
+                        Change Password
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         SESSION / LOGOUT
+    =========================================== -->
+    <section class="settings-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="section-label">
+                    SESSION
+                </span>
+
+                <h2>Account Session</h2>
+
+                <p>
+                    Sign out of your Placement Cell account.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="settings-card logout-card">
+
+            <div>
+
+                <h3>Sign out</h3>
+
+                <p>
+                    You will need to login again to access
+                    your Placement Cell dashboard.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout-btn">
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- ==========================================
+     TOAST
+=========================================== -->
+
+<div
+    id="settingsToast"
+    class="settings-toast">
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for('static', filename='js/placement/settings.js') }}"></script>
+
+{% endblock %}

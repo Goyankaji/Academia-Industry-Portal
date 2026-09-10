@@ -1,0 +1,374 @@
+/* =========================================================
+   PLACEMENT CELL - APPLICATION DETAILS
+   ========================================================= */
+
+.application-details-page {
+    width: 100%;
+}
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.application-details-page .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 15px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: #2563eb;
+}
+
+.back-link i {
+    font-size: 12px;
+}
+
+.page-eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.application-details-page .page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.application-details-page .page-header p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* =========================================================
+   HEADER STATUS
+   ========================================================= */
+
+.header-status {
+    min-width: 145px;
+    padding: 14px 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.status-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.status-applied {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.status-shortlisted {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.status-selected {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.status-rejected {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.status-withdrawn {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+/* =========================================================
+   DETAILS CARD
+   ========================================================= */
+
+.details-card {
+    margin-bottom: 18px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    background: #ffffff;
+}
+
+/* =========================================================
+   CARD HEADING
+   ========================================================= */
+
+.card-heading {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 20px;
+}
+
+.heading-icon {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 14px;
+}
+
+.card-heading span {
+    display: block;
+    margin-bottom: 3px;
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+}
+
+.card-heading h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   INFORMATION GRID
+   ========================================================= */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 18px;
+}
+
+.info-item {
+    min-width: 0;
+    padding: 12px 13px;
+    border: 1px solid #f1f5f9;
+    border-radius: 10px;
+    background: #fafbfc;
+}
+
+.info-item span {
+    display: block;
+    margin-bottom: 5px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.info-item strong {
+    display: block;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+/* =========================================================
+   STUDENT LINKS
+   ========================================================= */
+
+.student-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 17px;
+    padding-top: 17px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.student-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 11px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    color: #475569;
+    background: #ffffff;
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.student-links a:hover {
+    color: #2563eb;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+/* =========================================================
+   TEXT SECTION
+   ========================================================= */
+
+.text-section {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.text-section h3 {
+    margin: 0 0 8px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.text-section p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+/* =========================================================
+   SKILLS
+   ========================================================= */
+
+.skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skill-row {
+    min-height: 42px;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    border: 1px solid #f1f5f9;
+    border-radius: 9px;
+    background: #fafbfc;
+}
+
+.skill-row > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.skill-row strong {
+    color: #334155;
+    font-size: 11px;
+}
+
+.skill-row span {
+    padding: 4px 7px;
+    border-radius: 5px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 9px;
+}
+
+/* =========================================================
+   BOTTOM ACTIONS
+   ========================================================= */
+
+.bottom-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin: 3px 0 25px;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border: 1px solid #dbe2ea;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .application-details-page .page-header {
+        flex-direction: column;
+    }
+
+    .header-status {
+        align-self: flex-start;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .details-card {
+        padding: 16px;
+    }
+
+    .student-links {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .student-links a {
+        justify-content: center;
+    }
+}

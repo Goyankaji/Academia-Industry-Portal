@@ -1,0 +1,603 @@
+/* =========================================================
+   PLACEMENT CELL - MESSAGES
+========================================================= */
+
+.messages-page {
+    width: 100%;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.messages-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.messages-header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.messages-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn-primary,
+.btn-secondary {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-primary {
+    background: #111827;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #1f2937;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.message-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #f3f4f6;
+    font-size: 20px;
+}
+
+.stat-label {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.stat-card strong {
+    font-size: 23px;
+    color: #111827;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.messages-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.folder-tabs {
+    display: flex;
+    gap: 6px;
+}
+
+.folder-tab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.folder-tab:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.folder-tab.active {
+    background: #111827;
+    color: #ffffff;
+}
+
+.unread-badge {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.message-search {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    overflow: hidden;
+    min-width: 330px;
+}
+
+.search-icon {
+    padding-left: 12px;
+    color: #9ca3af;
+    font-size: 20px;
+}
+
+.message-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0 10px;
+    font-size: 13px;
+    min-width: 0;
+}
+
+.message-search button {
+    height: 100%;
+    border: none;
+    border-left: 1px solid #e5e7eb;
+    background: #f9fafb;
+    padding: 0 14px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #374151;
+}
+
+.clear-search {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 0 6px;
+}
+
+
+/* =========================================================
+   MESSAGE CARD
+========================================================= */
+
+.messages-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.message-row {
+    display: flex;
+    gap: 15px;
+    padding: 19px 21px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.message-row:last-child {
+    border-bottom: none;
+}
+
+.message-row:hover {
+    background: #fafafa;
+}
+
+.message-row.unread {
+    background: #f9fafb;
+}
+
+.message-row.unread:hover {
+    background: #f3f4f6;
+}
+
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+.message-avatar {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #374151;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   MESSAGE CONTENT
+========================================================= */
+
+.message-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.message-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.message-person {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.message-person strong {
+    color: #111827;
+    font-size: 14px;
+}
+
+.role-badge {
+    padding: 3px 7px;
+    border-radius: 5px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.message-date {
+    color: #9ca3af;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.message-subject {
+    margin-top: 7px;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.message-preview {
+    margin-top: 5px;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.message-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 9px;
+}
+
+.read-status,
+.sent-status {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.read-status.read,
+.sent-status {
+    color: #6b7280;
+}
+
+.read-status.unread-status {
+    color: #dc2626;
+}
+
+.mark-read-btn {
+    border: none;
+    background: transparent;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+}
+
+.mark-read-btn:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-messages {
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.empty-icon {
+    font-size: 42px;
+    margin-bottom: 14px;
+    opacity: 0.65;
+}
+
+.empty-messages h3 {
+    margin: 0;
+    color: #111827;
+    font-size: 17px;
+}
+
+.empty-messages p {
+    margin: 7px auto 0;
+    max-width: 500px;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(17, 24, 39, 0.45);
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.compose-modal {
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 21px 23px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.modal-header p {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 7px;
+    background: #f3f4f6;
+    color: #4b5563;
+    font-size: 21px;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    background: #e5e7eb;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+#composeMessageForm {
+    padding: 22px;
+}
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 140px;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 5px;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.message-toast {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    z-index: 10000;
+    display: none;
+    max-width: 350px;
+    padding: 13px 17px;
+    border-radius: 8px;
+    background: #111827;
+    color: #ffffff;
+    font-size: 13px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.message-toast.show {
+    display: block;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .message-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .messages-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .message-search {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .messages-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .message-row {
+        padding: 15px;
+    }
+
+    .message-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .message-date {
+        white-space: normal;
+    }
+
+    .message-person {
+        flex-wrap: wrap;
+    }
+
+    .folder-tabs {
+        width: 100%;
+    }
+
+    .folder-tab {
+        flex: 1;
+        justify-content: center;
+    }
+}

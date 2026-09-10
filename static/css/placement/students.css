@@ -1,0 +1,380 @@
+.students-page {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.students-heading {
+    margin-bottom: 22px;
+}
+
+.page-section-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: #2554d9;
+    letter-spacing: 1px;
+}
+
+.students-heading h2 {
+    margin: 5px 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: #172033;
+}
+
+.students-heading p {
+    font-size: 11px;
+    color: #8993a5;
+}
+
+.student-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.student-stat-card {
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 13px;
+}
+
+.student-stat-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.student-stat-icon.blue {
+    background: #eaf0ff;
+    color: #2859d7;
+}
+
+.student-stat-icon.orange {
+    background: #fff1df;
+    color: #d88324;
+}
+
+.student-stat-icon.purple {
+    background: #f0eaff;
+    color: #7651d7;
+}
+
+.student-stat-icon.green {
+    background: #e8f8ee;
+    color: #1d9b57;
+}
+
+.student-stat-card span {
+    display: block;
+    font-size: 8px;
+    font-weight: 800;
+    color: #929bad;
+    letter-spacing: .6px;
+}
+
+.student-stat-card strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 21px;
+    color: #1d2639;
+}
+
+.students-card {
+    margin-bottom: 18px;
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.students-filter-form {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 230px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 12px;
+    border: 1px solid #dfe5ed;
+    border-radius: 9px;
+}
+
+.search-box i {
+    color: #929bad;
+    font-size: 12px;
+}
+
+.search-box input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 11px;
+    color: #29334a;
+}
+
+.students-filter-form select {
+    height: 40px;
+    padding: 0 11px;
+    border: 1px solid #dfe5ed;
+    border-radius: 9px;
+    background: #fff;
+    color: #5c6880;
+    font-size: 10px;
+    outline: none;
+}
+
+.filter-btn {
+    height: 40px;
+    padding: 0 15px;
+    border: none;
+    border-radius: 9px;
+    background: #2554d9;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.clear-filter {
+    font-size: 10px;
+    color: #d14d4d;
+    font-weight: 700;
+}
+
+.table-card-header {
+    padding: 17px 20px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.table-card-header span {
+    display: block;
+    font-size: 8px;
+    font-weight: 800;
+    color: #929bad;
+    letter-spacing: .8px;
+}
+
+.table-card-header h3 {
+    margin-top: 4px;
+    font-size: 15px;
+    color: #202a3e;
+}
+
+.student-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.student-table {
+    width: 100%;
+    min-width: 950px;
+    border-collapse: collapse;
+}
+
+.student-table th {
+    padding: 12px 18px;
+    text-align: left;
+    background: #fafbfc;
+    border-bottom: 1px solid #edf0f4;
+    font-size: 8px;
+    font-weight: 800;
+    color: #929bad;
+    text-transform: uppercase;
+}
+
+.student-table td {
+    padding: 13px 18px;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 10px;
+    color: #5c6880;
+}
+
+.student-profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.student-avatar {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #eaf0ff;
+    color: #2859d7;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.student-profile-cell strong {
+    display: block;
+    color: #29334a;
+    font-size: 10px;
+}
+
+.student-profile-cell span,
+.branch-name {
+    display: block;
+    margin-top: 3px;
+    color: #9aa3b3;
+    font-size: 8px;
+}
+
+.enrollment,
+.course-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: #34405a;
+}
+
+.cgpa-value {
+    font-weight: 800;
+    color: #2859d7;
+}
+
+.backlog-badge {
+    min-width: 24px;
+    padding: 4px 7px;
+    display: inline-flex;
+    justify-content: center;
+    border-radius: 15px;
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.no-backlog {
+    background: #e8f8ee;
+    color: #218653;
+}
+
+.has-backlog {
+    background: #fff0f0;
+    color: #c74b4b;
+}
+
+.placement-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border-radius: 20px;
+    font-size: 7px;
+    font-weight: 800;
+}
+
+.placement-status-selected {
+    background: #e8f8ee;
+    color: #218653;
+}
+
+.placement-status-shortlisted {
+    background: #fff3df;
+    color: #b9771f;
+}
+
+.placement-status-applied {
+    background: #eef1f5;
+    color: #647087;
+}
+
+.placement-status-rejected {
+    background: #fff0f0;
+    color: #c74b4b;
+}
+
+.placement-status-withdrawn,
+.placement-status-not-applied {
+    background: #f0f2f6;
+    color: #7d8799;
+}
+
+.view-student-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: 1px solid #dce3ed;
+    border-radius: 8px;
+    color: #2554d9;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.view-student-btn:hover {
+    background: #eef3ff;
+}
+
+.students-empty-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-student-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f1f4f8;
+    color: #929bad;
+}
+
+.students-empty-state h3 {
+    font-size: 14px;
+    color: #39445b;
+}
+
+.students-empty-state p {
+    margin: 6px 0 15px;
+    color: #929bad;
+    font-size: 10px;
+}
+
+.clear-empty-btn {
+    display: inline-block;
+    padding: 8px 13px;
+    border-radius: 8px;
+    background: #2554d9;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .student-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .students-filter-form {
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 550px) {
+    .student-stats {
+        grid-template-columns: 1fr;
+    }
+}

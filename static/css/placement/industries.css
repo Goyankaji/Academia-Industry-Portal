@@ -1,0 +1,499 @@
+/* =========================================================
+   PLACEMENT CELL - INDUSTRIES
+   ========================================================= */
+
+.industries-page {
+    width: 100%;
+}
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.industries-page .page-header {
+    margin-bottom: 21px;
+}
+
+.industries-page .page-eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.industries-page .page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 27px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.industries-page .page-header p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 11px;
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.industry-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    min-height: 76px;
+    padding: 15px 17px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    background: #ffffff;
+}
+
+.stat-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 14px;
+}
+
+.stat-card span {
+    display: block;
+    margin-bottom: 3px;
+    color: #64748b;
+    font-size: 10px;
+}
+
+.stat-card strong {
+    display: block;
+    color: #0f172a;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.filters-card {
+    margin-bottom: 20px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    background: #ffffff;
+}
+
+.filters-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+}
+
+.search-box i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.search-box input,
+.filters-form select {
+    height: 40px;
+    box-sizing: border-box;
+    border: 1px solid #dbe2ea;
+    border-radius: 9px;
+    outline: none;
+    background: #ffffff;
+    color: #334155;
+    font-family: inherit;
+    font-size: 11px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0 12px 0 35px;
+}
+
+.filters-form select {
+    min-width: 155px;
+    padding: 0 11px;
+}
+
+.search-box input:focus,
+.filters-form select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
+}
+
+.filter-button,
+.clear-button {
+    height: 40px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-sizing: border-box;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.filter-button {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.filter-button:hover {
+    background: #1d4ed8;
+}
+
+.clear-button {
+    border: 1px solid #dbe2ea;
+    background: #ffffff;
+    color: #475569;
+}
+
+.clear-button:hover {
+    background: #f8fafc;
+}
+
+/* =========================================================
+   INDUSTRIES CARD
+   ========================================================= */
+
+.industries-card {
+    width: 100%;
+}
+
+.industry-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+/* =========================================================
+   INDUSTRY CARD
+   ========================================================= */
+
+.industry-card {
+    padding: 17px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.industry-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbdcf8;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+/* =========================================================
+   COMPANY HEADER
+   ========================================================= */
+
+.industry-card-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.company-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 15px;
+}
+
+.company-heading {
+    min-width: 0;
+}
+
+.company-heading h2 {
+    margin: 0;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.company-heading span {
+    display: block;
+    margin-top: 4px;
+    overflow: hidden;
+    color: #64748b;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   COMPANY TYPE
+   ========================================================= */
+
+.company-type {
+    width: fit-content;
+    margin-top: 13px;
+    padding: 5px 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.company-type i {
+    color: #94a3b8;
+    font-size: 8px;
+}
+
+/* =========================================================
+   LOCATION
+   ========================================================= */
+
+.industry-location {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 9px;
+}
+
+.industry-location i {
+    color: #94a3b8;
+    font-size: 9px;
+}
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.industry-description {
+    min-height: 50px;
+    margin: 13px 0 0;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+.industry-description.muted {
+    color: #94a3b8;
+}
+
+/* =========================================================
+   CARD STATS
+   ========================================================= */
+
+.industry-card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 13px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.industry-card-stats > div {
+    padding: 8px;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.industry-card-stats strong {
+    display: block;
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.industry-card-stats span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 8px;
+}
+
+/* =========================================================
+   CARD FOOTER
+   ========================================================= */
+
+.industry-card-footer {
+    margin-top: 13px;
+}
+
+.details-button {
+    width: 100%;
+    height: 35px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid #dbe5f5;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.details-button:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.details-button i {
+    font-size: 8px;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+    min-height: 260px;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #f1f5f9;
+    color: #94a3b8;
+    font-size: 20px;
+}
+
+.empty-state h2 {
+    margin: 0 0 6px;
+    color: #0f172a;
+    font-size: 16px;
+}
+
+.empty-state p {
+    max-width: 430px;
+    margin: 0;
+    color: #94a3b8;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.clear-empty-button {
+    margin-top: 15px;
+    padding: 8px 13px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.clear-empty-button:hover {
+    background: #dbeafe;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1150px) {
+
+    .industry-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+
+    .filters-form {
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 650px) {
+
+    .industry-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .industry-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box,
+    .filters-form select,
+    .filter-button,
+    .clear-button {
+        width: 100%;
+    }
+}

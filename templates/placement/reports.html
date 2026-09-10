@@ -1,0 +1,421 @@
+{% extends "placement/base.html" %}
+
+{% block title %}Reports | Placement Cell{% endblock %}
+
+{% block page_title %}Reports{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/placement/reports.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="reports-page">
+
+    <!-- PAGE HEADER -->
+    <div class="reports-heading">
+
+        <div>
+            <span class="page-section-label">PLACEMENT ANALYTICS</span>
+            <h2>Reports</h2>
+            <p>View placement performance, application trends and industry participation.</p>
+        </div>
+
+        <button type="button" class="print-report-btn" id="printReportBtn">
+            <i class="fas fa-print"></i>
+            Print Report
+        </button>
+
+    </div>
+
+
+    <!-- OVERVIEW STATISTICS -->
+    <div class="report-stats">
+
+        <div class="report-stat-card">
+            <div class="report-stat-icon blue">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+
+            <div>
+                <span>TOTAL STUDENTS</span>
+                <strong>{{ total_students }}</strong>
+            </div>
+        </div>
+
+
+        <div class="report-stat-card">
+            <div class="report-stat-icon orange">
+                <i class="fas fa-paper-plane"></i>
+            </div>
+
+            <div>
+                <span>APPLICATIONS</span>
+                <strong>{{ total_applications }}</strong>
+            </div>
+        </div>
+
+
+        <div class="report-stat-card">
+            <div class="report-stat-icon purple">
+                <i class="fas fa-user-check"></i>
+            </div>
+
+            <div>
+                <span>SHORTLISTED</span>
+                <strong>{{ shortlisted }}</strong>
+            </div>
+        </div>
+
+
+        <div class="report-stat-card">
+            <div class="report-stat-icon green">
+                <i class="fas fa-trophy"></i>
+            </div>
+
+            <div>
+                <span>SELECTED</span>
+                <strong>{{ selected }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- OVERVIEW GRID -->
+    <div class="report-grid">
+
+        <!-- PLACEMENT PERFORMANCE -->
+        <div class="report-card">
+
+            <div class="report-card-header">
+                <span class="card-section-label">PLACEMENT OVERVIEW</span>
+                <h3>Placement Performance</h3>
+            </div>
+
+            <div class="placement-overview">
+
+                <div class="placement-rate-box">
+
+                    <div class="rate-circle">
+                        <span>{{ placement_rate }}%</span>
+                    </div>
+
+                    <div>
+                        <strong>Placement Rate</strong>
+                        <p>
+                            Students selected through placement opportunities.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="performance-list">
+
+                    <!-- APPLIED -->
+                    <div class="performance-row">
+
+                        <div class="performance-label">
+                            <span>Applied</span>
+                            <strong>{{ applied }}</strong>
+                        </div>
+
+                        <div class="performance-bar">
+                            <div
+                                class="bar-fill blue-bar"
+                                data-value="{{ applied }}">
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- SHORTLISTED -->
+                    <div class="performance-row">
+
+                        <div class="performance-label">
+                            <span>Shortlisted</span>
+                            <strong>{{ shortlisted }}</strong>
+                        </div>
+
+                        <div class="performance-bar">
+                            <div
+                                class="bar-fill purple-bar"
+                                data-value="{{ shortlisted }}">
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- SELECTED -->
+                    <div class="performance-row">
+
+                        <div class="performance-label">
+                            <span>Selected</span>
+                            <strong>{{ selected }}</strong>
+                        </div>
+
+                        <div class="performance-bar">
+                            <div
+                                class="bar-fill green-bar"
+                                data-value="{{ selected }}">
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- REJECTED -->
+                    <div class="performance-row">
+
+                        <div class="performance-label">
+                            <span>Rejected</span>
+                            <strong>{{ rejected }}</strong>
+                        </div>
+
+                        <div class="performance-bar">
+                            <div
+                                class="bar-fill red-bar"
+                                data-value="{{ rejected }}">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- OPPORTUNITY OVERVIEW -->
+        <div class="report-card">
+
+            <div class="report-card-header">
+                <span class="card-section-label">OPPORTUNITIES</span>
+                <h3>Opportunity Overview</h3>
+            </div>
+
+            <div class="opportunity-overview">
+
+                <div class="opportunity-item">
+
+                    <div class="opportunity-icon blue">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+
+                    <div>
+                        <span>Total Opportunities</span>
+                        <strong>{{ total_opportunities }}</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="opportunity-item">
+
+                    <div class="opportunity-icon green">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+
+                    <div>
+                        <span>Open Opportunities</span>
+                        <strong>{{ open_opportunities }}</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="opportunity-item">
+
+                    <div class="opportunity-icon purple">
+                        <i class="fas fa-building"></i>
+                    </div>
+
+                    <div>
+                        <span>Participating Industries</span>
+                        <strong>{{ participating_industries }}</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- APPLICATION STATUS -->
+    <div class="report-card application-status-card">
+
+        <div class="report-card-header">
+            <span class="card-section-label">APPLICATION ANALYSIS</span>
+            <h3>Application Status Report</h3>
+        </div>
+
+        <div class="application-status-grid">
+
+            {% for item in application_report %}
+
+            <div class="status-report-item">
+
+                <div class="status-report-top">
+                    <span>{{ item.label }}</span>
+                    <strong>{{ item.count }}</strong>
+                </div>
+
+                <div class="status-progress">
+
+                    <div
+                        class="status-progress-fill"
+                        data-value="{{ item.count }}">
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- INDUSTRY REPORT -->
+    <div class="report-card industry-report-card">
+
+        <div class="report-card-header">
+            <span class="card-section-label">INDUSTRY INSIGHTS</span>
+            <h3>Industry-wise Report</h3>
+        </div>
+
+
+        {% if industry_report %}
+
+        <div class="industry-table-wrapper">
+
+            <table class="industry-table">
+
+                <thead>
+                    <tr>
+                        <th>Industry</th>
+                        <th>Opportunities</th>
+                        <th>Applications</th>
+                        <th>Selected</th>
+                        <th>Selection Rate</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for industry in industry_report %}
+
+                    <tr>
+
+                        <!-- INDUSTRY -->
+                        <td>
+
+                            <div class="industry-name">
+
+                                <div class="industry-avatar">
+                                    <i class="fas fa-building"></i>
+                                </div>
+
+                                <strong>
+                                    {{ industry.company_name }}
+                                </strong>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- OPPORTUNITIES -->
+                        <td>
+                            <span class="table-number">
+                                {{ industry.opportunities or 0 }}
+                            </span>
+                        </td>
+
+
+                        <!-- APPLICATIONS -->
+                        <td>
+                            <span class="table-number">
+                                {{ industry.applications or 0 }}
+                            </span>
+                        </td>
+
+
+                        <!-- SELECTED -->
+                        <td>
+                            <span class="selected-number">
+                                {{ industry.selected or 0 }}
+                            </span>
+                        </td>
+
+
+                        <!-- SELECTION RATE -->
+                        <td>
+
+                            <div
+                                class="selection-rate"
+                                data-applications="{{ industry.applications or 0 }}"
+                                data-selected="{{ industry.selected or 0 }}">
+
+                                <span class="industry-rate-value">
+                                    0%
+                                </span>
+
+                                <div class="mini-progress">
+                                    <div class="mini-progress-fill"></div>
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% else %}
+
+        <div class="reports-empty-state">
+
+            <div class="empty-report-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+
+            <h3>No Industry Data Available</h3>
+
+            <p>
+                Industry-wise placement information will appear here
+                when opportunities receive applications.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/placement/reports.js') }}"></script>
+{% endblock %}

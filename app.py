@@ -251,7 +251,16 @@ def login():
                     url_for("college_dashboard")
                 )
 
+            # -------------------------------------------------
+            # PLACEMENT CELL
+            # -------------------------------------------------
 
+            if user["role"] == "PLACEMENT_CELL":
+
+                return redirect(
+                    url_for("placement_dashboard")
+                )
+            
             # -------------------------------------------------
             # OTHER ROLES
             # -------------------------------------------------
@@ -1862,6 +1871,7 @@ def toggle_placement_cell_status(placement_cell_id):
 
         if conn:
             conn.close()
+
 
 # =========================================================
 # INDUSTRIES - LIST
@@ -18956,6 +18966,6783 @@ def college_notifications_mark_all_read():
     finally:
         cursor.close()
         conn.close()
+
+# =========================================================
+# PLACEMENT CELL AUTHENTICATION DECORATOR
+# =========================================================
+
+def placement_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        # -------------------------------------------------
+        # LOGIN CHECK
+        # -------------------------------------------------
+
+        if "user_id" not in session:
+
+            flash(
+                "Please login first.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # -------------------------------------------------
+        # ROLE CHECK
+        # -------------------------------------------------
+
+        if session.get("role") != "PLACEMENT_CELL":
+
+            flash(
+                "Placement Cell access required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = None
+        cursor = None
+
+        try:
+
+            conn = get_db_connection()
+
+            cursor = conn.cursor(
+                dictionary=True
+            )
+
+
+            # -------------------------------------------------
+            # GET CURRENT PLACEMENT CELL
+            # -------------------------------------------------
+
+            cursor.execute("""
+                SELECT
+                    pc.id AS placement_cell_id,
+                    pc.college_id,
+                    pc.status AS placement_cell_status,
+
+                    u.status AS user_status,
+
+                    c.college_name,
+                    c.college_code,
+                    c.status AS college_status
+
+                FROM placement_cells pc
+
+                INNER JOIN users u
+                    ON pc.user_id = u.id
+
+                INNER JOIN colleges c
+                    ON pc.college_id = c.id
+
+                WHERE pc.user_id = %s
+
+                LIMIT 1
+            """, (
+                session["user_id"],
+            ))
+
+            placement_cell = cursor.fetchone()
+
+
+            # -------------------------------------------------
+            # PLACEMENT CELL NOT FOUND
+            # -------------------------------------------------
+
+            if not placement_cell:
+
+                session.clear()
+
+                flash(
+                    "Placement Cell profile not found.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("login")
+                )
+
+
+            # -------------------------------------------------
+            # ACCOUNT STATUS CHECK
+            # -------------------------------------------------
+
+            if (
+                placement_cell["user_status"] != "ACTIVE"
+                or placement_cell["placement_cell_status"] != "ACTIVE"
+                or placement_cell["college_status"] != "ACTIVE"
+            ):
+
+                session.clear()
+
+                flash(
+                    "Your Placement Cell account is not active.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("login")
+                )
+
+
+            # -------------------------------------------------
+            # STORE PLACEMENT CONTEXT IN SESSION
+            # -------------------------------------------------
+
+            session["placement_cell_id"] = (
+                placement_cell["placement_cell_id"]
+            )
+
+            session["college_id"] = (
+                placement_cell["college_id"]
+            )
+
+            session["college_name"] = (
+                placement_cell["college_name"]
+            )
+
+            session["college_code"] = (
+                placement_cell["college_code"]
+            )
+
+
+            return f(*args, **kwargs)
+
+
+        except mysql.connector.Error as e:
+
+            print("=" * 70)
+            print("PLACEMENT AUTH DATABASE ERROR:")
+            print(type(e).__name__)
+            print(e)
+            print("=" * 70)
+
+            flash(
+                "Unable to verify Placement Cell access.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        except Exception as e:
+
+            print("=" * 70)
+            print("PLACEMENT AUTH ERROR:")
+            print(type(e).__name__)
+            print(e)
+            print("=" * 70)
+
+            flash(
+                "Unable to verify Placement Cell access.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        finally:
+
+            if cursor:
+                cursor.close()
+
+            if conn:
+                conn.close()
+
+
+    return decorated_function
+
+# =========================================================
+# PLACEMENT CELL DASHBOARD
+# =========================================================
+
+# =========================================================
+# PLACEMENT CELL DASHBOARD
+# =========================================================
+
+@app.route("/placement/dashboard")
+@placement_required
+def placement_dashboard():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Placement Cell session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # CURRENT PLACEMENT CELL
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                pc.id AS placement_cell_id,
+                pc.user_id,
+                pc.college_id,
+                pc.status AS placement_cell_status,
+
+                u.name AS representative_name,
+                u.email AS account_email,
+                u.status AS user_status,
+
+                c.college_name,
+                c.college_code,
+                c.university_name
+
+            FROM placement_cells pc
+
+            INNER JOIN users u
+                ON pc.user_id = u.id
+
+            INNER JOIN colleges c
+                ON pc.college_id = c.id
+
+            WHERE pc.user_id = %s
+
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        placement_cell = cursor.fetchone()
+
+
+        # =================================================
+        # PLACEMENT CELL NOT FOUND
+        # =================================================
+
+        if not placement_cell:
+
+            session.clear()
+
+            flash(
+                "Placement Cell profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        college_id = placement_cell["college_id"]
+
+
+        # =================================================
+        # TOTAL STUDENTS
+        # Current Placement Cell's college only
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+        """, (
+            college_id,
+        ))
+
+        total_students = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # STUDENTS WITH COMPLETED PROFILES
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+              AND profile_completed = 1
+        """, (
+            college_id,
+        ))
+
+        profile_completed_students = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # ACTIVE / OPEN OPPORTUNITIES
+        #
+        # Opportunities are industry-wide because an
+        # opportunity can be available to students of
+        # different colleges.
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities
+            WHERE status = 'OPEN'
+        """)
+
+        active_opportunities = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # TOTAL APPLICATIONS
+        # Only students belonging to this college
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+        """, (
+            college_id,
+        ))
+
+        total_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # APPLIED
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'APPLIED'
+        """, (
+            college_id,
+        ))
+
+        applied_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # SHORTLISTED
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SHORTLISTED'
+        """, (
+            college_id,
+        ))
+
+        shortlisted_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # SELECTED
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+        """, (
+            college_id,
+        ))
+
+        selected_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # REJECTED
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'REJECTED'
+        """, (
+            college_id,
+        ))
+
+        rejected_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # WITHDRAWN
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'WITHDRAWN'
+        """, (
+            college_id,
+        ))
+
+        withdrawn_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # UNREAD NOTIFICATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM notifications
+
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (
+            user_id,
+        ))
+
+        unread_notifications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # UNREAD MESSAGES
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM messages
+
+            WHERE receiver_id = %s
+              AND is_read = 0
+        """, (
+            user_id,
+        ))
+
+        unread_messages = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # RECENT APPLICATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                sa.id AS application_id,
+                sa.status,
+                sa.application_date,
+                sa.created_at,
+
+                s.id AS student_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.cgpa,
+
+                u.name AS student_name,
+
+                o.id AS opportunity_id,
+                o.title AS opportunity_title,
+                o.opportunity_type,
+
+                i.company_name
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE s.college_id = %s
+
+            ORDER BY
+                sa.application_date DESC,
+                sa.created_at DESC
+
+            LIMIT 6
+        """, (
+            college_id,
+        ))
+
+        recent_applications = cursor.fetchall()
+
+
+        # =================================================
+        # RECENT OPEN OPPORTUNITIES
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                o.id,
+                o.title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+                o.application_deadline,
+                o.status,
+                o.created_at,
+
+                i.company_name
+
+            FROM opportunities o
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE o.status = 'OPEN'
+
+            ORDER BY o.created_at DESC
+
+            LIMIT 6
+        """)
+
+        recent_opportunities = cursor.fetchall()
+
+
+        # =================================================
+        # RECENT STUDENTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.cgpa,
+                s.created_at,
+
+                u.name AS student_name,
+                u.email AS student_email
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE s.college_id = %s
+
+            ORDER BY s.created_at DESC
+
+            LIMIT 6
+        """, (
+            college_id,
+        ))
+
+        recent_students = cursor.fetchall()
+
+
+        # =================================================
+        # APPLICATION PIPELINE
+        # =================================================
+
+        application_pipeline = {
+            "applied": applied_applications,
+            "shortlisted": shortlisted_applications,
+            "selected": selected_applications,
+            "rejected": rejected_applications,
+            "withdrawn": withdrawn_applications
+        }
+
+
+        # =================================================
+        # RENDER DASHBOARD
+        # =================================================
+
+        return render_template(
+
+            "placement/dashboard.html",
+
+            dashboard="dashboard",
+
+            placement_cell=placement_cell,
+
+            total_students=total_students,
+
+            profile_completed_students=profile_completed_students,
+
+            active_opportunities=active_opportunities,
+
+            total_applications=total_applications,
+
+            applied_applications=applied_applications,
+
+            shortlisted_applications=shortlisted_applications,
+
+            selected_applications=selected_applications,
+
+            rejected_applications=rejected_applications,
+
+            withdrawn_applications=withdrawn_applications,
+
+            unread_notifications=unread_notifications,
+
+            unread_messages=unread_messages,
+
+            application_pipeline=application_pipeline,
+
+            recent_applications=recent_applications,
+
+            recent_opportunities=recent_opportunities,
+
+            recent_students=recent_students
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("PLACEMENT DASHBOARD DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load Placement Cell dashboard.",
+            "error"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT DASHBOARD ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load Placement Cell dashboard.",
+            "error"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - STUDENTS
+# =========================================================
+
+@app.route("/placement/students")
+@placement_required
+def placement_students():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get("college_id")
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        # -------------------------------------------------
+        # FILTERS
+        # -------------------------------------------------
+
+        search_query = request.args.get(
+            "search",
+            ""
+        ).strip()
+
+        selected_branch = request.args.get(
+            "branch",
+            ""
+        ).strip()
+
+        selected_status = request.args.get(
+            "placement_status",
+            ""
+        ).strip().upper()
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # STUDENT QUERY
+        # ONLY CURRENT PLACEMENT CELL COLLEGE
+        # =================================================
+
+        query = """
+            SELECT
+
+                s.id,
+                s.user_id,
+                s.college_id,
+
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+
+                s.phone,
+                s.dob,
+                s.gender,
+                s.address,
+
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+
+                s.linkedin_url,
+                s.github_url,
+                s.portfolio_url,
+                s.resume_url,
+
+                s.profile_completed,
+
+                u.name AS name,
+                u.email AS email,
+                u.status AS user_status,
+                u.created_at AS user_created_at,
+
+                c.college_name,
+                c.college_code
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE s.college_id = %s
+        """
+
+        params = [
+            college_id
+        ]
+
+
+        # =================================================
+        # SEARCH
+        # =================================================
+
+        if search_query:
+
+            query += """
+                AND (
+                    u.name LIKE %s
+                    OR u.email LIKE %s
+                    OR s.enrollment_no LIKE %s
+                    OR s.course LIKE %s
+                    OR s.branch LIKE %s
+                )
+            """
+
+            search_value = f"%{search_query}%"
+
+            params.extend([
+                search_value,
+                search_value,
+                search_value,
+                search_value,
+                search_value
+            ])
+
+
+        # =================================================
+        # BRANCH FILTER
+        # =================================================
+
+        if selected_branch:
+
+            query += """
+                AND s.branch = %s
+            """
+
+            params.append(
+                selected_branch
+            )
+
+
+        query += """
+            ORDER BY u.name ASC
+        """
+
+
+        cursor.execute(
+            query,
+            params
+        )
+
+        students = cursor.fetchall()
+
+
+        # =================================================
+        # PLACEMENT STATUS
+        #
+        # Priority:
+        # SELECTED > SHORTLISTED > APPLIED > REJECTED
+        # =================================================
+
+        student_ids = [
+            student["id"]
+            for student in students
+        ]
+
+
+        placement_status_map = {}
+
+
+        if student_ids:
+
+            placeholders = ", ".join(
+                ["%s"] * len(student_ids)
+            )
+
+
+            cursor.execute(
+                f"""
+                    SELECT
+
+                        sa.student_id,
+
+                        CASE
+
+                            WHEN MAX(
+                                CASE
+                                    WHEN sa.status = 'SELECTED'
+                                    THEN 4
+                                    WHEN sa.status = 'SHORTLISTED'
+                                    THEN 3
+                                    WHEN sa.status = 'APPLIED'
+                                    THEN 2
+                                    WHEN sa.status = 'WITHDRAWN'
+                                    THEN 1
+                                    ELSE 0
+                                END
+                            ) = 4
+                            THEN 'SELECTED'
+
+
+                            WHEN MAX(
+                                CASE
+                                    WHEN sa.status = 'SHORTLISTED'
+                                    THEN 3
+                                    WHEN sa.status = 'APPLIED'
+                                    THEN 2
+                                    WHEN sa.status = 'WITHDRAWN'
+                                    THEN 1
+                                    ELSE 0
+                                END
+                            ) = 3
+                            THEN 'SHORTLISTED'
+
+
+                            WHEN MAX(
+                                CASE
+                                    WHEN sa.status = 'APPLIED'
+                                    THEN 2
+                                    WHEN sa.status = 'WITHDRAWN'
+                                    THEN 1
+                                    ELSE 0
+                                END
+                            ) = 2
+                            THEN 'APPLIED'
+
+
+                            WHEN MAX(
+                                CASE
+                                    WHEN sa.status = 'WITHDRAWN'
+                                    THEN 1
+                                    ELSE 0
+                                END
+                            ) = 1
+                            THEN 'WITHDRAWN'
+
+
+                            ELSE 'REJECTED'
+
+                        END AS placement_status
+
+                    FROM student_applications sa
+
+                    WHERE sa.student_id IN ({placeholders})
+
+                    GROUP BY sa.student_id
+                """,
+                student_ids
+            )
+
+
+            status_rows = cursor.fetchall()
+
+
+            for row in status_rows:
+
+                placement_status_map[
+                    row["student_id"]
+                ] = row["placement_status"]
+
+
+        # =================================================
+        # ATTACH STATUS TO STUDENTS
+        # =================================================
+
+        for student in students:
+
+            student["placement_status"] = (
+                placement_status_map.get(
+                    student["id"],
+                    "NOT APPLIED"
+                )
+            )
+
+
+        # =================================================
+        # STATUS FILTER
+        # =================================================
+
+        if selected_status:
+
+            students = [
+                student
+                for student in students
+                if student["placement_status"] == selected_status
+            ]
+
+
+        # =================================================
+        # BRANCHES
+        # =================================================
+
+        cursor.execute("""
+            SELECT DISTINCT
+                branch
+
+            FROM students
+
+            WHERE college_id = %s
+              AND branch IS NOT NULL
+              AND branch != ''
+
+            ORDER BY branch ASC
+        """, (
+            college_id,
+        ))
+
+
+        branches = [
+            row["branch"]
+            for row in cursor.fetchall()
+        ]
+
+
+        # =================================================
+        # STATISTICS
+        # =================================================
+
+        total_students = len(
+            students
+        )
+
+
+        applied_count = sum(
+            1
+            for student in students
+            if student["placement_status"] == "APPLIED"
+        )
+
+
+        shortlisted_count = sum(
+            1
+            for student in students
+            if student["placement_status"] == "SHORTLISTED"
+        )
+
+
+        selected_count = sum(
+            1
+            for student in students
+            if student["placement_status"] == "SELECTED"
+        )
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+
+            "placement/students.html",
+
+            dashboard="students",
+
+            students=students,
+
+            branches=branches,
+
+            search_query=search_query,
+
+            selected_branch=selected_branch,
+
+            selected_status=selected_status,
+
+            total_students=total_students,
+
+            applied_count=applied_count,
+
+            shortlisted_count=shortlisted_count,
+
+            selected_count=selected_count
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT STUDENTS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load students.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - STUDENT DETAILS
+# =========================================================
+
+@app.route("/placement/students/<student_id>")
+@placement_required
+def placement_student_details(student_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get("college_id")
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # STUDENT
+        #
+        # IMPORTANT:
+        # student must belong to Placement Cell's college
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                s.*,
+
+                u.name AS name,
+                u.email AS email,
+                u.status AS user_status,
+                u.created_at AS user_created_at,
+
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.city AS college_city,
+                c.state AS college_state
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE s.id = %s
+              AND s.college_id = %s
+
+            LIMIT 1
+        """, (
+            student_id,
+            college_id
+        ))
+
+
+        student = cursor.fetchone()
+
+
+        # =================================================
+        # SECURITY / NOT FOUND
+        # =================================================
+
+        if not student:
+
+            flash(
+                "Student not found or access denied.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_students")
+            )
+
+
+        # =================================================
+        # STUDENT SKILLS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                id,
+                skill_name,
+                proficiency_level,
+                assessment_percentage,
+                verification_status,
+                last_assessed_at,
+                created_at
+
+            FROM student_skills
+
+            WHERE student_id = %s
+
+            ORDER BY
+                assessment_percentage DESC,
+                skill_name ASC
+        """, (
+            student_id,
+        ))
+
+
+        skills = cursor.fetchall()
+
+
+        # =================================================
+        # APPLICATION HISTORY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                sa.id AS application_id,
+                sa.status,
+                sa.application_date,
+                sa.updated_at,
+
+                o.id AS opportunity_id,
+                o.title AS opportunity_title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+
+                i.id AS industry_id,
+                i.company_name
+
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE sa.student_id = %s
+
+            ORDER BY
+                sa.application_date DESC
+
+        """, (
+            student_id,
+        ))
+
+
+        applications = cursor.fetchall()
+
+
+        # =================================================
+        # PLACEMENT STATUS
+        # =================================================
+
+        placement_status = "NOT APPLIED"
+
+
+        if applications:
+
+            statuses = [
+                application["status"]
+                for application in applications
+            ]
+
+
+            if "SELECTED" in statuses:
+
+                placement_status = "SELECTED"
+
+            elif "SHORTLISTED" in statuses:
+
+                placement_status = "SHORTLISTED"
+
+            elif "APPLIED" in statuses:
+
+                placement_status = "APPLIED"
+
+            elif "WITHDRAWN" in statuses:
+
+                placement_status = "WITHDRAWN"
+
+            elif "REJECTED" in statuses:
+
+                placement_status = "REJECTED"
+
+
+        student["placement_status"] = (
+            placement_status
+        )
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+
+            "placement/student-details.html",
+
+            dashboard="students",
+
+            student=student,
+
+            skills=skills,
+
+            applications=applications
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT STUDENT DETAILS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load student details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_students")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - OPPORTUNITIES
+# =========================================================
+
+@app.route("/placement/opportunities")
+@placement_required
+def placement_opportunities():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        search = request.args.get("search", "").strip()
+        opportunity_type = request.args.get("type", "").strip().upper()
+        work_mode = request.args.get("work_mode", "").strip().upper()
+
+        query = """
+            SELECT
+                o.id,
+                o.industry_id,
+                o.title,
+                o.opportunity_type,
+                o.description,
+                o.required_skills,
+                o.eligibility_criteria,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+                o.application_deadline,
+                o.status,
+                o.created_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector
+
+            FROM opportunities o
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE o.status = 'OPEN'
+              AND i.status = 'ACTIVE'
+        """
+
+        params = []
+
+        if search:
+
+            query += """
+                AND (
+                    o.title LIKE %s
+                    OR o.description LIKE %s
+                    OR o.required_skills LIKE %s
+                    OR i.company_name LIKE %s
+                )
+            """
+
+            value = f"%{search}%"
+
+            params.extend([
+                value,
+                value,
+                value,
+                value
+            ])
+
+        if opportunity_type:
+
+            query += """
+                AND o.opportunity_type = %s
+            """
+
+            params.append(opportunity_type)
+
+        if work_mode:
+
+            query += """
+                AND o.work_mode = %s
+            """
+
+            params.append(work_mode)
+
+        query += """
+            ORDER BY
+                CASE
+                    WHEN o.application_deadline IS NULL THEN 1
+                    ELSE 0
+                END,
+                o.application_deadline ASC,
+                o.created_at DESC
+        """
+
+        cursor.execute(query, params)
+
+        opportunities = cursor.fetchall()
+
+        # -------------------------------------------------
+        # APPLICATION COUNT FOR CURRENT COLLEGE
+        # -------------------------------------------------
+
+        college_id = session.get("college_id")
+
+        for opportunity in opportunities:
+
+            cursor.execute("""
+                SELECT COUNT(*) AS total
+
+                FROM student_applications sa
+
+                INNER JOIN students s
+                    ON sa.student_id = s.id
+
+                WHERE sa.opportunity_id = %s
+                  AND s.college_id = %s
+            """, (
+                opportunity["id"],
+                college_id
+            ))
+
+            opportunity["application_count"] = (
+                cursor.fetchone()["total"] or 0
+            )
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities o
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+            WHERE o.status = 'OPEN'
+              AND i.status = 'ACTIVE'
+        """)
+
+        total_opportunities = cursor.fetchone()["total"] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM opportunities o
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+            WHERE o.status = 'OPEN'
+              AND i.status = 'ACTIVE'
+              AND o.application_deadline IS NOT NULL
+              AND o.application_deadline >= CURDATE()
+        """)
+
+        upcoming_deadlines = cursor.fetchone()["total"] or 0
+
+        cursor.execute("""
+            SELECT COUNT(DISTINCT industry_id) AS total
+            FROM opportunities
+            WHERE status = 'OPEN'
+        """)
+
+        hiring_industries = cursor.fetchone()["total"] or 0
+
+        return render_template(
+            "placement/opportunities.html",
+
+            dashboard="opportunities",
+
+            opportunities=opportunities,
+
+            total_opportunities=total_opportunities,
+
+            upcoming_deadlines=upcoming_deadlines,
+
+            hiring_industries=hiring_industries,
+
+            search=search,
+
+            opportunity_type=opportunity_type,
+
+            work_mode=work_mode
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT OPPORTUNITIES ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load opportunities.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - OPPORTUNITY DETAILS
+# =========================================================
+
+@app.route("/placement/opportunities/<opportunity_id>")
+@placement_required
+def placement_opportunity_details(opportunity_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        college_id = session.get("college_id")
+
+        # -------------------------------------------------
+        # OPPORTUNITY
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                o.id,
+                o.industry_id,
+                o.title,
+                o.opportunity_type,
+                o.description,
+                o.required_skills,
+                o.eligibility_criteria,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+                o.application_deadline,
+                o.status,
+                o.created_at,
+                o.updated_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.email AS industry_email,
+                i.website,
+                i.city,
+                i.state
+
+            FROM opportunities o
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE o.id = %s
+
+            LIMIT 1
+        """, (
+            opportunity_id,
+        ))
+
+        opportunity = cursor.fetchone()
+
+        if not opportunity:
+
+            flash(
+                "Opportunity not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_opportunities")
+            )
+
+        # -------------------------------------------------
+        # CURRENT COLLEGE APPLICATIONS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE sa.opportunity_id = %s
+              AND s.college_id = %s
+        """, (
+            opportunity_id,
+            college_id
+        ))
+
+        application_count = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # -------------------------------------------------
+        # COLLEGE STUDENT COUNT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+        """, (
+            college_id,
+        ))
+
+        total_students = cursor.fetchone()["total"] or 0
+
+        return render_template(
+            "placement/opportunity-details.html",
+
+            dashboard="opportunities",
+
+            opportunity=opportunity,
+
+            application_count=application_count,
+
+            total_students=total_students
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT OPPORTUNITY DETAILS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load opportunity details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_opportunities")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - ELIGIBLE STUDENTS
+# =========================================================
+
+@app.route("/placement/opportunities/<opportunity_id>/eligible-students")
+@placement_required
+def placement_eligible_students(opportunity_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get("college_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # OPPORTUNITY
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                o.id,
+                o.title,
+                o.opportunity_type,
+                o.required_skills,
+                o.eligibility_criteria,
+                o.application_deadline,
+                o.status,
+
+                i.company_name
+
+            FROM opportunities o
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE o.id = %s
+
+            LIMIT 1
+        """, (
+            opportunity_id,
+        ))
+
+        opportunity = cursor.fetchone()
+
+        if not opportunity:
+
+            flash(
+                "Opportunity not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_opportunities")
+            )
+
+        # -------------------------------------------------
+        # CURRENT COLLEGE STUDENTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                s.id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.cgpa,
+                s.active_backlogs,
+                s.profile_completed,
+
+                u.name,
+                u.email
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE s.college_id = %s
+
+            ORDER BY
+                s.cgpa DESC,
+                u.name ASC
+        """, (
+            college_id,
+        ))
+
+        students = cursor.fetchall()
+
+        # -------------------------------------------------
+        # REQUIRED SKILLS
+        # -------------------------------------------------
+
+        required_skills_text = (
+            opportunity["required_skills"] or ""
+        ).lower()
+
+        required_skills = [
+            skill.strip()
+            for skill in required_skills_text.replace(
+                ";", ","
+            ).split(",")
+            if skill.strip()
+        ]
+
+        # -------------------------------------------------
+        # APPLICATION STATUS
+        # -------------------------------------------------
+
+        student_ids = [
+            student["id"]
+            for student in students
+        ]
+
+        application_map = {}
+
+        if student_ids:
+
+            placeholders = ", ".join(
+                ["%s"] * len(student_ids)
+            )
+
+            cursor.execute(
+                f"""
+                    SELECT
+                        student_id,
+                        status
+
+                    FROM student_applications
+
+                    WHERE opportunity_id = %s
+
+                      AND student_id IN ({placeholders})
+                """,
+                [opportunity_id] + student_ids
+            )
+
+            for row in cursor.fetchall():
+
+                application_map[
+                    row["student_id"]
+                ] = row["status"]
+
+        # -------------------------------------------------
+        # STUDENT SKILLS
+        # -------------------------------------------------
+
+        skills_map = {}
+
+        if student_ids:
+
+            placeholders = ", ".join(
+                ["%s"] * len(student_ids)
+            )
+
+            cursor.execute(
+                f"""
+                    SELECT
+                        student_id,
+                        skill_name
+
+                    FROM student_skills
+
+                    WHERE student_id IN ({placeholders})
+                """,
+                student_ids
+            )
+
+            for row in cursor.fetchall():
+
+                skills_map.setdefault(
+                    row["student_id"],
+                    []
+                ).append(
+                    row["skill_name"]
+                )
+
+        # -------------------------------------------------
+        # ELIGIBILITY CALCULATION
+        # -------------------------------------------------
+
+        eligible_students = []
+
+        for student in students:
+
+            student_skills = [
+                str(skill).lower()
+                for skill in skills_map.get(
+                    student["id"],
+                    []
+                )
+            ]
+
+            matched_skills = []
+
+            for required_skill in required_skills:
+
+                if any(
+                    required_skill in skill
+                    or skill in required_skill
+                    for skill in student_skills
+                ):
+                    matched_skills.append(
+                        required_skill
+                    )
+
+            # ---------------------------------------------
+            # BASIC ELIGIBILITY
+            # ---------------------------------------------
+
+            cgpa_ok = True
+
+            criteria_text = (
+                opportunity["eligibility_criteria"]
+                or ""
+            ).lower()
+
+            import re
+
+            cgpa_matches = re.findall(
+                r'(?:cgpa|minimum cgpa|cgpa of)\s*(?:>=|:|is)?\s*(\d+(?:\.\d+)?)',
+                criteria_text
+            )
+
+            if cgpa_matches and student["cgpa"] is not None:
+
+                required_cgpa = float(
+                    cgpa_matches[0]
+                )
+
+                cgpa_ok = float(
+                    student["cgpa"]
+                ) >= required_cgpa
+
+            elif cgpa_matches:
+
+                cgpa_ok = False
+
+            # ---------------------------------------------
+            # BACKLOG CHECK
+            # ---------------------------------------------
+
+            backlog_ok = (
+                not student["active_backlogs"]
+                or student["active_backlogs"] == 0
+            )
+
+            # ---------------------------------------------
+            # SKILL CHECK
+            # ---------------------------------------------
+
+            skills_ok = (
+                not required_skills
+                or bool(matched_skills)
+            )
+
+            # ---------------------------------------------
+            # FINAL
+            # ---------------------------------------------
+
+            student["matched_skills"] = matched_skills
+
+            student["application_status"] = (
+                application_map.get(
+                    student["id"]
+                )
+            )
+
+            student["cgpa_ok"] = cgpa_ok
+            student["backlog_ok"] = backlog_ok
+            student["skills_ok"] = skills_ok
+
+            student["eligible"] = (
+                cgpa_ok
+                and backlog_ok
+                and skills_ok
+            )
+
+            if student["eligible"]:
+
+                eligible_students.append(
+                    student
+                )
+
+        return render_template(
+            "placement/eligible-students.html",
+
+            dashboard="opportunities",
+
+            opportunity=opportunity,
+
+            students=eligible_students,
+
+            total_eligible=len(
+                eligible_students
+            ),
+
+            total_students=len(
+                students
+            )
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACIBLE STUDENTS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to calculate eligible students.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "placement_opportunity_details",
+                opportunity_id=opportunity_id
+            )
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - APPLICATIONS
+# =========================================================
+
+@app.route("/placement/applications")
+@placement_required
+def placement_applications():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get("college_id")
+
+        if not college_id:
+            flash(
+                "College information not found.",
+                "error"
+            )
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # FILTERS
+        # -------------------------------------------------
+
+        search = request.args.get(
+            "search",
+            ""
+        ).strip()
+
+        selected_status = request.args.get(
+            "status",
+            ""
+        ).strip().upper()
+
+        selected_opportunity = request.args.get(
+            "opportunity_id",
+            ""
+        ).strip()
+
+        # -------------------------------------------------
+        # APPLICATIONS
+        # ONLY STUDENTS FROM CURRENT COLLEGE
+        # -------------------------------------------------
+
+        query = """
+            SELECT
+
+                sa.id AS application_id,
+                sa.status,
+                sa.application_date,
+                sa.created_at,
+                sa.updated_at,
+
+                s.id AS student_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.cgpa,
+                s.active_backlogs,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                o.id AS opportunity_id,
+                o.title AS opportunity_title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+                o.application_deadline,
+
+                i.id AS industry_id,
+                i.company_name,
+                i.company_type,
+                i.industry_sector
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE s.college_id = %s
+        """
+
+        params = [
+            college_id
+        ]
+
+        # -------------------------------------------------
+        # SEARCH
+        # -------------------------------------------------
+
+        if search:
+
+            query += """
+                AND (
+                    u.name LIKE %s
+                    OR u.email LIKE %s
+                    OR s.enrollment_no LIKE %s
+                    OR o.title LIKE %s
+                    OR i.company_name LIKE %s
+                )
+            """
+
+            value = f"%{search}%"
+
+            params.extend([
+                value,
+                value,
+                value,
+                value,
+                value
+            ])
+
+        # -------------------------------------------------
+        # STATUS FILTER
+        # -------------------------------------------------
+
+        if selected_status:
+
+            query += """
+                AND sa.status = %s
+            """
+
+            params.append(
+                selected_status
+            )
+
+        # -------------------------------------------------
+        # OPPORTUNITY FILTER
+        # -------------------------------------------------
+
+        if selected_opportunity:
+
+            query += """
+                AND sa.opportunity_id = %s
+            """
+
+            params.append(
+                selected_opportunity
+            )
+
+        # -------------------------------------------------
+        # ORDER
+        # -------------------------------------------------
+
+        query += """
+            ORDER BY
+                sa.application_date DESC,
+                sa.created_at DESC
+        """
+
+        cursor.execute(
+            query,
+            params
+        )
+
+        applications = cursor.fetchall()
+
+        # -------------------------------------------------
+        # OPPORTUNITY DROPDOWN
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT DISTINCT
+                o.id,
+                o.title
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            WHERE s.college_id = %s
+
+            ORDER BY o.title ASC
+        """, (
+            college_id,
+        ))
+
+        opportunities = cursor.fetchall()
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                COUNT(*) AS total,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'APPLIED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS applied,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'SHORTLISTED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS shortlisted,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'SELECTED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS selected,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'REJECTED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS rejected,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'WITHDRAWN'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS withdrawn
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+        """, (
+            college_id,
+        ))
+
+        stats = cursor.fetchone()
+
+        return render_template(
+            "placement/applications.html",
+
+            dashboard="applications",
+
+            applications=applications,
+            opportunities=opportunities,
+
+            stats=stats,
+
+            search=search,
+            selected_status=selected_status,
+            selected_opportunity=selected_opportunity
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT APPLICATIONS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load applications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - APPLICATION DETAILS
+# =========================================================
+
+@app.route(
+    "/placement/applications/<application_id>"
+)
+@placement_required
+def placement_application_details(
+    application_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get(
+            "college_id"
+        )
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+        # -------------------------------------------------
+        # APPLICATION
+        #
+        # IMPORTANT:
+        # Student's college is checked here.
+        # This prevents another college's application
+        # from being opened by changing the URL.
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                sa.id AS application_id,
+                sa.status,
+                sa.application_date,
+                sa.created_at,
+                sa.updated_at,
+
+                s.id AS student_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+                s.phone,
+                s.dob,
+                s.gender,
+                s.address,
+                s.linkedin_url,
+                s.github_url,
+                s.portfolio_url,
+                s.resume_url,
+                s.profile_completed,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                c.college_name,
+                c.college_code,
+                c.university_name,
+
+                o.id AS opportunity_id,
+                o.title AS opportunity_title,
+                o.opportunity_type,
+                o.description,
+                o.required_skills,
+                o.eligibility_criteria,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+                o.application_deadline,
+                o.status AS opportunity_status,
+
+                i.id AS industry_id,
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.email AS industry_email,
+                i.phone AS industry_phone
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN colleges c
+                ON s.college_id = c.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE sa.id = %s
+              AND s.college_id = %s
+
+            LIMIT 1
+        """, (
+            application_id,
+            college_id
+        ))
+
+        application = cursor.fetchone()
+
+        if not application:
+
+            flash(
+                "Application not found or access denied.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "placement_applications"
+                )
+            )
+
+        # -------------------------------------------------
+        # STUDENT SKILLS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                id,
+                skill_name,
+                proficiency_level,
+                assessment_percentage,
+                verification_status
+
+            FROM student_skills
+
+            WHERE student_id = %s
+
+            ORDER BY
+                assessment_percentage DESC,
+                skill_name ASC
+        """, (
+            application["student_id"],
+        ))
+
+        skills = cursor.fetchall()
+
+        # -------------------------------------------------
+        # RENDER
+        # -------------------------------------------------
+
+        return render_template(
+            "placement/application-details.html",
+
+            dashboard="applications",
+
+            application=application,
+            skills=skills
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT APPLICATION DETAILS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load application details.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "placement_applications"
+            )
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - PLACEMENTS
+# =========================================================
+
+@app.route("/placement/placements")
+@placement_required
+def placement_placements():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get("college_id")
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # FILTERS
+        # =================================================
+
+        search_query = request.args.get(
+            "search",
+            ""
+        ).strip()
+
+        selected_branch = request.args.get(
+            "branch",
+            ""
+        ).strip()
+
+        selected_company = request.args.get(
+            "company_id",
+            ""
+        ).strip()
+
+
+        # =================================================
+        # PLACEMENT RECORDS
+        #
+        # A placement record is created from a
+        # SELECTED student application.
+        # =================================================
+
+        query = """
+            SELECT
+
+                sa.id AS application_id,
+                sa.status AS placement_status,
+                sa.application_date,
+                sa.updated_at,
+
+                s.id AS student_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                o.id AS opportunity_id,
+                o.title AS opportunity_title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+                o.application_deadline,
+
+                i.id AS company_id,
+                i.company_name,
+                i.company_type,
+                i.industry_sector
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+        """
+
+        params = [
+            college_id
+        ]
+
+
+        # =================================================
+        # SEARCH
+        # =================================================
+
+        if search_query:
+
+            query += """
+                AND (
+                    u.name LIKE %s
+                    OR u.email LIKE %s
+                    OR s.enrollment_no LIKE %s
+                    OR o.title LIKE %s
+                    OR i.company_name LIKE %s
+                )
+            """
+
+            search_value = f"%{search_query}%"
+
+            params.extend([
+                search_value,
+                search_value,
+                search_value,
+                search_value,
+                search_value
+            ])
+
+
+        # =================================================
+        # BRANCH FILTER
+        # =================================================
+
+        if selected_branch:
+
+            query += """
+                AND s.branch = %s
+            """
+
+            params.append(
+                selected_branch
+            )
+
+
+        # =================================================
+        # COMPANY FILTER
+        # =================================================
+
+        if selected_company:
+
+            query += """
+                AND i.id = %s
+            """
+
+            params.append(
+                selected_company
+            )
+
+
+        query += """
+            ORDER BY
+                sa.updated_at DESC,
+                sa.application_date DESC
+        """
+
+
+        cursor.execute(
+            query,
+            params
+        )
+
+        placements = cursor.fetchall()
+
+
+        # =================================================
+        # BRANCH DROPDOWN
+        # =================================================
+
+        cursor.execute("""
+            SELECT DISTINCT
+                s.branch
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+              AND s.branch IS NOT NULL
+              AND s.branch != ''
+
+            ORDER BY s.branch ASC
+        """, (
+            college_id,
+        ))
+
+        branches = [
+            row["branch"]
+            for row in cursor.fetchall()
+        ]
+
+
+        # =================================================
+        # COMPANY DROPDOWN
+        # =================================================
+
+        cursor.execute("""
+            SELECT DISTINCT
+
+                i.id,
+                i.company_name
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+
+            ORDER BY i.company_name ASC
+        """, (
+            college_id,
+        ))
+
+        companies = cursor.fetchall()
+
+
+        # =================================================
+        # BASIC STATISTICS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+        """, (
+            college_id,
+        ))
+
+        total_students = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        cursor.execute("""
+            SELECT COUNT(DISTINCT sa.student_id) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+        """, (
+            college_id,
+        ))
+
+        placed_students = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        cursor.execute("""
+            SELECT COUNT(DISTINCT i.id) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+        """, (
+            college_id,
+        ))
+
+        hiring_companies = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        placement_rate = 0
+
+        if total_students > 0:
+
+            placement_rate = round(
+                (
+                    placed_students
+                    / total_students
+                ) * 100,
+                2
+            )
+
+
+        return render_template(
+            "placement/placements.html",
+
+            dashboard="placements",
+
+            placements=placements,
+
+            branches=branches,
+            companies=companies,
+
+            search_query=search_query,
+            selected_branch=selected_branch,
+            selected_company=selected_company,
+
+            total_students=total_students,
+            placed_students=placed_students,
+            hiring_companies=hiring_companies,
+            placement_rate=placement_rate
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT RECORDS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load placement records.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - PLACEMENT DETAILS
+# =========================================================
+
+@app.route(
+    "/placement/placements/<application_id>"
+)
+@placement_required
+def placement_placement_details(
+    application_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get(
+            "college_id"
+        )
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # PLACEMENT DETAILS
+        #
+        # Only SELECTED applications are considered
+        # actual placement records.
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                sa.id AS application_id,
+                sa.status AS placement_status,
+                sa.application_date,
+                sa.created_at,
+                sa.updated_at,
+
+                s.id AS student_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+                s.phone,
+                s.dob,
+                s.gender,
+                s.address,
+                s.linkedin_url,
+                s.github_url,
+                s.portfolio_url,
+                s.resume_url,
+                s.profile_completed,
+
+                u.name AS student_name,
+                u.email AS student_email,
+
+                c.college_name,
+                c.college_code,
+                c.university_name,
+
+                o.id AS opportunity_id,
+                o.title AS opportunity_title,
+                o.opportunity_type,
+                o.description,
+                o.required_skills,
+                o.eligibility_criteria,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+                o.application_deadline,
+                o.status AS opportunity_status,
+
+                i.id AS company_id,
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.email AS company_email,
+                i.phone AS company_phone
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            INNER JOIN colleges c
+                ON s.college_id = c.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE sa.id = %s
+              AND s.college_id = %s
+              AND sa.status = 'SELECTED'
+
+            LIMIT 1
+        """, (
+            application_id,
+            college_id
+        ))
+
+        placement = cursor.fetchone()
+
+
+        if not placement:
+
+            flash(
+                "Placement record not found or access denied.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_placements")
+            )
+
+
+        # =================================================
+        # STUDENT SKILLS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                id,
+                skill_name,
+                proficiency_level,
+                assessment_percentage,
+                verification_status
+
+            FROM student_skills
+
+            WHERE student_id = %s
+
+            ORDER BY
+                assessment_percentage DESC,
+                skill_name ASC
+        """, (
+            placement["student_id"],
+        ))
+
+        skills = cursor.fetchall()
+
+
+        return render_template(
+            "placement/placement-details.html",
+
+            dashboard="placement_details",
+
+            placement=placement,
+            skills=skills
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT DETAILS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load placement details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_placements")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - PLACEMENT STATISTICS
+# =========================================================
+
+@app.route(
+    "/placement/placement-statistics"
+)
+@placement_required
+def placement_statistics():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get(
+            "college_id"
+        )
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # TOTAL STUDENTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+        """, (
+            college_id,
+        ))
+
+        total_students = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # PLACED STUDENTS
+        # DISTINCT STUDENTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(DISTINCT sa.student_id) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+        """, (
+            college_id,
+        ))
+
+        placed_students = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # NOT PLACED
+        # =================================================
+
+        not_placed_students = max(
+            total_students - placed_students,
+            0
+        )
+
+
+        # =================================================
+        # PLACEMENT RATE
+        # =================================================
+
+        placement_rate = 0
+
+        if total_students > 0:
+
+            placement_rate = round(
+                (
+                    placed_students
+                    / total_students
+                ) * 100,
+                2
+            )
+
+
+        # =================================================
+        # COMPANIES
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(DISTINCT i.id) AS total
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+        """, (
+            college_id,
+        ))
+
+        total_companies = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # BRANCH-WISE STATISTICS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                s.branch,
+
+                COUNT(DISTINCT s.id)
+                    AS total_students,
+
+                COUNT(
+                    DISTINCT
+                    CASE
+                        WHEN sa.status = 'SELECTED'
+                        THEN s.id
+                    END
+                ) AS placed_students
+
+            FROM students s
+
+            LEFT JOIN student_applications sa
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+
+            GROUP BY s.branch
+
+            ORDER BY
+                placed_students DESC,
+                s.branch ASC
+        """, (
+            college_id,
+        ))
+
+        branch_statistics = cursor.fetchall()
+
+
+        # Add placement percentage
+
+        for row in branch_statistics:
+
+            total = (
+                row["total_students"]
+                or 0
+            )
+
+            placed = (
+                row["placed_students"]
+                or 0
+            )
+
+            row["placement_rate"] = (
+                round(
+                    (placed / total) * 100,
+                    2
+                )
+                if total > 0
+                else 0
+            )
+
+
+        # =================================================
+        # COMPANY-WISE STATISTICS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                i.id AS company_id,
+                i.company_name,
+
+                COUNT(
+                    DISTINCT sa.student_id
+                ) AS selected_students
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE s.college_id = %s
+              AND sa.status = 'SELECTED'
+
+            GROUP BY
+                i.id,
+                i.company_name
+
+            ORDER BY
+                selected_students DESC,
+                i.company_name ASC
+        """, (
+            college_id,
+        ))
+
+        company_statistics = cursor.fetchall()
+
+
+        return render_template(
+            "placement/placement-statistics.html",
+
+            dashboard="placement_statistics",
+
+            total_students=total_students,
+            placed_students=placed_students,
+            not_placed_students=not_placed_students,
+
+            placement_rate=placement_rate,
+
+            total_companies=total_companies,
+
+            branch_statistics=branch_statistics,
+            company_statistics=company_statistics
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT STATISTICS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load placement statistics.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - INDUSTRIES
+# =========================================================
+
+@app.route("/placement/industries")
+@placement_required
+def placement_industries():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT PLACEMENT CELL
+        # =================================================
+
+        college_id = session.get("college_id")
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # FILTERS
+        # =================================================
+
+        search = request.args.get(
+            "search",
+            ""
+        ).strip()
+
+        company_type = request.args.get(
+            "company_type",
+            ""
+        ).strip()
+
+        industry_sector = request.args.get(
+            "industry_sector",
+            ""
+        ).strip()
+
+
+        # =================================================
+        # INDUSTRY LIST
+        #
+        # Only ACTIVE industries are visible.
+        # =================================================
+
+        query = """
+            SELECT
+
+                i.id,
+                i.user_id,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+
+                i.contact_person,
+                i.designation,
+
+                i.phone,
+                i.email,
+                i.website,
+
+                i.address,
+                i.city,
+                i.state,
+
+                i.description,
+
+                i.status,
+
+                i.created_at,
+                i.updated_at,
+
+                u.name AS user_name,
+                u.email AS user_email,
+
+                COUNT(
+                    DISTINCT o.id
+                ) AS opportunity_count,
+
+                COUNT(
+                    DISTINCT c.id
+                ) AS collaboration_count
+
+            FROM industries i
+
+            INNER JOIN users u
+                ON i.user_id = u.id
+
+            LEFT JOIN opportunities o
+                ON o.industry_id = i.id
+
+            LEFT JOIN collaborations c
+                ON c.industry_id = i.id
+
+            WHERE i.status = 'ACTIVE'
+        """
+
+        params = []
+
+
+        # =================================================
+        # SEARCH
+        # =================================================
+
+        if search:
+
+            query += """
+                AND (
+                    i.company_name LIKE %s
+                    OR i.company_type LIKE %s
+                    OR i.industry_sector LIKE %s
+                    OR i.contact_person LIKE %s
+                    OR i.city LIKE %s
+                    OR i.state LIKE %s
+                )
+            """
+
+            search_value = f"%{search}%"
+
+            params.extend([
+                search_value,
+                search_value,
+                search_value,
+                search_value,
+                search_value,
+                search_value
+            ])
+
+
+        # =================================================
+        # COMPANY TYPE
+        # =================================================
+
+        if company_type:
+
+            query += """
+                AND i.company_type = %s
+            """
+
+            params.append(
+                company_type
+            )
+
+
+        # =================================================
+        # INDUSTRY SECTOR
+        # =================================================
+
+        if industry_sector:
+
+            query += """
+                AND i.industry_sector = %s
+            """
+
+            params.append(
+                industry_sector
+            )
+
+
+        # =================================================
+        # GROUP
+        # =================================================
+
+        query += """
+            GROUP BY
+
+                i.id,
+                i.user_id,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+
+                i.contact_person,
+                i.designation,
+
+                i.phone,
+                i.email,
+                i.website,
+
+                i.address,
+                i.city,
+                i.state,
+
+                i.description,
+
+                i.status,
+
+                i.created_at,
+                i.updated_at,
+
+                u.name,
+                u.email
+
+            ORDER BY
+                i.company_name ASC
+        """
+
+
+        cursor.execute(
+            query,
+            params
+        )
+
+        industries = cursor.fetchall()
+
+
+        # =================================================
+        # COMPANY TYPES
+        # =================================================
+
+        cursor.execute("""
+            SELECT DISTINCT
+                company_type
+
+            FROM industries
+
+            WHERE status = 'ACTIVE'
+
+              AND company_type IS NOT NULL
+
+              AND company_type != ''
+
+            ORDER BY company_type ASC
+        """)
+
+        company_types = [
+            row["company_type"]
+            for row in cursor.fetchall()
+        ]
+
+
+        # =================================================
+        # INDUSTRY SECTORS
+        # =================================================
+
+        cursor.execute("""
+            SELECT DISTINCT
+                industry_sector
+
+            FROM industries
+
+            WHERE status = 'ACTIVE'
+
+              AND industry_sector IS NOT NULL
+
+              AND industry_sector != ''
+
+            ORDER BY industry_sector ASC
+        """)
+
+        industry_sectors = [
+            row["industry_sector"]
+            for row in cursor.fetchall()
+        ]
+
+
+        # =================================================
+        # SUMMARY
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total_industries
+
+            FROM industries
+
+            WHERE status = 'ACTIVE'
+        """)
+
+        total_industries = (
+            cursor.fetchone()["total_industries"]
+            or 0
+        )
+
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total_opportunities
+
+            FROM opportunities o
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE i.status = 'ACTIVE'
+              AND o.status = 'OPEN'
+        """)
+
+        total_opportunities = (
+            cursor.fetchone()["total_opportunities"]
+            or 0
+        )
+
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total_collaborations
+
+            FROM collaborations c
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE i.status = 'ACTIVE'
+        """)
+
+        total_collaborations = (
+            cursor.fetchone()["total_collaborations"]
+            or 0
+        )
+
+
+        return render_template(
+            "placement/industries.html",
+
+            dashboard="industries",
+
+            industries=industries,
+
+            company_types=company_types,
+            industry_sectors=industry_sectors,
+
+            total_industries=total_industries,
+            total_opportunities=total_opportunities,
+            total_collaborations=total_collaborations,
+
+            search=search,
+            company_type=company_type,
+            industry_sector=industry_sector
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT INDUSTRIES ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load industries.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - INDUSTRY DETAILS
+# =========================================================
+
+@app.route(
+    "/placement/industries/<industry_id>"
+)
+@placement_required
+def placement_industry_details(
+    industry_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        college_id = session.get(
+            "college_id"
+        )
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # INDUSTRY INFORMATION
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                i.id,
+                i.user_id,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+
+                i.contact_person,
+                i.designation,
+
+                i.phone,
+                i.email,
+                i.website,
+
+                i.address,
+                i.city,
+                i.state,
+
+                i.description,
+
+                i.status,
+
+                i.created_at,
+                i.updated_at,
+
+                u.name AS user_name,
+                u.email AS user_email
+
+            FROM industries i
+
+            INNER JOIN users u
+                ON i.user_id = u.id
+
+            WHERE i.id = %s
+              AND i.status = 'ACTIVE'
+
+            LIMIT 1
+        """, (
+            industry_id,
+        ))
+
+        industry = cursor.fetchone()
+
+
+        if not industry:
+
+            flash(
+                "Industry not found or is not active.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_industries")
+            )
+
+
+        # =================================================
+        # OPPORTUNITIES
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                o.id,
+                o.title,
+                o.opportunity_type,
+
+                o.description,
+                o.required_skills,
+                o.eligibility_criteria,
+
+                o.location,
+                o.work_mode,
+
+                o.stipend,
+                o.package,
+
+                o.application_deadline,
+
+                o.status,
+                o.created_at
+
+            FROM opportunities o
+
+            WHERE o.industry_id = %s
+
+              AND o.status = 'OPEN'
+
+            ORDER BY
+                o.application_deadline IS NULL ASC,
+                o.application_deadline ASC,
+                o.created_at DESC
+        """, (
+            industry_id,
+        ))
+
+        opportunities = cursor.fetchall()
+
+
+        # =================================================
+        # COLLABORATIONS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                c.id,
+                c.title,
+                c.description,
+                c.collaboration_type,
+
+                c.start_date,
+                c.end_date,
+
+                c.status,
+
+                c.created_at,
+                c.updated_at,
+
+                cl.college_name,
+                cl.college_code,
+                cl.city,
+                cl.state
+
+            FROM collaborations c
+
+            INNER JOIN colleges cl
+                ON c.college_id = cl.id
+
+            WHERE c.industry_id = %s
+
+            ORDER BY
+                c.created_at DESC
+
+            LIMIT 10
+        """, (
+            industry_id,
+        ))
+
+        collaborations = cursor.fetchall()
+
+
+        # =================================================
+        # COUNTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total
+
+            FROM opportunities
+
+            WHERE industry_id = %s
+              AND status = 'OPEN'
+        """, (
+            industry_id,
+        ))
+
+        opportunity_count = (
+            cursor.fetchone()["total"]
+            or 0
+        )
+
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total
+
+            FROM collaborations
+
+            WHERE industry_id = %s
+        """, (
+            industry_id,
+        ))
+
+        collaboration_count = (
+            cursor.fetchone()["total"]
+            or 0
+        )
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "placement/industry-details.html",
+
+            dashboard="industry_details",
+
+            industry=industry,
+
+            opportunities=opportunities,
+            collaborations=collaborations,
+
+            opportunity_count=opportunity_count,
+            collaboration_count=collaboration_count
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT INDUSTRY DETAILS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load industry details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_industries")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# PLACEMENT CELL - SEND COLLABORATION
+# ============================================================
+
+@app.route("/placement/collaborations/send", methods=["GET", "POST"])
+@placement_required
+def placement_send_collaboration():
+
+    college_id = session.get("college_id")
+
+    if not college_id:
+        flash("College information not found.", "error")
+        return redirect(url_for("placement_dashboard"))
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # ----------------------------------------------------
+        # GET ACTIVE INDUSTRIES
+        # ----------------------------------------------------
+        cursor.execute("""
+            SELECT
+                id,
+                company_name,
+                company_type,
+                industry_sector,
+                contact_person,
+                designation,
+                email,
+                phone,
+                website,
+                address,
+                city,
+                state
+            FROM industries
+            WHERE status = 'ACTIVE'
+            ORDER BY company_name ASC
+        """)
+
+        industries = cursor.fetchall()
+
+        # ----------------------------------------------------
+        # POST - SEND COLLABORATION REQUEST
+        # ----------------------------------------------------
+        if request.method == "POST":
+
+            industry_id = request.form.get("industry_id", "").strip()
+            title = request.form.get("title", "").strip()
+            collaboration_type = request.form.get(
+                "collaboration_type", ""
+            ).strip()
+            description = request.form.get("description", "").strip()
+            start_date = request.form.get("start_date", "").strip()
+            end_date = request.form.get("end_date", "").strip()
+
+            # ---------------- VALIDATION ----------------
+
+            if not industry_id:
+                flash("Please select an industry.", "error")
+                return render_template(
+                    "placement/send-collaboration.html",
+                    industries=industries
+                )
+
+            if not title:
+                flash("Collaboration title is required.", "error")
+                return render_template(
+                    "placement/send-collaboration.html",
+                    industries=industries
+                )
+
+            if not collaboration_type:
+                flash("Please select collaboration type.", "error")
+                return render_template(
+                    "placement/send-collaboration.html",
+                    industries=industries
+                )
+
+            if not description:
+                flash("Collaboration description is required.", "error")
+                return render_template(
+                    "placement/send-collaboration.html",
+                    industries=industries
+                )
+
+            # ------------------------------------------------
+            # VERIFY INDUSTRY EXISTS & ACTIVE
+            # ------------------------------------------------
+            cursor.execute("""
+                SELECT id, company_name
+                FROM industries
+                WHERE id = %s
+                  AND status = 'ACTIVE'
+                LIMIT 1
+            """, (industry_id,))
+
+            industry = cursor.fetchone()
+
+            if not industry:
+                flash("Selected industry is not available.", "error")
+                return render_template(
+                    "placement/send-collaboration.html",
+                    industries=industries
+                )
+
+            # ------------------------------------------------
+            # CHECK DUPLICATE PENDING REQUEST
+            # ------------------------------------------------
+            cursor.execute("""
+                SELECT id
+                FROM collaborations
+                WHERE college_id = %s
+                  AND industry_id = %s
+                  AND status = 'PENDING'
+                LIMIT 1
+            """, (college_id, industry_id))
+
+            existing_request = cursor.fetchone()
+
+            if existing_request:
+                flash(
+                    "A pending collaboration request already exists with this industry.",
+                    "warning"
+                )
+                return render_template(
+                    "placement/send-collaboration.html",
+                    industries=industries
+                )
+
+            # ------------------------------------------------
+            # INSERT COLLABORATION
+            # ------------------------------------------------
+            cursor.execute("""
+                INSERT INTO collaborations (
+                    college_id,
+                    industry_id,
+                    initiated_by,
+                    title,
+                    description,
+                    collaboration_type,
+                    start_date,
+                    end_date,
+                    status
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, 'PENDING'
+                )
+            """, (
+                college_id,
+                industry_id,
+                "PLACEMENT_CELL",
+                title,
+                description,
+                collaboration_type,
+                start_date if start_date else None,
+                end_date if end_date else None
+            ))
+
+            collaboration_id = cursor.lastrowid
+
+            conn.commit()
+
+            # ------------------------------------------------
+            # NOTIFICATION FOR INDUSTRY
+            # ------------------------------------------------
+            try:
+                cursor.execute("""
+                    SELECT user_id
+                    FROM industries
+                    WHERE id = %s
+                    LIMIT 1
+                """, (industry_id,))
+
+                industry_user = cursor.fetchone()
+
+                if industry_user and industry_user.get("user_id"):
+
+                    cursor.execute("""
+                        INSERT INTO notifications (
+                            user_id,
+                            title,
+                            message,
+                            notification_type,
+                            is_read,
+                            created_at
+                        )
+                        VALUES (
+                            %s, %s, %s, %s, %s, NOW()
+                        )
+                    """, (
+                        industry_user["user_id"],
+                        "New Collaboration Request",
+                        f"Your industry has received a new collaboration request: {title}",
+                        "COLLABORATION",
+                        0
+                    ))
+
+                    conn.commit()
+
+            except Exception as notification_error:
+                # Collaboration already saved successfully.
+                # Notification failure should not rollback request.
+                print(
+                    "Collaboration notification error:",
+                    notification_error
+                )
+
+            flash(
+                f"Collaboration request sent successfully to {industry['company_name']}.",
+                "success"
+            )
+
+            return redirect(
+                url_for("placement_receive_collaborations")
+            )
+
+        # ----------------------------------------------------
+        # GET REQUEST
+        # ----------------------------------------------------
+        return render_template(
+            "placement/send-collaboration.html",
+            industries=industries
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("Placement Send Collaboration Error:", e)
+
+        flash(
+            "Something went wrong while sending the collaboration request.",
+            "error"
+        )
+
+        return render_template(
+            "placement/send-collaboration.html",
+            industries=[]
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# PLACEMENT CELL - RECEIVE COLLABORATIONS
+# ============================================================
+
+@app.route("/placement/collaborations/receive")
+@placement_required
+def placement_receive_collaborations():
+
+    college_id = session.get("college_id")
+
+    if not college_id:
+        flash("College information not found.", "error")
+        return redirect(url_for("placement_dashboard"))
+
+    search = request.args.get("search", "").strip()
+    selected_status = request.args.get("status", "").strip().upper()
+    selected_type = request.args.get("collaboration_type", "").strip()
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # ====================================================
+        # RECEIVE COLLABORATIONS
+        # Only INDUSTRY-initiated requests
+        # belonging to current college
+        # ====================================================
+
+        query = """
+            SELECT
+                c.id,
+                c.college_id,
+                c.industry_id,
+                c.initiated_by,
+                c.title,
+                c.description,
+                c.collaboration_type,
+                c.start_date,
+                c.end_date,
+                c.status,
+                c.created_at,
+                c.updated_at,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+                i.contact_person,
+                i.designation,
+                i.email AS industry_email,
+                i.phone AS industry_phone,
+                i.website AS industry_website,
+                i.address AS industry_address,
+                i.city AS industry_city,
+                i.state AS industry_state
+
+            FROM collaborations c
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE c.college_id = %s
+              AND UPPER(c.initiated_by) = 'INDUSTRY'
+        """
+
+        params = [college_id]
+
+        # ====================================================
+        # SEARCH
+        # ====================================================
+
+        if search:
+            query += """
+                AND (
+                    c.title LIKE %s
+                    OR c.description LIKE %s
+                    OR c.collaboration_type LIKE %s
+                    OR i.company_name LIKE %s
+                    OR i.industry_sector LIKE %s
+                    OR i.contact_person LIKE %s
+                )
+            """
+
+            search_value = f"%{search}%"
+
+            params.extend([
+                search_value,
+                search_value,
+                search_value,
+                search_value,
+                search_value,
+                search_value
+            ])
+
+        # ====================================================
+        # STATUS FILTER
+        # ====================================================
+
+        if selected_status:
+            query += """
+                AND UPPER(c.status) = %s
+            """
+            params.append(selected_status)
+
+        # ====================================================
+        # COLLABORATION TYPE FILTER
+        # ====================================================
+
+        if selected_type:
+            query += """
+                AND c.collaboration_type = %s
+            """
+            params.append(selected_type)
+
+        query += """
+            ORDER BY c.created_at DESC
+        """
+
+        cursor.execute(query, tuple(params))
+
+        collaborations = cursor.fetchall()
+
+        # ====================================================
+        # AVAILABLE COLLABORATION TYPES
+        # ====================================================
+
+        cursor.execute("""
+            SELECT DISTINCT collaboration_type
+            FROM collaborations
+            WHERE college_id = %s
+              AND UPPER(initiated_by) = 'INDUSTRY'
+              AND collaboration_type IS NOT NULL
+              AND collaboration_type != ''
+            ORDER BY collaboration_type
+        """, (college_id,))
+
+        collaboration_types = cursor.fetchall()
+
+        # ====================================================
+        # STATISTICS
+        # ====================================================
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total,
+                SUM(
+                    CASE
+                        WHEN UPPER(status) = 'PENDING'
+                        THEN 1 ELSE 0
+                    END
+                ) AS pending,
+                SUM(
+                    CASE
+                        WHEN UPPER(status) = 'ACTIVE'
+                        THEN 1 ELSE 0
+                    END
+                ) AS active,
+                SUM(
+                    CASE
+                        WHEN UPPER(status) = 'COMPLETED'
+                        THEN 1 ELSE 0
+                    END
+                ) AS completed,
+                SUM(
+                    CASE
+                        WHEN UPPER(status) IN ('REJECTED', 'CANCELLED')
+                        THEN 1 ELSE 0
+                    END
+                ) AS closed
+            FROM collaborations
+            WHERE college_id = %s
+              AND UPPER(initiated_by) = 'INDUSTRY'
+        """, (college_id,))
+
+        stats = cursor.fetchone() or {}
+
+        stats = {
+            "total": stats.get("total") or 0,
+            "pending": stats.get("pending") or 0,
+            "active": stats.get("active") or 0,
+            "completed": stats.get("completed") or 0,
+            "closed": stats.get("closed") or 0
+        }
+
+        return render_template(
+            "placement/receive-collaboration.html",
+            collaborations=collaborations,
+            collaboration_types=collaboration_types,
+            stats=stats,
+            search=search,
+            selected_status=selected_status,
+            selected_type=selected_type
+        )
+
+    except Exception as e:
+
+        print("Placement Receive Collaboration Error:", e)
+
+        flash(
+            "Unable to load received collaboration requests.",
+            "error"
+        )
+
+        return render_template(
+            "placement/receive-collaboration.html",
+            collaborations=[],
+            collaboration_types=[],
+            stats={
+                "total": 0,
+                "pending": 0,
+                "active": 0,
+                "completed": 0,
+                "closed": 0
+            },
+            search=search,
+            selected_status=selected_status,
+            selected_type=selected_type
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# ============================================================
+# PLACEMENT CELL - NOTIFICATIONS
+# ============================================================
+
+@app.route("/placement/notifications")
+@placement_required
+def placement_notifications():
+
+    user_id = session.get("user_id")
+
+    if not user_id:
+        flash("Session expired. Please login again.", "error")
+        return redirect(url_for("login"))
+
+    search = request.args.get("search", "").strip()
+    selected_filter = request.args.get("filter", "all").strip().lower()
+
+    if selected_filter not in ["all", "unread", "read"]:
+        selected_filter = "all"
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT
+                id,
+                title,
+                message,
+                notification_type,
+                is_read,
+                created_at
+            FROM notifications
+            WHERE user_id = %s
+        """
+
+        params = [user_id]
+
+        # Search
+        if search:
+            query += """
+                AND (
+                    title LIKE %s
+                    OR message LIKE %s
+                )
+            """
+            search_value = f"%{search}%"
+            params.extend([search_value, search_value])
+
+        # Filter
+        if selected_filter == "unread":
+            query += " AND is_read = 0"
+
+        elif selected_filter == "read":
+            query += " AND is_read = 1"
+
+        query += " ORDER BY created_at DESC"
+
+        cursor.execute(query, tuple(params))
+        notifications = cursor.fetchall()
+
+        # Statistics
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM notifications
+            WHERE user_id = %s
+        """, (user_id,))
+
+        total_notifications = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS unread
+            FROM notifications
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        unread_count = cursor.fetchone()["unread"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS read_count
+            FROM notifications
+            WHERE user_id = %s
+              AND is_read = 1
+        """, (user_id,))
+
+        read_count = cursor.fetchone()["read_count"]
+
+        return render_template(
+            "placement/notifications.html",
+            notifications=notifications,
+            total_notifications=total_notifications,
+            unread_count=unread_count,
+            read_count=read_count,
+            search=search,
+            selected_filter=selected_filter
+        )
+
+    except Exception as e:
+        print("=" * 70)
+        print("PLACEMENT NOTIFICATIONS ERROR:")
+        print(type(e).__name__)
+        print(str(e))
+        print("=" * 70)
+
+        flash("Unable to load notifications.", "error")
+        return redirect(url_for("placement_dashboard"))
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# PLACEMENT CELL - MARK NOTIFICATION AS READ
+# ============================================================
+
+@app.route(
+    "/placement/notifications/<int:notification_id>/read",
+    methods=["POST"]
+)
+@placement_required
+def placement_mark_notification_read(notification_id):
+
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return jsonify({
+            "success": False,
+            "message": "Session expired."
+        }), 401
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE notifications
+            SET is_read = 1
+            WHERE id = %s
+              AND user_id = %s
+        """, (notification_id, user_id))
+
+        conn.commit()
+
+        return jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+
+        print("PLACEMENT MARK NOTIFICATION ERROR:", str(e))
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to mark notification as read."
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+# ============================================================
+# PLACEMENT CELL - MARK ALL NOTIFICATIONS AS READ
+# ============================================================
+
+@app.route(
+    "/placement/notifications/mark-all-read",
+    methods=["POST"]
+)
+@placement_required
+def placement_mark_all_notifications_read():
+
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return jsonify({
+            "success": False,
+            "message": "Session expired."
+        }), 401
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE notifications
+            SET is_read = 1
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        conn.commit()
+
+        return jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+
+        print("PLACEMENT MARK ALL NOTIFICATIONS ERROR:", str(e))
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to mark notifications as read."
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - REPORTS
+# =========================================================
+
+@app.route("/placement/reports")
+@placement_required
+def placement_reports():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # CURRENT PLACEMENT CELL / COLLEGE
+        # =================================================
+
+        college_id = session.get("college_id")
+
+        if not college_id:
+
+            flash(
+                "College information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # TOTAL STUDENTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+        """, (
+            college_id,
+        ))
+
+        total_students = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # APPLICATION STATISTICS
+        # ONLY CURRENT COLLEGE STUDENTS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                COUNT(*) AS total_applications,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'APPLIED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS applied,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'SHORTLISTED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS shortlisted,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'SELECTED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS selected,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'REJECTED'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS rejected,
+
+                SUM(
+                    CASE
+                        WHEN sa.status = 'WITHDRAWN'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS withdrawn
+
+            FROM student_applications sa
+
+            INNER JOIN students s
+                ON sa.student_id = s.id
+
+            WHERE s.college_id = %s
+        """, (
+            college_id,
+        ))
+
+        application_stats = cursor.fetchone()
+
+
+        total_applications = (
+            application_stats["total_applications"] or 0
+        )
+
+        applied = (
+            application_stats["applied"] or 0
+        )
+
+        shortlisted = (
+            application_stats["shortlisted"] or 0
+        )
+
+        selected = (
+            application_stats["selected"] or 0
+        )
+
+        rejected = (
+            application_stats["rejected"] or 0
+        )
+
+        withdrawn = (
+            application_stats["withdrawn"] or 0
+        )
+
+
+        # =================================================
+        # PLACEMENT RATE
+        # =================================================
+
+        placement_rate = 0
+
+        if total_students > 0:
+
+            placement_rate = round(
+                (
+                    selected / total_students
+                ) * 100,
+                2
+            )
+
+
+        # =================================================
+        # REPORT DATA
+        # =================================================
+
+        return render_template(
+            "placement/reports.html",
+
+            dashboard="reports",
+
+            total_students=total_students,
+
+            total_applications=total_applications,
+
+            applied=applied,
+
+            shortlisted=shortlisted,
+
+            selected=selected,
+
+            rejected=rejected,
+
+            withdrawn=withdrawn,
+
+            placement_rate=placement_rate
+        )
+
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("PLACEMENT REPORTS DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load Placement Cell reports.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT REPORTS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load Placement Cell reports.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - PROFILE
+# =========================================================
+
+@app.route("/placement/profile")
+@placement_required
+def placement_profile():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Placement Cell session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # FETCH PLACEMENT CELL PROFILE
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+
+                pc.id AS placement_cell_id,
+                pc.user_id,
+                pc.college_id,
+
+                pc.representative_name,
+                pc.designation,
+                pc.phone,
+                pc.email AS placement_email,
+                pc.status AS placement_cell_status,
+
+                u.name AS account_name,
+                u.email AS account_email,
+                u.status AS user_status,
+                u.created_at AS account_created_at,
+
+                c.college_name,
+                c.college_code,
+                c.university_name,
+                c.status AS college_status
+
+            FROM placement_cells pc
+
+            INNER JOIN users u
+                ON pc.user_id = u.id
+
+            INNER JOIN colleges c
+                ON pc.college_id = c.id
+
+            WHERE pc.user_id = %s
+
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+
+        placement_cell = cursor.fetchone()
+
+
+        # =================================================
+        # PROFILE NOT FOUND
+        # =================================================
+
+        if not placement_cell:
+
+            flash(
+                "Placement Cell profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        # =================================================
+        # PROFILE COMPLETION
+        # =================================================
+
+        profile_fields = [
+            placement_cell.get("representative_name"),
+            placement_cell.get("designation"),
+            placement_cell.get("phone"),
+            placement_cell.get("placement_email"),
+            placement_cell.get("college_name"),
+            placement_cell.get("college_code"),
+            placement_cell.get("university_name")
+        ]
+
+        completed_fields = 0
+
+        for value in profile_fields:
+
+            if value is not None and str(value).strip():
+
+                completed_fields += 1
+
+
+        profile_completion = round(
+            (
+                completed_fields /
+                len(profile_fields)
+            ) * 100
+        )
+
+
+        # =================================================
+        # COLLEGE STUDENT COUNT
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM students
+            WHERE college_id = %s
+        """, (
+            placement_cell["college_id"],
+        ))
+
+        student_count = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # RENDER PROFILE
+        # =================================================
+
+        return render_template(
+            "placement/profile.html",
+
+            dashboard="profile",
+
+            placement_cell=placement_cell,
+
+            profile=placement_cell,
+
+            profile_completion=profile_completion,
+
+            student_count=student_count
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("PLACEMENT PROFILE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load Placement Cell profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT PROFILE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load Placement Cell profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - UPDATE PROFILE
+# =========================================================
+
+@app.route(
+    "/placement/profile/update",
+    methods=["POST"]
+)
+@placement_required
+def placement_update_profile():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Placement Cell session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # FORM DATA
+        # =================================================
+
+        representative_name = request.form.get(
+            "representative_name",
+            ""
+        ).strip()
+
+        designation = request.form.get(
+            "designation",
+            ""
+        ).strip()
+
+        phone = request.form.get(
+            "phone",
+            ""
+        ).strip()
+
+        email = request.form.get(
+            "email",
+            ""
+        ).strip().lower()
+
+
+        # =================================================
+        # BASIC VALIDATION
+        # =================================================
+
+        if not representative_name:
+
+            flash(
+                "Representative name is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_profile")
+            )
+
+
+        if not email:
+
+            flash(
+                "Email address is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_profile")
+            )
+
+
+        if "@" not in email or "." not in email:
+
+            flash(
+                "Please enter a valid email address.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_profile")
+            )
+
+
+        # =================================================
+        # DATABASE CONNECTION
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # CHECK CURRENT PLACEMENT CELL
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                college_id,
+                email
+            FROM placement_cells
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        placement_cell = cursor.fetchone()
+
+
+        if not placement_cell:
+
+            flash(
+                "Placement Cell profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_dashboard")
+            )
+
+
+        # =================================================
+        # CHECK EMAIL ALREADY USED BY ANOTHER USER
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM users
+            WHERE email = %s
+              AND id <> %s
+            LIMIT 1
+        """, (
+            email,
+            user_id
+        ))
+
+        existing_user = cursor.fetchone()
+
+
+        if existing_user:
+
+            flash(
+                "This email address is already registered with another account.",
+                "error"
+            )
+
+            return redirect(
+                url_for("placement_profile")
+            )
+
+
+        # =================================================
+        # UPDATE PLACEMENT CELL
+        # =================================================
+
+        cursor.execute("""
+            UPDATE placement_cells
+            SET
+                representative_name = %s,
+                designation = %s,
+                phone = %s,
+                email = %s
+            WHERE user_id = %s
+        """, (
+            representative_name,
+            designation if designation else None,
+            phone if phone else None,
+            email,
+            user_id
+        ))
+
+
+        # =================================================
+        # UPDATE USER ACCOUNT
+        # =================================================
+
+        cursor.execute("""
+            UPDATE users
+            SET
+                name = %s,
+                email = %s
+            WHERE id = %s
+        """, (
+            representative_name,
+            email,
+            user_id
+        ))
+
+
+        # =================================================
+        # COMMIT
+        # =================================================
+
+        conn.commit()
+
+
+        # =================================================
+        # UPDATE SESSION
+        # =================================================
+
+        session["user_name"] = representative_name
+        session["user_email"] = email
+
+
+        # =================================================
+        # SUCCESS
+        # =================================================
+
+        flash(
+            "Placement Cell profile updated successfully.",
+            "success"
+        )
+
+
+        return redirect(
+            url_for("placement_profile")
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT PROFILE UPDATE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update Placement Cell profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_profile")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT PROFILE UPDATE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update Placement Cell profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_profile")
+        )
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - MESSAGES
+# =========================================================
+
+@app.route("/placement/messages")
+@placement_required
+def placement_messages():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash(
+                "Placement Cell session expired. Please login again.",
+                "error"
+            )
+            return redirect(url_for("login"))
+
+        # -------------------------------------------------
+        # FILTERS
+        # -------------------------------------------------
+
+        search = request.args.get(
+            "search",
+            ""
+        ).strip()
+
+        selected_folder = request.args.get(
+            "folder",
+            "inbox"
+        ).strip().lower()
+
+        if selected_folder not in [
+            "inbox",
+            "sent"
+        ]:
+            selected_folder = "inbox"
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # INBOX
+        # =================================================
+
+        if selected_folder == "inbox":
+
+            query = """
+                SELECT
+
+                    m.id,
+                    m.sender_id,
+                    m.receiver_id,
+                    m.subject,
+                    m.message,
+                    m.is_read,
+                    m.created_at,
+
+                    u.name AS sender_name,
+                    u.email AS sender_email,
+                    u.role AS sender_role
+
+                FROM messages m
+
+                INNER JOIN users u
+                    ON m.sender_id = u.id
+
+                WHERE m.receiver_id = %s
+            """
+
+            params = [
+                user_id
+            ]
+
+
+            if search:
+
+                query += """
+                    AND (
+                        m.subject LIKE %s
+                        OR m.message LIKE %s
+                        OR u.name LIKE %s
+                        OR u.email LIKE %s
+                    )
+                """
+
+                search_value = f"%{search}%"
+
+                params.extend([
+                    search_value,
+                    search_value,
+                    search_value,
+                    search_value
+                ])
+
+
+            query += """
+                ORDER BY m.created_at DESC
+            """
+
+
+        # =================================================
+        # SENT
+        # =================================================
+
+        else:
+
+            query = """
+                SELECT
+
+                    m.id,
+                    m.sender_id,
+                    m.receiver_id,
+                    m.subject,
+                    m.message,
+                    m.is_read,
+                    m.created_at,
+
+                    u.name AS receiver_name,
+                    u.email AS receiver_email,
+                    u.role AS receiver_role
+
+                FROM messages m
+
+                INNER JOIN users u
+                    ON m.receiver_id = u.id
+
+                WHERE m.sender_id = %s
+            """
+
+            params = [
+                user_id
+            ]
+
+
+            if search:
+
+                query += """
+                    AND (
+                        m.subject LIKE %s
+                        OR m.message LIKE %s
+                        OR u.name LIKE %s
+                        OR u.email LIKE %s
+                    )
+                """
+
+                search_value = f"%{search}%"
+
+                params.extend([
+                    search_value,
+                    search_value,
+                    search_value,
+                    search_value
+                ])
+
+
+            query += """
+                ORDER BY m.created_at DESC
+            """
+
+
+        cursor.execute(
+            query,
+            tuple(params)
+        )
+
+        messages = cursor.fetchall()
+
+
+        # =================================================
+        # MESSAGE STATISTICS
+        # =================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM messages
+            WHERE receiver_id = %s
+        """, (
+            user_id,
+        ))
+
+        total_received = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        cursor.execute("""
+            SELECT COUNT(*) AS unread
+            FROM messages
+            WHERE receiver_id = %s
+              AND is_read = 0
+        """, (
+            user_id,
+        ))
+
+        unread_count = (
+            cursor.fetchone()["unread"] or 0
+        )
+
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM messages
+            WHERE sender_id = %s
+        """, (
+            user_id,
+        ))
+
+        total_sent = (
+            cursor.fetchone()["total"] or 0
+        )
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "placement/messages.html",
+
+            messages=messages,
+
+            selected_folder=selected_folder,
+            search=search,
+
+            total_received=total_received,
+            unread_count=unread_count,
+            total_sent=total_sent
+        )
+
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("PLACEMENT MESSAGES DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load messages.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT MESSAGES ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load messages.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - SEND MESSAGE
+# =========================================================
+
+@app.route(
+    "/placement/messages/send",
+    methods=["POST"]
+)
+@placement_required
+def placement_send_message():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            return jsonify({
+                "success": False,
+                "message": "Session expired. Please login again."
+            }), 401
+
+
+        receiver_id = request.form.get(
+            "receiver_id",
+            ""
+        ).strip()
+
+        subject = request.form.get(
+            "subject",
+            ""
+        ).strip()
+
+        message = request.form.get(
+            "message",
+            ""
+        ).strip()
+
+
+        # =================================================
+        # VALIDATION
+        # =================================================
+
+        if not receiver_id:
+
+            return jsonify({
+                "success": False,
+                "message": "Please select a recipient."
+            }), 400
+
+
+        if not subject:
+
+            return jsonify({
+                "success": False,
+                "message": "Subject is required."
+            }), 400
+
+
+        if not message:
+
+            return jsonify({
+                "success": False,
+                "message": "Message is required."
+            }), 400
+
+
+        if receiver_id == user_id:
+
+            return jsonify({
+                "success": False,
+                "message": "You cannot send a message to yourself."
+            }), 400
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # VERIFY RECEIVER
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                name,
+                email,
+                role,
+                status
+            FROM users
+            WHERE id = %s
+            LIMIT 1
+        """, (
+            receiver_id,
+        ))
+
+        receiver = cursor.fetchone()
+
+
+        if not receiver:
+
+            return jsonify({
+                "success": False,
+                "message": "Recipient not found."
+            }), 404
+
+
+        if receiver["status"] != "ACTIVE":
+
+            return jsonify({
+                "success": False,
+                "message": "Recipient account is not active."
+            }), 400
+
+
+        # =================================================
+        # INSERT MESSAGE
+        # =================================================
+
+        cursor.execute("""
+            INSERT INTO messages (
+                sender_id,
+                receiver_id,
+                subject,
+                message,
+                is_read,
+                created_at
+            )
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                0,
+                NOW()
+            )
+        """, (
+            user_id,
+            receiver_id,
+            subject,
+            message
+        ))
+
+
+        conn.commit()
+
+
+        return jsonify({
+            "success": True,
+            "message": "Message sent successfully."
+        })
+
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT SEND MESSAGE DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to send message."
+        }), 500
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT SEND MESSAGE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return jsonify({
+            "success": False,
+            "message": "Something went wrong."
+        }), 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - MARK MESSAGE AS READ
+# =========================================================
+
+@app.route(
+    "/placement/messages/<int:message_id>/read",
+    methods=["POST"]
+)
+@placement_required
+def placement_mark_message_read(message_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            return jsonify({
+                "success": False,
+                "message": "Session expired."
+            }), 401
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor()
+
+
+        # =================================================
+        # ONLY RECEIVER CAN MARK AS READ
+        # =================================================
+
+        cursor.execute("""
+            UPDATE messages
+            SET is_read = 1
+            WHERE id = %s
+              AND receiver_id = %s
+        """, (
+            message_id,
+            user_id
+        ))
+
+
+        conn.commit()
+
+
+        if cursor.rowcount == 0:
+
+            return jsonify({
+                "success": False,
+                "message": "Message not found."
+            }), 404
+
+
+        return jsonify({
+            "success": True,
+            "message": "Message marked as read."
+        })
+
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT MARK MESSAGE READ DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to update message."
+        }), 500
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT MARK MESSAGE READ ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return jsonify({
+            "success": False,
+            "message": "Something went wrong."
+        }), 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - SETTINGS
+# =========================================================
+
+@app.route("/placement/settings")
+@placement_required
+def placement_settings():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            flash(
+                "Placement Cell session expired. Please login again.",
+                "error"
+            )
+            return redirect(url_for("login"))
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # ACCOUNT
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                name,
+                email,
+                role,
+                status,
+                created_at
+            FROM users
+            WHERE id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        account = cursor.fetchone()
+
+
+        if not account:
+
+            flash(
+                "Account not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # GET SETTINGS
+        # =================================================
+
+        cursor.execute("""
+            SELECT
+                id,
+                user_id,
+                notify_messages,
+                notify_opportunities,
+                notify_collaborations,
+                theme_preference
+            FROM placement_cell_settings
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        settings = cursor.fetchone()
+
+
+        # =================================================
+        # CREATE DEFAULT SETTINGS
+        # =================================================
+
+        if not settings:
+
+            cursor.execute("""
+                INSERT INTO placement_cell_settings (
+                    user_id,
+                    notify_messages,
+                    notify_opportunities,
+                    notify_collaborations,
+                    theme_preference
+                )
+                VALUES (
+                    %s,
+                    TRUE,
+                    TRUE,
+                    TRUE,
+                    'light'
+                )
+            """, (
+                user_id,
+            ))
+
+            conn.commit()
+
+
+            settings = {
+                "notify_messages": True,
+                "notify_opportunities": True,
+                "notify_collaborations": True,
+                "theme_preference": "light"
+            }
+
+
+        # =================================================
+        # RENDER
+        # =================================================
+
+        return render_template(
+            "placement/settings.html",
+
+            dashboard="settings",
+
+            account=account,
+
+            settings=settings
+        )
+
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("PLACEMENT SETTINGS DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load settings.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PLACEMENT SETTINGS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load settings.",
+            "error"
+        )
+
+        return redirect(
+            url_for("placement_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - UPDATE NOTIFICATION SETTINGS
+# =========================================================
+
+@app.route(
+    "/placement/settings/notifications",
+    methods=["POST"]
+)
+@placement_required
+def placement_update_notification_settings():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            return {
+                "success": False,
+                "message": "Session expired. Please login again."
+            }, 401
+
+
+        notify_messages = (
+            request.form.get("notify_messages")
+            == "true"
+        )
+
+        notify_opportunities = (
+            request.form.get("notify_opportunities")
+            == "true"
+        )
+
+        notify_collaborations = (
+            request.form.get("notify_collaborations")
+            == "true"
+        )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor()
+
+
+        cursor.execute("""
+            INSERT INTO placement_cell_settings (
+                user_id,
+                notify_messages,
+                notify_opportunities,
+                notify_collaborations
+            )
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s
+            )
+            ON DUPLICATE KEY UPDATE
+
+                notify_messages =
+                    VALUES(notify_messages),
+
+                notify_opportunities =
+                    VALUES(notify_opportunities),
+
+                notify_collaborations =
+                    VALUES(notify_collaborations)
+        """, (
+            user_id,
+            notify_messages,
+            notify_opportunities,
+            notify_collaborations
+        ))
+
+
+        conn.commit()
+
+
+        return {
+            "success": True,
+            "message": "Notification preferences saved."
+        }
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT NOTIFICATION SETTINGS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return {
+            "success": False,
+            "message": "Unable to save notification preferences."
+        }, 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PLACEMENT CELL - UPDATE APPEARANCE
+# =========================================================
+
+@app.route(
+    "/placement/settings/appearance",
+    methods=["POST"]
+)
+@placement_required
+def placement_update_appearance():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            return {
+                "success": False,
+                "message": "Session expired."
+            }, 401
+
+
+        theme = request.form.get(
+            "theme",
+            "light"
+        ).strip().lower()
+
+
+        if theme not in [
+            "light",
+            "dark"
+        ]:
+
+            return {
+                "success": False,
+                "message": "Invalid theme selected."
+            }, 400
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor()
+
+
+        cursor.execute("""
+            INSERT INTO placement_cell_settings (
+                user_id,
+                theme_preference
+            )
+            VALUES (
+                %s,
+                %s
+            )
+            ON DUPLICATE KEY UPDATE
+
+                theme_preference =
+                    VALUES(theme_preference)
+        """, (
+            user_id,
+            theme
+        ))
+
+
+        conn.commit()
+
+
+        return {
+            "success": True,
+            "message": "Appearance preference saved."
+        }
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT APPEARANCE SETTINGS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return {
+            "success": False,
+            "message": "Unable to save appearance preference."
+        }, 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# PLACEMENT CELL - CHANGE PASSWORD
+# =========================================================
+
+@app.route(
+    "/placement/settings/password",
+    methods=["POST"]
+)
+@placement_required
+def placement_change_password():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+
+        if not user_id:
+
+            return {
+                "success": False,
+                "message": "Session expired. Please login again."
+            }, 401
+
+
+        current_password = request.form.get(
+            "current_password",
+            ""
+        )
+
+        new_password = request.form.get(
+            "new_password",
+            ""
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            ""
+        )
+
+
+        # =================================================
+        # VALIDATION
+        # =================================================
+
+        if not current_password:
+
+            return {
+                "success": False,
+                "message": "Current password is required."
+            }, 400
+
+
+        if not new_password:
+
+            return {
+                "success": False,
+                "message": "New password is required."
+            }, 400
+
+
+        if len(new_password) < 6:
+
+            return {
+                "success": False,
+                "message":
+                    "Password must be at least 6 characters."
+            }, 400
+
+
+        if new_password != confirm_password:
+
+            return {
+                "success": False,
+                "message":
+                    "New passwords do not match."
+            }, 400
+
+
+        if current_password == new_password:
+
+            return {
+                "success": False,
+                "message":
+                    "New password must be different from current password."
+            }, 400
+
+
+        # =================================================
+        # DATABASE
+        # =================================================
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        cursor.execute("""
+            SELECT
+                password
+            FROM users
+            WHERE id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        account = cursor.fetchone()
+
+
+        if not account:
+
+            return {
+                "success": False,
+                "message": "Account not found."
+            }, 404
+
+
+        # =================================================
+        # VERIFY CURRENT PASSWORD
+        # =================================================
+
+        if account["password"] != current_password:
+
+            return {
+                "success": False,
+                "message": "Current password is incorrect."
+            }, 400
+
+
+        # =================================================
+        # UPDATE PASSWORD
+        # =================================================
+
+        cursor.execute("""
+            UPDATE users
+            SET password = %s
+            WHERE id = %s
+        """, (
+            new_password,
+            user_id
+        ))
+
+
+        conn.commit()
+
+
+        return {
+            "success": True,
+            "message": "Password changed successfully."
+        }
+
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("PLACEMENT CHANGE PASSWORD ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return {
+            "success": False,
+            "message": "Unable to change password."
+        }, 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
 
 # =========================================================
 # LOGOUT

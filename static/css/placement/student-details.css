@@ -1,0 +1,384 @@
+.student-details-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.back-students {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 17px;
+    color: #2554d9;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.student-detail-header {
+    padding: 24px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 15px;
+}
+
+.detail-avatar {
+    width: 65px;
+    height: 65px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: #eaf0ff;
+    color: #2859d7;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.detail-header-info {
+    flex: 1;
+}
+
+.detail-label,
+.detail-header-status > span,
+.detail-card-header > div:first-child > span {
+    display: block;
+    font-size: 8px;
+    font-weight: 800;
+    color: #929bad;
+    letter-spacing: .8px;
+}
+
+.detail-header-info h2 {
+    margin: 4px 0;
+    font-size: 23px;
+    color: #1b2437;
+}
+
+.detail-header-info p {
+    font-size: 10px;
+    color: #8993a5;
+}
+
+.detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.detail-meta span {
+    font-size: 9px;
+    color: #69748a;
+}
+
+.detail-meta i {
+    color: #2554d9;
+    margin-right: 4px;
+}
+
+.detail-header-status {
+    min-width: 155px;
+    padding-left: 20px;
+    border-left: 1px solid #edf0f5;
+}
+
+.placement-status-large {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 7px 10px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.detail-card {
+    margin-bottom: 18px;
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.detail-card-header {
+    min-height: 68px;
+    padding: 17px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.detail-card-header h3 {
+    margin-top: 4px;
+    font-size: 14px;
+    color: #263148;
+}
+
+.detail-card-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #f1f4f9;
+    color: #596a86;
+    font-size: 12px;
+}
+
+.information-grid {
+    padding: 6px 20px 15px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.information-item {
+    min-height: 62px;
+    padding: 13px 8px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.information-item.full {
+    grid-column: 1 / -1;
+}
+
+.information-item span {
+    display: block;
+    font-size: 8px;
+    color: #9aa3b3;
+    font-weight: 600;
+}
+
+.information-item strong {
+    display: block;
+    margin-top: 5px;
+    color: #34405a;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.highlight-value {
+    color: #2554d9 !important;
+}
+
+.skills-grid {
+    padding: 18px 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.skill-item {
+    padding: 13px;
+    border: 1px solid #edf0f4;
+    border-radius: 10px;
+}
+
+.skill-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.skill-top strong {
+    font-size: 10px;
+    color: #354057;
+}
+
+.skill-top span {
+    font-size: 9px;
+    font-weight: 800;
+    color: #2554d9;
+}
+
+.skill-progress {
+    height: 6px;
+    margin: 9px 0 7px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #edf0f5;
+}
+
+.skill-progress-value {
+    height: 100%;
+    border-radius: 10px;
+    background: #2554d9;
+}
+
+.skill-bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.skill-bottom span {
+    font-size: 8px;
+    color: #929bad;
+}
+
+.application-count {
+    font-size: 15px;
+    font-weight: 800;
+    color: #2554d9;
+}
+
+.application-count span {
+    font-size: 8px;
+    font-weight: 600;
+    color: #929bad;
+}
+
+.application-history {
+    padding: 5px 20px 12px;
+}
+
+.application-history-item {
+    min-height: 78px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.application-history-item:last-child {
+    border-bottom: none;
+}
+
+.application-icon {
+    width: 35px;
+    height: 35px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #eef2ff;
+    color: #3e5fd2;
+    font-size: 12px;
+}
+
+.application-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.application-main strong,
+.application-main span,
+.application-main small {
+    display: block;
+}
+
+.application-main strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #34405a;
+    font-size: 10px;
+}
+
+.application-main span {
+    margin-top: 3px;
+    color: #68738a;
+    font-size: 9px;
+}
+
+.application-main small {
+    margin-top: 3px;
+    color: #9aa3b3;
+    font-size: 8px;
+}
+
+.application-date {
+    font-size: 8px;
+    color: #929bad;
+    white-space: nowrap;
+}
+
+.detail-empty {
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #929bad;
+    font-size: 10px;
+}
+
+.detail-empty i {
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.college-detail-box {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.college-detail-box strong {
+    color: #2b354c;
+    font-size: 13px;
+}
+
+.college-detail-box span {
+    color: #2554d9;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.college-detail-box small {
+    color: #929bad;
+    font-size: 9px;
+}
+
+@media (max-width: 850px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .student-detail-header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .detail-header-status {
+        width: 100%;
+        padding: 15px 0 0;
+        border-left: none;
+        border-top: 1px solid #edf0f5;
+    }
+}
+
+@media (max-width: 600px) {
+    .information-grid,
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .information-item.full {
+        grid-column: auto;
+    }
+
+    .application-history-item {
+        flex-wrap: wrap;
+        padding: 10px 0;
+    }
+
+    .application-date {
+        display: none;
+    }
+}

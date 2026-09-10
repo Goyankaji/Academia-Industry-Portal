@@ -1,0 +1,441 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Industries | Placement Cell
+{% endblock %}
+
+{% block page_title %}
+Industries
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/industries.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="industries-page">
+
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <span class="page-eyebrow">
+                PLACEMENT CELL
+            </span>
+
+            <h1>
+                Industries
+            </h1>
+
+            <p>
+                Explore active industry partners and
+                available opportunities.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SUMMARY
+    ================================================== -->
+
+    <div class="industry-stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Active Industries
+                </span>
+
+                <strong>
+                    {{ total_industries }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Open Opportunities
+                </span>
+
+                <strong>
+                    {{ total_opportunities }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                <i class="fa-solid fa-handshake"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Collaborations
+                </span>
+
+                <strong>
+                    {{ total_collaborations }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         FILTERS
+    ================================================== -->
+
+    <div class="filters-card">
+
+        <form
+            method="GET"
+            action="{{ url_for('placement_industries') }}"
+            class="filters-form"
+        >
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search company, sector, type or location..."
+                    value="{{ search }}"
+                >
+
+            </div>
+
+
+            <select name="company_type">
+
+                <option value="">
+                    All Company Types
+                </option>
+
+                {% for type in company_types %}
+
+                    <option
+                        value="{{ type }}"
+                        {% if company_type == type %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ type }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <select name="industry_sector">
+
+                <option value="">
+                    All Sectors
+                </option>
+
+                {% for sector in industry_sectors %}
+
+                    <option
+                        value="{{ sector }}"
+                        {% if industry_sector == sector %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ sector }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="filter-button"
+            >
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+
+            {% if search or company_type or industry_sector %}
+
+                <a
+                    href="{{ url_for('placement_industries') }}"
+                    class="clear-button"
+                >
+                    Clear
+                </a>
+
+            {% endif %}
+
+        </form>
+
+    </div>
+
+
+    <!-- =================================================
+         INDUSTRY LIST
+    ================================================== -->
+
+    <div class="industries-card">
+
+        {% if industries %}
+
+            <div class="industry-grid">
+
+                {% for industry in industries %}
+
+                    <article class="industry-card">
+
+                        <!-- Company Header -->
+
+                        <div class="industry-card-header">
+
+                            <div class="company-icon">
+
+                                <i class="fa-solid fa-building"></i>
+
+                            </div>
+
+
+                            <div class="company-heading">
+
+                                <h2>
+                                    {{ industry.company_name }}
+                                </h2>
+
+                                {% if industry.industry_sector %}
+
+                                    <span>
+                                        {{ industry.industry_sector }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Company Type -->
+
+                        {% if industry.company_type %}
+
+                            <div class="company-type">
+
+                                <i class="fa-solid fa-tag"></i>
+
+                                {{ industry.company_type }}
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- Location -->
+
+                        {% if industry.city or industry.state %}
+
+                            <div class="industry-location">
+
+                                <i class="fa-solid fa-location-dot"></i>
+
+                                <span>
+
+                                    {% if industry.city %}
+                                        {{ industry.city }}
+                                    {% endif %}
+
+                                    {% if industry.city and industry.state %}
+                                        ,
+                                    {% endif %}
+
+                                    {% if industry.state %}
+                                        {{ industry.state }}
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- Description -->
+
+                        {% if industry.description %}
+
+                            <p class="industry-description">
+
+                                {{ industry.description[:180] }}
+
+                                {% if industry.description|length > 180 %}
+                                    ...
+                                {% endif %}
+
+                            </p>
+
+                        {% else %}
+
+                            <p class="industry-description muted">
+                                No company description available.
+                            </p>
+
+                        {% endif %}
+
+
+                        <!-- Stats -->
+
+                        <div class="industry-card-stats">
+
+                            <div>
+
+                                <strong>
+                                    {{ industry.opportunity_count or 0 }}
+                                </strong>
+
+                                <span>
+                                    Open Opportunities
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    {{ industry.collaboration_count or 0 }}
+                                </strong>
+
+                                <span>
+                                    Collaborations
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Action -->
+
+                        <div class="industry-card-footer">
+
+                            <a
+                                href="{{ url_for(
+                                    'placement_industry_details',
+                                    industry_id=industry.id
+                                ) }}"
+                                class="details-button"
+                            >
+
+                                View Details
+
+                                <i class="fa-solid fa-arrow-right"></i>
+
+                            </a>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+
+                    <i class="fa-solid fa-building-circle-xmark"></i>
+
+                </div>
+
+                <h2>
+                    No Industries Found
+                </h2>
+
+                <p>
+                    No active industries match the selected
+                    search or filters.
+                </p>
+
+
+                {% if search or company_type or industry_sector %}
+
+                    <a
+                        href="{{ url_for('placement_industries') }}"
+                        class="clear-empty-button"
+                    >
+                        Clear Filters
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/industries.js'
+    ) }}"
+></script>
+
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "placement/base.html" %}
+
+{% block title %}Notifications | Placement Cell{% endblock %}
+
+{% block page_title %}Notifications{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/placement/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="notifications-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1>Notifications</h1>
+            <p>Stay updated with important placement activities and updates.</p>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="notification-stats">
+
+        <div class="stat-card">
+            <div class="stat-icon total-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Notifications</span>
+                <span class="stat-value">{{ total_notifications }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon unread-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Unread</span>
+                <span class="stat-value">{{ unread_count }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon read-icon">
+                <i class="fas fa-envelope-open"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Read</span>
+                <span class="stat-value">{{ read_count }}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toolbar -->
+    <div class="notifications-toolbar">
+
+        <form method="GET"
+              action="{{ url_for('placement_notifications') }}"
+              class="search-form">
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search notifications..."
+                >
+            </div>
+
+            <input type="hidden" name="filter" value="{{ selected_filter }}">
+
+            <button type="submit" class="search-btn">
+                Search
+            </button>
+
+        </form>
+
+        <div class="toolbar-actions">
+
+            <div class="filter-buttons">
+
+                <a href="{{ url_for('placement_notifications', filter='all', search=search) }}"
+                   class="filter-btn {% if selected_filter == 'all' %}active{% endif %}">
+                    All
+                </a>
+
+                <a href="{{ url_for('placement_notifications', filter='unread', search=search) }}"
+                   class="filter-btn {% if selected_filter == 'unread' %}active{% endif %}">
+                    Unread
+                    {% if unread_count > 0 %}
+                        <span class="filter-count">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="{{ url_for('placement_notifications', filter='read', search=search) }}"
+                   class="filter-btn {% if selected_filter == 'read' %}active{% endif %}">
+                    Read
+                </a>
+
+            </div>
+
+            {% if unread_count > 0 %}
+            <form method="POST"
+                  action="{{ url_for('placement_mark_all_notifications_read') }}"
+                  class="mark-all-form"
+                  id="markAllForm">
+
+                <button type="submit" class="mark-all-btn">
+                    <i class="fas fa-check-double"></i>
+                    Mark All as Read
+                </button>
+
+            </form>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-card">
+
+        {% if notifications %}
+
+            <div class="notifications-list">
+
+                {% for notification in notifications %}
+
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %}"
+                     data-notification-id="{{ notification.id }}">
+
+                    <div class="notification-icon
+                        {% if notification.notification_type %}
+                            type-{{ notification.notification_type|lower|replace(' ', '-') }}
+                        {% else %}
+                            type-default
+                        {% endif %}">
+                        <i class="fas fa-bell"></i>
+                    </div>
+
+                    <div class="notification-content">
+
+                        <div class="notification-top">
+
+                            <div>
+                                <h3>{{ notification.title }}</h3>
+
+                                {% if not notification.is_read %}
+                                    <span class="unread-badge">Unread</span>
+                                {% endif %}
+                            </div>
+
+                            <span class="notification-time"
+                                  data-time="{{ notification.created_at }}">
+                                {{ notification.created_at }}
+                            </span>
+
+                        </div>
+
+                        <p>{{ notification.message }}</p>
+
+                        <div class="notification-footer">
+
+                            {% if notification.notification_type %}
+                                <span class="notification-type">
+                                    {{ notification.notification_type }}
+                                </span>
+                            {% endif %}
+
+                            {% if not notification.is_read %}
+
+                            <form method="POST"
+                                  action="{{ url_for('placement_mark_notification_read', notification_id=notification.id) }}"
+                                  class="mark-read-form">
+
+                                <button type="submit" class="mark-read-btn">
+                                    <i class="fas fa-check"></i>
+                                    Mark as Read
+                                </button>
+
+                            </form>
+
+                            {% else %}
+
+                            <span class="read-status">
+                                <i class="fas fa-check-double"></i>
+                                Read
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <!-- Empty State -->
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    <i class="far fa-bell-slash"></i>
+                </div>
+
+                <h2>No Notifications Found</h2>
+
+                {% if search %}
+                    <p>No notifications match your search.</p>
+                    <a href="{{ url_for('placement_notifications') }}"
+                       class="clear-search-btn">
+                        Clear Search
+                    </a>
+                {% elif selected_filter == 'unread' %}
+                    <p>You have no unread notifications.</p>
+                {% elif selected_filter == 'read' %}
+                    <p>You don't have any read notifications yet.</p>
+                {% else %}
+                    <p>You're all caught up. New notifications will appear here.</p>
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/placement/notifications.js') }}"></script>
+{% endblock %}

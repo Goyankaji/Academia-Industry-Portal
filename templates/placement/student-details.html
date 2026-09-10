@@ -1,0 +1,673 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+{{ student.name }} | Student Details | SIH Portal
+{% endblock %}
+
+{% block page_title %}
+Student Details
+{% endblock %}
+
+
+{% block content %}
+
+<div class="student-details-page">
+
+    <!-- =====================================================
+         BACK
+    ====================================================== -->
+
+    <a
+        href="{{ url_for('placement_students') }}"
+        class="back-students"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Students
+    </a>
+
+
+    <!-- =====================================================
+         PROFILE HEADER
+    ====================================================== -->
+
+    <section class="student-detail-header">
+
+        <div class="detail-avatar">
+
+            {{
+                student.name
+                |string
+                |first
+                |upper
+            }}
+
+        </div>
+
+
+        <div class="detail-header-info">
+
+            <span class="detail-label">
+                STUDENT PROFILE
+            </span>
+
+            <h2>
+                {{ student.name }}
+            </h2>
+
+            <p>
+                {{ student.email }}
+            </p>
+
+            <div class="detail-meta">
+
+                <span>
+                    <i class="fa-solid fa-id-card"></i>
+                    {{ student.enrollment_no or "No enrollment number" }}
+                </span>
+
+                <span>
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    {{ student.course or "Course not specified" }}
+                </span>
+
+                <span>
+                    <i class="fa-solid fa-code-branch"></i>
+                    {{ student.branch or "Branch not specified" }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="detail-header-status">
+
+            <span>
+                PLACEMENT STATUS
+            </span>
+
+            <strong
+                class="
+                    placement-status-large
+                    placement-status-{{ student.placement_status|lower|replace(' ', '-') }}
+                "
+            >
+
+                {% if student.placement_status == "SELECTED" %}
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                {% elif student.placement_status == "SHORTLISTED" %}
+
+                    <i class="fa-solid fa-list-check"></i>
+
+                {% elif student.placement_status == "APPLIED" %}
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                {% else %}
+
+                    <i class="fa-regular fa-circle"></i>
+
+                {% endif %}
+
+                {{ student.placement_status|replace("_", " ") }}
+
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PERSONAL + ACADEMIC
+    ====================================================== -->
+
+    <div class="details-grid">
+
+
+        <!-- PERSONAL INFORMATION -->
+
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div>
+
+                    <span>
+                        PERSONAL INFORMATION
+                    </span>
+
+                    <h3>
+                        Basic Details
+                    </h3>
+
+                </div>
+
+                <div class="detail-card-icon">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+            </div>
+
+
+            <div class="information-grid">
+
+                <div class="information-item">
+
+                    <span>
+                        Full Name
+                    </span>
+
+                    <strong>
+                        {{ student.name or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Email
+                    </span>
+
+                    <strong>
+                        {{ student.email or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Phone
+                    </span>
+
+                    <strong>
+                        {{ student.phone or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Date of Birth
+                    </span>
+
+                    <strong>
+                        {{ student.dob or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Gender
+                    </span>
+
+                    <strong>
+                        {{ student.gender or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item full">
+
+                    <span>
+                        Address
+                    </span>
+
+                    <strong>
+                        {{ student.address or "—" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ACADEMIC INFORMATION -->
+
+        <section class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div>
+
+                    <span>
+                        ACADEMIC INFORMATION
+                    </span>
+
+                    <h3>
+                        Academic Record
+                    </h3>
+
+                </div>
+
+                <div class="detail-card-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+
+            </div>
+
+
+            <div class="information-grid">
+
+                <div class="information-item">
+
+                    <span>
+                        Enrollment No.
+                    </span>
+
+                    <strong>
+                        {{ student.enrollment_no or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Course
+                    </span>
+
+                    <strong>
+                        {{ student.course or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Branch
+                    </span>
+
+                    <strong>
+                        {{ student.branch or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Semester
+                    </span>
+
+                    <strong>
+                        {{ student.semester or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Passing Year
+                    </span>
+
+                    <strong>
+                        {{ student.passing_year or "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        CGPA
+                    </span>
+
+                    <strong class="highlight-value">
+                        {{ student.cgpa if student.cgpa is not none else "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Current SGPA
+                    </span>
+
+                    <strong>
+                        {{ student.current_sgpa if student.current_sgpa is not none else "—" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>
+                        Active Backlogs
+                    </span>
+
+                    <strong>
+                        {{ student.active_backlogs or 0 }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =====================================================
+         SKILLS
+    ====================================================== -->
+
+    <section class="detail-card skills-card">
+
+        <div class="detail-card-header">
+
+            <div>
+
+                <span>
+                    SKILLS & COMPETENCIES
+                </span>
+
+                <h3>
+                    Student Skills
+                </h3>
+
+            </div>
+
+            <div class="detail-card-icon">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+
+        </div>
+
+
+        {% if skills %}
+
+            <div class="skills-grid">
+
+                {% for skill in skills %}
+
+                    <div class="skill-item">
+
+                        <div class="skill-top">
+
+                            <strong>
+                                {{ skill.skill_name }}
+                            </strong>
+
+                            {% if skill.assessment_percentage is not none %}
+
+                                <span>
+                                    {{ skill.assessment_percentage }}%
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if skill.assessment_percentage is not none %}
+
+                            <div class="skill-progress">
+                                class="skill-progress-value"
+                                data-width="{{ skill.assessment_percentage }}"
+                            ></div>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="skill-bottom">
+
+                            <span>
+                                {{ skill.proficiency_level or "Not assessed" }}
+                            </span>
+
+                            {% if skill.verification_status %}
+
+                                <span>
+                                    {{ skill.verification_status }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="detail-empty">
+
+                <i class="fa-solid fa-bolt"></i>
+
+                <p>
+                    No skills have been added for this student yet.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         APPLICATION HISTORY
+    ====================================================== -->
+
+    <section class="detail-card applications-card">
+
+        <div class="detail-card-header">
+
+            <div>
+
+                <span>
+                    PLACEMENT ACTIVITY
+                </span>
+
+                <h3>
+                    Application History
+                </h3>
+
+            </div>
+
+            <div class="application-count">
+
+                {{ applications|length }}
+
+                <span>
+                    Applications
+                </span>
+
+            </div>
+
+        </div>
+
+
+        {% if applications %}
+
+            <div class="application-history">
+
+                {% for application in applications %}
+
+                    <div class="application-history-item">
+
+                        <div class="application-icon">
+
+                            <i class="fa-solid fa-briefcase"></i>
+
+                        </div>
+
+
+                        <div class="application-main">
+
+                            <strong>
+                                {{ application.opportunity_title }}
+                            </strong>
+
+                            <span>
+                                {{ application.company_name }}
+                            </span>
+
+                            <small>
+
+                                {{ application.opportunity_type or "Opportunity" }}
+
+                                {% if application.location %}
+                                    · {{ application.location }}
+                                {% endif %}
+
+                            </small>
+
+                        </div>
+
+
+                        <div class="application-date">
+
+                            {% if application.application_date %}
+
+                                {{ application.application_date.strftime("%d %b %Y") }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <span
+                            class="
+                                placement-status
+                                placement-status-{{ application.status|lower|replace('_', '-') }}
+                            "
+                        >
+                            {{ application.status|replace("_", " ") }}
+                        </span>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="detail-empty">
+
+                <i class="fa-solid fa-file-lines"></i>
+
+                <p>
+                    This student has not submitted any applications yet.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         COLLEGE INFORMATION
+    ====================================================== -->
+
+    <section class="detail-card">
+
+        <div class="detail-card-header">
+
+            <div>
+
+                <span>
+                    INSTITUTION
+                </span>
+
+                <h3>
+                    College Information
+                </h3>
+
+            </div>
+
+            <div class="detail-card-icon">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+
+        </div>
+
+
+        <div class="college-detail-box">
+
+            <strong>
+                {{ student.college_name }}
+            </strong>
+
+            <span>
+                {{ student.college_code or "—" }}
+            </span>
+
+            {% if student.university_name %}
+
+                <small>
+                    {{ student.university_name }}
+                </small>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/student-details.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/student-details.js'
+    ) }}"
+></script>
+
+{% endblock %}

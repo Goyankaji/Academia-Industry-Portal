@@ -1,0 +1,302 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Opportunities | Placement Cell | SIH Portal
+{% endblock %}
+
+{% block page_title %}
+Opportunities
+{% endblock %}
+
+{% block content %}
+
+<div class="opportunities-page">
+
+    <div class="opportunities-heading">
+        <span>INDUSTRY OPPORTUNITIES</span>
+        <h2>Available Opportunities</h2>
+        <p>
+            Explore active opportunities from registered industries
+            for your college students.
+        </p>
+    </div>
+
+
+    <div class="opportunity-stats">
+
+        <div class="opportunity-stat">
+            <i class="fa-solid fa-briefcase"></i>
+            <div>
+                <span>OPEN OPPORTUNITIES</span>
+                <strong>{{ total_opportunities }}</strong>
+            </div>
+        </div>
+
+        <div class="opportunity-stat">
+            <i class="fa-solid fa-calendar-check"></i>
+            <div>
+                <span>UPCOMING DEADLINES</span>
+                <strong>{{ upcoming_deadlines }}</strong>
+            </div>
+        </div>
+
+        <div class="opportunity-stat">
+            <i class="fa-solid fa-building"></i>
+            <div>
+                <span>HIRING INDUSTRIES</span>
+                <strong>{{ hiring_industries }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="opportunity-filter-card">
+
+        <form method="GET"
+              action="{{ url_for('placement_opportunities') }}">
+
+            <div class="opportunity-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search opportunity or company..."
+                >
+            </div>
+
+
+            <select name="type">
+
+                <option value="">All Types</option>
+
+                <option value="JOB"
+                    {% if opportunity_type == "JOB" %}selected{% endif %}>
+                    Job
+                </option>
+
+                <option value="INTERNSHIP"
+                    {% if opportunity_type == "INTERNSHIP" %}selected{% endif %}>
+                    Internship
+                </option>
+
+                <option value="PROJECT"
+                    {% if opportunity_type == "PROJECT" %}selected{% endif %}>
+                    Project
+                </option>
+
+                <option value="TRAINING"
+                    {% if opportunity_type == "TRAINING" %}selected{% endif %}>
+                    Training
+                </option>
+
+                <option value="COLLABORATION"
+                    {% if opportunity_type == "COLLABORATION" %}selected{% endif %}>
+                    Collaboration
+                </option>
+
+            </select>
+
+
+            <select name="work_mode">
+
+                <option value="">All Work Modes</option>
+
+                <option value="ONSITE"
+                    {% if work_mode == "ONSITE" %}selected{% endif %}>
+                    Onsite
+                </option>
+
+                <option value="REMOTE"
+                    {% if work_mode == "REMOTE" %}selected{% endif %}>
+                    Remote
+                </option>
+
+                <option value="HYBRID"
+                    {% if work_mode == "HYBRID" %}selected{% endif %}>
+                    Hybrid
+                </option>
+
+            </select>
+
+
+            <button type="submit">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="opportunity-grid">
+
+        {% if opportunities %}
+
+            {% for opportunity in opportunities %}
+
+                <article class="opportunity-card">
+
+                    <div class="opportunity-card-top">
+
+                        <div class="company-icon">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+
+                        <span class="open-status">
+                            OPEN
+                        </span>
+
+                    </div>
+
+
+                    <span class="opportunity-type">
+                        {{ opportunity.opportunity_type }}
+                    </span>
+
+
+                    <h3>
+                        {{ opportunity.title }}
+                    </h3>
+
+
+                    <p class="company-name">
+                        {{ opportunity.company_name }}
+                    </p>
+
+
+                    <div class="opportunity-meta">
+
+                        {% if opportunity.location %}
+                            <span>
+                                <i class="fa-solid fa-location-dot"></i>
+                                {{ opportunity.location }}
+                            </span>
+                        {% endif %}
+
+                        {% if opportunity.work_mode %}
+                            <span>
+                                <i class="fa-solid fa-laptop"></i>
+                                {{ opportunity.work_mode }}
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if opportunity.package or opportunity.stipend %}
+
+                        <div class="opportunity-compensation">
+
+                            {% if opportunity.package %}
+                                <span>
+                                    Package:
+                                    <strong>
+                                        {{ opportunity.package }}
+                                    </strong>
+                                </span>
+                            {% endif %}
+
+                            {% if opportunity.stipend %}
+                                <span>
+                                    Stipend:
+                                    <strong>
+                                        {{ opportunity.stipend }}
+                                    </strong>
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="opportunity-footer">
+
+                        <span class="deadline">
+
+                            <i class="fa-regular fa-calendar"></i>
+
+                            {% if opportunity.application_deadline %}
+                                {{ opportunity.application_deadline.strftime("%d %b %Y") }}
+                            {% else %}
+                                No deadline
+                            {% endif %}
+
+                        </span>
+
+
+                        <a
+                            href="{{ url_for(
+                                'placement_opportunity_details',
+                                opportunity_id=opportunity.id
+                            ) }}"
+                        >
+                            View Details
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="opportunity-empty">
+
+                <div>
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+
+                <h3>
+                    No opportunities available
+                </h3>
+
+                <p>
+                    There are currently no active industry opportunities
+                    matching your filters.
+                </p>
+
+                <a href="{{ url_for('placement_opportunities') }}">
+                    Clear Filters
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/opportunities.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/opportunities.js'
+    ) }}"
+></script>
+
+{% endblock %}

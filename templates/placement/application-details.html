@@ -1,0 +1,656 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Application Details | Placement Cell
+{% endblock %}
+
+{% block page_css %}
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/application-details.css'
+    ) }}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="application-details-page">
+
+    <!-- =================================================
+         HEADER
+         ================================================= -->
+
+    <div class="page-header">
+
+        <div>
+
+            <a
+                href="{{ url_for('placement_applications') }}"
+                class="back-link"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Applications
+            </a>
+
+            <span class="page-eyebrow">
+                APPLICATION DETAILS
+            </span>
+
+            <h1>
+                {{ application.student_name }}
+            </h1>
+
+            <p>
+                {{ application.opportunity_title }}
+                ·
+                {{ application.company_name }}
+            </p>
+
+        </div>
+
+
+        <div class="header-status">
+
+            <span class="status-label">
+                Application Status
+            </span>
+
+            <span
+                class="status-badge status-{{ application.status|lower }}"
+            >
+                {{ application.status|replace('_', ' ') }}
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         APPLICATION OVERVIEW
+         ================================================= -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-file-lines"></i>
+            </div>
+
+            <div>
+                <span>
+                    APPLICATION
+                </span>
+
+                <h2>
+                    Application Overview
+                </h2>
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+                <span>
+                    Application ID
+                </span>
+
+                <strong>
+                    {{ application.application_id }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Status
+                </span>
+
+                <strong>
+                    {{ application.status|replace('_', ' ') }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Application Date
+                </span>
+
+                <strong>
+
+                    {% if application.application_date %}
+                        {{ application.application_date.strftime(
+                            '%d %b %Y, %I:%M %p'
+                        ) }}
+                    {% else %}
+                        —
+                    {% endif %}
+
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Last Updated
+                </span>
+
+                <strong>
+
+                    {% if application.updated_at %}
+                        {{ application.updated_at.strftime(
+                            '%d %b %Y, %I:%M %p'
+                        ) }}
+                    {% else %}
+                        —
+                    {% endif %}
+
+                </strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         STUDENT
+         ================================================= -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-user"></i>
+            </div>
+
+            <div>
+                <span>
+                    STUDENT
+                </span>
+
+                <h2>
+                    Student Information
+                </h2>
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+                <span>
+                    Name
+                </span>
+
+                <strong>
+                    {{ application.student_name }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    {{ application.student_email }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Enrollment No.
+                </span>
+
+                <strong>
+                    {{ application.enrollment_no or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Course
+                </span>
+
+                <strong>
+                    {{ application.course or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Branch
+                </span>
+
+                <strong>
+                    {{ application.branch or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Semester
+                </span>
+
+                <strong>
+                    {{ application.semester or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    CGPA
+                </span>
+
+                <strong>
+                    {{ application.cgpa or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Active Backlogs
+                </span>
+
+                <strong>
+                    {{ application.active_backlogs or 0 }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="student-links">
+
+            {% if application.resume_url %}
+
+                <a
+                    href="{{ application.resume_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-solid fa-file-pdf"></i>
+                    Resume
+                </a>
+
+            {% endif %}
+
+
+            {% if application.linkedin_url %}
+
+                <a
+                    href="{{ application.linkedin_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-linkedin"></i>
+                    LinkedIn
+                </a>
+
+            {% endif %}
+
+
+            {% if application.github_url %}
+
+                <a
+                    href="{{ application.github_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-github"></i>
+                    GitHub
+                </a>
+
+            {% endif %}
+
+
+            {% if application.portfolio_url %}
+
+                <a
+                    href="{{ application.portfolio_url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-solid fa-globe"></i>
+                    Portfolio
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         OPPORTUNITY
+         ================================================= -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+
+            <div>
+                <span>
+                    OPPORTUNITY
+                </span>
+
+                <h2>
+                    Opportunity Information
+                </h2>
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+                <span>
+                    Opportunity
+                </span>
+
+                <strong>
+                    {{ application.opportunity_title }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Type
+                </span>
+
+                <strong>
+                    {{ application.opportunity_type or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Location
+                </span>
+
+                <strong>
+                    {{ application.location or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Work Mode
+                </span>
+
+                <strong>
+                    {{ application.work_mode or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Stipend
+                </span>
+
+                <strong>
+                    {{ application.stipend or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Package
+                </span>
+
+                <strong>
+                    {{ application.package or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Deadline
+                </span>
+
+                <strong>
+
+                    {% if application.application_deadline %}
+                        {{ application.application_deadline.strftime(
+                            '%d %b %Y'
+                        ) }}
+                    {% else %}
+                        —
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Opportunity Status
+                </span>
+
+                <strong>
+                    {{ application.opportunity_status or '—' }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        {% if application.description %}
+
+            <div class="text-section">
+
+                <h3>
+                    Description
+                </h3>
+
+                <p>
+                    {{ application.description }}
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =================================================
+         COMPANY
+         ================================================= -->
+
+    <section class="details-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+
+            <div>
+                <span>
+                    INDUSTRY
+                </span>
+
+                <h2>
+                    Company Information
+                </h2>
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+                <span>
+                    Company
+                </span>
+
+                <strong>
+                    {{ application.company_name }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Company Type
+                </span>
+
+                <strong>
+                    {{ application.company_type or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Industry Sector
+                </span>
+
+                <strong>
+                    {{ application.industry_sector or '—' }}
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+                <span>
+                    Contact Person
+                </span>
+
+                <strong>
+                    {{ application.contact_person or '—' }}
+                </strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         STUDENT SKILLS
+         ================================================= -->
+
+    {% if skills %}
+
+        <section class="details-card">
+
+            <div class="card-heading">
+
+                <div class="heading-icon">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+
+                <div>
+                    <span>
+                        PROFILE
+                    </span>
+
+                    <h2>
+                        Student Skills
+                    </h2>
+                </div>
+
+            </div>
+
+
+            <div class="skills-list">
+
+                {% for skill in skills %}
+
+                    <div class="skill-row">
+
+                        <div>
+
+                            <strong>
+                                {{ skill.skill_name }}
+                            </strong>
+
+                            {% if skill.proficiency_level %}
+
+                                <span>
+                                    {{ skill.proficiency_level }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if skill.assessment_percentage is not none %}
+
+                            <strong>
+                                {{ skill.assessment_percentage }}%
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <div class="bottom-actions">
+
+        <a
+            href="{{ url_for('placement_applications') }}"
+            class="back-button"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Applications
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block page_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/application-details.js'
+    ) }}"
+></script>
+
+{% endblock %}

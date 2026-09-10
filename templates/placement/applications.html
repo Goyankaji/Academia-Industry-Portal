@@ -1,0 +1,472 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Applications | Placement Cell
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/applications.css'
+    ) }}"
+>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="applications-page">
+
+    <!-- =================================================
+         PAGE HEADER
+         ================================================= -->
+
+    <div class="page-header">
+
+        <div>
+            <span class="page-eyebrow">
+                PLACEMENT CELL
+            </span>
+
+            <h1>
+                Applications
+            </h1>
+
+            <p>
+                Track and review student applications
+                received from your college.
+            </p>
+        </div>
+
+        <div class="header-count">
+
+            <span class="count">
+                {{ stats.total or 0 }}
+            </span>
+
+            <span class="label">
+                Total Applications
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         STATISTICS
+         ================================================= -->
+
+    <div class="application-stats">
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fa-solid fa-file-lines"></i>
+            </div>
+
+            <div>
+                <span class="stat-label">
+                    Total
+                </span>
+
+                <strong>
+                    {{ stats.total or 0 }}
+                </strong>
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fa-solid fa-paper-plane"></i>
+            </div>
+
+            <div>
+                <span class="stat-label">
+                    Applied
+                </span>
+
+                <strong>
+                    {{ stats.applied or 0 }}
+                </strong>
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+
+            <div>
+                <span class="stat-label">
+                    Shortlisted
+                </span>
+
+                <strong>
+                    {{ stats.shortlisted or 0 }}
+                </strong>
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <div>
+                <span class="stat-label">
+                    Selected
+                </span>
+
+                <strong>
+                    {{ stats.selected or 0 }}
+                </strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         FILTERS
+         ================================================= -->
+
+    <div class="filters-card">
+
+        <form
+            method="GET"
+            action="{{ url_for('placement_applications') }}"
+            class="filters-form"
+        >
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    id="applicationSearch"
+                    placeholder="Search student, enrollment, opportunity or company..."
+                    value="{{ search }}"
+                >
+
+            </div>
+
+
+            <select
+                name="status"
+                id="statusFilter"
+            >
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option
+                    value="APPLIED"
+                    {% if selected_status == 'APPLIED' %}
+                    selected
+                    {% endif %}
+                >
+                    Applied
+                </option>
+
+                <option
+                    value="SHORTLISTED"
+                    {% if selected_status == 'SHORTLISTED' %}
+                    selected
+                    {% endif %}
+                >
+                    Shortlisted
+                </option>
+
+                <option
+                    value="SELECTED"
+                    {% if selected_status == 'SELECTED' %}
+                    selected
+                    {% endif %}
+                >
+                    Selected
+                </option>
+
+                <option
+                    value="REJECTED"
+                    {% if selected_status == 'REJECTED' %}
+                    selected
+                    {% endif %}
+                >
+                    Rejected
+                </option>
+
+                <option
+                    value="WITHDRAWN"
+                    {% if selected_status == 'WITHDRAWN' %}
+                    selected
+                    {% endif %}
+                >
+                    Withdrawn
+                </option>
+
+            </select>
+
+
+            <select
+                name="opportunity_id"
+                id="opportunityFilter"
+            >
+
+                <option value="">
+                    All Opportunities
+                </option>
+
+                {% for opportunity in opportunities %}
+
+                    <option
+                        value="{{ opportunity.id }}"
+                        {% if selected_opportunity == opportunity.id|string %}
+                        selected
+                        {% endif %}
+                    >
+                        {{ opportunity.title }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="filter-button"
+            >
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+
+            {% if search or selected_status or selected_opportunity %}
+
+                <a
+                    href="{{ url_for('placement_applications') }}"
+                    class="clear-button"
+                >
+                    Clear
+                </a>
+
+            {% endif %}
+
+        </form>
+
+    </div>
+
+
+    <!-- =================================================
+         APPLICATIONS TABLE
+         ================================================= -->
+
+    <div class="applications-card">
+
+        {% if applications %}
+
+            <div class="table-wrapper">
+
+                <table class="applications-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Student
+                            </th>
+
+                            <th>
+                                Opportunity
+                            </th>
+
+                            <th>
+                                Company
+                            </th>
+
+                            <th>
+                                Applied On
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for application in applications %}
+
+                            <tr class="application-row">
+
+                                <td>
+
+                                    <div class="student-cell">
+
+                                        <div class="student-avatar">
+                                            {{ application.student_name[0]|upper }}
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ application.student_name }}
+                                            </strong>
+
+                                            <span>
+                                                {{ application.enrollment_no or '—' }}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="opportunity-cell">
+
+                                        <strong>
+                                            {{ application.opportunity_title }}
+                                        </strong>
+
+                                        <span>
+                                            {{ application.opportunity_type or 'Opportunity' }}
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="company-name">
+                                        {{ application.company_name }}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if application.application_date %}
+
+                                        {{ application.application_date.strftime(
+                                            '%d %b %Y'
+                                        ) }}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <span
+                                        class="status-badge status-{{ application.status|lower }}"
+                                    >
+                                        {{ application.status|replace('_', ' ') }}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for(
+                                            'placement_application_details',
+                                            application_id=application.application_id
+                                        ) }}"
+                                        class="view-button"
+                                    >
+                                        View
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    <i class="fa-solid fa-file-circle-xmark"></i>
+                </div>
+
+                <h2>
+                    No Applications Found
+                </h2>
+
+                <p>
+                    No student applications match the
+                    selected filters.
+                </p>
+
+                {% if search or selected_status or selected_opportunity %}
+
+                    <a
+                        href="{{ url_for('placement_applications') }}"
+                        class="empty-clear-button"
+                    >
+                        Clear Filters
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/application-details.js'
+    ) }}"
+></script>
+
+{% endblock %}

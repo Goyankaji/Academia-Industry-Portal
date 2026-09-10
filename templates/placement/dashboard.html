@@ -1,0 +1,971 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Placement Cell Dashboard | SIH Portal
+{% endblock %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <!-- =====================================================
+         WELCOME SECTION
+    ====================================================== -->
+
+    <section class="dashboard-welcome">
+
+        <div class="welcome-content">
+
+            <span class="welcome-eyebrow">
+                PLACEMENT CELL DASHBOARD
+            </span>
+
+            <h2>
+                Welcome back,
+                {{ placement_cell.representative_name or "Placement Officer" }}
+            </h2>
+
+            <p>
+                Manage students, placement opportunities and
+                recruitment activities for
+                <strong>
+                    {{ placement_cell.college_name }}
+                </strong>.
+            </p>
+
+        </div>
+
+
+        <div class="welcome-context">
+
+            <div class="context-item">
+
+                <span>
+                    College Code
+                </span>
+
+                <strong>
+                    {{ placement_cell.college_code or "—" }}
+                </strong>
+
+            </div>
+
+
+            <div class="context-divider"></div>
+
+
+            <div class="context-item">
+
+                <span>
+                    Account Status
+                </span>
+
+                <strong class="status-active">
+                    <i class="fa-solid fa-circle"></i>
+                    Active
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRIMARY STATISTICS
+    ====================================================== -->
+
+    <section class="stats-grid">
+
+
+        <!-- TOTAL STUDENTS -->
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <div class="stat-icon blue">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+
+                <span class="stat-label">
+                    STUDENTS
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                <span
+                    class="counter"
+                    data-value="{{ total_students }}"
+                >
+                    0
+                </span>
+            </div>
+
+            <div class="stat-description">
+                Registered students in your college
+            </div>
+
+        </div>
+
+
+        <!-- ACTIVE OPPORTUNITIES -->
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <div class="stat-icon purple">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+
+                <span class="stat-label">
+                    OPPORTUNITIES
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                <span
+                    class="counter"
+                    data-value="{{ active_opportunities }}"
+                >
+                    0
+                </span>
+            </div>
+
+            <div class="stat-description">
+                Currently open industry opportunities
+            </div>
+
+        </div>
+
+
+        <!-- APPLICATIONS -->
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <div class="stat-icon orange">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+                <span class="stat-label">
+                    APPLICATIONS
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                <span
+                    class="counter"
+                    data-value="{{ total_applications }}"
+                >
+                    0
+                </span>
+            </div>
+
+            <div class="stat-description">
+                Applications from your students
+            </div>
+
+        </div>
+
+
+        <!-- SHORTLISTED -->
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <div class="stat-icon teal">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+
+                <span class="stat-label">
+                    SHORTLISTED
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                <span
+                    class="counter"
+                    data-value="{{ shortlisted_applications }}"
+                >
+                    0
+                </span>
+            </div>
+
+            <div class="stat-description">
+                Students shortlisted by industry
+            </div>
+
+        </div>
+
+
+        <!-- SELECTED -->
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <div class="stat-icon green">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+
+                <span class="stat-label">
+                    SELECTED
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                <span
+                    class="counter"
+                    data-value="{{ selected_applications }}"
+                >
+                    0
+                </span>
+            </div>
+
+            <div class="stat-description">
+                Students selected for opportunities
+            </div>
+
+        </div>
+
+
+        <!-- PROFILE READY -->
+
+        <div class="stat-card">
+
+            <div class="stat-top">
+
+                <div class="stat-icon indigo">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+
+                <span class="stat-label">
+                    PROFILE READY
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                <span
+                    class="counter"
+                    data-value="{{ profile_completed_students }}"
+                >
+                    0
+                </span>
+            </div>
+
+            <div class="stat-description">
+                Students with completed profiles
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD GRID
+    ====================================================== -->
+
+    <section class="dashboard-main-grid">
+
+
+        <!-- =================================================
+             APPLICATION PIPELINE
+        ================================================== -->
+
+        <div class="dashboard-card pipeline-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        PLACEMENT PIPELINE
+                    </span>
+
+                    <h3>
+                        Application Progress
+                    </h3>
+
+                </div>
+
+                <span class="card-icon">
+                    <i class="fa-solid fa-chart-simple"></i>
+                </span>
+
+            </div>
+
+
+            <div class="pipeline">
+
+
+                <div class="pipeline-row">
+
+                    <div class="pipeline-label">
+
+                        <span class="pipeline-dot applied"></span>
+
+                        <span>
+                            Applied
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        {{ applied_applications }}
+                    </strong>
+
+                </div>
+
+
+                <div class="pipeline-track">
+
+                    <div
+                        class="pipeline-progress applied-progress"
+                        data-count="{{ applied_applications }}"
+                        data-total="{{ total_applications }}"
+                    ></div>
+
+                </div>
+
+
+                <div class="pipeline-row">
+
+                    <div class="pipeline-label">
+
+                        <span class="pipeline-dot shortlisted"></span>
+
+                        <span>
+                            Shortlisted
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        {{ shortlisted_applications }}
+                    </strong>
+
+                </div>
+
+
+                <div class="pipeline-track">
+
+                    <div
+                        class="pipeline-progress shortlisted-progress"
+                        data-count="{{ shortlisted_applications }}"
+                        data-total="{{ total_applications }}"
+                    ></div>
+
+                </div>
+
+
+                <div class="pipeline-row">
+
+                    <div class="pipeline-label">
+
+                        <span class="pipeline-dot selected"></span>
+
+                        <span>
+                            Selected
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        {{ selected_applications }}
+                    </strong>
+
+                </div>
+
+
+                <div class="pipeline-track">
+
+                    <div
+                        class="pipeline-progress selected-progress"
+                        data-count="{{ selected_applications }}"
+                        data-total="{{ total_applications }}"
+                    ></div>
+
+                </div>
+
+
+                <div class="pipeline-row">
+
+                    <div class="pipeline-label">
+
+                        <span class="pipeline-dot rejected"></span>
+
+                        <span>
+                            Rejected
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        {{ rejected_applications }}
+                    </strong>
+
+                </div>
+
+
+                <div class="pipeline-track">
+
+                    <div
+                        class="pipeline-progress rejected-progress"
+                        data-count="{{ rejected_applications }}"
+                        data-total="{{ total_applications }}"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             QUICK OVERVIEW
+        ================================================== -->
+
+        <div class="dashboard-card overview-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        ACCOUNT OVERVIEW
+                    </span>
+
+                    <h3>
+                        Placement Cell
+                    </h3>
+
+                </div>
+
+                <span class="card-icon">
+                    <i class="fa-solid fa-building-columns"></i>
+                </span>
+
+            </div>
+
+
+            <div class="overview-list">
+
+
+                <div class="overview-item">
+
+                    <div class="overview-icon">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+
+                    <div>
+
+                        <span>
+                            College Students
+                        </span>
+
+                        <strong>
+                            {{ total_students }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="overview-item">
+
+                    <div class="overview-icon">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Unread Notifications
+                        </span>
+
+                        <strong>
+                            {{ unread_notifications }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="overview-item">
+
+                    <div class="overview-icon">
+                        <i class="fa-solid fa-message"></i>
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Unread Messages
+                        </span>
+
+                        <strong>
+                            {{ unread_messages }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="overview-item">
+
+                    <div class="overview-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Profile Ready
+                        </span>
+
+                        <strong>
+                            {{ profile_completed_students }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RECENT APPLICATIONS
+    ====================================================== -->
+
+    <section class="dashboard-card table-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="card-eyebrow">
+                    RECENT ACTIVITY
+                </span>
+
+                <h3>
+                    Recent Applications
+                </h3>
+
+            </div>
+
+            <button
+                type="button"
+                class="refresh-btn"
+                data-refresh-page
+                title="Refresh dashboard"
+            >
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+
+        </div>
+
+
+        {% if recent_applications %}
+
+            <div class="dashboard-table-wrapper">
+
+                <table class="dashboard-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Student
+                            </th>
+
+                            <th>
+                                Opportunity
+                            </th>
+
+                            <th>
+                                Company
+                            </th>
+
+                            <th>
+                                Applied
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for application in recent_applications %}
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="student-cell">
+
+                                        <div class="student-avatar">
+
+                                            {{
+                                                application.student_name
+                                                |string
+                                                |first
+                                                |upper
+                                            }}
+
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ application.student_name }}
+                                            </strong>
+
+                                            <span>
+                                                {{ application.enrollment_no }}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="table-primary">
+                                        {{ application.opportunity_title }}
+                                    </span>
+
+                                    <span class="table-secondary">
+                                        {{ application.opportunity_type or "Opportunity" }}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+                                    {{ application.company_name }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if application.application_date %}
+
+                                        {{ application.application_date.strftime("%d %b %Y") }}
+
+                                    {% elif application.created_at %}
+
+                                        {{ application.created_at.strftime("%d %b %Y") }}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <span
+                                        class="status-badge status-{{ application.status|lower }}"
+                                    >
+                                        {{ application.status|replace("_", " ") }}
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    <i class="fa-solid fa-file-circle-xmark"></i>
+                </div>
+
+                <h4>
+                    No applications yet
+                </h4>
+
+                <p>
+                    Applications from your college students will
+                    appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         BOTTOM TWO COLUMNS
+    ====================================================== -->
+
+    <section class="dashboard-bottom-grid">
+
+
+        <!-- RECENT OPPORTUNITIES -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        INDUSTRY OPPORTUNITIES
+                    </span>
+
+                    <h3>
+                        Latest Opportunities
+                    </h3>
+
+                </div>
+
+                <span class="card-icon">
+                    <i class="fa-solid fa-briefcase"></i>
+                </span>
+
+            </div>
+
+
+            {% if recent_opportunities %}
+
+                <div class="list-container">
+
+                    {% for opportunity in recent_opportunities %}
+
+                        <div class="opportunity-item">
+
+                            <div class="opportunity-icon">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+
+                            <div class="opportunity-info">
+
+                                <strong>
+                                    {{ opportunity.title }}
+                                </strong>
+
+                                <span>
+                                    {{ opportunity.company_name }}
+                                </span>
+
+                                <small>
+
+                                    {% if opportunity.location %}
+                                        {{ opportunity.location }}
+                                    {% endif %}
+
+                                    {% if opportunity.work_mode %}
+                                        · {{ opportunity.work_mode }}
+                                    {% endif %}
+
+                                </small>
+
+                            </div>
+
+                            <span class="open-badge">
+                                OPEN
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state compact">
+
+                    <div class="empty-icon">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+
+                    <h4>
+                        No open opportunities
+                    </h4>
+
+                    <p>
+                        New industry opportunities will appear here.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- RECENT STUDENTS -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        STUDENT DIRECTORY
+                    </span>
+
+                    <h3>
+                        Recently Added Students
+                    </h3>
+
+                </div>
+
+                <span class="card-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </span>
+
+            </div>
+
+
+            {% if recent_students %}
+
+                <div class="list-container">
+
+                    {% for student in recent_students %}
+
+                        <div class="student-list-item">
+
+                            <div class="student-avatar">
+
+                                {{
+                                    student.student_name
+                                    |string
+                                    |first
+                                    |upper
+                                }}
+
+                            </div>
+
+
+                            <div class="student-list-info">
+
+                                <strong>
+                                    {{ student.student_name }}
+                                </strong>
+
+                                <span>
+                                    {{ student.enrollment_no }}
+                                </span>
+
+                                <small>
+
+                                    {{ student.branch or "Branch not specified" }}
+
+                                    {% if student.cgpa is not none %}
+                                        · CGPA {{ student.cgpa }}
+                                    {% endif %}
+
+                                </small>
+
+                            </div>
+
+
+                            <span class="student-status-dot"></span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state compact">
+
+                    <div class="empty-icon">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+
+                    <h4>
+                        No students found
+                    </h4>
+
+                    <p>
+                        Students registered with your college will appear here.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/placement/dashboard.css') }}"
+>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/placement/dashboard.js') }}"
+></script>
+
+{% endblock %}

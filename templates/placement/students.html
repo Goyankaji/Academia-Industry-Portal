@@ -1,0 +1,562 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Students | Placement Cell | SIH Portal
+{% endblock %}
+
+{% block page_title %}
+Students
+{% endblock %}
+
+
+{% block content %}
+
+<div class="students-page">
+
+    <!-- =====================================================
+         PAGE INTRO
+    ====================================================== -->
+
+    <div class="students-heading">
+
+        <div>
+
+            <span class="page-section-label">
+                STUDENT MANAGEMENT
+            </span>
+
+            <h2>
+                Students
+            </h2>
+
+            <p>
+                View and manage students registered under
+                {{ session.get('college_name', 'your college') }}.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <div class="student-stats">
+
+        <div class="student-stat-card">
+
+            <div class="student-stat-icon blue">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    TOTAL STUDENTS
+                </span>
+
+                <strong>
+                    {{ total_students }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="student-stat-card">
+
+            <div class="student-stat-icon orange">
+                <i class="fa-solid fa-paper-plane"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    APPLIED
+                </span>
+
+                <strong>
+                    {{ applied_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="student-stat-card">
+
+            <div class="student-stat-icon purple">
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    SHORTLISTED
+                </span>
+
+                <strong>
+                    {{ shortlisted_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="student-stat-card">
+
+            <div class="student-stat-icon green">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    SELECTED
+                </span>
+
+                <strong>
+                    {{ selected_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTER CARD
+    ====================================================== -->
+
+    <div class="students-card">
+
+        <form
+            method="GET"
+            action="{{ url_for('placement_students') }}"
+            class="students-filter-form"
+        >
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search_query }}"
+                    placeholder="Search by name, email, enrollment no..."
+                >
+
+            </div>
+
+
+            <select name="branch">
+
+                <option value="">
+                    All Branches
+                </option>
+
+                {% for branch in branches %}
+
+                    <option
+                        value="{{ branch }}"
+                        {% if selected_branch == branch %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ branch }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <select name="placement_status">
+
+                <option value="">
+                    All Placement Status
+                </option>
+
+                <option
+                    value="NOT APPLIED"
+                    {% if selected_status == "NOT APPLIED" %}
+                        selected
+                    {% endif %}
+                >
+                    Not Applied
+                </option>
+
+                <option
+                    value="APPLIED"
+                    {% if selected_status == "APPLIED" %}
+                        selected
+                    {% endif %}
+                >
+                    Applied
+                </option>
+
+                <option
+                    value="SHORTLISTED"
+                    {% if selected_status == "SHORTLISTED" %}
+                        selected
+                    {% endif %}
+                >
+                    Shortlisted
+                </option>
+
+                <option
+                    value="SELECTED"
+                    {% if selected_status == "SELECTED" %}
+                        selected
+                    {% endif %}
+                >
+                    Selected
+                </option>
+
+                <option
+                    value="REJECTED"
+                    {% if selected_status == "REJECTED" %}
+                        selected
+                    {% endif %}
+                >
+                    Rejected
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="filter-btn"
+            >
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+
+            {% if search_query or selected_branch or selected_status %}
+
+                <a
+                    href="{{ url_for('placement_students') }}"
+                    class="clear-filter"
+                >
+                    Clear
+                </a>
+
+            {% endif %}
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         STUDENT TABLE
+    ====================================================== -->
+
+    <div class="students-card table-card">
+
+        <div class="table-card-header">
+
+            <div>
+
+                <span>
+                    STUDENT DIRECTORY
+                </span>
+
+                <h3>
+                    {{ students|length }} Students
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        {% if students %}
+
+            <div class="student-table-wrapper">
+
+                <table class="student-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Student
+                            </th>
+
+                            <th>
+                                Enrollment No.
+                            </th>
+
+                            <th>
+                                Course / Branch
+                            </th>
+
+                            <th>
+                                CGPA
+                            </th>
+
+                            <th>
+                                Backlogs
+                            </th>
+
+                            <th>
+                                Placement Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                            <tr>
+
+                                <!-- STUDENT -->
+
+                                <td>
+
+                                    <div class="student-profile-cell">
+
+                                        <div class="student-avatar">
+
+                                            {{
+                                                student.name
+                                                |string
+                                                |first
+                                                |upper
+                                            }}
+
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ student.name }}
+                                            </strong>
+
+                                            <span>
+                                                {{ student.email }}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ENROLLMENT -->
+
+                                <td>
+
+                                    <span class="enrollment">
+                                        {{ student.enrollment_no or "—" }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- COURSE -->
+
+                                <td>
+
+                                    <strong class="course-name">
+                                        {{ student.course or "—" }}
+                                    </strong>
+
+                                    <span class="branch-name">
+                                        {{ student.branch or "Branch not specified" }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- CGPA -->
+
+                                <td>
+
+                                    {% if student.cgpa is not none %}
+
+                                        <span class="cgpa-value">
+                                            {{ student.cgpa }}
+                                        </span>
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- BACKLOG -->
+
+                                <td>
+
+                                    <span
+                                        class="
+                                            backlog-badge
+                                            {% if student.active_backlogs and student.active_backlogs > 0 %}
+                                                has-backlog
+                                            {% else %}
+                                                no-backlog
+                                            {% endif %}
+                                        "
+                                    >
+
+                                        {{ student.active_backlogs or 0 }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    <span
+                                        class="
+                                            placement-status
+                                            placement-status-{{ student.placement_status|lower|replace(' ', '-') }}
+                                        "
+                                    >
+
+                                        {% if student.placement_status == "SELECTED" %}
+
+                                            <i class="fa-solid fa-circle-check"></i>
+
+                                        {% elif student.placement_status == "SHORTLISTED" %}
+
+                                            <i class="fa-solid fa-list-check"></i>
+
+                                        {% elif student.placement_status == "APPLIED" %}
+
+                                            <i class="fa-solid fa-paper-plane"></i>
+
+                                        {% elif student.placement_status == "REJECTED" %}
+
+                                            <i class="fa-solid fa-circle-xmark"></i>
+
+                                        {% else %}
+
+                                            <i class="fa-regular fa-circle"></i>
+
+                                        {% endif %}
+
+                                        {{ student.placement_status|replace("_", " ") }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- ACTION -->
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for(
+                                            'placement_student_details',
+                                            student_id=student.id
+                                        ) }}"
+                                        class="view-student-btn"
+                                    >
+
+                                        View
+
+                                        <i class="fa-solid fa-arrow-right"></i>
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="students-empty-state">
+
+                <div class="empty-student-icon">
+
+                    <i class="fa-solid fa-user-graduate"></i>
+
+                </div>
+
+                <h3>
+                    No students found
+                </h3>
+
+                <p>
+                    Try changing your search or filter criteria.
+                </p>
+
+                <a
+                    href="{{ url_for('placement_students') }}"
+                    class="clear-empty-btn"
+                >
+                    View All Students
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/students.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/students.js'
+    ) }}"
+></script>
+
+{% endblock %}

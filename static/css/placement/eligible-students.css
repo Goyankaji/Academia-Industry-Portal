@@ -1,0 +1,247 @@
+.eligible-page {
+    max-width: 1450px;
+    margin: auto;
+}
+
+.eligible-heading {
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.eligible-heading h2 {
+    margin: 5px 0;
+    font-size: 24px;
+}
+
+.eligible-heading p {
+    color: #8993a5;
+    font-size: 10px;
+}
+
+.eligible-count {
+    padding: 13px 18px;
+    text-align: center;
+    background: #eaf0ff;
+    border-radius: 11px;
+}
+
+.eligible-count strong,
+.eligible-count span {
+    display: block;
+}
+
+.eligible-count strong {
+    font-size: 22px;
+    color: #2554d9;
+}
+
+.eligible-count span {
+    margin-top: 3px;
+    font-size: 8px;
+    color: #657189;
+}
+
+.eligibility-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.eligibility-summary > div {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 12px;
+}
+
+.eligibility-summary i {
+    color: #2554d9;
+}
+
+.eligibility-summary span {
+    flex: 1;
+    font-size: 9px;
+    color: #8993a5;
+}
+
+.eligibility-summary strong {
+    font-size: 13px;
+    color: #29334a;
+}
+
+.eligible-card {
+    background: #fff;
+    border: 1px solid #e6eaf1;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.eligible-table-wrapper {
+    overflow-x: auto;
+}
+
+.eligible-table {
+    width: 100%;
+    min-width: 950px;
+    border-collapse: collapse;
+}
+
+.eligible-table th {
+    padding: 12px 18px;
+    text-align: left;
+    background: #fafbfc;
+    border-bottom: 1px solid #edf0f4;
+    color: #929bad;
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.eligible-table td {
+    padding: 13px 18px;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 9px;
+    color: #657189;
+}
+
+.eligible-student {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.eligible-avatar {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #eaf0ff;
+    color: #2859d7;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.eligible-student strong,
+.eligible-student span {
+    display: block;
+}
+
+.eligible-student strong {
+    font-size: 10px;
+    color: #2d374e;
+}
+
+.eligible-student span {
+    margin-top: 3px;
+    font-size: 8px;
+    color: #9aa3b3;
+}
+
+.cgpa {
+    color: #2554d9;
+}
+
+.no-backlog {
+    padding: 4px 7px;
+    border-radius: 15px;
+    background: #e8f8ee;
+    color: #218653;
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.matched-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.matched-skills span {
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: #eef2ff;
+    color: #4960a8;
+    font-size: 7px;
+}
+
+.not-available {
+    color: #9aa3b3;
+    font-size: 8px;
+}
+
+.application-status,
+.not-applied {
+    padding: 5px 8px;
+    border-radius: 15px;
+    font-size: 7px;
+    font-weight: 800;
+}
+
+.application-status {
+    background: #fff3df;
+    color: #b9771f;
+}
+
+.not-applied {
+    background: #f0f2f6;
+    color: #7d8799;
+}
+
+.student-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #2554d9;
+    font-size: 8px;
+    font-weight: 700;
+}
+
+.eligible-empty {
+    padding: 65px 20px;
+    text-align: center;
+}
+
+.eligible-empty > div {
+    width: 48px;
+    height: 48px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f1f4f8;
+    color: #929bad;
+}
+
+.eligible-empty h3 {
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.eligible-empty p {
+    margin: 6px auto;
+    max-width: 360px;
+    color: #929bad;
+    font-size: 10px;
+}
+
+@media (max-width: 700px) {
+    .eligibility-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .eligible-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

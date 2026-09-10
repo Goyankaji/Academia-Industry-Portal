@@ -1,0 +1,409 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Placement Statistics | Placement Cell
+{% endblock %}
+
+{% block page_title %}
+Placement Statistics
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/placement-statistics.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="placement-statistics-page">
+
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+        <div>
+
+            <a
+                href="{{ url_for('placement_placements') }}"
+                class="back-link"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Placements
+            </a>
+
+            <span class="page-eyebrow">
+                PLACEMENT CELL
+            </span>
+
+            <h1>
+                Placement Statistics
+            </h1>
+
+            <p>
+                Overview of placement performance for your college.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         OVERVIEW
+    ================================================== -->
+
+    <div class="overview-grid">
+
+        <div class="overview-card">
+
+            <span class="overview-label">
+                Total Students
+            </span>
+
+            <strong>
+                {{ total_students }}
+            </strong>
+
+            <small>
+                Registered students
+            </small>
+
+        </div>
+
+
+        <div class="overview-card">
+
+            <span class="overview-label">
+                Placed Students
+            </span>
+
+            <strong>
+                {{ placed_students }}
+            </strong>
+
+            <small>
+                Successfully selected
+            </small>
+
+        </div>
+
+
+        <div class="overview-card">
+
+            <span class="overview-label">
+                Not Placed
+            </span>
+
+            <strong>
+                {{ not_placed_students }}
+            </strong>
+
+            <small>
+                Currently not selected
+            </small>
+
+        </div>
+
+
+        <div class="overview-card">
+
+            <span class="overview-label">
+                Placement Rate
+            </span>
+
+            <strong>
+                {{ placement_rate }}%
+            </strong>
+
+            <small>
+                Overall placement rate
+            </small>
+
+        </div>
+
+
+        <div class="overview-card">
+
+            <span class="overview-label">
+                Hiring Companies
+            </span>
+
+            <strong>
+                {{ total_companies }}
+            </strong>
+
+            <small>
+                Companies with selections
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         BRANCH STATISTICS
+    ================================================== -->
+
+    <section class="statistics-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-code-branch"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    ACADEMIC BREAKDOWN
+                </span>
+
+                <h2>
+                    Branch-wise Placement
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        {% if branch_statistics %}
+
+            <div class="table-wrapper">
+
+                <table class="statistics-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Branch
+                            </th>
+
+                            <th>
+                                Total Students
+                            </th>
+
+                            <th>
+                                Placed
+                            </th>
+
+                            <th>
+                                Not Placed
+                            </th>
+
+                            <th>
+                                Placement Rate
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for row in branch_statistics %}
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+                                        {{ row.branch or 'Not Specified' }}
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+                                    {{ row.total_students }}
+                                </td>
+
+
+                                <td>
+
+                                    <span class="placed-number">
+                                        {{ row.placed_students }}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+                                    {{
+                                        (row.total_students or 0)
+                                        -
+                                        (row.placed_students or 0)
+                                    }}
+                                </td>
+
+
+                                <td>
+
+                                    <div class="rate-cell">
+
+                                        <div
+                                            class="rate-bar"
+                                            data-rate="{{ row.placement_rate }}"
+                                        >
+
+                                            <span></span>
+
+                                        </div>
+
+                                        <strong>
+                                            {{ row.placement_rate }}%
+                                        </strong>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <h3>
+                    No branch data available
+                </h3>
+
+                <p>
+                    Placement statistics will appear once
+                    student data is available.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =================================================
+         COMPANY STATISTICS
+    ================================================== -->
+
+    <section class="statistics-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    INDUSTRY BREAKDOWN
+                </span>
+
+                <h2>
+                    Company-wise Placements
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        {% if company_statistics %}
+
+            <div class="company-grid">
+
+                {% for company in company_statistics %}
+
+                    <div class="company-card">
+
+                        <div class="company-icon">
+
+                            <i class="fa-solid fa-building"></i>
+
+                        </div>
+
+
+                        <div class="company-info">
+
+                            <strong>
+                                {{ company.company_name }}
+                            </strong>
+
+                            <span>
+                                Students Selected
+                            </span>
+
+                        </div>
+
+
+                        <div class="company-count">
+
+                            {{ company.selected_students }}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="fa-solid fa-building"></i>
+
+                <h3>
+                    No company placement data
+                </h3>
+
+                <p>
+                    Company-wise statistics will appear
+                    after students are selected.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/placement/placement-statistics.js'
+    ) }}"
+></script>
+
+{% endblock %}

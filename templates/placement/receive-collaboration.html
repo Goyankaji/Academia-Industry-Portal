@@ -1,0 +1,389 @@
+{% extends "placement/base.html" %}
+
+{% block title %}Receive Collaboration{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/placement/receive-collaboration.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="receive-collaboration-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="breadcrumb">
+                <span>Placement Cell</span>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Collaborations</span>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Receive Collaboration</span>
+            </div>
+
+            <h1>
+                <i class="fa-solid fa-inbox"></i>
+                Receive Collaboration
+            </h1>
+
+            <p>
+                View collaboration requests received from industry partners.
+            </p>
+        </div>
+
+        <a href="{{ url_for('placement_send_collaboration') }}"
+           class="primary-btn">
+            <i class="fa-solid fa-paper-plane"></i>
+            Send Collaboration
+        </a>
+    </div>
+
+
+    <!-- STATISTICS -->
+    <div class="collaboration-stats">
+
+        <div class="stat-card">
+            <div class="stat-icon total">
+                <i class="fa-solid fa-handshake"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Total Requests</span>
+                <strong>{{ stats.total }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon pending">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Pending</span>
+                <strong>{{ stats.pending }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon active">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Active</span>
+                <strong>{{ stats.active }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon completed">
+                <i class="fa-solid fa-flag-checkered"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Completed</span>
+                <strong>{{ stats.completed }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+    <div class="filters-card">
+
+        <form method="GET"
+              action="{{ url_for('placement_receive_collaborations') }}"
+              class="filters-form">
+
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search company, title, sector..."
+                    autocomplete="off"
+                >
+            </div>
+
+
+            <div class="filter-group">
+                <select name="status">
+                    <option value="">All Status</option>
+
+                    <option value="PENDING"
+                        {% if selected_status == 'PENDING' %}selected{% endif %}>
+                        Pending
+                    </option>
+
+                    <option value="ACTIVE"
+                        {% if selected_status == 'ACTIVE' %}selected{% endif %}>
+                        Active
+                    </option>
+
+                    <option value="COMPLETED"
+                        {% if selected_status == 'COMPLETED' %}selected{% endif %}>
+                        Completed
+                    </option>
+
+                    <option value="REJECTED"
+                        {% if selected_status == 'REJECTED' %}selected{% endif %}>
+                        Rejected
+                    </option>
+
+                    <option value="CANCELLED"
+                        {% if selected_status == 'CANCELLED' %}selected{% endif %}>
+                        Cancelled
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="filter-group">
+                <select name="collaboration_type">
+                    <option value="">All Types</option>
+
+                    {% for type in collaboration_types %}
+                        <option value="{{ type.collaboration_type }}"
+                            {% if selected_type == type.collaboration_type %}selected{% endif %}>
+                            {{ type.collaboration_type|replace('_', ' ')|title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <button type="submit" class="filter-btn">
+                <i class="fa-solid fa-filter"></i>
+                Apply
+            </button>
+
+
+            {% if search or selected_status or selected_type %}
+                <a href="{{ url_for('placement_receive_collaborations') }}"
+                   class="clear-btn">
+                    <i class="fa-solid fa-xmark"></i>
+                    Clear
+                </a>
+            {% endif %}
+
+        </form>
+
+    </div>
+
+
+    <!-- REQUESTS -->
+    <div class="section-heading">
+        <div>
+            <h2>Industry Collaboration Requests</h2>
+            <p>
+                {{ collaborations|length }}
+                request{% if collaborations|length != 1 %}s{% endif %}
+                found
+            </p>
+        </div>
+    </div>
+
+
+    {% if collaborations %}
+
+        <div class="collaboration-list">
+
+            {% for collaboration in collaborations %}
+
+                <div class="collaboration-card">
+
+                    <!-- CARD TOP -->
+                    <div class="card-top">
+
+                        <div class="company-info">
+
+                            <div class="company-logo">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+
+                            <div>
+                                <h3>{{ collaboration.title }}</h3>
+
+                                <div class="company-name">
+                                    {{ collaboration.company_name }}
+                                </div>
+
+                                {% if collaboration.industry_sector %}
+                                    <span class="sector">
+                                        {{ collaboration.industry_sector }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+                        {% set status = collaboration.status|upper %}
+
+                        <span class="status-badge status-{{ status|lower }}">
+                            {% if status == 'PENDING' %}
+                                <i class="fa-solid fa-clock"></i>
+                            {% elif status == 'ACTIVE' %}
+                                <i class="fa-solid fa-circle-check"></i>
+                            {% elif status == 'COMPLETED' %}
+                                <i class="fa-solid fa-flag-checkered"></i>
+                            {% elif status in ['REJECTED', 'CANCELLED'] %}
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-info"></i>
+                            {% endif %}
+
+                            {{ status|replace('_', ' ')|title }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- TYPE -->
+                    <div class="card-meta">
+
+                        <div class="meta-item">
+                            <span class="meta-label">Type</span>
+                            <span class="meta-value">
+                                <i class="fa-solid fa-layer-group"></i>
+                                {{ collaboration.collaboration_type
+                                   |replace('_', ' ')
+                                   |title }}
+                            </span>
+                        </div>
+
+
+                        <div class="meta-item">
+                            <span class="meta-label">Contact Person</span>
+                            <span class="meta-value">
+                                <i class="fa-solid fa-user"></i>
+                                {{ collaboration.contact_person or 'Not provided' }}
+                            </span>
+                        </div>
+
+
+                        <div class="meta-item">
+                            <span class="meta-label">Email</span>
+                            <span class="meta-value">
+                                <i class="fa-solid fa-envelope"></i>
+                                {{ collaboration.industry_email or 'Not provided' }}
+                            </span>
+                        </div>
+
+
+                        <div class="meta-item">
+                            <span class="meta-label">Location</span>
+                            <span class="meta-value">
+                                <i class="fa-solid fa-location-dot"></i>
+
+                                {% if collaboration.industry_city and collaboration.industry_state %}
+                                    {{ collaboration.industry_city }},
+                                    {{ collaboration.industry_state }}
+                                {% elif collaboration.industry_city %}
+                                    {{ collaboration.industry_city }}
+                                {% elif collaboration.industry_state %}
+                                    {{ collaboration.industry_state }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+                    {% if collaboration.description %}
+                        <div class="description-section">
+
+                            <span class="meta-label">Description</span>
+
+                            <p>
+                                {{ collaboration.description }}
+                            </p>
+
+                        </div>
+                    {% endif %}
+
+
+                    <!-- DATES -->
+                    <div class="card-bottom">
+
+                        <div class="date-info">
+
+                            {% if collaboration.start_date %}
+                                <span>
+                                    <i class="fa-regular fa-calendar"></i>
+                                    Start:
+                                    {{ collaboration.start_date.strftime('%d %b %Y') }}
+                                </span>
+                            {% endif %}
+
+                            {% if collaboration.end_date %}
+                                <span>
+                                    <i class="fa-regular fa-calendar-check"></i>
+                                    End:
+                                    {{ collaboration.end_date.strftime('%d %b %Y') }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="received-info">
+                            <i class="fa-regular fa-clock"></i>
+
+                            Received
+                            {% if collaboration.created_at %}
+                                {{ collaboration.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                <i class="fa-solid fa-inbox"></i>
+            </div>
+
+            <h3>No Collaboration Requests Found</h3>
+
+            {% if search or selected_status or selected_type %}
+                <p>
+                    No requests match your current filters.
+                    Try changing the filters or clearing them.
+                </p>
+
+                <a href="{{ url_for('placement_receive_collaborations') }}"
+                   class="empty-action">
+                    Clear Filters
+                </a>
+            {% else %}
+                <p>
+                    No industry collaboration requests have been received
+                    by your college yet.
+                </p>
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/placement/receive-collaboration.js') }}"></script>
+{% endblock %}

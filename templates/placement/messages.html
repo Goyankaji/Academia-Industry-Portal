@@ -1,0 +1,430 @@
+{% extends "placement/base.html" %}
+
+{% block title %}Messages | Placement Cell{% endblock %}
+
+{% block page_title %}Messages{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/placement/messages.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="messages-page">
+
+    <!-- ================================
+         PAGE HEADER
+    ================================= -->
+    <div class="messages-header">
+
+        <div>
+            <h1>Messages</h1>
+            <p>Communicate with students, colleges and industry partners.</p>
+        </div>
+
+        <button type="button"
+                class="btn-primary"
+                id="openComposeBtn">
+            <span>＋</span>
+            New Message
+        </button>
+
+    </div>
+
+
+    <!-- ================================
+         STATISTICS
+    ================================= -->
+    <div class="message-stats">
+
+        <div class="stat-card">
+            <div class="stat-icon">📥</div>
+
+            <div>
+                <span class="stat-label">Received</span>
+                <strong>{{ total_received }}</strong>
+            </div>
+        </div>
+
+
+        <div class="stat-card unread-stat">
+            <div class="stat-icon">✉</div>
+
+            <div>
+                <span class="stat-label">Unread</span>
+                <strong>{{ unread_count }}</strong>
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-icon">📤</div>
+
+            <div>
+                <span class="stat-label">Sent</span>
+                <strong>{{ total_sent }}</strong>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+         TOOLBAR
+    ================================= -->
+    <div class="messages-toolbar">
+
+        <div class="folder-tabs">
+
+            <a href="{{ url_for('placement_messages',
+                                folder='inbox',
+                                search=search) }}"
+               class="folder-tab {% if selected_folder == 'inbox' %}active{% endif %}">
+                <span>📥</span>
+                Inbox
+
+                {% if unread_count > 0 %}
+                <span class="unread-badge">
+                    {{ unread_count }}
+                </span>
+                {% endif %}
+            </a>
+
+
+            <a href="{{ url_for('placement_messages',
+                                folder='sent',
+                                search=search) }}"
+               class="folder-tab {% if selected_folder == 'sent' %}active{% endif %}">
+                <span>📤</span>
+                Sent
+            </a>
+
+        </div>
+
+
+        <form method="GET"
+              action="{{ url_for('placement_messages') }}"
+              class="message-search">
+
+            <input type="hidden"
+                   name="folder"
+                   value="{{ selected_folder }}">
+
+            <span class="search-icon">⌕</span>
+
+            <input type="text"
+                   name="search"
+                   value="{{ search }}"
+                   placeholder="Search messages...">
+
+            {% if search %}
+            <a href="{{ url_for('placement_messages',
+                                folder=selected_folder) }}"
+               class="clear-search">
+                ×
+            </a>
+            {% endif %}
+
+            <button type="submit">
+                Search
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- ================================
+         MESSAGE LIST
+    ================================= -->
+    <div class="messages-card">
+
+        {% if messages %}
+
+            <div class="message-list">
+
+                {% for msg in messages %}
+
+                <div class="message-row
+                    {% if selected_folder == 'inbox' and not msg.is_read %}
+                        unread
+                    {% endif %}"
+                    data-message-id="{{ msg.id }}"
+                    data-is-read="{{ msg.is_read }}">
+
+                    <div class="message-avatar">
+
+                        {% if selected_folder == 'inbox' %}
+                            {{ (msg.sender_name or 'U')[0]|upper }}
+                        {% else %}
+                            {{ (msg.receiver_name or 'U')[0]|upper }}
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="message-main">
+
+                        <div class="message-top">
+
+                            <div class="message-person">
+
+                                {% if selected_folder == 'inbox' %}
+
+                                    <strong>
+                                        {{ msg.sender_name }}
+                                    </strong>
+
+                                    <span class="role-badge">
+                                        {{ msg.sender_role|replace('_', ' ')|title }}
+                                    </span>
+
+                                {% else %}
+
+                                    <strong>
+                                        To: {{ msg.receiver_name }}
+                                    </strong>
+
+                                    <span class="role-badge">
+                                        {{ msg.receiver_role|replace('_', ' ')|title }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <span class="message-date">
+                                {{ msg.created_at.strftime('%d %b %Y, %I:%M %p') if msg.created_at else '—' }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="message-subject">
+                            {{ msg.subject }}
+                        </div>
+
+
+                        <div class="message-preview">
+                            {{ msg.message|truncate(150) }}
+                        </div>
+
+
+                        <div class="message-meta">
+
+                            {% if selected_folder == 'inbox' %}
+
+                                {% if msg.is_read %}
+
+                                <span class="read-status read">
+                                    ✓ Read
+                                </span>
+
+                                {% else %}
+
+                                <span class="read-status unread-status">
+                                    ● Unread
+                                </span>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="sent-status">
+                                    Sent
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if selected_folder == 'inbox' and not msg.is_read %}
+
+                            <button type="button"
+                                    class="mark-read-btn"
+                                    data-message-id="{{ msg.id }}">
+                                Mark as read
+                            </button>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-messages">
+
+                <div class="empty-icon">
+                    {% if selected_folder == 'inbox' %}
+                        📥
+                    {% else %}
+                        📤
+                    {% endif %}
+                </div>
+
+                <h3>
+                    {% if search %}
+                        No messages found
+                    {% elif selected_folder == 'inbox' %}
+                        Your inbox is empty
+                    {% else %}
+                        No sent messages
+                    {% endif %}
+                </h3>
+
+                <p>
+                    {% if search %}
+                        Try using a different search term.
+                    {% elif selected_folder == 'inbox' %}
+                        Messages received from students, colleges and industries will appear here.
+                    {% else %}
+                        Messages you send will appear here.
+                    {% endif %}
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     COMPOSE MESSAGE MODAL
+================================================= -->
+
+<div class="modal-overlay"
+     id="composeModal">
+
+    <div class="compose-modal">
+
+        <div class="modal-header">
+
+            <div>
+                <h2>New Message</h2>
+                <p>Send a message to a portal user.</p>
+            </div>
+
+            <button type="button"
+                    class="modal-close"
+                    id="closeComposeBtn">
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="composeMessageForm">
+
+            <div class="form-group">
+
+                <label for="receiver_id">
+                    Recipient
+                </label>
+
+                <select id="receiver_id"
+                        name="receiver_id"
+                        required>
+
+                    <option value="">
+                        Select recipient
+                    </option>
+
+                    <option disabled>
+                        Students
+                    </option>
+
+                    {# Recipients can be loaded dynamically later #}
+
+                    <option disabled>
+                        Colleges
+                    </option>
+
+                    <option disabled>
+                        Industry
+                    </option>
+
+                </select>
+
+                <small>
+                    Recipient selection will use active portal users.
+                </small>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="subject">
+                    Subject
+                </label>
+
+                <input type="text"
+                       id="subject"
+                       name="subject"
+                       maxlength="255"
+                       placeholder="Enter message subject"
+                       required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="message">
+                    Message
+                </label>
+
+                <textarea id="message"
+                          name="message"
+                          rows="7"
+                          placeholder="Write your message..."
+                          required></textarea>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button type="button"
+                        class="btn-secondary"
+                        id="cancelComposeBtn">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                        class="btn-primary"
+                        id="sendMessageBtn">
+                    Send Message
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- Toast -->
+<div class="message-toast"
+     id="messageToast"></div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/placement/messages.js') }}"></script>
+{% endblock %}

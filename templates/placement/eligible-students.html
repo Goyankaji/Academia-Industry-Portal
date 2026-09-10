@@ -1,0 +1,285 @@
+{% extends "placement/base.html" %}
+
+{% block title %}
+Eligible Students | {{ opportunity.title }}
+{% endblock %}
+
+{% block page_title %}
+Eligible Students
+{% endblock %}
+
+{% block content %}
+
+<div class="eligible-page">
+
+    <a
+        href="{{ url_for(
+            'placement_opportunity_details',
+            opportunity_id=opportunity.id
+        ) }}"
+        class="back-link"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Opportunity
+    </a>
+
+
+    <div class="eligible-heading">
+
+        <div>
+
+            <span>
+                ELIGIBILITY ANALYSIS
+            </span>
+
+            <h2>
+                Eligible Students
+            </h2>
+
+            <p>
+                {{ opportunity.title }}
+                · {{ opportunity.company_name }}
+            </p>
+
+        </div>
+
+
+        <div class="eligible-count">
+
+            <strong>
+                {{ total_eligible }}
+            </strong>
+
+            <span>
+                Eligible Students
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="eligibility-summary">
+
+        <div>
+            <i class="fa-solid fa-users"></i>
+
+            <span>
+                College Students
+            </span>
+
+            <strong>
+                {{ total_students }}
+            </strong>
+        </div>
+
+        <div>
+            <i class="fa-solid fa-user-check"></i>
+
+            <span>
+                Eligible
+            </span>
+
+            <strong>
+                {{ total_eligible }}
+            </strong>
+        </div>
+
+        <div>
+            <i class="fa-solid fa-briefcase"></i>
+
+            <span>
+                Opportunity
+            </span>
+
+            <strong>
+                {{ opportunity.opportunity_type }}
+            </strong>
+        </div>
+
+    </div>
+
+
+    <div class="eligible-card">
+
+        {% if students %}
+
+            <div class="eligible-table-wrapper">
+
+                <table class="eligible-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Student</th>
+                            <th>Branch</th>
+                            <th>CGPA</th>
+                            <th>Backlogs</th>
+                            <th>Matched Skills</th>
+                            <th>Application</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="eligible-student">
+
+                                        <div class="eligible-avatar">
+                                            {{ student.name|string|first|upper }}
+                                        </div>
+
+                                        <div>
+                                            <strong>
+                                                {{ student.name }}
+                                            </strong>
+
+                                            <span>
+                                                {{ student.enrollment_no or "—" }}
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+                                    {{ student.branch or "—" }}
+                                </td>
+
+
+                                <td>
+                                    <strong class="cgpa">
+                                        {{ student.cgpa if student.cgpa is not none else "—" }}
+                                    </strong>
+                                </td>
+
+
+                                <td>
+
+                                    <span class="no-backlog">
+                                        {{ student.active_backlogs or 0 }}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if student.matched_skills %}
+
+                                        <div class="matched-skills">
+
+                                            {% for skill in student.matched_skills[:3] %}
+
+                                                <span>
+                                                    {{ skill }}
+                                                </span>
+
+                                            {% endfor %}
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <span class="not-available">
+                                            General eligibility
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if student.application_status %}
+
+                                        <span class="application-status">
+                                            {{ student.application_status|replace("_", " ") }}
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="not-applied">
+                                            NOT APPLIED
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for(
+                                            'placement_student_details',
+                                            student_id=student.id
+                                        ) }}"
+                                        class="student-view"
+                                    >
+                                        View
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="eligible-empty">
+
+                <div>
+                    <i class="fa-solid fa-user-slash"></i>
+                </div>
+
+                <h3>
+                    No eligible students found
+                </h3>
+
+                <p>
+                    No students from your college currently match
+                    the available eligibility requirements.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/placement/eligible-students.css'
+    ) }}"
+>
+
+{% endblock %}
