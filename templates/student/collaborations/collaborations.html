@@ -1,0 +1,818 @@
+{% extends "student/base.html" %}
+
+{% block title %}
+Student Collaborations | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/student/collaborations.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="student-collaborations-page">
+
+
+    <!-- =====================================================
+         PAGE HERO
+         ===================================================== -->
+
+    <section class="collaboration-hero">
+
+        <div class="hero-content">
+
+            <span class="page-eyebrow">
+                INDUSTRY COLLABORATION
+            </span>
+
+            <h1>
+                Collaborations
+            </h1>
+
+            <p>
+                Explore the collaborations between your college
+                and industry partners and stay informed about
+                ongoing industry engagement.
+            </p>
+
+        </div>
+
+
+        <div class="hero-user">
+
+            <div class="hero-avatar">
+                {{ student.name[0]|upper }}
+            </div>
+
+            <div>
+
+                <span>
+                    Student
+                </span>
+
+                <strong>
+                    {{ student.name }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STATISTICS
+         ===================================================== -->
+
+    <section class="collaboration-stats">
+
+
+        <!-- TOTAL -->
+
+        <div class="collaboration-stat">
+
+            <div class="stat-icon">
+                🤝
+            </div>
+
+            <div>
+
+                <span>
+                    TOTAL COLLABORATIONS
+                </span>
+
+                <strong>
+                    {{ stats.total }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- PENDING -->
+
+        <div class="collaboration-stat">
+
+            <div class="stat-icon">
+                ⏳
+            </div>
+
+            <div>
+
+                <span>
+                    PENDING
+                </span>
+
+                <strong>
+                    {{ stats.pending }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTIVE -->
+
+        <div class="collaboration-stat">
+
+            <div class="stat-icon">
+                ●
+            </div>
+
+            <div>
+
+                <span>
+                    ACTIVE
+                </span>
+
+                <strong>
+                    {{ stats.active }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- INDUSTRY PARTNERS -->
+
+        <div class="collaboration-stat">
+
+            <div class="stat-icon">
+                🏢
+            </div>
+
+            <div>
+
+                <span>
+                    INDUSTRY PARTNERS
+                </span>
+
+                <strong>
+                    {{ active_industry_partners }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         COLLEGE INFORMATION
+         ===================================================== -->
+
+    {% if student.college_name %}
+
+    <section class="college-info-card">
+
+        <div class="college-icon">
+            🎓
+        </div>
+
+
+        <div class="college-info">
+
+            <span>
+                YOUR COLLEGE
+            </span>
+
+            <strong>
+                {{ student.college_name }}
+            </strong>
+
+            {% if student.university_name %}
+
+            <p>
+                {{ student.university_name }}
+            </p>
+
+            {% endif %}
+
+        </div>
+
+
+        {% if student.college_code %}
+
+        <span class="college-code">
+            {{ student.college_code }}
+        </span>
+
+        {% endif %}
+
+    </section>
+
+    {% endif %}
+
+
+
+    <!-- =====================================================
+         SEARCH + FILTER
+         ===================================================== -->
+
+    <section class="collaboration-filter-card">
+
+        <form
+            method="GET"
+            action="{{ url_for('student_collaborations') }}"
+            id="collaborationFilterForm"
+        >
+
+
+            <!-- SEARCH -->
+
+            <div class="search-field">
+
+                <span class="search-icon">
+                    ⌕
+                </span>
+
+                <input
+                    type="text"
+                    name="search"
+                    id="collaborationSearch"
+                    value="{{ search }}"
+                    placeholder="Search company, collaboration or industry..."
+                >
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div class="filter-field">
+
+                <label for="collaborationStatus">
+                    STATUS
+                </label>
+
+                <select
+                    name="status"
+                    id="collaborationStatus"
+                >
+
+                    <option value="">
+                        All Statuses
+                    </option>
+
+                    <option
+                        value="PENDING"
+                        {% if selected_status == 'PENDING' %}
+                            selected
+                        {% endif %}
+                    >
+                        Pending
+                    </option>
+
+                    <option
+                        value="ACTIVE"
+                        {% if selected_status == 'ACTIVE' %}
+                            selected
+                        {% endif %}
+                    >
+                        Active
+                    </option>
+
+                    <option
+                        value="COMPLETED"
+                        {% if selected_status == 'COMPLETED' %}
+                            selected
+                        {% endif %}
+                    >
+                        Completed
+                    </option>
+
+                    <option
+                        value="REJECTED"
+                        {% if selected_status == 'REJECTED' %}
+                            selected
+                        {% endif %}
+                    >
+                        Rejected
+                    </option>
+
+                    <option
+                        value="CANCELLED"
+                        {% if selected_status == 'CANCELLED' %}
+                            selected
+                        {% endif %}
+                    >
+                        Cancelled
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TYPE -->
+
+            <div class="filter-field">
+
+                <label for="collaborationType">
+                    COLLABORATION TYPE
+                </label>
+
+                <select
+                    name="collaboration_type"
+                    id="collaborationType"
+                >
+
+                    <option value="">
+                        All Types
+                    </option>
+
+
+                    {% for type_item in collaboration_types %}
+
+                    <option
+                        value="{{ type_item.collaboration_type }}"
+                        {% if selected_type == type_item.collaboration_type %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ type_item.collaboration_type }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- SEARCH BUTTON -->
+
+            <button
+                type="submit"
+                class="search-btn"
+            >
+                Search
+            </button>
+
+
+            <!-- CLEAR -->
+
+            {% if search or selected_status or selected_type %}
+
+            <a
+                href="{{ url_for('student_collaborations') }}"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+            {% endif %}
+
+        </form>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RESULTS HEADER
+         ===================================================== -->
+
+    <div class="results-heading">
+
+        <div>
+
+            <span class="page-eyebrow">
+                COLLEGE–INDUSTRY ENGAGEMENT
+            </span>
+
+            <h2>
+                Your Collaborations
+            </h2>
+
+        </div>
+
+
+        <span class="results-count">
+
+            {{ collaborations|length }}
+
+            {% if collaborations|length == 1 %}
+                collaboration
+            {% else %}
+                collaborations
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         COLLABORATION LIST
+         ===================================================== -->
+
+    {% if collaborations %}
+
+    <section class="collaboration-grid">
+
+
+        {% for collaboration in collaborations %}
+
+        <article class="collaboration-card">
+
+
+            <!-- =================================================
+                 CARD TOP
+                 ================================================= -->
+
+            <div class="card-top">
+
+
+                <div class="company-avatar">
+
+                    {{ collaboration.company_name[0]|upper }}
+
+                </div>
+
+
+                <div class="card-title-area">
+
+
+                    <div class="title-row">
+
+                        <h3>
+                            {{ collaboration.title }}
+                        </h3>
+
+
+                        <span
+                            class="status-badge
+                            status-{{ collaboration.status|lower }}"
+                        >
+                            {{ collaboration.status }}
+                        </span>
+
+                    </div>
+
+
+                    <p class="company-name">
+
+                        {{ collaboration.company_name }}
+
+                        {% if collaboration.industry_sector %}
+
+                        <span>
+                            · {{ collaboration.industry_sector }}
+                        </span>
+
+                        {% endif %}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TYPE
+                 ================================================= -->
+
+            {% if collaboration.collaboration_type %}
+
+            <div class="collaboration-type">
+
+                <span class="type-label">
+                    TYPE
+                </span>
+
+                <span class="type-value">
+                    {{ collaboration.collaboration_type }}
+                </span>
+
+            </div>
+
+            {% endif %}
+
+
+
+            <!-- =================================================
+                 DESCRIPTION
+                 ================================================= -->
+
+            {% if collaboration.description %}
+
+            <p class="card-description">
+
+                {{ collaboration.description }}
+
+            </p>
+
+            {% else %}
+
+            <p class="card-description muted">
+
+                No description has been provided for this
+                collaboration.
+
+            </p>
+
+            {% endif %}
+
+
+
+            <!-- =================================================
+                 DATES
+                 ================================================= -->
+
+            <div class="date-row">
+
+
+                {% if collaboration.start_date %}
+
+                <div class="date-item">
+
+                    <span class="date-icon">
+                        ▶
+                    </span>
+
+                    <div>
+
+                        <small>
+                            START DATE
+                        </small>
+
+                        <strong
+                            class="formatted-date"
+                            data-date="{{ collaboration.start_date }}"
+                        >
+                            {{ collaboration.start_date }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+
+                {% if collaboration.end_date %}
+
+                <div class="date-item">
+
+                    <span class="date-icon">
+                        ■
+                    </span>
+
+                    <div>
+
+                        <small>
+                            END DATE
+                        </small>
+
+                        <strong
+                            class="formatted-date"
+                            data-date="{{ collaboration.end_date }}"
+                        >
+                            {{ collaboration.end_date }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+
+                {% if collaboration.industry_city %}
+
+                <div class="date-item">
+
+                    <span class="date-icon">
+                        📍
+                    </span>
+
+                    <div>
+
+                        <small>
+                            INDUSTRY LOCATION
+                        </small>
+
+                        <strong>
+                            {{ collaboration.industry_city }}
+
+                            {% if collaboration.industry_state %}
+                                , {{ collaboration.industry_state }}
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+
+
+            <!-- =================================================
+                 INDUSTRY CONTACT
+                 ================================================= -->
+
+            <div class="industry-contact">
+
+
+                <div class="contact-heading">
+
+                    <span>
+                        INDUSTRY PARTNER
+                    </span>
+
+                </div>
+
+
+                <div class="contact-content">
+
+
+                    <div class="contact-avatar">
+
+                        {{ collaboration.company_name[0]|upper }}
+
+                    </div>
+
+
+                    <div class="contact-info">
+
+                        <strong>
+                            {{ collaboration.company_name }}
+                        </strong>
+
+
+                        {% if collaboration.contact_person %}
+
+                        <p>
+                            {{ collaboration.contact_person }}
+
+                            {% if collaboration.designation %}
+
+                                · {{ collaboration.designation }}
+
+                            {% endif %}
+
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if collaboration.industry_website %}
+
+                    <a
+                        href="{{ collaboration.industry_website }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="website-btn"
+                    >
+                        Website ↗
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 CARD FOOTER
+                 ================================================= -->
+
+            <div class="card-footer">
+
+
+                <div class="initiative-info">
+
+                    {% if collaboration.initiated_by %}
+
+                    <small>
+                        INITIATED BY
+                    </small>
+
+                    <strong>
+                        {{ collaboration.initiated_by }}
+                    </strong>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="created-info">
+
+                    {% if collaboration.created_at %}
+
+                    <small>
+                        CREATED
+                    </small>
+
+                    <strong
+                        class="formatted-date"
+                        data-date="{{ collaboration.created_at }}"
+                    >
+                        {{ collaboration.created_at }}
+                    </strong>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+
+    </section>
+
+
+    {% else %}
+
+
+    <!-- =====================================================
+         EMPTY STATE
+         ===================================================== -->
+
+    <section class="empty-state">
+
+        <div class="empty-icon">
+            🤝
+        </div>
+
+
+        <h3>
+            No collaborations found
+        </h3>
+
+
+        <p>
+
+            {% if search or selected_status or selected_type %}
+
+                We couldn't find any collaborations matching
+                your current filters.
+
+            {% else %}
+
+                There are currently no industry collaborations
+                associated with your college.
+
+            {% endif %}
+
+        </p>
+
+
+        {% if search or selected_status or selected_type %}
+
+        <a
+            href="{{ url_for('student_collaborations') }}"
+        >
+            View All Collaborations
+        </a>
+
+        {% endif %}
+
+    </section>
+
+    {% endif %}
+
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/student/collaborations.js') }}"
+></script>
+
+{% endblock %}

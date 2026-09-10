@@ -1,0 +1,723 @@
+{% extends "student/base.html" %}
+
+
+{% block title %}
+My Profile | SIH Portal
+{% endblock %}
+
+
+{% block page_heading %}
+My Profile
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/student/profile.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="profile-page">
+
+
+    <!-- ================================================= -->
+    <!-- PROFILE HEADER -->
+    <!-- ================================================= -->
+
+    <section class="profile-header-card">
+
+
+        <div class="profile-identity">
+
+            <div class="profile-avatar">
+
+                {{ student.name[0]|upper }}
+
+            </div>
+
+
+            <div class="profile-identity-info">
+
+                <span class="profile-label">
+                    STUDENT PROFILE
+                </span>
+
+                <h2>
+                    {{ student.name }}
+                </h2>
+
+                <p>
+                    {{ student.email }}
+                </p>
+
+                <div class="profile-tags">
+
+                    {% if student.course %}
+
+                        <span>
+                            {{ student.course }}
+                        </span>
+
+                    {% endif %}
+
+                    {% if student.branch %}
+
+                        <span>
+                            {{ student.branch }}
+                        </span>
+
+                    {% endif %}
+
+                    {% if student.enrollment_no %}
+
+                        <span>
+                            {{ student.enrollment_no }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('student_profile_edit') }}"
+            class="edit-profile-btn"
+        >
+            <span>✎</span>
+            Edit Profile
+        </a>
+
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- PROFILE COMPLETION -->
+    <!-- ================================================= -->
+
+    <section class="profile-completion-card">
+
+        <div class="completion-info">
+
+            <div>
+
+                <span class="section-eyebrow">
+                    PROFILE COMPLETION
+                </span>
+
+                <h3>
+                    Keep your profile up to date
+                </h3>
+
+                <p>
+                    A complete profile helps you get discovered
+                    for relevant opportunities.
+                </p>
+
+            </div>
+
+
+            <strong class="completion-percentage">
+                {{ profile_completion }}%
+            </strong>
+
+        </div>
+
+
+        <div class="profile-progress-track">
+
+            <div
+                class="profile-progress-fill"
+                data-progress="{{ profile_completion }}"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- PERSONAL + ACADEMIC -->
+    <!-- ================================================= -->
+
+    <div class="profile-grid">
+
+
+        <!-- ================================================= -->
+        <!-- PERSONAL INFORMATION -->
+        <!-- ================================================= -->
+
+        <section class="profile-card">
+
+            <div class="card-title">
+
+                <div class="title-icon">
+                    👤
+                </div>
+
+                <div>
+
+                    <span>
+                        PERSONAL
+                    </span>
+
+                    <h3>
+                        Personal Information
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Full Name
+                    </span>
+
+                    <strong>
+                        {{ student.name or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Email Address
+                    </span>
+
+                    <strong>
+                        {{ student.email or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Phone
+                    </span>
+
+                    <strong>
+                        {{ student.phone or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Date of Birth
+                    </span>
+
+                    <strong>
+                        {{ student.dob or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Gender
+                    </span>
+
+                    <strong>
+                        {{ student.gender or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item detail-full">
+
+                    <span>
+                        Address
+                    </span>
+
+                    <strong>
+                        {{ student.address or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- ACADEMIC INFORMATION -->
+        <!-- ================================================= -->
+
+        <section class="profile-card">
+
+            <div class="card-title">
+
+                <div class="title-icon">
+                    🎓
+                </div>
+
+                <div>
+
+                    <span>
+                        ACADEMIC
+                    </span>
+
+                    <h3>
+                        Academic Information
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+
+                <div class="detail-item">
+
+                    <span>
+                        College
+                    </span>
+
+                    <strong>
+                        {{ student.college_name or 'Not available' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Enrollment No.
+                    </span>
+
+                    <strong>
+                        {{ student.enrollment_no or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Course
+                    </span>
+
+                    <strong>
+                        {{ student.course or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Branch
+                    </span>
+
+                    <strong>
+                        {{ student.branch or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Semester
+                    </span>
+
+                    <strong>
+                        {{ student.semester or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Passing Year
+                    </span>
+
+                    <strong>
+                        {{ student.passing_year or 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        CGPA
+                    </span>
+
+                    <strong>
+                        {{ student.cgpa if student.cgpa is not none else 'Not provided' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Active Backlogs
+                    </span>
+
+                    <strong>
+                        {{ student.active_backlogs if student.active_backlogs is not none else 0 }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- PROFESSIONAL INFORMATION -->
+    <!-- ================================================= -->
+
+    <section class="profile-card">
+
+        <div class="card-title">
+
+            <div class="title-icon">
+                🔗
+            </div>
+
+            <div>
+
+                <span>
+                    PROFESSIONAL
+                </span>
+
+                <h3>
+                    Professional Links & Resume
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="professional-links">
+
+
+            <div class="professional-item">
+
+                <div class="professional-icon">
+                    in
+                </div>
+
+                <div>
+
+                    <span>
+                        LinkedIn
+                    </span>
+
+                    {% if student.linkedin_url %}
+
+                        <a
+                            href="{{ student.linkedin_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {{ student.linkedin_url }}
+                        </a>
+
+                    {% else %}
+
+                        <p>
+                            Not added
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <div class="professional-item">
+
+                <div class="professional-icon">
+                    GH
+                </div>
+
+                <div>
+
+                    <span>
+                        GitHub
+                    </span>
+
+                    {% if student.github_url %}
+
+                        <a
+                            href="{{ student.github_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {{ student.github_url }}
+                        </a>
+
+                    {% else %}
+
+                        <p>
+                            Not added
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <div class="professional-item">
+
+                <div class="professional-icon">
+                    ↗
+                </div>
+
+                <div>
+
+                    <span>
+                        Portfolio
+                    </span>
+
+                    {% if student.portfolio_url %}
+
+                        <a
+                            href="{{ student.portfolio_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {{ student.portfolio_url }}
+                        </a>
+
+                    {% else %}
+
+                        <p>
+                            Not added
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <div class="professional-item">
+
+                <div class="professional-icon">
+                    PDF
+                </div>
+
+                <div>
+
+                    <span>
+                        Resume
+                    </span>
+
+                    {% if student.resume_url %}
+
+                        <a
+                            href="{{ student.resume_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            View Resume
+                        </a>
+
+                    {% else %}
+
+                        <p>
+                            Not uploaded
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- SKILLS -->
+    <!-- ================================================= -->
+
+    <section class="profile-card">
+
+        <div class="card-title">
+
+            <div class="title-icon">
+                ⚡
+            </div>
+
+            <div>
+
+                <span>
+                    SKILLS
+                </span>
+
+                <h3>
+                    Assessed Skills
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        {% if skills %}
+
+            <div class="skills-list">
+
+                {% for skill in skills %}
+
+                    <div class="skill-item">
+
+                        <div class="skill-header">
+
+                            <div>
+
+                                <strong>
+                                    {{ skill.skill_name }}
+                                </strong>
+
+                                {% if skill.proficiency_level %}
+
+                                    <span>
+                                        {{ skill.proficiency_level }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            {% if skill.assessment_percentage is not none %}
+
+                                <strong>
+                                    {{ skill.assessment_percentage }}%
+                                </strong>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if skill.assessment_percentage is not none %}
+
+                            <div class="skill-progress">
+
+                            <div
+                                data-progress="{{ skill.assessment_percentage }}"
+                            ></div>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        {% if skill.verification_status %}
+
+                            <small>
+                                {{ skill.verification_status }}
+                            </small>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="profile-empty">
+
+                <span>
+                    ⚡
+                </span>
+
+                <h4>
+                    No skills added yet
+                </h4>
+
+                <p>
+                    Skill assessments will appear here when available.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+</div>
+
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/student/profile.js') }}"
+></script>
+
+{% endblock %}

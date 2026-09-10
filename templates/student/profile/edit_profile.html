@@ -1,0 +1,566 @@
+{% extends "student/base.html" %}
+
+
+{% block title %}
+Edit Profile | SIH Portal
+{% endblock %}
+
+
+{% block page_heading %}
+Edit Profile
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/student/profile.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="profile-page">
+
+
+    <!-- ================================================= -->
+    <!-- EDIT HEADER -->
+    <!-- ================================================= -->
+
+    <section class="edit-header">
+
+        <div>
+
+            <span class="section-eyebrow">
+                PROFILE SETTINGS
+            </span>
+
+            <h2>
+                Edit Your Profile
+            </h2>
+
+            <p>
+                Keep your personal, academic and professional
+                information up to date.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('student_profile') }}"
+            class="back-profile-btn"
+        >
+            ← Back to Profile
+        </a>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- FORM -->
+    <!-- ================================================= -->
+
+    <form
+        method="POST"
+        action="{{ url_for('student_profile_edit') }}"
+        id="studentProfileForm"
+        novalidate
+    >
+
+
+        <!-- ================================================= -->
+        <!-- PERSONAL INFORMATION -->
+        <!-- ================================================= -->
+
+        <section class="edit-card">
+
+            <div class="edit-card-header">
+
+                <div>
+
+                    <span>
+                        PERSONAL INFORMATION
+                    </span>
+
+                    <h3>
+                        Basic Details
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value="{{ student.name or '' }}"
+                        maxlength="100"
+                        required
+                    >
+
+                    <small class="field-error">
+                    </small>
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label>
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        value="{{ student.email or '' }}"
+                        readonly
+                        class="readonly-field"
+                    >
+
+                    <small>
+                        Login email cannot be changed here.
+                    </small>
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label>
+                        College
+                    </label>
+
+                    <input
+                        type="text"
+                        value="{{ student.college_name or '' }}"
+                        readonly
+                        class="readonly-field"
+                    >
+
+                    <small>
+                        College is linked to your registration.
+                    </small>
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label>
+                        Enrollment Number
+                    </label>
+
+                    <input
+                        type="text"
+                        value="{{ student.enrollment_no or '' }}"
+                        readonly
+                        class="readonly-field"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="phone">
+                        Phone Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value="{{ student.phone or '' }}"
+                        maxlength="20"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="dob">
+                        Date of Birth
+                    </label>
+
+                    <input
+                        type="date"
+                        id="dob"
+                        name="dob"
+                        value="{{ student.dob or '' }}"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="gender">
+                        Gender
+                    </label>
+
+                    <select
+                        id="gender"
+                        name="gender"
+                    >
+
+                        <option value="">
+                            Select Gender
+                        </option>
+
+                        <option
+                            value="MALE"
+                            {% if student.gender == 'MALE' %}
+                                selected
+                            {% endif %}
+                        >
+                            Male
+                        </option>
+
+                        <option
+                            value="FEMALE"
+                            {% if student.gender == 'FEMALE' %}
+                                selected
+                            {% endif %}
+                        >
+                            Female
+                        </option>
+
+                        <option
+                            value="OTHER"
+                            {% if student.gender == 'OTHER' %}
+                                selected
+                            {% endif %}
+                        >
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <div class="form-group form-full">
+
+                    <label for="address">
+                        Address
+                    </label>
+
+                    <textarea
+                        id="address"
+                        name="address"
+                        rows="4"
+                        maxlength="500"
+                    >{{ student.address or '' }}</textarea>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- ACADEMIC -->
+        <!-- ================================================= -->
+
+        <section class="edit-card">
+
+            <div class="edit-card-header">
+
+                <div>
+
+                    <span>
+                        ACADEMIC INFORMATION
+                    </span>
+
+                    <h3>
+                        Academic Details
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="course">
+                        Course
+                    </label>
+
+                    <input
+                        type="text"
+                        id="course"
+                        name="course"
+                        value="{{ student.course or '' }}"
+                        maxlength="100"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="branch">
+                        Branch
+                    </label>
+
+                    <input
+                        type="text"
+                        id="branch"
+                        name="branch"
+                        value="{{ student.branch or '' }}"
+                        maxlength="100"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="semester">
+                        Semester
+                    </label>
+
+                    <input
+                        type="number"
+                        id="semester"
+                        name="semester"
+                        value="{{ student.semester or '' }}"
+                        min="1"
+                        max="12"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="passing_year">
+                        Passing Year
+                    </label>
+
+                    <input
+                        type="number"
+                        id="passing_year"
+                        name="passing_year"
+                        value="{{ student.passing_year or '' }}"
+                        min="2000"
+                        max="2100"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="cgpa">
+                        CGPA
+                    </label>
+
+                    <input
+                        type="number"
+                        id="cgpa"
+                        name="cgpa"
+                        value="{{ student.cgpa if student.cgpa is not none else '' }}"
+                        min="0"
+                        max="10"
+                        step="0.01"
+                    >
+
+                    <small>
+                        Enter a value between 0 and 10.
+                    </small>
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="active_backlogs">
+                        Active Backlogs
+                    </label>
+
+                    <input
+                        type="number"
+                        id="active_backlogs"
+                        name="active_backlogs"
+                        value="{{ student.active_backlogs if student.active_backlogs is not none else 0 }}"
+                        min="0"
+                    >
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- PROFESSIONAL -->
+        <!-- ================================================= -->
+
+        <section class="edit-card">
+
+            <div class="edit-card-header">
+
+                <div>
+
+                    <span>
+                        PROFESSIONAL INFORMATION
+                    </span>
+
+                    <h3>
+                        Online Presence
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="linkedin_url">
+                        LinkedIn URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="linkedin_url"
+                        name="linkedin_url"
+                        value="{{ student.linkedin_url or '' }}"
+                        placeholder="https://linkedin.com/in/username"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="github_url">
+                        GitHub URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="github_url"
+                        name="github_url"
+                        value="{{ student.github_url or '' }}"
+                        placeholder="https://github.com/username"
+                    >
+
+                </div>
+
+
+
+                <div class="form-group form-full">
+
+                    <label for="portfolio_url">
+                        Portfolio URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="portfolio_url"
+                        name="portfolio_url"
+                        value="{{ student.portfolio_url or '' }}"
+                        placeholder="https://yourportfolio.com"
+                    >
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- ACTIONS -->
+        <!-- ================================================= -->
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('student_profile') }}"
+                class="cancel-btn"
+            >
+                Cancel
+            </a>
+
+
+            <button
+                type="submit"
+                class="save-profile-btn"
+                id="saveProfileBtn"
+            >
+                <span>
+                    Save Changes
+                </span>
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/student/profile.js') }}"
+></script>
+
+{% endblock %}

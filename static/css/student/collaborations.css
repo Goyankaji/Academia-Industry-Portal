@@ -1,0 +1,1399 @@
+/* =========================================================
+   STUDENT COLLABORATIONS
+   ========================================================= */
+
+.student-collaborations-page {
+
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.collaboration-hero {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 25px;
+
+    padding: 27px 30px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+}
+
+
+.page-eyebrow {
+
+    display: block;
+
+    color: #2563eb;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .12em;
+
+}
+
+
+.hero-content h1 {
+
+    margin-top: 7px;
+
+    color: #111827;
+
+    font-size: 27px;
+
+    letter-spacing: -.03em;
+
+}
+
+
+.hero-content p {
+
+    max-width: 680px;
+
+    margin-top: 7px;
+
+    color: #6b7280;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+
+}
+
+
+.hero-user {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 9px 13px;
+
+    border: 1px solid #edf0f4;
+
+    border-radius: 10px;
+
+}
+
+
+.hero-avatar {
+
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+}
+
+
+.hero-user span {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+}
+
+
+.hero-user strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #374151;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.collaboration-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 14px;
+
+    margin-top: 17px;
+
+}
+
+
+.collaboration-stat {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 17px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 11px;
+
+}
+
+
+.stat-icon {
+
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    font-size: 16px;
+
+}
+
+
+.collaboration-stat span {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .07em;
+
+}
+
+
+.collaboration-stat strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #111827;
+
+    font-size: 21px;
+
+}
+
+
+/* =========================================================
+   COLLEGE INFORMATION
+   ========================================================= */
+
+.college-info-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 17px;
+
+    padding: 14px 16px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+}
+
+
+.college-icon {
+
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    font-size: 16px;
+
+}
+
+
+.college-info {
+
+    flex: 1;
+
+}
+
+
+.college-info > span {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: .08em;
+
+}
+
+
+.college-info strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #374151;
+
+    font-size: 10px;
+
+}
+
+
+.college-info p {
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 8px;
+
+}
+
+
+.college-code {
+
+    padding: 6px 8px;
+
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.collaboration-filter-card {
+
+    margin-top: 17px;
+
+    padding: 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 11px;
+
+}
+
+
+.collaboration-filter-card form {
+
+    display: flex;
+
+    align-items: end;
+
+    gap: 10px;
+
+}
+
+
+.search-field {
+
+    flex: 1;
+
+    min-width: 230px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 12px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 8px;
+
+}
+
+
+.search-icon {
+
+    color: #94a3b8;
+
+    font-size: 18px;
+
+}
+
+
+.search-field input {
+
+    width: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #111827;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+}
+
+
+.filter-field {
+
+    min-width: 160px;
+
+}
+
+
+.filter-field label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #64748b;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+.filter-field select {
+
+    width: 100%;
+
+    height: 42px;
+
+    padding: 0 10px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+}
+
+
+.search-btn {
+
+    height: 42px;
+
+    padding: 0 18px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+
+.search-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+.clear-btn {
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 12px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 8px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   RESULTS HEADER
+   ========================================================= */
+
+.results-heading {
+
+    display: flex;
+
+    align-items: end;
+
+    justify-content: space-between;
+
+    margin-top: 25px;
+
+}
+
+
+.results-heading h2 {
+
+    margin-top: 5px;
+
+    color: #111827;
+
+    font-size: 18px;
+
+}
+
+
+.results-count {
+
+    padding: 6px 9px;
+
+    border-radius: 6px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   COLLABORATION GRID
+   ========================================================= */
+
+.collaboration-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-top: 12px;
+
+}
+
+
+.collaboration-card {
+
+    padding: 19px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+
+}
+
+
+.collaboration-card:hover {
+
+    transform: translateY(-2px);
+
+    border-color: #cbd5e1;
+
+    box-shadow:
+        0 10px 30px rgba(15, 23, 42, .06);
+
+}
+
+
+/* =========================================================
+   CARD TOP
+   ========================================================= */
+
+.card-top {
+
+    display: flex;
+
+    gap: 12px;
+
+}
+
+
+.company-avatar {
+
+    width: 44px;
+
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 16px;
+
+    font-weight: 800;
+
+}
+
+
+.card-title-area {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.title-row {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+.title-row h3 {
+
+    color: #111827;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+
+}
+
+
+.company-name {
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+}
+
+
+.company-name span {
+
+    color: #94a3b8;
+
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    padding: 5px 8px;
+
+    border-radius: 6px;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+}
+
+
+.status-pending {
+
+    background: #fef3c7;
+
+    color: #92400e;
+
+}
+
+
+.status-active {
+
+    background: #dcfce7;
+
+    color: #166534;
+
+}
+
+
+.status-completed {
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+
+}
+
+
+.status-rejected {
+
+    background: #fee2e2;
+
+    color: #991b1b;
+
+}
+
+
+.status-cancelled {
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+}
+
+
+/* =========================================================
+   TYPE
+   ========================================================= */
+
+.collaboration-type {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 14px;
+
+    padding: 5px 7px;
+
+    background: #f8fafc;
+
+    border: 1px solid #eef2f7;
+
+    border-radius: 5px;
+
+}
+
+
+.type-label {
+
+    color: #9ca3af;
+
+    font-size: 6px;
+
+    font-weight: 800;
+
+}
+
+
+.type-value {
+
+    color: #475569;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.card-description {
+
+    display: -webkit-box;
+
+    margin-top: 12px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    line-height: 1.7;
+
+    -webkit-box-orient: vertical;
+
+    -webkit-line-clamp: 3;
+
+}
+
+
+.card-description.muted {
+
+    color: #9ca3af;
+
+}
+
+
+/* =========================================================
+   DATES
+   ========================================================= */
+
+.date-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    margin-top: 15px;
+
+    padding: 11px 0;
+
+    border-top: 1px solid #f1f5f9;
+
+    border-bottom: 1px solid #f1f5f9;
+
+}
+
+
+.date-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding-right: 10px;
+
+    border-right: 1px solid #e5e7eb;
+
+}
+
+
+.date-item:last-child {
+
+    border-right: none;
+
+}
+
+
+.date-icon {
+
+    color: #94a3b8;
+
+    font-size: 9px;
+
+}
+
+
+.date-item small {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 6px;
+
+    font-weight: 700;
+
+}
+
+
+.date-item strong {
+
+    display: block;
+
+    max-width: 150px;
+
+    margin-top: 3px;
+
+    overflow: hidden;
+
+    color: #475569;
+
+    font-size: 8px;
+
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   INDUSTRY CONTACT
+   ========================================================= */
+
+.industry-contact {
+
+    margin-top: 14px;
+
+    padding: 11px;
+
+    background: #f8fafc;
+
+    border-radius: 8px;
+
+}
+
+
+.contact-heading span {
+
+    color: #9ca3af;
+
+    font-size: 6px;
+
+    font-weight: 800;
+
+    letter-spacing: .08em;
+
+}
+
+
+.contact-content {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 8px;
+
+}
+
+
+.contact-avatar {
+
+    width: 30px;
+
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 7px;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+}
+
+
+.contact-info {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.contact-info strong {
+
+    display: block;
+
+    overflow: hidden;
+
+    color: #374151;
+
+    font-size: 8px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+.contact-info p {
+
+    margin-top: 3px;
+
+    overflow: hidden;
+
+    color: #94a3b8;
+
+    font-size: 7px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+.website-btn {
+
+    padding: 6px 8px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    color: #2563eb;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.card-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 13px;
+
+}
+
+
+.initiative-info small,
+.created-info small {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 6px;
+
+    font-weight: 700;
+
+}
+
+
+.initiative-info strong,
+.created-info strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 7px;
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+
+    margin-top: 13px;
+
+    padding: 70px 20px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+}
+
+
+.empty-icon {
+
+    font-size: 30px;
+
+}
+
+
+.empty-state h3 {
+
+    margin-top: 10px;
+
+    color: #111827;
+
+    font-size: 15px;
+
+}
+
+
+.empty-state p {
+
+    max-width: 500px;
+
+    margin: 7px auto 0;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+
+    line-height: 1.7;
+
+}
+
+
+.empty-state a {
+
+    display: inline-block;
+
+    margin-top: 13px;
+
+    color: #2563eb;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .collaboration-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+
+@media (max-width: 850px) {
+
+    .collaboration-stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+
+    .collaboration-filter-card form {
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .search-field {
+
+        flex-basis: 100%;
+
+    }
+
+
+    .filter-field {
+
+        flex: 1;
+
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .collaboration-hero {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        padding: 21px;
+
+    }
+
+
+    .hero-user {
+
+        width: 100%;
+
+    }
+
+
+    .collaboration-stats {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .college-info-card {
+
+        align-items: flex-start;
+
+    }
+
+
+    .college-code {
+
+        margin-left: auto;
+
+    }
+
+
+    .collaboration-filter-card form {
+
+        display: grid;
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .search-field {
+
+        min-width: 0;
+
+    }
+
+
+    .filter-field {
+
+        width: 100%;
+
+    }
+
+
+    .search-btn,
+    .clear-btn {
+
+        width: 100%;
+
+        justify-content: center;
+
+    }
+
+
+    .title-row {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .date-row {
+
+        flex-direction: column;
+
+    }
+
+
+    .date-item {
+
+        padding-bottom: 8px;
+
+        padding-right: 0;
+
+        border-right: none;
+
+        border-bottom: 1px solid #f1f5f9;
+
+    }
+
+
+    .date-item:last-child {
+
+        padding-bottom: 0;
+
+        border-bottom: none;
+
+    }
+
+
+    .contact-content {
+
+        align-items: flex-start;
+
+    }
+
+
+    .website-btn {
+
+        margin-left: auto;
+
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .collaboration-card {
+
+        padding: 15px;
+
+    }
+
+
+    .company-avatar {
+
+        width: 38px;
+
+        height: 38px;
+
+    }
+
+
+    .card-footer {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+}

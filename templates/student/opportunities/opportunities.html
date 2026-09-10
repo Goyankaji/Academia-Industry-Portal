@@ -1,0 +1,650 @@
+{% extends "student/base.html" %}
+
+{% block title %}
+Student Opportunities | SIH Portal
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/student/opportunities.css') }}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="student-opportunities-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <section class="opportunities-hero">
+
+        <div class="hero-content">
+
+            <span class="page-eyebrow">
+                CAREER OPPORTUNITIES
+            </span>
+
+            <h1>
+                Discover Opportunities
+            </h1>
+
+            <p>
+                Explore internships, jobs, projects and training
+                opportunities from industry partners.
+            </p>
+
+        </div>
+
+        <div class="hero-user">
+
+            <div class="hero-avatar">
+                {{ student.name[0]|upper }}
+            </div>
+
+            <div>
+                <span>Welcome back</span>
+                <strong>{{ student.name }}</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         STAT CARDS
+         ===================================================== -->
+
+    <section class="opportunity-stats">
+
+        <div class="opportunity-stat">
+
+            <div class="stat-icon">
+                💼
+            </div>
+
+            <div>
+                <span>OPEN OPPORTUNITIES</span>
+                <strong>{{ total_opportunities }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="opportunity-stat">
+
+            <div class="stat-icon">
+                ⏳
+            </div>
+
+            <div>
+                <span>ACTIVE DEADLINES</span>
+                <strong>{{ active_deadlines }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="opportunity-stat">
+
+            <div class="stat-icon">
+                📄
+            </div>
+
+            <div>
+                <span>MY APPLICATIONS</span>
+                <strong>{{ total_applications }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="opportunity-stat">
+
+            <div class="stat-icon">
+                ⭐
+            </div>
+
+            <div>
+                <span>SHORTLISTED</span>
+                <strong>{{ shortlisted_applications }}</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PROFILE NOTICE
+         ===================================================== -->
+
+    {% if not student.profile_completed %}
+
+    <section class="profile-notice">
+
+        <div class="notice-icon">
+            !
+        </div>
+
+        <div class="notice-content">
+
+            <strong>
+                Complete your profile
+            </strong>
+
+            <p>
+                A complete profile can improve your chances
+                of being considered for opportunities.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('student_profile_edit') }}"
+            class="complete-profile-btn"
+        >
+            Complete Profile →
+        </a>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         SEARCH + FILTERS
+         ===================================================== -->
+
+    <section class="opportunity-filter-card">
+
+        <form
+            method="GET"
+            action="{{ url_for('student_opportunities') }}"
+            id="opportunityFilterForm"
+        >
+
+            <div class="search-field">
+
+                <span class="search-icon">
+                    ⌕
+                </span>
+
+                <input
+                    type="text"
+                    name="search"
+                    id="opportunitySearch"
+                    value="{{ search }}"
+                    placeholder="Search opportunities, companies or skills..."
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="opportunityType">
+                    Opportunity Type
+                </label>
+
+                <select
+                    name="type"
+                    id="opportunityType"
+                >
+
+                    <option value="">
+                        All Types
+                    </option>
+
+                    <option
+                        value="INTERNSHIP"
+                        {% if opportunity_type == 'INTERNSHIP' %}
+                            selected
+                        {% endif %}
+                    >
+                        Internship
+                    </option>
+
+                    <option
+                        value="JOB"
+                        {% if opportunity_type == 'JOB' %}
+                            selected
+                        {% endif %}
+                    >
+                        Job
+                    </option>
+
+                    <option
+                        value="PROJECT"
+                        {% if opportunity_type == 'PROJECT' %}
+                            selected
+                        {% endif %}
+                    >
+                        Project
+                    </option>
+
+                    <option
+                        value="TRAINING"
+                        {% if opportunity_type == 'TRAINING' %}
+                            selected
+                        {% endif %}
+                    >
+                        Training
+                    </option>
+
+                    <option
+                        value="COLLABORATION"
+                        {% if opportunity_type == 'COLLABORATION' %}
+                            selected
+                        {% endif %}
+                    >
+                        Collaboration
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="workMode">
+                    Work Mode
+                </label>
+
+                <select
+                    name="work_mode"
+                    id="workMode"
+                >
+
+                    <option value="">
+                        All Modes
+                    </option>
+
+                    <option
+                        value="ONSITE"
+                        {% if work_mode == 'ONSITE' %}
+                            selected
+                        {% endif %}
+                    >
+                        On-site
+                    </option>
+
+                    <option
+                        value="REMOTE"
+                        {% if work_mode == 'REMOTE' %}
+                            selected
+                        {% endif %}
+                    >
+                        Remote
+                    </option>
+
+                    <option
+                        value="HYBRID"
+                        {% if work_mode == 'HYBRID' %}
+                            selected
+                        {% endif %}
+                    >
+                        Hybrid
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="search-btn"
+            >
+                Search
+            </button>
+
+
+            {% if search or opportunity_type or work_mode %}
+
+            <a
+                href="{{ url_for('student_opportunities') }}"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+            {% endif %}
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESULTS HEADER
+         ===================================================== -->
+
+    <div class="results-heading">
+
+        <div>
+
+            <span class="page-eyebrow">
+                AVAILABLE NOW
+            </span>
+
+            <h2>
+                Latest Opportunities
+            </h2>
+
+        </div>
+
+        <span class="results-count">
+            {{ opportunities|length }}
+            {% if opportunities|length == 1 %}
+                opportunity
+            {% else %}
+                opportunities
+            {% endif %}
+        </span>
+
+    </div>
+
+
+    <!-- =====================================================
+         OPPORTUNITY LIST
+         ===================================================== -->
+
+    {% if opportunities %}
+
+    <section class="opportunity-grid">
+
+        {% for opportunity in opportunities %}
+
+        <article class="opportunity-card">
+
+            <!-- CARD HEADER -->
+
+            <div class="card-header">
+
+                <div class="company-avatar">
+                    {{ opportunity.company_name[0]|upper }}
+                </div>
+
+                <div class="card-title-area">
+
+                    <div class="title-row">
+
+                        <h3>
+                            {{ opportunity.title }}
+                        </h3>
+
+                        <span class="type-badge">
+                            {{ opportunity.opportunity_type }}
+                        </span>
+
+                    </div>
+
+                    <p class="company-name">
+                        {{ opportunity.company_name }}
+
+                        {% if opportunity.industry_sector %}
+                        <span>
+                            · {{ opportunity.industry_sector }}
+                        </span>
+                        {% endif %}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- META INFORMATION -->
+
+            <div class="card-meta">
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        📍
+                    </span>
+
+                    <div>
+                        <small>Location</small>
+                        <strong>
+                            {{ opportunity.location or 'Not specified' }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        ◉
+                    </span>
+
+                    <div>
+                        <small>Work Mode</small>
+                        <strong>
+                            {{ opportunity.work_mode or 'Not specified' }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                {% if opportunity.stipend %}
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        ₹
+                    </span>
+
+                    <div>
+                        <small>Stipend</small>
+                        <strong>
+                            {{ opportunity.stipend }}
+                        </strong>
+                    </div>
+
+                </div>
+
+                {% elif opportunity.package %}
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        ₹
+                    </span>
+
+                    <div>
+                        <small>Package</small>
+                        <strong>
+                            {{ opportunity.package }}
+                        </strong>
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <p class="card-description">
+                {{ opportunity.description }}
+            </p>
+
+
+            <!-- SKILLS -->
+
+            {% if opportunity.required_skills %}
+
+            <div class="skill-tags">
+
+                {% set skills =
+                    opportunity.required_skills
+                    .replace(';', ',')
+                    .split(',')
+                %}
+
+                {% for skill in skills[:5] %}
+
+                    {% if skill.strip() %}
+
+                    <span>
+                        {{ skill.strip() }}
+                    </span>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- FOOTER -->
+
+            <div class="card-footer">
+
+                <div class="deadline-info">
+
+                    {% if opportunity.application_deadline %}
+
+                    <small>
+                        APPLICATION DEADLINE
+                    </small>
+
+                    <strong
+                        data-deadline="{{ opportunity.application_deadline }}"
+                    >
+                        {{ opportunity.application_deadline }}
+                    </strong>
+
+                    {% else %}
+
+                    <small>
+                        APPLICATION DEADLINE
+                    </small>
+
+                    <strong>
+                        No deadline
+                    </strong>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="card-actions">
+
+                    <a
+                        href="{{ url_for(
+                            'student_opportunity_detail',
+                            opportunity_id=opportunity.id
+                        ) }}"
+                        class="details-btn"
+                    >
+                        View Details
+                    </a>
+
+
+                    {% if opportunity.application_status %}
+
+                    <span
+                        class="application-badge
+                        status-{{ opportunity.application_status|lower }}"
+                    >
+                        {{ opportunity.application_status }}
+                    </span>
+
+                    {% else %}
+
+                    <a
+                        href="{{ url_for(
+                            'student_opportunity_detail',
+                            opportunity_id=opportunity.id
+                        ) }}"
+                        class="apply-btn"
+                    >
+                        Apply Now →
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </section>
+
+    {% else %}
+
+    <!-- =====================================================
+         EMPTY STATE
+         ===================================================== -->
+
+    <section class="empty-state">
+
+        <div class="empty-icon">
+            💼
+        </div>
+
+        <h3>
+            No opportunities found
+        </h3>
+
+        <p>
+
+            {% if search or opportunity_type or work_mode %}
+
+                We couldn't find any opportunities matching
+                your current filters.
+
+            {% else %}
+
+                There are no open opportunities available
+                right now. Please check again later.
+
+            {% endif %}
+
+        </p>
+
+
+        {% if search or opportunity_type or work_mode %}
+
+        <a
+            href="{{ url_for('student_opportunities') }}"
+        >
+            View All Opportunities
+        </a>
+
+        {% endif %}
+
+    </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/student/opportunities.js') }}"
+></script>
+
+{% endblock %}

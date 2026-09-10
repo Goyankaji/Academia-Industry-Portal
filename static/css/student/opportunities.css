@@ -1,0 +1,2208 @@
+/* =========================================================
+   STUDENT OPPORTUNITIES
+   ========================================================= */
+
+.student-opportunities-page,
+.opportunity-detail-page {
+
+    max-width: 1400px;
+    margin: 0 auto;
+
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.opportunities-hero {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 25px;
+
+    padding: 27px 30px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+}
+
+
+.page-eyebrow {
+
+    display: block;
+
+    color: #2563eb;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .12em;
+
+}
+
+
+.hero-content h1 {
+
+    margin-top: 7px;
+
+    color: #111827;
+
+    font-size: 27px;
+
+    letter-spacing: -.03em;
+
+}
+
+
+.hero-content p {
+
+    max-width: 650px;
+
+    margin-top: 7px;
+
+    color: #6b7280;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+
+}
+
+
+.hero-user {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 9px 13px;
+
+    border: 1px solid #edf0f4;
+
+    border-radius: 10px;
+
+}
+
+
+.hero-avatar {
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+}
+
+
+.hero-user span {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+}
+
+
+.hero-user strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #374151;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.opportunity-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 14px;
+
+    margin-top: 17px;
+
+}
+
+
+.opportunity-stat {
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 17px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 11px;
+
+}
+
+
+.stat-icon {
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    font-size: 16px;
+
+}
+
+
+.opportunity-stat span {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .07em;
+
+}
+
+
+.opportunity-stat strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #111827;
+
+    font-size: 21px;
+
+}
+
+
+/* =========================================================
+   PROFILE NOTICE
+   ========================================================= */
+
+.profile-notice {
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 17px;
+
+    padding: 13px 15px;
+
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 10px;
+
+}
+
+
+.notice-icon {
+
+    width: 29px;
+    height: 29px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+}
+
+
+.notice-content strong {
+
+    display: block;
+
+    color: #1e3a8a;
+
+    font-size: 10px;
+
+}
+
+
+.notice-content p {
+
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+}
+
+
+.complete-profile-btn {
+
+    margin-left: auto;
+
+    color: #2563eb;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.opportunity-filter-card {
+
+    margin-top: 17px;
+
+    padding: 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 11px;
+
+}
+
+
+.opportunity-filter-card form {
+
+    display: flex;
+
+    align-items: end;
+
+    gap: 10px;
+
+}
+
+
+.search-field {
+
+    flex: 1;
+
+    min-width: 240px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 12px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 8px;
+
+}
+
+
+.search-icon {
+
+    color: #94a3b8;
+
+    font-size: 18px;
+
+}
+
+
+.search-field input {
+
+    width: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #111827;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+}
+
+
+.filter-field {
+
+    min-width: 150px;
+
+}
+
+
+.filter-field label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #64748b;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+.filter-field select {
+
+    width: 100%;
+
+    height: 42px;
+
+    padding: 0 10px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+}
+
+
+.search-btn {
+
+    height: 42px;
+
+    padding: 0 18px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+
+.search-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+.clear-btn {
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 12px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 8px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+
+.results-heading {
+
+    display: flex;
+
+    align-items: end;
+
+    justify-content: space-between;
+
+    margin-top: 25px;
+
+}
+
+
+.results-heading h2 {
+
+    margin-top: 5px;
+
+    color: #111827;
+
+    font-size: 18px;
+
+}
+
+
+.results-count {
+
+    padding: 6px 9px;
+
+    border-radius: 6px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   OPPORTUNITY GRID
+   ========================================================= */
+
+.opportunity-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-top: 12px;
+
+}
+
+
+.opportunity-card {
+
+    padding: 19px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+
+}
+
+
+.opportunity-card:hover {
+
+    transform: translateY(-2px);
+
+    border-color: #cbd5e1;
+
+    box-shadow:
+        0 10px 30px rgba(15, 23, 42, .06);
+
+}
+
+
+/* =========================================================
+   CARD HEADER
+   ========================================================= */
+
+.card-header {
+
+    display: flex;
+
+    gap: 12px;
+
+}
+
+
+.company-avatar {
+
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 16px;
+
+    font-weight: 800;
+
+}
+
+
+.card-title-area {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.title-row {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+.title-row h3 {
+
+    color: #111827;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+
+}
+
+
+.type-badge {
+
+    flex-shrink: 0;
+
+    padding: 4px 7px;
+
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+}
+
+
+.company-name {
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+}
+
+
+.company-name span {
+
+    color: #94a3b8;
+
+}
+
+
+/* =========================================================
+   META
+   ========================================================= */
+
+.card-meta {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 16px;
+
+    padding: 11px 0;
+
+    border-top: 1px solid #f1f5f9;
+
+    border-bottom: 1px solid #f1f5f9;
+
+}
+
+
+.meta-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding-right: 9px;
+
+    border-right: 1px solid #e5e7eb;
+
+}
+
+
+.meta-item:last-child {
+
+    border-right: none;
+
+}
+
+
+.meta-icon {
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+}
+
+
+.meta-item small {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 7px;
+
+}
+
+
+.meta-item strong {
+
+    display: block;
+
+    max-width: 130px;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #475569;
+
+    font-size: 8px;
+
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.card-description {
+
+    display: -webkit-box;
+
+    margin-top: 13px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    line-height: 1.65;
+
+    -webkit-box-orient: vertical;
+
+    -webkit-line-clamp: 3;
+
+}
+
+
+/* =========================================================
+   SKILLS
+   ========================================================= */
+
+.skill-tags {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin-top: 12px;
+
+}
+
+
+.skill-tags span,
+.detail-skill-tags span {
+
+    padding: 4px 7px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   CARD FOOTER
+   ========================================================= */
+
+.card-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 16px;
+
+}
+
+
+.deadline-info small {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+}
+
+
+.deadline-info strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #475569;
+
+    font-size: 8px;
+
+}
+
+
+.card-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+}
+
+
+.details-btn {
+
+    padding: 8px 10px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 7px;
+
+    color: #475569;
+
+    background: #ffffff;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+.details-btn:hover {
+
+    background: #f8fafc;
+
+}
+
+
+.apply-btn {
+
+    padding: 8px 11px;
+
+    border-radius: 7px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+.apply-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+/* =========================================================
+   APPLICATION STATUS
+   ========================================================= */
+
+.application-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 7px 9px;
+
+    border-radius: 6px;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+}
+
+
+.status-applied {
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+}
+
+
+.status-shortlisted {
+
+    background: #fef3c7;
+
+    color: #92400e;
+
+}
+
+
+.status-selected {
+
+    background: #dcfce7;
+
+    color: #166534;
+
+}
+
+
+.status-rejected {
+
+    background: #fee2e2;
+
+    color: #991b1b;
+
+}
+
+
+.status-withdrawn {
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+
+    margin-top: 13px;
+
+    padding: 70px 20px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+}
+
+
+.empty-icon {
+
+    font-size: 30px;
+
+}
+
+
+.empty-state h3 {
+
+    margin-top: 10px;
+
+    color: #111827;
+
+    font-size: 15px;
+
+}
+
+
+.empty-state p {
+
+    max-width: 450px;
+
+    margin: 7px auto 0;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+
+    line-height: 1.7;
+
+}
+
+
+.empty-state a {
+
+    display: inline-block;
+
+    margin-top: 13px;
+
+    color: #2563eb;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   DETAIL PAGE
+   ========================================================= */
+
+.opportunity-detail-page {
+
+    padding-bottom: 30px;
+
+}
+
+
+.back-link {
+
+    display: inline-flex;
+
+    margin-bottom: 12px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+.back-link:hover {
+
+    color: #2563eb;
+
+}
+
+
+.detail-main-card {
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+}
+
+
+/* =========================================================
+   DETAIL HEADER
+   ========================================================= */
+
+.detail-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 28px 30px;
+
+    background: #f8fafc;
+
+    border-bottom: 1px solid #e5e7eb;
+
+}
+
+
+.detail-company-avatar {
+
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 13px;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 21px;
+
+    font-weight: 800;
+
+}
+
+
+.detail-type {
+
+    color: #2563eb;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .1em;
+
+}
+
+
+.detail-header-info h1 {
+
+    margin-top: 4px;
+
+    color: #111827;
+
+    font-size: 24px;
+
+    letter-spacing: -.02em;
+
+}
+
+
+.detail-header-info p {
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   DETAIL INFO
+   ========================================================= */
+
+.detail-info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    border-bottom: 1px solid #e5e7eb;
+
+}
+
+
+.detail-info-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 16px;
+
+    border-right: 1px solid #e5e7eb;
+
+}
+
+
+.detail-info-item:last-child {
+
+    border-right: none;
+
+}
+
+
+.detail-info-item > span {
+
+    font-size: 13px;
+
+}
+
+
+.detail-info-item small {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 7px;
+
+}
+
+
+.detail-info-item strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #374151;
+
+    font-size: 9px;
+
+}
+
+
+/* =========================================================
+   DETAIL CONTENT
+   ========================================================= */
+
+.detail-content {
+
+    padding: 28px 30px;
+
+}
+
+
+.detail-section {
+
+    margin-bottom: 28px;
+
+}
+
+
+.detail-section:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+.detail-section-label {
+
+    display: block;
+
+    color: #2563eb;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .1em;
+
+}
+
+
+.detail-section h2 {
+
+    margin-top: 5px;
+
+    color: #111827;
+
+    font-size: 16px;
+
+}
+
+
+.detail-section > p {
+
+    max-width: 900px;
+
+    margin-top: 9px;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+    line-height: 1.8;
+
+    white-space: pre-line;
+
+}
+
+
+.detail-skill-tags {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin-top: 11px;
+
+}
+
+
+.detail-skill-tags span {
+
+    padding: 6px 9px;
+
+    font-size: 8px;
+
+}
+
+
+/* =========================================================
+   COMPANY BOX
+   ========================================================= */
+
+.detail-company-box {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 11px;
+
+    padding: 13px;
+
+    max-width: 500px;
+
+    background: #f8fafc;
+
+    border: 1px solid #eef2f7;
+
+    border-radius: 9px;
+
+}
+
+
+.company-box-avatar {
+
+    width: 39px;
+    height: 39px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+}
+
+
+.detail-company-box h3 {
+
+    color: #374151;
+
+    font-size: 11px;
+
+}
+
+
+.detail-company-box p {
+
+    margin-top: 3px;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+}
+
+
+/* =========================================================
+   APPLY SECTION
+   ========================================================= */
+
+.detail-apply-section {
+
+    padding: 20px 30px;
+
+    background: #f8fafc;
+
+    border-top: 1px solid #e5e7eb;
+
+}
+
+
+.apply-section-content {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+}
+
+
+.apply-section-content h2 {
+
+    margin-top: 4px;
+
+    color: #111827;
+
+    font-size: 16px;
+
+}
+
+
+.apply-section-content p {
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+}
+
+
+.detail-apply-btn {
+
+    flex-shrink: 0;
+
+    padding: 11px 17px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+}
+
+
+.detail-apply-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+/* =========================================================
+   ALREADY APPLIED
+   ========================================================= */
+
+.already-applied-box {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 13px;
+
+    background: #ffffff;
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 9px;
+
+}
+
+
+.already-applied-icon {
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #dcfce7;
+
+    color: #166534;
+
+    font-weight: 800;
+
+}
+
+
+.already-applied-box strong {
+
+    display: block;
+
+    color: #166534;
+
+    font-size: 10px;
+
+}
+
+
+.already-applied-box p {
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 8px;
+
+}
+
+
+.already-applied-box small {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #9ca3af;
+
+    font-size: 7px;
+
+}
+
+
+.already-applied-box .application-badge {
+
+    margin-left: auto;
+
+}
+
+
+/* =========================================================
+   APPLICATION FORM
+   ========================================================= */
+
+.application-form-wrapper {
+
+    display: none;
+
+    margin-top: 18px;
+
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+}
+
+
+.application-form-wrapper.visible {
+
+    display: block;
+
+}
+
+
+.form-header h2 {
+
+    margin-top: 4px;
+
+    color: #111827;
+
+    font-size: 16px;
+
+}
+
+
+/* =========================================================
+   APPLICANT SUMMARY
+   ========================================================= */
+
+.applicant-summary {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+    margin-top: 16px;
+
+    padding: 12px;
+
+    background: #f8fafc;
+
+    border-radius: 8px;
+
+}
+
+
+.applicant-summary small {
+
+    display: block;
+
+    color: #9ca3af;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+}
+
+
+.applicant-summary strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #374151;
+
+    font-size: 9px;
+
+}
+
+
+/* =========================================================
+   RESUME
+   ========================================================= */
+
+.resume-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-top: 12px;
+
+    padding: 11px;
+
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 8px;
+
+}
+
+
+.resume-icon {
+
+    font-size: 15px;
+
+}
+
+
+.resume-status strong {
+
+    display: block;
+
+    color: #1e3a8a;
+
+    font-size: 9px;
+
+}
+
+
+.resume-status p {
+
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 8px;
+
+}
+
+
+/* =========================================================
+   APPLICATION FIELD
+   ========================================================= */
+
+.application-field {
+
+    margin-top: 17px;
+
+}
+
+
+.application-field label {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 7px;
+
+    color: #374151;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+.application-field label span {
+
+    color: #9ca3af;
+
+    font-weight: 400;
+
+}
+
+
+.application-field textarea {
+
+    width: 100%;
+
+    padding: 11px;
+
+    resize: vertical;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    color: #374151;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+    line-height: 1.6;
+
+}
+
+
+.application-field textarea:focus {
+
+    border-color: #93c5fd;
+
+}
+
+
+.textarea-footer {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-top: 4px;
+
+    color: #9ca3af;
+
+    font-size: 7px;
+
+}
+
+
+/* =========================================================
+   APPLICATION ACTIONS
+   ========================================================= */
+
+.application-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    margin-top: 16px;
+
+    padding-top: 14px;
+
+    border-top: 1px solid #f1f5f9;
+
+}
+
+
+.cancel-application-btn {
+
+    padding: 9px 14px;
+
+    border: 1px solid #dbe1e8;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    font-family: inherit;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+
+.submit-application-btn {
+
+    padding: 9px 15px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+}
+
+
+.submit-application-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+.submit-application-btn:disabled {
+
+    opacity: .6;
+
+    cursor: not-allowed;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .opportunity-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+
+@media (max-width: 850px) {
+
+    .opportunity-stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+
+    .opportunity-filter-card form {
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .search-field {
+
+        flex-basis: 100%;
+
+    }
+
+
+    .filter-field {
+
+        flex: 1;
+
+    }
+
+
+    .detail-info-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+
+    .detail-info-item:nth-child(2) {
+
+        border-right: none;
+
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .opportunities-hero {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        padding: 21px;
+
+    }
+
+
+    .hero-user {
+
+        width: 100%;
+
+    }
+
+
+    .opportunity-stats {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .profile-notice {
+
+        align-items: flex-start;
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .complete-profile-btn {
+
+        margin-left: 41px;
+
+    }
+
+
+    .opportunity-filter-card form {
+
+        display: grid;
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .search-field {
+
+        min-width: 0;
+
+    }
+
+
+    .filter-field {
+
+        width: 100%;
+
+    }
+
+
+    .search-btn,
+    .clear-btn {
+
+        width: 100%;
+
+        justify-content: center;
+
+    }
+
+
+    .card-footer {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .card-actions {
+
+        width: 100%;
+
+    }
+
+
+    .details-btn,
+    .apply-btn {
+
+        flex: 1;
+
+        text-align: center;
+
+    }
+
+
+    .detail-header {
+
+        align-items: flex-start;
+
+        padding: 21px;
+
+    }
+
+
+    .detail-header-info h1 {
+
+        font-size: 19px;
+
+    }
+
+
+    .detail-info-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .detail-info-item {
+
+        border-right: none;
+
+        border-bottom: 1px solid #e5e7eb;
+
+    }
+
+
+    .detail-info-item:last-child {
+
+        border-bottom: none;
+
+    }
+
+
+    .detail-content {
+
+        padding: 21px;
+
+    }
+
+
+    .detail-apply-section {
+
+        padding: 17px 21px;
+
+    }
+
+
+    .apply-section-content {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .detail-apply-btn {
+
+        width: 100%;
+
+    }
+
+
+    .already-applied-box {
+
+        align-items: flex-start;
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .already-applied-box .application-badge {
+
+        margin-left: 43px;
+
+    }
+
+
+    .applicant-summary {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .title-row {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .opportunity-card {
+
+        padding: 15px;
+
+    }
+
+
+    .detail-company-avatar {
+
+        width: 48px;
+        height: 48px;
+
+    }
+
+
+    .detail-header-info h1 {
+
+        font-size: 17px;
+
+    }
+
+}

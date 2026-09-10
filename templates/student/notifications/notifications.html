@@ -1,0 +1,402 @@
+{% extends "student/base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/student/notifications.css') }}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="notifications-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+    <section class="notifications-hero">
+
+        <div class="hero-left">
+
+            <div class="hero-icon">
+                🔔
+            </div>
+
+            <div>
+                <span class="hero-label">STUDENT PORTAL</span>
+
+                <h1>Notifications</h1>
+
+                <p>
+                    Stay updated with important activities,
+                    applications and portal updates.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="hero-actions">
+
+            {% if stats.unread > 0 %}
+            <button
+                type="button"
+                class="mark-all-btn"
+                id="markAllReadBtn"
+            >
+                <span>✓</span>
+                Mark All as Read
+            </button>
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         STAT CARDS
+    ====================================================== -->
+    <section class="notification-stats">
+
+        <div class="stat-card">
+            <div class="stat-icon total-icon">▣</div>
+
+            <div class="stat-content">
+                <span class="stat-label">Total</span>
+                <strong>{{ stats.total }}</strong>
+            </div>
+        </div>
+
+
+        <div class="stat-card unread-stat">
+            <div class="stat-icon unread-icon">●</div>
+
+            <div class="stat-content">
+                <span class="stat-label">Unread</span>
+                <strong>{{ stats.unread }}</strong>
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-icon read-icon">✓</div>
+
+            <div class="stat-content">
+                <span class="stat-label">Read</span>
+                <strong>{{ stats.read }}</strong>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FILTER SECTION
+    ====================================================== -->
+    <section class="notification-toolbar">
+
+        <form
+            method="GET"
+            action="{{ url_for('student_notifications') }}"
+            id="notificationFilterForm"
+        >
+
+            <!-- Search -->
+            <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    type="text"
+                    name="search"
+                    id="notificationSearch"
+                    value="{{ search }}"
+                    placeholder="Search notifications..."
+                    autocomplete="off"
+                >
+
+                {% if search %}
+                <button
+                    type="button"
+                    class="clear-search"
+                    id="clearSearchBtn"
+                    title="Clear search"
+                >
+                    ×
+                </button>
+                {% endif %}
+
+            </div>
+
+
+            <!-- Type Filter -->
+            <div class="filter-box">
+
+                <label for="notificationType">
+                    Type
+                </label>
+
+                <select
+                    name="type"
+                    id="notificationType"
+                >
+                    <option value="">All Types</option>
+
+                    {% for type_item in notification_types %}
+
+                        {% set type_value = type_item.notification_type %}
+
+                        <option
+                            value="{{ type_value }}"
+                            {% if selected_type == type_value %}selected{% endif %}
+                        >
+                            {{ type_value|replace('_', ' ')|title }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="filter-btn"
+            >
+                Apply
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESULTS HEADER
+    ====================================================== -->
+    <div class="results-header">
+
+        <div>
+            <h2>Your Notifications</h2>
+
+            <p>
+                {% if notifications %}
+                    Showing {{ notifications|length }} notification{% if notifications|length != 1 %}s{% endif %}
+                {% else %}
+                    No notifications found
+                {% endif %}
+            </p>
+        </div>
+
+        {% if search or selected_type %}
+        <a
+            href="{{ url_for('student_notifications') }}"
+            class="reset-filters"
+        >
+            Reset Filters
+        </a>
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         NOTIFICATION LIST
+    ====================================================== -->
+    {% if notifications %}
+
+    <section class="notification-list" id="notificationList">
+
+        {% for notification in notifications %}
+
+        <article
+            class="notification-card {% if not notification.is_read %}unread{% else %}read{% endif %}"
+            data-notification-id="{{ notification.id }}"
+        >
+
+            <!-- Unread Indicator -->
+            {% if not notification.is_read %}
+            <span class="unread-dot"></span>
+            {% endif %}
+
+
+            <!-- Icon -->
+            <div class="notification-icon
+                {% if notification.notification_type %}
+                    type-{{ notification.notification_type|lower|replace(' ', '-') }}
+                {% endif %}
+            ">
+
+                {% set ntype = (notification.notification_type or '')|upper %}
+
+                {% if 'APPLICATION' in ntype %}
+                    📄
+                {% elif 'OPPORTUNITY' in ntype %}
+                    💼
+                {% elif 'COLLABORATION' in ntype %}
+                    🤝
+                {% elif 'PROFILE' in ntype %}
+                    👤
+                {% elif 'SYSTEM' in ntype %}
+                    ⚙
+                {% elif 'MESSAGE' in ntype %}
+                    💬
+                {% else %}
+                    🔔
+                {% endif %}
+
+            </div>
+
+
+            <!-- Notification Content -->
+            <div class="notification-main">
+
+                <div class="notification-top">
+
+                    <div class="notification-heading">
+
+                        <h3>
+                            {{ notification.title }}
+                        </h3>
+
+                        {% if notification.notification_type %}
+                        <span class="notification-type">
+                            {{ notification.notification_type
+                                |replace('_', ' ')
+                                |title
+                            }}
+                        </span>
+                        {% endif %}
+
+                    </div>
+
+                    <time
+                        class="notification-time"
+                        data-date="{{ notification.created_at }}"
+                    >
+                        {{ notification.created_at }}
+                    </time>
+
+                </div>
+
+
+                <p class="notification-message">
+                    {{ notification.message }}
+                </p>
+
+
+                <div class="notification-footer">
+
+                    <span class="notification-date">
+                        <span>🕒</span>
+                        <span
+                            class="formatted-date"
+                            data-date="{{ notification.created_at }}"
+                        >
+                            {{ notification.created_at }}
+                        </span>
+                    </span>
+
+
+                    {% if not notification.is_read %}
+
+                    <button
+                        type="button"
+                        class="mark-read-btn"
+                        data-notification-id="{{ notification.id }}"
+                    >
+                        <span>✓</span>
+                        Mark as Read
+                    </button>
+
+                    {% else %}
+
+                    <span class="read-label">
+                        ✓ Read
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </section>
+
+    {% else %}
+
+    <!-- =====================================================
+         EMPTY STATE
+    ====================================================== -->
+    <section class="empty-state">
+
+        <div class="empty-icon">
+            {% if search or selected_type %}
+                🔎
+            {% else %}
+                🔔
+            {% endif %}
+        </div>
+
+        <h3>
+            {% if search or selected_type %}
+                No Matching Notifications
+            {% else %}
+                No Notifications Yet
+            {% endif %}
+        </h3>
+
+        <p>
+            {% if search or selected_type %}
+                Try changing your search or filter to find
+                the notification you are looking for.
+            {% else %}
+                You are all caught up. New notifications will
+                appear here when there is an update.
+            {% endif %}
+        </p>
+
+        {% if search or selected_type %}
+        <a
+            href="{{ url_for('student_notifications') }}"
+            class="empty-action"
+        >
+            Clear Filters
+        </a>
+        {% endif %}
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         TOAST
+    ====================================================== -->
+    <div
+        class="notification-toast"
+        id="notificationToast"
+    >
+        <span class="toast-icon">✓</span>
+        <span id="toastMessage">
+            Notification updated.
+        </span>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script
+    src="{{ url_for('static', filename='js/student/notifications.js') }}"
+></script>
+{% endblock %}

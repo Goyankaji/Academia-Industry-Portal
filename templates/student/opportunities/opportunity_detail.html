@@ -1,0 +1,560 @@
+{% extends "student/base.html" %}
+
+{% block title %}
+{{ opportunity.title }} | SIH Portal
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/student/opportunities.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="opportunity-detail-page">
+
+
+    <!-- =====================================================
+         BACK
+         ===================================================== -->
+
+    <a
+        href="{{ url_for('student_opportunities') }}"
+        class="back-link"
+    >
+        ← Back to Opportunities
+    </a>
+
+
+    <!-- =====================================================
+         MAIN DETAIL CARD
+         ===================================================== -->
+
+    <section class="detail-main-card">
+
+
+        <!-- HEADER -->
+
+        <div class="detail-header">
+
+            <div class="detail-company-avatar">
+                {{ opportunity.company_name[0]|upper }}
+            </div>
+
+
+            <div class="detail-header-info">
+
+                <span class="detail-type">
+                    {{ opportunity.opportunity_type }}
+                </span>
+
+                <h1>
+                    {{ opportunity.title }}
+                </h1>
+
+                <p>
+                    {{ opportunity.company_name }}
+
+                    {% if opportunity.industry_sector %}
+                        · {{ opportunity.industry_sector }}
+                    {% endif %}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             QUICK INFO
+             ================================================= -->
+
+        <div class="detail-info-grid">
+
+
+            <div class="detail-info-item">
+
+                <span>
+                    📍
+                </span>
+
+                <div>
+                    <small>Location</small>
+
+                    <strong>
+                        {{ opportunity.location or 'Not specified' }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="detail-info-item">
+
+                <span>
+                    ◉
+                </span>
+
+                <div>
+                    <small>Work Mode</small>
+
+                    <strong>
+                        {{ opportunity.work_mode or 'Not specified' }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="detail-info-item">
+
+                <span>
+                    ₹
+                </span>
+
+                <div>
+
+                    {% if opportunity.stipend %}
+
+                        <small>Stipend</small>
+
+                        <strong>
+                            {{ opportunity.stipend }}
+                        </strong>
+
+                    {% elif opportunity.package %}
+
+                        <small>Package</small>
+
+                        <strong>
+                            {{ opportunity.package }}
+                        </strong>
+
+                    {% else %}
+
+                        <small>Compensation</small>
+
+                        <strong>
+                            Not specified
+                        </strong>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-info-item">
+
+                <span>
+                    ⏳
+                </span>
+
+                <div>
+
+                    <small>Application Deadline</small>
+
+                    <strong
+                        data-deadline="{{ opportunity.application_deadline }}"
+                    >
+                        {{ opportunity.application_deadline or 'No deadline' }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             BODY
+             ================================================= -->
+
+        <div class="detail-content">
+
+
+            <!-- DESCRIPTION -->
+
+            <section class="detail-section">
+
+                <span class="detail-section-label">
+                    ABOUT THE OPPORTUNITY
+                </span>
+
+                <h2>
+                    Opportunity Overview
+                </h2>
+
+                <p>
+                    {{ opportunity.description }}
+                </p>
+
+            </section>
+
+
+            <!-- SKILLS -->
+
+            {% if opportunity.required_skills %}
+
+            <section class="detail-section">
+
+                <span class="detail-section-label">
+                    REQUIRED SKILLS
+                </span>
+
+                <h2>
+                    What You'll Need
+                </h2>
+
+                <div class="detail-skill-tags">
+
+                    {% set skills =
+                        opportunity.required_skills
+                        .replace(';', ',')
+                        .split(',')
+                    %}
+
+                    {% for skill in skills %}
+
+                        {% if skill.strip() %}
+
+                        <span>
+                            {{ skill.strip() }}
+                        </span>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            {% endif %}
+
+
+            <!-- ELIGIBILITY -->
+
+            <section class="detail-section">
+
+                <span class="detail-section-label">
+                    ELIGIBILITY
+                </span>
+
+                <h2>
+                    Eligibility Criteria
+                </h2>
+
+                <p>
+                    {{ opportunity.eligibility_criteria
+                        or
+                        'No specific eligibility criteria have been provided by the industry partner.'
+                    }}
+                </p>
+
+            </section>
+
+
+            <!-- COMPANY -->
+
+            <section class="detail-section company-section">
+
+                <span class="detail-section-label">
+                    INDUSTRY PARTNER
+                </span>
+
+                <div class="detail-company-box">
+
+                    <div class="company-box-avatar">
+                        {{ opportunity.company_name[0]|upper }}
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            {{ opportunity.company_name }}
+                        </h3>
+
+                        {% if opportunity.company_type %}
+
+                        <p>
+                            {{ opportunity.company_type }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             APPLY SECTION
+             ================================================= -->
+
+        <div class="detail-apply-section">
+
+
+            {% if opportunity.application_status %}
+
+            <div class="already-applied-box">
+
+                <div class="already-applied-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Application Submitted
+                    </strong>
+
+                    <p>
+                        You have already applied to this opportunity.
+                    </p>
+
+                    {% if opportunity.application_date %}
+
+                    <small>
+                        Applied on:
+                        {{ opportunity.application_date }}
+                    </small>
+
+                    {% endif %}
+
+                </div>
+
+                <span
+                    class="application-badge
+                    status-{{ opportunity.application_status|lower }}"
+                >
+                    {{ opportunity.application_status }}
+                </span>
+
+            </div>
+
+            {% else %}
+
+            <div class="apply-section-content">
+
+                <div>
+
+                    <span class="detail-section-label">
+                        INTERESTED?
+                    </span>
+
+                    <h2>
+                        Apply for this opportunity
+                    </h2>
+
+                    <p>
+                        Your saved profile information and resume
+                        will be submitted with your application.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="detail-apply-btn"
+                    id="openApplicationBtn"
+                >
+                    Apply Now →
+                </button>
+
+            </div>
+
+
+            <!-- =============================================
+                 APPLICATION FORM
+                 ============================================= -->
+
+            <div
+                class="application-form-wrapper"
+                id="applicationFormWrapper"
+            >
+
+                <form
+                    method="POST"
+                    action="{{ url_for(
+                        'student_apply_opportunity',
+                        opportunity_id=opportunity.id
+                    ) }}"
+                    id="studentApplicationForm"
+                >
+
+                    <div class="form-header">
+
+                        <div>
+
+                            <span class="detail-section-label">
+                                APPLICATION
+                            </span>
+
+                            <h2>
+                                Submit Your Application
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- APPLICANT -->
+
+                    <div class="applicant-summary">
+
+                        <div>
+
+                            <small>
+                                APPLICANT
+                            </small>
+
+                            <strong>
+                                {{ student.name }}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                EMAIL
+                            </small>
+
+                            <strong>
+                                {{ student.email }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RESUME -->
+
+                    <div class="resume-status">
+
+                        <div class="resume-icon">
+                            📄
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Resume
+                            </strong>
+
+                            {% if student.resume_url %}
+
+                            <p>
+                                Your saved resume will be submitted
+                                with this application.
+                            </p>
+
+                            {% else %}
+
+                            <p>
+                                No resume is currently linked to
+                                your profile.
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COVER LETTER -->
+
+                    <div class="application-field">
+
+                        <label for="cover_letter">
+                            Cover Letter
+                            <span>
+                                Optional
+                            </span>
+                        </label>
+
+                        <textarea
+                            id="cover_letter"
+                            name="cover_letter"
+                            rows="7"
+                            maxlength="2000"
+                            placeholder="Tell the company briefly why you are interested in this opportunity..."
+                        ></textarea>
+
+                        <div class="textarea-footer">
+
+                            <span>
+                                Keep it clear and relevant.
+                            </span>
+
+                            <span>
+                                <b id="coverLetterCount">0</b>
+                                / 2000
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="application-actions">
+
+                        <button
+                            type="button"
+                            class="cancel-application-btn"
+                            id="cancelApplicationBtn"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="submit-application-btn"
+                            id="submitApplicationBtn"
+                        >
+                            Submit Application →
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/student/opportunities.js') }}"
+></script>
+
+{% endblock %}

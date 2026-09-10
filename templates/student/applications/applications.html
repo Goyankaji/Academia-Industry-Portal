@@ -1,0 +1,702 @@
+{% extends "student/base.html" %}
+
+{% block title %}
+My Applications | SIH Portal
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/student/applications.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="student-applications-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <section class="applications-hero">
+
+        <div class="hero-content">
+
+            <span class="page-eyebrow">
+                APPLICATION TRACKER
+            </span>
+
+            <h1>
+                My Applications
+            </h1>
+
+            <p>
+                Track all your applications and stay updated
+                on your opportunities with industry partners.
+            </p>
+
+        </div>
+
+
+        <div class="hero-user">
+
+            <div class="hero-avatar">
+                {{ student.name[0]|upper }}
+            </div>
+
+            <div>
+
+                <span>
+                    Student
+                </span>
+
+                <strong>
+                    {{ student.name }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         STATISTICS
+         ===================================================== -->
+
+    <section class="application-stats">
+
+
+        <div class="application-stat">
+
+            <div class="stat-icon">
+                📄
+            </div>
+
+            <div>
+
+                <span>
+                    TOTAL APPLICATIONS
+                </span>
+
+                <strong>
+                    {{ total_applications }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="application-stat">
+
+            <div class="stat-icon">
+                📤
+            </div>
+
+            <div>
+
+                <span>
+                    APPLIED
+                </span>
+
+                <strong>
+                    {{ applied_applications }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="application-stat">
+
+            <div class="stat-icon">
+                ⭐
+            </div>
+
+            <div>
+
+                <span>
+                    SHORTLISTED
+                </span>
+
+                <strong>
+                    {{ shortlisted_applications }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="application-stat">
+
+            <div class="stat-icon">
+                ✓
+            </div>
+
+            <div>
+
+                <span>
+                    SELECTED
+                </span>
+
+                <strong>
+                    {{ selected_applications }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SEARCH + FILTER
+         ===================================================== -->
+
+    <section class="application-filter-card">
+
+        <form
+            method="GET"
+            action="{{ url_for('student_applications') }}"
+            id="applicationFilterForm"
+        >
+
+
+            <div class="search-field">
+
+                <span class="search-icon">
+                    ⌕
+                </span>
+
+                <input
+                    type="text"
+                    name="search"
+                    id="applicationSearch"
+                    value="{{ search }}"
+                    placeholder="Search by opportunity, company or skills..."
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="applicationStatus">
+                    APPLICATION STATUS
+                </label>
+
+                <select
+                    name="status"
+                    id="applicationStatus"
+                >
+
+                    <option value="">
+                        All Statuses
+                    </option>
+
+                    <option
+                        value="APPLIED"
+                        {% if application_status == 'APPLIED' %}
+                            selected
+                        {% endif %}
+                    >
+                        Applied
+                    </option>
+
+                    <option
+                        value="SHORTLISTED"
+                        {% if application_status == 'SHORTLISTED' %}
+                            selected
+                        {% endif %}
+                    >
+                        Shortlisted
+                    </option>
+
+                    <option
+                        value="SELECTED"
+                        {% if application_status == 'SELECTED' %}
+                            selected
+                        {% endif %}
+                    >
+                        Selected
+                    </option>
+
+                    <option
+                        value="REJECTED"
+                        {% if application_status == 'REJECTED' %}
+                            selected
+                        {% endif %}
+                    >
+                        Rejected
+                    </option>
+
+                    <option
+                        value="WITHDRAWN"
+                        {% if application_status == 'WITHDRAWN' %}
+                            selected
+                        {% endif %}
+                    >
+                        Withdrawn
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="search-btn"
+            >
+                Search
+            </button>
+
+
+            {% if search or application_status %}
+
+            <a
+                href="{{ url_for('student_applications') }}"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+            {% endif %}
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESULTS HEADER
+         ===================================================== -->
+
+    <div class="results-heading">
+
+        <div>
+
+            <span class="page-eyebrow">
+                APPLICATION HISTORY
+            </span>
+
+            <h2>
+                Your Applications
+            </h2>
+
+        </div>
+
+
+        <span class="results-count">
+
+            {{ applications|length }}
+
+            {% if applications|length == 1 %}
+                application
+            {% else %}
+                applications
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <!-- =====================================================
+         APPLICATION LIST
+         ===================================================== -->
+
+    {% if applications %}
+
+    <section class="applications-list">
+
+
+        {% for application in applications %}
+
+        <article class="application-card">
+
+
+            <!-- =================================================
+                 CARD HEADER
+                 ================================================= -->
+
+            <div class="application-card-header">
+
+
+                <div class="company-avatar">
+
+                    {{ application.company_name[0]|upper }}
+
+                </div>
+
+
+                <div class="application-title-area">
+
+                    <div class="application-title-row">
+
+                        <h3>
+                            {{ application.title }}
+                        </h3>
+
+
+                        <span
+                            class="application-status
+                            status-{{ application.status|lower }}"
+                        >
+                            {{ application.status }}
+                        </span>
+
+                    </div>
+
+
+                    <p class="company-name">
+
+                        {{ application.company_name }}
+
+                        {% if application.industry_sector %}
+
+                        <span>
+                            · {{ application.industry_sector }}
+                        </span>
+
+                        {% endif %}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 META INFORMATION
+                 ================================================= -->
+
+            <div class="application-meta">
+
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        💼
+                    </span>
+
+                    <div>
+
+                        <small>
+                            TYPE
+                        </small>
+
+                        <strong>
+                            {{ application.opportunity_type }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        📍
+                    </span>
+
+                    <div>
+
+                        <small>
+                            LOCATION
+                        </small>
+
+                        <strong>
+                            {{ application.location or 'Not specified' }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        ◉
+                    </span>
+
+                    <div>
+
+                        <small>
+                            WORK MODE
+                        </small>
+
+                        <strong>
+                            {{ application.work_mode or 'Not specified' }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                    <span class="meta-icon">
+                        🗓
+                    </span>
+
+                    <div>
+
+                        <small>
+                            APPLIED ON
+                        </small>
+
+                        <strong
+                            class="application-date"
+                            data-date="{{ application.application_date }}"
+                        >
+                            {{ application.application_date }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 APPLICATION SUMMARY
+                 ================================================= -->
+
+            <div class="application-summary">
+
+
+                <div class="summary-item">
+
+                    <span>
+                        Application ID
+                    </span>
+
+                    <strong
+                        class="application-id"
+                        title="{{ application.application_id }}"
+                    >
+                        {{ application.application_id }}
+                    </strong>
+
+                </div>
+
+
+                {% if application.application_deadline %}
+
+                <div class="summary-item">
+
+                    <span>
+                        Opportunity Deadline
+                    </span>
+
+                    <strong>
+                        {{ application.application_deadline }}
+                    </strong>
+
+                </div>
+
+                {% endif %}
+
+
+                {% if application.stipend %}
+
+                <div class="summary-item">
+
+                    <span>
+                        Stipend
+                    </span>
+
+                    <strong>
+                        {{ application.stipend }}
+                    </strong>
+
+                </div>
+
+                {% elif application.package %}
+
+                <div class="summary-item">
+
+                    <span>
+                        Package
+                    </span>
+
+                    <strong>
+                        {{ application.package }}
+                    </strong>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 CARD FOOTER
+                 ================================================= -->
+
+            <div class="application-card-footer">
+
+
+                <div class="status-message">
+
+                    {% if application.status == 'APPLIED' %}
+
+                        <span class="status-dot applied-dot"></span>
+
+                        <span>
+                            Application submitted and under review.
+                        </span>
+
+                    {% elif application.status == 'SHORTLISTED' %}
+
+                        <span class="status-dot shortlisted-dot"></span>
+
+                        <span>
+                            You have been shortlisted for this opportunity.
+                        </span>
+
+                    {% elif application.status == 'SELECTED' %}
+
+                        <span class="status-dot selected-dot"></span>
+
+                        <span>
+                            Congratulations! You have been selected.
+                        </span>
+
+                    {% elif application.status == 'REJECTED' %}
+
+                        <span class="status-dot rejected-dot"></span>
+
+                        <span>
+                            This application was not selected.
+                        </span>
+
+                    {% elif application.status == 'WITHDRAWN' %}
+
+                        <span class="status-dot withdrawn-dot"></span>
+
+                        <span>
+                            This application has been withdrawn.
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-dot"></span>
+
+                        <span>
+                            Application status: {{ application.status }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <a
+                    href="{{ url_for(
+                        'student_application_detail',
+                        application_id=application.application_id
+                    ) }}"
+                    class="view-application-btn"
+                >
+                    View Application →
+                </a>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+
+    </section>
+
+
+    {% else %}
+
+
+    <!-- =====================================================
+         EMPTY STATE
+         ===================================================== -->
+
+    <section class="empty-state">
+
+        <div class="empty-icon">
+            📄
+        </div>
+
+        <h3>
+            No applications found
+        </h3>
+
+        <p>
+
+            {% if search or application_status %}
+
+                We couldn't find any applications matching
+                your current filters.
+
+            {% else %}
+
+                You haven't applied to any opportunities yet.
+                Explore available opportunities and submit
+                your first application.
+
+            {% endif %}
+
+        </p>
+
+
+        {% if search or application_status %}
+
+        <a
+            href="{{ url_for('student_applications') }}"
+        >
+            View All Applications
+        </a>
+
+        {% else %}
+
+        <a
+            href="{{ url_for('student_opportunities') }}"
+        >
+            Explore Opportunities →
+        </a>
+
+        {% endif %}
+
+    </section>
+
+    {% endif %}
+
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/student/applications.js') }}"
+></script>
+
+{% endblock %}

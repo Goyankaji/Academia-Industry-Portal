@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}Student Portal{% endblock %}
+    </title>
+
+
+    <!-- ================================================= -->
+    <!-- STUDENT BASE CSS -->
+    <!-- ================================================= -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/base.css') }}"
+    >
+
+
+    <!-- PAGE SPECIFIC CSS -->
+    {% block extra_css %}{% endblock %}
+
+</head>
+
+
+<body>
+
+<div class="student-layout">
+
+
+    <!-- ================================================= -->
+    <!-- SIDEBAR -->
+    <!-- ================================================= -->
+
+    <aside class="student-sidebar" id="studentSidebar">
+
+
+        <!-- BRAND -->
+        <div class="sidebar-brand">
+
+            <div class="brand-logo">
+                SIH
+            </div>
+
+            <div class="brand-text">
+
+                <h2>
+                    SIH Portal
+                </h2>
+
+                <span>
+                    Student
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- NAVIGATION -->
+        <!-- ================================================= -->
+
+        <nav class="student-navigation">
+
+
+            <div class="nav-section-title">
+                MAIN
+            </div>
+
+
+            <!-- Dashboard -->
+
+            <a
+                href="{{ url_for('student_dashboard') }}"
+                class="nav-item {% if dashboard == 'dashboard' %}active{% endif %}"
+            >
+
+                <span class="nav-icon">
+                    ▦
+                </span>
+
+                <span class="nav-label">
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <!-- Profile -->
+
+            <a
+                href="{{ url_for('student_profile') }}"
+                class="nav-item {% if dashboard == 'profile' %}active{% endif %}"
+            >
+
+                <span class="nav-icon">
+                    ◉
+                </span>
+
+                <span class="nav-label">
+                    My Profile
+                </span>
+
+            </a>
+
+
+            <!-- Opportunities -->
+
+            <a
+                href="{{ url_for('student_opportunities') }}"
+                class="nav-item {% if dashboard == 'opportunities' %}active{% endif %}"
+            >
+
+                <span class="nav-icon">
+                    ◈
+                </span>
+
+                <span class="nav-label">
+                    Opportunities
+                </span>
+
+            </a>
+
+
+            <!-- Applications -->
+
+            <a
+                href="{{ url_for('student_applications') }}"
+                class="nav-item {% if dashboard == 'applications' %}active{% endif %}"
+            >
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                <span class="nav-label">
+                    My Applications
+                </span>
+
+            </a>
+
+
+            <!-- Collaborations -->
+
+            <a
+                href="{{ url_for('student_collaborations') }}"
+                class="nav-item {% if dashboard == 'collaborations' %}active{% endif %}"
+            >
+
+                <span class="nav-icon">
+                    ⇄
+                </span>
+
+                <span class="nav-label">
+                    Collaborations
+                </span>
+
+            </a>
+
+
+            <!-- Notifications -->
+
+            <a
+                href="{{ url_for('student_notifications') }}"
+                class="nav-item {% if dashboard == 'notifications' %}active{% endif %}"
+            >
+
+                <span class="nav-icon">
+                    ♢
+                </span>
+
+                <span class="nav-label">
+                    Notifications
+                </span>
+
+                {% if unread_notifications is defined and unread_notifications > 0 %}
+
+                    <span class="nav-badge">
+                        {{ unread_notifications }}
+                    </span>
+
+                {% endif %}
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- ================================================= -->
+        <!-- SIDEBAR BOTTOM -->
+        <!-- ================================================= -->
+
+        <div class="sidebar-bottom">
+
+
+            <!-- User -->
+
+            <div class="sidebar-user">
+
+                <div class="sidebar-user-avatar">
+
+                    {% if student is defined and student.name %}
+
+                        {{ student.name[0]|upper }}
+
+                    {% elif session.get('name') %}
+
+                        {{ session.get('name')[0]|upper }}
+
+                    {% else %}
+
+                        S
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="sidebar-user-info">
+
+                    <strong>
+
+                        {% if student is defined %}
+
+                            {{ student.name }}
+
+                        {% else %}
+
+                            {{ session.get('name', 'Student') }}
+
+                        {% endif %}
+
+                    </strong>
+
+                    <span>
+                        Student
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Logout -->
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout-item"
+            >
+
+                <span>
+                    ↪
+                </span>
+
+                <span>
+                    Logout
+                </span>
+
+            </a>
+
+
+        </div>
+
+
+    </aside>
+
+
+    <!-- ================================================= -->
+    <!-- MAIN AREA -->
+    <!-- ================================================= -->
+
+    <main class="student-main">
+
+
+        <!-- ================================================= -->
+        <!-- TOPBAR -->
+        <!-- ================================================= -->
+
+        <header class="student-topbar">
+
+
+            <div class="topbar-left">
+
+                <button
+                    type="button"
+                    class="sidebar-toggle"
+                    id="sidebarToggle"
+                    aria-label="Toggle sidebar"
+                >
+                    ☰
+                </button>
+
+
+                <div class="page-eyebrow">Student Portal</div>
+
+                <h1>
+                    {% if dashboard == "profile" %}
+                        My Profile
+                    {% elif dashboard == "opportunities" %}
+                        Opportunities
+                    {% elif dashboard == "applications" %}
+                        My Applications
+                    {% elif dashboard == "collaborations" %}
+                        Collaborations
+                    {% elif dashboard == "notifications" %}
+                        Notifications
+                    {% else %}
+                        Dashboard
+                    {% endif %}
+                </h1>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+
+                <!-- Notifications -->
+
+                <button
+                    type="button"
+                    class="notification-button"
+                    title="Notifications"
+                >
+
+                    ♢
+
+                    {% if unread_notifications is defined and unread_notifications > 0 %}
+
+                        <span class="notification-dot"></span>
+
+                    {% endif %}
+
+                </button>
+
+
+                <!-- User -->
+
+                <div class="topbar-user">
+
+                    <div class="topbar-avatar">
+
+                        {% if student is defined and student.name %}
+
+                            {{ student.name[0]|upper }}
+
+                        {% elif session.get('name') %}
+
+                            {{ session.get('name')[0]|upper }}
+
+                        {% else %}
+
+                            S
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="topbar-user-details">
+
+                        <strong>
+
+                            {% if student is defined %}
+
+                                {{ student.name }}
+
+                            {% else %}
+
+                                {{ session.get('name', 'Student') }}
+
+                            {% endif %}
+
+                        </strong>
+
+                        <span>
+                            Student
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </header>
+
+
+        <!-- ================================================= -->
+        <!-- FLASH MESSAGES -->
+        <!-- ================================================= -->
+
+        <div class="student-flash-container">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% if messages %}
+
+                    {% for category, message in messages %}
+
+                        <div
+                            class="student-alert alert-{{ category }}"
+                            role="alert"
+                        >
+
+                            <span>
+                                {{ message }}
+                            </span>
+
+                            <button
+                                type="button"
+                                class="alert-close"
+                                onclick="this.parentElement.remove()"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            {% endwith %}
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PAGE CONTENT -->
+        <!-- ================================================= -->
+
+        <section class="student-content">
+
+            {% block content %}
+
+            {% endblock %}
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- STUDENT BASE JS -->
+<!-- ================================================= -->
+
+<script
+    src="{{ url_for('static', filename='js/student/base.js') }}"
+></script>
+
+
+<!-- PAGE SPECIFIC JS -->
+{% block extra_js %}{% endblock %}
+
+
+</body>
+
+</html>
