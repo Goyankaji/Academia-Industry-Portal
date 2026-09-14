@@ -1,492 +1,171 @@
-{% extends "student/base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
 
-{% block title %}
-Student Dashboard | SIH Portal
-{% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>{{ page_title or "Student Dashboard" }}</title>
 
-{% block page_heading %}
-Dashboard
-{% endblock %}
 
+    <!-- =====================================================
+         STUDENT BASE CSS
+    ====================================================== -->
 
-{% block extra_css %}
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+                           filename='css/student/student_base.css') }}">
 
-<link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='css/student/dashboard.css') }}"
->
 
-{% endblock %}
+    <!-- =====================================================
+         STUDENT DASHBOARD CSS
+    ====================================================== -->
 
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+                           filename='css/student/student_dashboard.css') }}">
 
+</head>
 
-{% block content %}
 
+<body>
 
-<div class="student-dashboard">
 
+<div class="student-page">
 
-    <!-- ================================================= -->
-    <!-- WELCOME -->
-    <!-- ================================================= -->
 
-    <section class="dashboard-welcome">
+    <!-- =====================================================
+         STUDENT SIDEBAR
+    ====================================================== -->
 
-        <div class="welcome-content">
+    {% include "student/components/student_sidebar.html" %}
 
-            <span class="welcome-eyebrow">
-                STUDENT DASHBOARD
-            </span>
 
-            <h2>
-                Welcome back, {{ student.name }}
-            </h2>
 
-            <p>
-                Track your opportunities, applications
-                and placement journey from one place.
-            </p>
+    <!-- =====================================================
+         STUDENT MAIN AREA
+    ====================================================== -->
 
-        </div>
+    <div class="student-main">
 
 
-        <!-- PROFILE COMPLETION -->
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
 
-        <div class="profile-completion">
+        {% include "student/components/student_topbar.html" %}
 
-            <div class="completion-header">
 
-                <span>
-                    Profile Completion
-                </span>
 
-                <strong>
-                    {{ profile_completion }}%
-                </strong>
+        <!-- =================================================
+             DASHBOARD CONTENT
+        ================================================== -->
 
-            </div>
+        <main class="student-content">
 
 
-            <div class="completion-track">
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
 
-            <div
-                class="completion-fill"
-                data-progress="{{ profile_completion }}"
-            ></div>
+            <section class="dashboard-header">
 
-            </div>
+                <div class="dashboard-header-content">
 
 
-            {% if profile_completion < 100 %}
-
-                <span class="completion-hint">
-                    Complete your profile to improve your opportunities.
-                </span>
-
-            {% else %}
-
-                <span class="completion-hint">
-                    Your profile is complete.
-                </span>
-
-            {% endif %}
-
-        </div>
-
-    </section>
-
-
-
-    <!-- ================================================= -->
-    <!-- STUDENT SUMMARY -->
-    <!-- ================================================= -->
-
-    <section class="student-summary">
-
-
-        <div class="summary-item">
-
-            <span class="summary-label">
-                College
-            </span>
-
-            <strong>
-                {{ student.college_name or 'Not Available' }}
-            </strong>
-
-        </div>
-
-
-        <div class="summary-item">
-
-            <span class="summary-label">
-                Course
-            </span>
-
-            <strong>
-                {{ student.course or 'Not Available' }}
-            </strong>
-
-        </div>
-
-
-        <div class="summary-item">
-
-            <span class="summary-label">
-                Branch
-            </span>
-
-            <strong>
-                {{ student.branch or 'Not Available' }}
-            </strong>
-
-        </div>
-
-
-        <div class="summary-item">
-
-            <span class="summary-label">
-                Enrollment No.
-            </span>
-
-            <strong>
-                {{ student.enrollment_no or 'Not Available' }}
-            </strong>
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- ================================================= -->
-    <!-- STATISTICS -->
-    <!-- ================================================= -->
-
-    <section class="dashboard-stats">
-
-
-        <!-- Opportunities -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <span class="stat-icon">
-                    💼
-                </span>
-
-                <span class="stat-title">
-                    Opportunities
-                </span>
-
-            </div>
-
-            <strong class="stat-number">
-                {{ total_opportunities }}
-            </strong>
-
-            <span class="stat-description">
-                Currently available
-            </span>
-
-        </div>
-
-
-        <!-- Applications -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <span class="stat-icon">
-                    📝
-                </span>
-
-                <span class="stat-title">
-                    Applications
-                </span>
-
-            </div>
-
-            <strong class="stat-number">
-                {{ total_applications }}
-            </strong>
-
-            <span class="stat-description">
-                Applications submitted
-            </span>
-
-        </div>
-
-
-        <!-- Shortlisted -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <span class="stat-icon">
-                    ⭐
-                </span>
-
-                <span class="stat-title">
-                    Shortlisted
-                </span>
-
-            </div>
-
-            <strong class="stat-number">
-                {{ shortlisted_applications }}
-            </strong>
-
-            <span class="stat-description">
-                Applications shortlisted
-            </span>
-
-        </div>
-
-
-        <!-- Selected -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <span class="stat-icon">
-                    🎯
-                </span>
-
-                <span class="stat-title">
-                    Selected
-                </span>
-
-            </div>
-
-            <strong class="stat-number">
-                {{ selected_applications }}
-            </strong>
-
-            <span class="stat-description">
-                Successful applications
-            </span>
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- ================================================= -->
-    <!-- TWO COLUMN SECTION -->
-    <!-- ================================================= -->
-
-    <section class="dashboard-columns">
-
-
-        <!-- ================================================= -->
-        <!-- RECENT APPLICATIONS -->
-        <!-- ================================================= -->
-
-        <div class="dashboard-card">
-
-
-            <div class="card-header">
-
-                <div>
-
-                    <span class="card-eyebrow">
-                        APPLICATIONS
+                    <span class="dashboard-eyebrow">
+                        STUDENT PORTAL
                     </span>
 
-                    <h3>
-                        Recent Applications
-                    </h3>
 
-                </div>
+                    <h1>
 
-                <a
-                    href="#"
-                    class="card-link"
-                >
-                    View All
-                </a>
+                        Welcome,
+                        {{ student.name or session.get('user_name', 'Student') }}
 
-            </div>
+                        👋
 
+                    </h1>
 
-            {% if recent_applications %}
-
-                <div class="application-list">
-
-                    {% for application in recent_applications %}
-
-                        <div class="application-row">
-
-
-                            <div class="company-avatar">
-
-                                {{ application.company_name[0]|upper }}
-
-                            </div>
-
-
-                            <div class="application-info">
-
-                                <strong>
-                                    {{ application.opportunity_title }}
-                                </strong>
-
-                                <span>
-                                    {{ application.company_name }}
-                                </span>
-
-                                <small>
-
-                                    {% if application.application_date %}
-
-                                        Applied:
-                                        {{ application.application_date }}
-
-                                    {% endif %}
-
-                                </small>
-
-                            </div>
-
-
-                            <span
-                                class="
-                                    application-status
-                                    status-{{ application.status|lower }}
-                                "
-                            >
-
-                                {{ application.status|replace('_', ' ') }}
-
-                            </span>
-
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% else %}
-
-                <div class="empty-state">
-
-                    <div class="empty-icon">
-                        📝
-                    </div>
-
-                    <h4>
-                        No applications yet
-                    </h4>
 
                     <p>
-                        You haven't applied to any opportunity yet.
+
+                        {{ page_subtitle or
+                           "Track your academic and career journey." }}
+
                     </p>
 
-                </div>
-
-            {% endif %}
-
-        </div>
-
-
-
-        <!-- ================================================= -->
-        <!-- PLACEMENT STATUS -->
-        <!-- ================================================= -->
-
-        <div class="dashboard-card">
-
-
-            <div class="card-header">
-
-                <div>
-
-                    <span class="card-eyebrow">
-                        PLACEMENT
-                    </span>
-
-                    <h3>
-                        Placement Status
-                    </h3>
 
                 </div>
 
-            </div>
+            </section>
 
 
-            <div class="placement-status">
+
+            <!-- =================================================
+                 PROFILE COMPLETION
+            ================================================== -->
+
+            <section class="profile-completion-card">
 
 
-                <div class="placement-status-icon">
-                    🎓
-                </div>
+                <div class="profile-completion-info">
 
 
-                <span class="placement-status-label">
-                    Current Status
-                </span>
+                    <div class="profile-completion-main">
 
-
-                <h2>
-                    {{ placement_status|replace('_', ' ') }}
-                </h2>
-
-
-                <p>
-                    Your status is calculated from your
-                    latest application activity.
-                </p>
-
-
-                <div class="placement-summary">
-
-
-                    <div>
-
-                        <span>
-                            Shortlisted
+                        <span class="section-label">
+                            Profile Completion
                         </span>
 
-                        <strong>
-                            {{ shortlisted_applications }}
-                        </strong>
+
+                        <h2>
+                            {{ profile_completion|int }}%
+                        </h2>
 
                     </div>
 
 
-                    <div>
+
+                    <div class="profile-completion-text">
+
 
                         <span>
-                            Selected
+
+                            Keep your profile updated to improve
+                            your opportunities.
+
                         </span>
 
-                        <strong>
-                            {{ selected_applications }}
-                        </strong>
+
+                        <!-- PROFILE ROUTE IS NOW ACTIVE -->
+
+                        <a href="{{ url_for('student_profile') }}">
+
+                            Complete Profile →
+
+                        </a>
+
 
                     </div>
 
+                </div>
 
-                    <div>
 
-                        <span>
-                            Rejected
-                        </span>
 
-                        <strong>
-                            {{ rejected_applications }}
-                        </strong>
+                <!-- PROFILE PROGRESS -->
+
+                <div class="profile-progress">
+
+
+                    <div class="profile-progress-track">
+
+
+                        <div class="profile-progress-bar"
+                             data-progress="{{ profile_completion|int }}">
+                        </div>
+
 
                     </div>
 
@@ -494,253 +173,841 @@ Dashboard
                 </div>
 
 
-            </div>
-
-        </div>
-
-
-    </section>
+            </section>
 
 
 
-    <!-- ================================================= -->
-    <!-- RECENT OPPORTUNITIES -->
-    <!-- ================================================= -->
+            <!-- =================================================
+     DASHBOARD INTELLIGENCE STATISTICS
+================================================== -->
 
-    <section class="dashboard-card opportunities-card">
-
-
-        <div class="card-header">
-
-            <div>
-
-                <span class="card-eyebrow">
-                    OPPORTUNITIES
-                </span>
-
-                <h3>
-                    Latest Opportunities
-                </h3>
-
-            </div>
-
-            <a
-                href="#"
-                class="card-link"
-            >
-                Explore All
-            </a>
-
-        </div>
+<section class="dashboard-stats dashboard-intelligence-grid">
 
 
-        {% if recent_opportunities %}
+    <!-- =================================================
+         PROFILE COMPLETION
+    ================================================== -->
 
-            <div class="opportunities-grid">
+    {% set card_title = "Profile Completion" %}
+    {% set card_value = (profile_completion|int|string) ~ "%" %}
+    {% set card_icon = "👤" %}
+    {% set card_description = "Profile completion status" %}
+    {% set card_variant = "primary" %}
+    {% set card_link = url_for('student_profile') %}
 
-                {% for opportunity in recent_opportunities %}
-
-                    <div class="opportunity-card">
+    {% include "student/components/stats_card.html" %}
 
 
-                        <div class="opportunity-company">
 
-                            <div class="company-avatar">
+    <!-- =================================================
+         SKILL SCORE
+    ================================================== -->
 
-                                {{ opportunity.company_name[0]|upper }}
+    {% set card_title = "Skill Score" %}
+    {% set card_value = (skill_score|round(0)|int|string) ~ "%" %}
+    {% set card_icon = "🧠" %}
+    {% set card_description = "Latest assessment score" %}
+    {% set card_variant = "success" %}
+    {% set card_link = url_for('student_skill_assessment') %}
 
-                            </div>
+    {% include "student/components/stats_card.html" %}
 
-                            <span>
-                                {{ opportunity.company_name }}
-                            </span>
+
+
+    <!-- =================================================
+         SKILL GAPS
+    ================================================== -->
+
+    {% set card_title = "Skill Gaps" %}
+    {% set card_value = skill_gaps %}
+    {% set card_icon = "📊" %}
+    {% set card_description = "Skills that need improvement" %}
+    {% set card_variant = "warning" %}
+    {% set card_link = url_for('student_skill_gap') %}
+
+    {% include "student/components/stats_card.html" %}
+
+
+
+    <!-- =================================================
+         APPLICATIONS
+    ================================================== -->
+
+    {% set card_title = "Applications" %}
+    {% set card_value = total_applications %}
+    {% set card_icon = "📄" %}
+    {% set card_description = "Total applications submitted" %}
+    {% set card_variant = "primary" %}
+    {% set card_link = url_for('student_applications') %}
+
+    {% include "student/components/stats_card.html" %}
+
+
+
+    <!-- =================================================
+         ACTIVE INTERNSHIP
+    ================================================== -->
+
+    {% set card_title = "Active Internship" %}
+    {% set card_value = active_internships %}
+    {% set card_icon = "🎓" %}
+    {% set card_description = "Current internship status" %}
+    {% set card_variant = "info" %}
+    {% set card_link = url_for('student_internships') %}
+
+    {% include "student/components/stats_card.html" %}
+
+
+
+    <!-- =================================================
+         PROJECTS
+    ================================================== -->
+
+    {% set card_title = "Projects" %}
+    {% set card_value = total_projects %}
+    {% set card_icon = "🚀" %}
+    {% set card_description = "Projects in your portfolio" %}
+    {% set card_variant = "primary" %}
+    {% set card_link = url_for('student_projects') %}
+
+    {% include "student/components/stats_card.html" %}
+
+
+
+    <!-- =================================================
+         CERTIFICATIONS
+    ================================================== -->
+
+    {% set card_title = "Certifications" %}
+    {% set card_value = total_certifications %}
+    {% set card_icon = "📜" %}
+    {% set card_description = "Certifications earned" %}
+    {% set card_variant = "info" %}
+    {% set card_link = url_for('student_certifications') %}
+
+    {% include "student/components/stats_card.html" %}
+
+
+
+    <!-- =================================================
+         ACHIEVEMENTS
+    ================================================== -->
+
+    {% set card_title = "Achievements" %}
+    {% set card_value = total_achievements %}
+    {% set card_icon = "🏆" %}
+    {% set card_description = "Achievements and recognitions" %}
+    {% set card_variant = "success" %}
+    {% set card_link = url_for('student_achievements') %}
+
+    {% include "student/components/stats_card.html" %}
+
+
+</section>
+
+
+
+            <!-- =================================================
+                 DASHBOARD TWO COLUMN AREA
+            ================================================== -->
+
+            <section class="dashboard-grid">
+
+
+                <!-- =================================================
+                     RECENT APPLICATIONS
+                ================================================== -->
+
+                <div class="dashboard-panel">
+
+
+                    <!-- PANEL HEADER -->
+
+                    <div class="panel-header">
+
+
+                        <div>
+
+                            <h2>
+                                Recent Applications
+                            </h2>
+
+
+                            <p>
+                                Your latest opportunity applications
+                            </p>
 
                         </div>
 
 
-                        <h4>
-                            {{ opportunity.title }}
-                        </h4>
+                        <!-- APPLICATION MODULE NOT YET IMPLEMENTED -->
+
+                        <a href="#"
+                           data-coming-soon="true">
+
+                            View All
+
+                        </a>
 
 
-                        <div class="opportunity-meta">
-
-                            <span>
-                                {{ opportunity.opportunity_type or 'Opportunity' }}
-                            </span>
-
-                            {% if opportunity.location %}
-
-                                <span>
-                                    📍 {{ opportunity.location }}
-                                </span>
-
-                            {% endif %}
-
-                            {% if opportunity.work_mode %}
-
-                                <span>
-                                    {{ opportunity.work_mode }}
-                                </span>
-
-                            {% endif %}
-
-                        </div>
+                    </div>
 
 
-                        {% if opportunity.application_deadline %}
 
-                            <div class="opportunity-deadline">
+                    <!-- PANEL BODY -->
 
-                                Deadline:
-                                <strong>
-                                    {{ opportunity.application_deadline }}
-                                </strong>
+                    <div class="panel-body">
+
+
+                        {% if recent_applications %}
+
+
+                            <div class="application-list">
+
+
+                                {% for application in recent_applications %}
+
+
+                                    <div class="dashboard-application-item">
+
+
+                                        <!-- APPLICATION ICON -->
+
+                                        <div class="dashboard-item-icon application-icon">
+
+                                            📄
+
+                                        </div>
+
+
+
+                                        <!-- APPLICATION DETAILS -->
+
+                                        <div class="dashboard-item-content">
+
+
+                                            <h3>
+
+                                                {{ application.opportunity_title }}
+
+                                            </h3>
+
+
+                                            <p>
+
+                                                {{ application.company_name }}
+
+                                            </p>
+
+
+                                            <div class="dashboard-item-meta">
+
+
+                                                <span class="application-status
+                                                    status-{{ application.status|lower|replace('_', '-') }}">
+
+                                                    {{ application.status }}
+
+                                                </span>
+
+
+                                                {% if application.opportunity_type %}
+
+                                                    <span>
+
+                                                        {{ application.opportunity_type }}
+
+                                                    </span>
+
+                                                {% endif %}
+
+
+                                            </div>
+
+
+                                        </div>
+
+
+
+                                        <!-- APPLICATION DATE -->
+
+                                        <div class="dashboard-item-date">
+
+
+                                            {% if application.application_date %}
+
+                                                <span>
+
+                                                    {{ application.application_date }}
+
+                                                </span>
+
+
+                                            {% elif application.created_at %}
+
+                                                <span>
+
+                                                    {{ application.created_at }}
+
+                                                </span>
+
+                                            {% endif %}
+
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                {% endfor %}
+
 
                             </div>
+
+
+                        {% else %}
+
+
+                            <!-- EMPTY APPLICATION STATE -->
+
+                            <div class="empty-state">
+
+
+                                <div class="empty-state-icon">
+                                    📄
+                                </div>
+
+
+                                <h3>
+                                    No Applications Yet
+                                </h3>
+
+
+                                <p>
+
+                                    You haven't applied to any
+                                    opportunities yet.
+
+                                </p>
+
+
+                                <a href="#"
+                                   data-coming-soon="true"
+                                   class="student-btn student-btn-primary">
+
+                                    Explore Opportunities
+
+                                </a>
+
+
+                            </div>
+
 
                         {% endif %}
 
 
                     </div>
 
-                {% endfor %}
 
-            </div>
-
-        {% else %}
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    💼
                 </div>
 
-                <h4>
-                    No opportunities available
-                </h4>
-
-                <p>
-                    There are currently no open opportunities.
-                </p>
-
-            </div>
-
-        {% endif %}
 
 
-    </section>
+                <!-- =================================================
+                     RECENT OPPORTUNITIES
+                ================================================== -->
+
+                <div class="dashboard-panel">
 
 
+                    <!-- PANEL HEADER -->
 
-    <!-- ================================================= -->
-    <!-- NOTIFICATIONS -->
-    <!-- ================================================= -->
-
-    <section class="dashboard-card">
+                    <div class="panel-header">
 
 
-        <div class="card-header">
+                        <div>
 
-            <div>
+                            <h2>
+                                Recent Opportunities
+                            </h2>
 
-                <span class="card-eyebrow">
-                    UPDATES
-                </span>
-
-                <h3>
-                    Recent Notifications
-                </h3>
-
-            </div>
-
-
-            <span class="unread-count">
-
-                {{ unread_notifications }} unread
-
-            </span>
-
-        </div>
-
-
-        {% if recent_notifications %}
-
-            <div class="notification-list">
-
-                {% for notification in recent_notifications %}
-
-                    <div
-                        class="
-                            notification-row
-                            {% if not notification.is_read %}
-                                unread
-                            {% endif %}
-                        "
-                    >
-
-                        <div class="notification-icon">
-                            🔔
-                        </div>
-
-
-                        <div class="notification-content">
-
-                            <strong>
-                                {{ notification.title }}
-                            </strong>
 
                             <p>
-                                {{ notification.message }}
+                                Latest opportunities available
                             </p>
 
-                            <small>
-                                {{ notification.created_at }}
-                            </small>
-
                         </div>
+
+
+                        <!-- OPPORTUNITY MODULE NOT YET IMPLEMENTED -->
+
+                        <a href="#"
+                           data-coming-soon="true">
+
+                            View All
+
+                        </a>
+
 
                     </div>
 
-                {% endfor %}
 
-            </div>
 
-        {% else %}
+                    <!-- PANEL BODY -->
 
-            <div class="empty-state">
+                    <div class="panel-body">
 
-                <div class="empty-icon">
-                    🔔
+
+                        {% if recent_opportunities %}
+
+
+                            <div class="opportunity-list">
+
+
+                                {% for opportunity in recent_opportunities %}
+
+
+                                    <div class="dashboard-opportunity-item">
+
+
+                                        <!-- OPPORTUNITY ICON -->
+
+                                        <div class="dashboard-item-icon opportunity-icon">
+
+                                            💼
+
+                                        </div>
+
+
+
+                                        <!-- OPPORTUNITY DETAILS -->
+
+                                        <div class="dashboard-item-content">
+
+
+                                            <h3>
+
+                                                {{ opportunity.title }}
+
+                                            </h3>
+
+
+                                            <p>
+
+                                                {{ opportunity.company_name }}
+
+                                            </p>
+
+
+                                            <div class="dashboard-item-meta">
+
+
+                                                {% if opportunity.opportunity_type %}
+
+                                                    <span>
+
+                                                        {{ opportunity.opportunity_type }}
+
+                                                    </span>
+
+                                                {% endif %}
+
+
+                                                {% if opportunity.work_mode %}
+
+                                                    <span>
+
+                                                        {{ opportunity.work_mode }}
+
+                                                    </span>
+
+                                                {% endif %}
+
+
+                                            </div>
+
+
+                                        </div>
+
+
+
+                                        <!-- LOCATION -->
+
+                                        <div class="dashboard-item-date">
+
+
+                                            {% if opportunity.location %}
+
+                                                <span>
+
+                                                    📍 {{ opportunity.location }}
+
+                                                </span>
+
+                                            {% endif %}
+
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        {% else %}
+
+
+                            <!-- EMPTY OPPORTUNITY STATE -->
+
+                            <div class="empty-state">
+
+
+                                <div class="empty-state-icon">
+                                    💼
+                                </div>
+
+
+                                <h3>
+                                    No Opportunities Available
+                                </h3>
+
+
+                                <p>
+
+                                    New opportunities will appear here
+                                    when they become available.
+
+                                </p>
+
+
+                            </div>
+
+
+                        {% endif %}
+
+
+                    </div>
+
+
                 </div>
 
-                <h4>
-                    No notifications
-                </h4>
 
-                <p>
-                    You're all caught up.
-                </p>
-
-            </div>
-
-        {% endif %}
+            </section>
 
 
-    </section>
+
+            <!-- =================================================
+                 CAREER JOURNEY
+            ================================================== -->
+
+            <section class="career-summary-panel">
+
+
+                <!-- PANEL HEADER -->
+
+                <div class="panel-header">
+
+
+                    <div>
+
+                        <h2>
+                            Your Career Journey
+                        </h2>
+
+
+                        <p>
+                            Build your profile step-by-step
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- CAREER JOURNEY ITEMS -->
+
+                <div class="career-journey">
+
+
+                    <!-- =================================================
+                         PROFILE
+                    ================================================== -->
+
+                    <div class="journey-item">
+
+
+                        <div class="journey-icon">
+                            🧑‍🎓
+                        </div>
+
+
+                        <div class="journey-content">
+
+
+                            <h3>
+                                Profile
+                            </h3>
+
+
+                            <p>
+
+                                Keep your academic and personal
+                                information updated.
+
+                            </p>
+
+
+                        </div>
+
+
+                        <!-- PROFILE ROUTE ACTIVE -->
+
+                        <a href="{{ url_for('student_profile') }}">
+
+                            →
+
+                        </a>
+
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         SKILLS
+                    ================================================== -->
+
+                    <div class="journey-item">
+
+
+                        <div class="journey-icon">
+                            🧠
+                        </div>
+
+
+                        <div class="journey-content">
+
+
+                            <h3>
+                                Skills
+                            </h3>
+
+
+                            <p>
+
+                                Add and improve your technical
+                                and professional skills.
+
+                            </p>
+
+
+                        </div>
+
+
+                        <!-- SKILLS MODULE COMING SOON -->
+
+                        <a href="{{ url_for('student_skills') }}">
+
+                            →
+
+                        </a>
+
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         CERTIFICATIONS
+                    ================================================== -->
+
+                    <div class="journey-item">
+
+
+                        <div class="journey-icon">
+                            📜
+                        </div>
+
+
+                        <div class="journey-content">
+
+
+                            <h3>
+                                Certifications
+                            </h3>
+
+
+                            <p>
+
+                                Showcase certifications you've earned.
+
+                            </p>
+
+
+                        </div>
+
+
+                        <!-- CERTIFICATIONS MODULE COMING SOON -->
+
+                        <a href="{{ url_for('student_certifications') }}">
+
+                            →
+
+                        </a>
+
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         PROJECTS
+                    ================================================== -->
+
+                    <div class="journey-item">
+
+
+                        <div class="journey-icon">
+                            🚀
+                        </div>
+
+
+                        <div class="journey-content">
+
+
+                            <h3>
+                                Projects
+                            </h3>
+
+
+                            <p>
+
+                                Build your project portfolio and
+                                demonstrate your experience.
+
+                            </p>
+
+
+                        </div>
+
+
+                        <!-- PROJECTS MODULE COMING SOON -->
+
+                        <a href="{{ url_for('student_projects') }}">
+
+                            →
+
+                        </a>
+
+
+                    </div>
+
+
+                    <!-- =================================================
+                         ACHIEVEMENTS
+                    ================================================== -->
+
+                    <div class="journey-item">
+
+                        <div class="journey-icon">
+                            🏆
+                        </div>
+
+                        <div class="journey-content">
+
+                            <h3>
+                                Achievements
+                            </h3>
+
+                            <p>
+                                Showcase your awards, recognitions and accomplishments.
+                            </p>
+
+                        </div>
+
+                        <a href="{{ url_for('student_achievements') }}">
+
+                            →
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         DIGITAL PORTFOLIO
+                    ================================================== -->
+
+                    <div class="journey-item">
+
+                        <div class="journey-icon">
+                            💼
+                        </div>
+
+                        <div class="journey-content">
+
+                            <h3>
+                                Digital Portfolio
+                            </h3>
+
+                            <p>
+                                Showcase your complete professional profile.
+                            </p>
+
+                        </div>
+
+                        <a href="{{ url_for('student_portfolio') }}">
+
+                            →
+
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
 
 
 </div>
 
 
-{% endblock %}
+
+<!-- =========================================================
+     STUDENT BASE JAVASCRIPT
+========================================================= -->
+
+<script src="{{ url_for('static',
+                         filename='js/student/student_base.js') }}">
+</script>
 
 
 
-{% block extra_js %}
+<!-- =========================================================
+     STUDENT DASHBOARD JAVASCRIPT
+========================================================= -->
 
-<script
-    src="{{ url_for('static', filename='js/student/dashboard.js') }}"
-></script>
+<script src="{{ url_for('static',
+                         filename='js/student/dashboard.js') }}">
+</script>
 
-{% endblock %}
+
+</body>
+
+</html>

@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from database.db import get_db_connection
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -25800,10 +25801,6 @@ def placement_change_password():
 
 
 # =========================================================
-# STUDENT MODULE
-# =========================================================
-
-# =========================================================
 # STUDENT DASHBOARD
 # =========================================================
 
@@ -25816,14 +25813,400 @@ def student_dashboard():
 
     try:
 
-        # -------------------------------------------------
-        # CURRENT USER
-        # -------------------------------------------------
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # =========================================================
+        # CURRENT STUDENT
+        # =========================================================
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                s.college_id,
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+                s.phone,
+                s.dob,
+                s.gender,
+                s.address,
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+                s.linkedin_url,
+                s.github_url,
+                s.portfolio_url,
+                s.resume_url,
+                s.profile_completed,
+
+                u.name,
+                u.email,
+
+                c.college_name,
+                c.college_code
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE s.user_id = %s
+
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(url_for("login"))
+
+        student_id = student["id"]
+
+        # =========================================================
+        # 1. APPLICATIONS
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_applications
+            WHERE student_id = %s
+              AND status IN (
+                  'PENDING',
+                  'SHORTLISTED',
+                  'SELECTED'
+              )
+        """, (student_id,))
+
+        active_applications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 2. SKILLS
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_skills
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_skills = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 3. CERTIFICATIONS
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_certifications
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_certifications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 4. PROJECTS
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_projects
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_projects = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 5. ACHIEVEMENTS
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_achievements
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_achievements = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 6. SKILL SCORE
+        # Latest completed assessment percentage
+        # =========================================================
+
+        cursor.execute("""
+            SELECT
+                percentage
+            FROM student_skill_assessment_attempts
+
+            WHERE student_id = %s
+              AND status = 'PASSED'
+              AND percentage IS NOT NULL
+
+            ORDER BY completed_at DESC
+
+            LIMIT 1
+        """, (student_id,))
+
+        skill_score_row = cursor.fetchone()
+
+        if skill_score_row:
+            skill_score = round(
+                float(skill_score_row["percentage"] or 0),
+                2
+            )
+        else:
+            skill_score = 0
+
+        # =========================================================
+        # 7. SKILL GAPS
+        # Count unresolved skill gaps
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_skill_gaps
+
+            WHERE student_id = %s
+              AND status <> 'RESOLVED'
+        """, (student_id,))
+
+        skill_gaps = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 8. ACTIVE INTERNSHIP
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM internships
+
+            WHERE student_id = %s
+
+              AND status IN (
+                  'OFFERED',
+                  'ACCEPTED',
+                  'IN_PROGRESS'
+              )
+        """, (student_id,))
+
+        active_internships = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 9. UNREAD NOTIFICATIONS
+        # =========================================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM notifications
+
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        unread_notifications = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        # =========================================================
+        # 10. RECENT APPLICATIONS
+        # =========================================================
+
+        cursor.execute("""
+            SELECT
+                sa.id AS application_id,
+                sa.status,
+                sa.application_date,
+                sa.created_at,
+
+                o.id AS opportunity_id,
+                o.title AS opportunity_title,
+                o.opportunity_type,
+
+                i.company_name
+
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE sa.student_id = %s
+
+            ORDER BY
+                sa.application_date DESC,
+                sa.created_at DESC
+
+            LIMIT 5
+        """, (student_id,))
+
+        recent_applications = cursor.fetchall()
+
+        # =========================================================
+        # 11. RECENT OPPORTUNITIES
+        # =========================================================
+
+        cursor.execute("""
+            SELECT
+                o.id,
+                o.title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+                o.application_deadline,
+                o.status,
+                o.created_at,
+
+                i.company_name
+
+            FROM opportunities o
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE o.status = 'OPEN'
+
+            ORDER BY o.created_at DESC
+
+            LIMIT 5
+        """)
+
+        recent_opportunities = cursor.fetchall()
+
+        # =========================================================
+        # 12. PROFILE COMPLETION
+        # =========================================================
+
+        profile_completion = (
+            student.get("profile_completed", 0) or 0
+        )
+
+        # =========================================================
+        # DASHBOARD
+        # =========================================================
+
+        return render_template(
+            "student/dashboard.html",
+
+            dashboard="dashboard",
+            active_page="dashboard",
+
+            page_title="Student Dashboard",
+            page_subtitle="Track your academic and career journey.",
+
+            student=student,
+
+            # Main intelligence metrics
+            profile_completion=profile_completion,
+            skill_score=skill_score,
+            skill_gaps=skill_gaps,
+            total_applications=total_applications,
+            active_internships=active_internships,
+            total_projects=total_projects,
+            total_certifications=total_certifications,
+            total_achievements=total_achievements,
+
+            # Existing metrics
+            active_applications=active_applications,
+            total_skills=total_skills,
+            unread_notifications=unread_notifications,
+
+            # Recent sections
+            recent_applications=recent_applications,
+            recent_opportunities=recent_opportunities
+        )
+
+    except mysql.connector.Error as e:
+
+        print(
+            "STUDENT DASHBOARD DB ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load dashboard.",
+            "error"
+        )
+
+        return redirect(url_for("login"))
+
+    except Exception as e:
+
+        print(
+            "STUDENT DASHBOARD ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load dashboard.",
+            "error"
+        )
+
+        return redirect(url_for("login"))
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+# =========================================================
+# STUDENT PROFILE
+# =========================================================
+
+@app.route("/student/profile", methods=["GET", "POST"])
+@student_required
+def student_profile():
+
+    conn = None
+    cursor = None
+
+    try:
 
         user_id = session.get("user_id")
 
         if not user_id:
-
             flash(
                 "Student session expired. Please login again.",
                 "error"
@@ -25834,10 +26217,6 @@ def student_dashboard():
             )
 
 
-        # -------------------------------------------------
-        # DATABASE CONNECTION
-        # -------------------------------------------------
-
         conn = get_db_connection()
 
         cursor = conn.cursor(
@@ -25846,13 +26225,230 @@ def student_dashboard():
 
 
         # =================================================
-        # STUDENT PROFILE
+        # UPDATE PROFILE
         # =================================================
 
-        cursor.execute("""
+        if request.method == "POST":
+
+            name = request.form.get(
+                "name",
+                ""
+            ).strip()
+
+            phone = request.form.get(
+                "phone",
+                ""
+            ).strip()
+
+            dob = request.form.get(
+                "dob",
+                ""
+            ).strip()
+
+            gender = request.form.get(
+                "gender",
+                ""
+            ).strip()
+
+            address = request.form.get(
+                "address",
+                ""
+            ).strip()
+
+            linkedin_url = request.form.get(
+                "linkedin_url",
+                ""
+            ).strip()
+
+            github_url = request.form.get(
+                "github_url",
+                ""
+            ).strip()
+
+            portfolio_url = request.form.get(
+                "portfolio_url",
+                ""
+            ).strip()
+
+            resume_url = request.form.get(
+                "resume_url",
+                ""
+            ).strip()
+
+
+            # -------------------------------------------------
+            # BASIC VALIDATION
+            # -------------------------------------------------
+
+            if not name:
+
+                flash(
+                    "Name is required.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_profile")
+                )
+
+
+            # -------------------------------------------------
+            # UPDATE USER NAME
+            # -------------------------------------------------
+
+            cursor.execute(
+                """
+                UPDATE users
+
+                SET name = %s
+
+                WHERE id = %s
+                """,
+                (
+                    name,
+                    user_id
+                )
+            )
+
+
+            # -------------------------------------------------
+            # UPDATE STUDENT PROFILE
+            # -------------------------------------------------
+
+            cursor.execute(
+                """
+                UPDATE students
+
+                SET
+                    phone = NULLIF(%s, ''),
+                    dob = NULLIF(%s, ''),
+                    gender = NULLIF(%s, ''),
+                    address = NULLIF(%s, ''),
+                    linkedin_url = NULLIF(%s, ''),
+                    github_url = NULLIF(%s, ''),
+                    portfolio_url = NULLIF(%s, ''),
+                    resume_url = NULLIF(%s, '')
+
+                WHERE user_id = %s
+                """,
+                (
+                    phone,
+                    dob,
+                    gender,
+                    address,
+                    linkedin_url,
+                    github_url,
+                    portfolio_url,
+                    resume_url,
+                    user_id
+                )
+            )
+            # =================================================
+            # CREATE INTERNSHIP WHEN APPLICATION IS SELECTED
+            # =================================================
+
+            if new_status == "SELECTED":
+
+                cursor.execute("""
+                    SELECT
+                        sa.student_id,
+                        sa.opportunity_id,
+                        o.industry_id
+                    FROM student_applications sa
+
+                    INNER JOIN opportunities o
+                        ON sa.opportunity_id = o.id
+
+                    WHERE sa.id = %s
+
+                    LIMIT 1
+                """, (
+                    application_id,
+                ))
+
+                selected_application = cursor.fetchone()
+
+                if selected_application:
+
+                    # Check whether internship already exists
+                    cursor.execute("""
+                        SELECT id
+                        FROM internships
+                        WHERE application_id = %s
+                        LIMIT 1
+                    """, (
+                        application_id,
+                    ))
+
+                    existing_internship = cursor.fetchone()
+
+                    # Create only if it does not already exist
+                    if not existing_internship:
+
+                        internship_id = str(uuid.uuid4())
+
+                        cursor.execute("""
+                            INSERT INTO internships
+                            (
+                                id,
+                                application_id,
+                                student_id,
+                                opportunity_id,
+                                industry_id,
+                                status,
+                                progress_percentage
+                            )
+
+                            VALUES
+                            (
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                'OFFERED',
+                                0.00
+                            )
+                        """, (
+                            internship_id,
+                            application_id,
+                            selected_application["student_id"],
+                            selected_application["opportunity_id"],
+                            selected_application["industry_id"]
+                        ))
+
+            # -------------------------------------------------
+            # COMMIT
+            # -------------------------------------------------
+
+            conn.commit()
+
+
+            # -------------------------------------------------
+            # SUCCESS
+            # -------------------------------------------------
+
+            session["user_name"] = name
+
+            flash(
+                "Profile updated successfully.",
+                "success"
+            )
+
+            return redirect(
+                url_for("student_profile")
+            )
+
+
+        # =================================================
+        # LOAD STUDENT PROFILE
+        # =================================================
+
+        cursor.execute(
+            """
             SELECT
 
-                s.id AS student_id,
+                s.id,
                 s.user_id,
                 s.college_id,
 
@@ -25878,9 +26474,8 @@ def student_dashboard():
 
                 s.profile_completed,
 
-                u.name,
-                u.email,
-                u.status AS user_status,
+                u.name AS name,
+                u.email AS email,
 
                 c.college_name,
                 c.college_code,
@@ -25897,9 +26492,11 @@ def student_dashboard():
             WHERE s.user_id = %s
 
             LIMIT 1
-        """, (
-            user_id,
-        ))
+            """,
+            (
+                user_id,
+            )
+        )
 
 
         student = cursor.fetchone()
@@ -25911,8 +26508,6 @@ def student_dashboard():
 
         if not student:
 
-            session.clear()
-
             flash(
                 "Student profile not found.",
                 "error"
@@ -25923,1153 +26518,18 @@ def student_dashboard():
             )
 
 
-        student_id = student["student_id"]
-
-
         # =================================================
-        # TOTAL OPEN OPPORTUNITIES
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM opportunities o
-
-            WHERE o.status = 'OPEN'
-        """)
-
-        total_opportunities = (
-            cursor.fetchone()["total"] or 0
-        )
-
-
-        # =================================================
-        # TOTAL APPLICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM student_applications
-
-            WHERE student_id = %s
-        """, (
-            student_id,
-        ))
-
-        total_applications = (
-            cursor.fetchone()["total"] or 0
-        )
-
-
-        # =================================================
-        # SHORTLISTED APPLICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM student_applications
-
-            WHERE student_id = %s
-              AND status = 'SHORTLISTED'
-        """, (
-            student_id,
-        ))
-
-        shortlisted_applications = (
-            cursor.fetchone()["total"] or 0
-        )
-
-
-        # =================================================
-        # SELECTED APPLICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM student_applications
-
-            WHERE student_id = %s
-              AND status = 'SELECTED'
-        """, (
-            student_id,
-        ))
-
-        selected_applications = (
-            cursor.fetchone()["total"] or 0
-        )
-
-
-        # =================================================
-        # REJECTED APPLICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM student_applications
-
-            WHERE student_id = %s
-              AND status = 'REJECTED'
-        """, (
-            student_id,
-        ))
-
-        rejected_applications = (
-            cursor.fetchone()["total"] or 0
-        )
-
-
-        # =================================================
-        # UNREAD NOTIFICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM notifications
-
-            WHERE user_id = %s
-              AND is_read = 0
-        """, (
-            user_id,
-        ))
-
-        unread_notifications = (
-            cursor.fetchone()["total"] or 0
-        )
-
-
-        # =================================================
-        # RECENT APPLICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT
-
-                sa.id AS application_id,
-                sa.status,
-                sa.application_date,
-                sa.created_at,
-                sa.updated_at,
-
-                o.id AS opportunity_id,
-                o.title AS opportunity_title,
-                o.opportunity_type,
-                o.location,
-                o.work_mode,
-
-                i.id AS industry_id,
-                i.company_name
-
-            FROM student_applications sa
-
-            INNER JOIN opportunities o
-                ON sa.opportunity_id = o.id
-
-            INNER JOIN industries i
-                ON o.industry_id = i.id
-
-            WHERE sa.student_id = %s
-
-            ORDER BY
-                sa.application_date DESC,
-                sa.created_at DESC
-
-            LIMIT 5
-        """, (
-            student_id,
-        ))
-
-        recent_applications = cursor.fetchall()
-
-
-        # =================================================
-        # RECENT OPPORTUNITIES
-        # =================================================
-
-        cursor.execute("""
-            SELECT
-
-                o.id,
-                o.title,
-                o.opportunity_type,
-                o.description,
-                o.location,
-                o.work_mode,
-                o.application_deadline,
-                o.status,
-
-                i.company_name
-
-            FROM opportunities o
-
-            INNER JOIN industries i
-                ON o.industry_id = i.id
-
-            WHERE o.status = 'OPEN'
-
-            ORDER BY
-                o.created_at DESC
-
-            LIMIT 5
-        """)
-
-        recent_opportunities = cursor.fetchall()
-
-
-        # =================================================
-        # RECENT NOTIFICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT
-
-                id,
-                title,
-                message,
-                notification_type,
-                is_read,
-                created_at
-
-            FROM notifications
-
-            WHERE user_id = %s
-
-            ORDER BY
-                created_at DESC
-
-            LIMIT 5
-        """, (
-            user_id,
-        ))
-
-        recent_notifications = cursor.fetchall()
-
-
-        # =================================================
-        # PROFILE COMPLETION
-        # =================================================
-
-        profile_fields = [
-
-            student.get("name"),
-            student.get("email"),
-            student.get("enrollment_no"),
-            student.get("course"),
-            student.get("branch"),
-            student.get("semester"),
-            student.get("passing_year"),
-            student.get("phone"),
-            student.get("dob"),
-            student.get("gender"),
-            student.get("address"),
-            student.get("cgpa"),
-            student.get("linkedin_url"),
-            student.get("github_url"),
-            student.get("portfolio_url"),
-            student.get("resume_url")
-
-        ]
-
-
-        completed_fields = 0
-
-        for value in profile_fields:
-
-            if value is not None and str(value).strip():
-
-                completed_fields += 1
-
-
-        profile_completion = round(
-            (
-                completed_fields /
-                len(profile_fields)
-            ) * 100
-        )
-
-
-        # =================================================
-        # RENDER
+        # RENDER PROFILE
         # =================================================
 
         return render_template(
-            "student/dashboard.html",
-
-            dashboard="dashboard",
-
-            student=student,
-
-            total_opportunities=total_opportunities,
-
-            total_applications=total_applications,
-
-            shortlisted_applications=shortlisted_applications,
-
-            selected_applications=selected_applications,
-
-            rejected_applications=rejected_applications,
-
-            unread_notifications=unread_notifications,
-
-            recent_applications=recent_applications,
-
-            recent_opportunities=recent_opportunities,
-
-            recent_notifications=recent_notifications,
-
-            profile_completion=profile_completion
-        )
-
-
-    # =====================================================
-    # DATABASE ERROR
-    # =====================================================
-
-    except mysql.connector.Error as e:
-
-        print("=" * 70)
-        print("STUDENT DASHBOARD DATABASE ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-        flash(
-            "Unable to load Student Dashboard.",
-            "error"
-        )
-
-        return redirect(
-            url_for("login")
-        )
-
-
-    # =====================================================
-    # GENERAL ERROR
-    # =====================================================
-
-    except Exception as e:
-
-        print("=" * 70)
-        print("STUDENT DASHBOARD ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print(e)
-        print("=" * 70)
-
-        flash(
-            "Unable to load Student Dashboard.",
-            "error"
-        )
-
-        return redirect(
-            url_for("login")
-        )
-
-
-    # =====================================================
-    # CLOSE DATABASE
-    # =====================================================
-
-    finally:
-
-        if cursor:
-            cursor.close()
-
-        if conn:
-            conn.close()
-
-
-# =========================================================
-# STUDENT MODULE - PROFILE
-# =========================================================
-
-
-# =========================================================
-# STUDENT PROFILE - VIEW
-# =========================================================
-
-@app.route("/student/profile")
-@student_required
-def student_profile():
-
-    conn = None
-    cursor = None
-
-    try:
-
-        user_id = session.get("user_id")
-
-        if not user_id:
-
-            flash(
-                "Student session expired. Please login again.",
-                "error"
-            )
-
-            return redirect(
-                url_for("login")
-            )
-
-
-        # -------------------------------------------------
-        # DATABASE
-        # -------------------------------------------------
-
-        conn = get_db_connection()
-
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
-
-        # -------------------------------------------------
-        # STUDENT PROFILE
-        # -------------------------------------------------
-
-        cursor.execute("""
-            SELECT
-
-                s.id AS student_id,
-                s.user_id,
-                s.college_id,
-
-                s.enrollment_no,
-                s.course,
-                s.branch,
-                s.semester,
-                s.passing_year,
-
-                s.phone,
-                s.dob,
-                s.gender,
-                s.address,
-
-                s.cgpa,
-                s.active_backlogs,
-
-                s.linkedin_url,
-                s.github_url,
-                s.portfolio_url,
-                s.resume_url,
-
-                s.profile_completed,
-
-                u.name AS name,
-                u.email AS email,
-                u.status AS user_status,
-
-                c.college_name,
-                c.college_code,
-                c.university_name,
-                c.city AS college_city,
-                c.state AS college_state
-
-            FROM students s
-
-            INNER JOIN users u
-                ON s.user_id = u.id
-
-            LEFT JOIN colleges c
-                ON s.college_id = c.id
-
-            WHERE s.user_id = %s
-
-            LIMIT 1
-        """, (
-            user_id,
-        ))
-
-
-        student = cursor.fetchone()
-
-
-        # -------------------------------------------------
-        # PROFILE NOT FOUND
-        # -------------------------------------------------
-
-        if not student:
-
-            flash(
-                "Student profile not found.",
-                "error"
-            )
-
-            return redirect(
-                url_for("student_dashboard")
-            )
-
-
-        # -------------------------------------------------
-        # STUDENT SKILLS
-        # -------------------------------------------------
-
-        cursor.execute("""
-            SELECT
-
-                id,
-                skill_name,
-                proficiency_level,
-                assessment_percentage,
-                verification_status,
-                last_assessed_at
-
-            FROM student_skills
-
-            WHERE student_id = %s
-
-            ORDER BY
-                assessment_percentage DESC,
-                skill_name ASC
-        """, (
-            student["student_id"],
-        ))
-
-        skills = cursor.fetchall()
-
-
-        # -------------------------------------------------
-        # PROFILE COMPLETION
-        # -------------------------------------------------
-
-        profile_fields = [
-
-            student.get("name"),
-            student.get("email"),
-            student.get("enrollment_no"),
-            student.get("course"),
-            student.get("branch"),
-            student.get("semester"),
-            student.get("passing_year"),
-            student.get("phone"),
-            student.get("dob"),
-            student.get("gender"),
-            student.get("address"),
-            student.get("cgpa"),
-            student.get("linkedin_url"),
-            student.get("github_url"),
-            student.get("portfolio_url"),
-            student.get("resume_url")
-
-        ]
-
-
-        completed_fields = sum(
-            1
-            for value in profile_fields
-            if value is not None
-            and str(value).strip() != ""
-        )
-
-
-        profile_completion = round(
-            (
-                completed_fields /
-                len(profile_fields)
-            ) * 100
-        )
-
-
-        # -------------------------------------------------
-        # RENDER
-        # -------------------------------------------------
-
-        return render_template(
-            "student/profile/profile.html",
+            "student/profile.html",
 
             dashboard="profile",
+            active_page="profile",
 
-            student=student,
-
-            skills=skills,
-
-            profile_completion=profile_completion
-        )
-
-
-    except mysql.connector.Error as e:
-
-        print("=" * 70)
-        print("STUDENT PROFILE DATABASE ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-        flash(
-            "Unable to load your profile.",
-            "error"
-        )
-
-        return redirect(
-            url_for("student_dashboard")
-        )
-
-
-    except Exception as e:
-
-        print("=" * 70)
-        print("STUDENT PROFILE ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-        flash(
-            "Unable to load your profile.",
-            "error"
-        )
-
-        return redirect(
-            url_for("student_dashboard")
-        )
-
-
-    finally:
-
-        if cursor:
-            cursor.close()
-
-        if conn:
-            conn.close()
-
-
-
-# =========================================================
-# STUDENT PROFILE - EDIT
-# =========================================================
-
-@app.route(
-    "/student/profile/edit",
-    methods=["GET", "POST"]
-)
-@student_required
-def student_profile_edit():
-
-    conn = None
-    cursor = None
-
-    try:
-
-        user_id = session.get("user_id")
-
-        if not user_id:
-
-            flash(
-                "Student session expired. Please login again.",
-                "error"
-            )
-
-            return redirect(
-                url_for("login")
-            )
-
-
-        # -------------------------------------------------
-        # DATABASE
-        # -------------------------------------------------
-
-        conn = get_db_connection()
-
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
-
-        # =================================================
-        # GET CURRENT PROFILE
-        # =================================================
-
-        cursor.execute("""
-            SELECT
-
-                s.id AS student_id,
-                s.user_id,
-                s.college_id,
-
-                s.enrollment_no,
-                s.course,
-                s.branch,
-                s.semester,
-                s.passing_year,
-
-                s.phone,
-                s.dob,
-                s.gender,
-                s.address,
-
-                s.cgpa,
-                s.active_backlogs,
-
-                s.linkedin_url,
-                s.github_url,
-                s.portfolio_url,
-                s.resume_url,
-
-                s.profile_completed,
-
-                u.name AS name,
-                u.email AS email,
-
-                c.college_name,
-                c.college_code,
-                c.university_name
-
-            FROM students s
-
-            INNER JOIN users u
-                ON s.user_id = u.id
-
-            LEFT JOIN colleges c
-                ON s.college_id = c.id
-
-            WHERE s.user_id = %s
-
-            LIMIT 1
-        """, (
-            user_id,
-        ))
-
-
-        student = cursor.fetchone()
-
-
-        if not student:
-
-            flash(
-                "Student profile not found.",
-                "error"
-            )
-
-            return redirect(
-                url_for("student_dashboard")
-            )
-
-
-        # =================================================
-        # POST — UPDATE PROFILE
-        # =================================================
-
-        if request.method == "POST":
-
-            # -------------------------------------------------
-            # FORM VALUES
-            # -------------------------------------------------
-
-            name = request.form.get(
-                "name",
-                ""
-            ).strip()
-
-            course = request.form.get(
-                "course",
-                ""
-            ).strip()
-
-            branch = request.form.get(
-                "branch",
-                ""
-            ).strip()
-
-            semester = request.form.get(
-                "semester",
-                ""
-            ).strip()
-
-            passing_year = request.form.get(
-                "passing_year",
-                ""
-            ).strip()
-
-            phone = request.form.get(
-                "phone",
-                ""
-            ).strip()
-
-            dob = request.form.get(
-                "dob",
-                ""
-            ).strip()
-
-            gender = request.form.get(
-                "gender",
-                ""
-            ).strip()
-
-            address = request.form.get(
-                "address",
-                ""
-            ).strip()
-
-            cgpa = request.form.get(
-                "cgpa",
-                ""
-            ).strip()
-
-            active_backlogs = request.form.get(
-                "active_backlogs",
-                "0"
-            ).strip()
-
-            linkedin_url = request.form.get(
-                "linkedin_url",
-                ""
-            ).strip()
-
-            github_url = request.form.get(
-                "github_url",
-                ""
-            ).strip()
-
-            portfolio_url = request.form.get(
-                "portfolio_url",
-                ""
-            ).strip()
-
-
-            # =================================================
-            # VALIDATION
-            # =================================================
-
-            if not name:
-
-                flash(
-                    "Name is required.",
-                    "error"
-                )
-
-                return render_template(
-                    "student/profile/edit_profile.html",
-                    dashboard="profile",
-                    student=student
-                )
-
-
-            # -------------------------------------------------
-            # SEMESTER
-            # -------------------------------------------------
-
-            semester_value = None
-
-            if semester:
-
-                try:
-
-                    semester_value = int(
-                        semester
-                    )
-
-                except ValueError:
-
-                    flash(
-                        "Semester must be a valid number.",
-                        "error"
-                    )
-
-                    return render_template(
-                        "student/profile/edit_profile.html",
-                        dashboard="profile",
-                        student=student
-                    )
-
-
-                if semester_value < 1 or semester_value > 12:
-
-                    flash(
-                        "Semester must be between 1 and 12.",
-                        "error"
-                    )
-
-                    return render_template(
-                        "student/profile/edit_profile.html",
-                        dashboard="profile",
-                        student=student
-                    )
-
-
-            # -------------------------------------------------
-            # PASSING YEAR
-            # -------------------------------------------------
-
-            passing_year_value = None
-
-            if passing_year:
-
-                try:
-
-                    passing_year_value = int(
-                        passing_year
-                    )
-
-                except ValueError:
-
-                    flash(
-                        "Passing year must be a valid year.",
-                        "error"
-                    )
-
-                    return render_template(
-                        "student/profile/edit_profile.html",
-                        dashboard="profile",
-                        student=student
-                    )
-
-
-                if (
-                    passing_year_value < 2000
-                    or passing_year_value > 2100
-                ):
-
-                    flash(
-                        "Please enter a valid passing year.",
-                        "error"
-                    )
-
-                    return render_template(
-                        "student/profile/edit_profile.html",
-                        dashboard="profile",
-                        student=student
-                    )
-
-
-            # -------------------------------------------------
-            # CGPA
-            # -------------------------------------------------
-
-            cgpa_value = None
-
-            if cgpa:
-
-                try:
-
-                    cgpa_value = float(
-                        cgpa
-                    )
-
-                except ValueError:
-
-                    flash(
-                        "CGPA must be a valid number.",
-                        "error"
-                    )
-
-                    return render_template(
-                        "student/profile/edit_profile.html",
-                        dashboard="profile",
-                        student=student
-                    )
-
-
-                if cgpa_value < 0 or cgpa_value > 10:
-
-                    flash(
-                        "CGPA must be between 0 and 10.",
-                        "error"
-                    )
-
-                    return render_template(
-                        "student/profile/edit_profile.html",
-                        dashboard="profile",
-                        student=student
-                    )
-
-
-            # -------------------------------------------------
-            # ACTIVE BACKLOGS
-            # -------------------------------------------------
-
-            try:
-
-                backlog_value = int(
-                    active_backlogs or 0
-                )
-
-            except ValueError:
-
-                flash(
-                    "Active backlogs must be a valid number.",
-                    "error"
-                )
-
-                return render_template(
-                    "student/profile/edit_profile.html",
-                    dashboard="profile",
-                    student=student
-                )
-
-
-            if backlog_value < 0:
-
-                flash(
-                    "Active backlogs cannot be negative.",
-                    "error"
-                )
-
-                return render_template(
-                    "student/profile/edit_profile.html",
-                    dashboard="profile",
-                    student=student
-                )
-
-
-            # =================================================
-            # UPDATE USERS TABLE
-            # =================================================
-
-            cursor.execute("""
-                UPDATE users
-
-                SET name = %s
-
-                WHERE id = %s
-
-                  AND role = 'STUDENT'
-            """, (
-                name,
-                user_id
-            ))
-
-
-            # =================================================
-            # UPDATE STUDENTS TABLE
-            # =================================================
-
-            cursor.execute("""
-                UPDATE students
-
-                SET
-
-                    course = NULLIF(%s, ''),
-                    branch = NULLIF(%s, ''),
-                    semester = %s,
-                    passing_year = %s,
-
-                    phone = NULLIF(%s, ''),
-                    dob = NULLIF(%s, ''),
-                    gender = NULLIF(%s, ''),
-                    address = NULLIF(%s, ''),
-
-                    cgpa = %s,
-                    active_backlogs = %s,
-
-                    linkedin_url = NULLIF(%s, ''),
-                    github_url = NULLIF(%s, ''),
-                    portfolio_url = NULLIF(%s, '')
-
-                WHERE user_id = %s
-            """, (
-
-                course,
-                branch,
-                semester_value,
-                passing_year_value,
-
-                phone,
-                dob,
-                gender,
-                address,
-
-                cgpa_value,
-                backlog_value,
-
-                linkedin_url,
-                github_url,
-                portfolio_url,
-
-                user_id
-            ))
-
-
-            # =================================================
-            # PROFILE COMPLETION
-            # =================================================
-
-            completion_values = [
-
-                name,
-                student.get("email"),
-                student.get("enrollment_no"),
-                course,
-                branch,
-                semester_value,
-                passing_year_value,
-                phone,
-                dob,
-                gender,
-                address,
-                cgpa_value,
-                linkedin_url,
-                github_url,
-                portfolio_url,
-                student.get("resume_url")
-
-            ]
-
-
-            completed_fields = sum(
-                1
-                for value in completion_values
-                if value is not None
-                and str(value).strip() != ""
-            )
-
-
-            profile_completed = (
-                1
-                if completed_fields == len(
-                    completion_values
-                )
-                else 0
-            )
-
-
-            cursor.execute("""
-                UPDATE students
-
-                SET profile_completed = %s
-
-                WHERE user_id = %s
-            """, (
-                profile_completed,
-                user_id
-            ))
-
-
-            # =================================================
-            # COMMIT
-            # =================================================
-
-            conn.commit()
-
-
-            # -------------------------------------------------
-            # UPDATE SESSION NAME
-            # -------------------------------------------------
-
-            session["name"] = name
-            session["user_name"] = name
-
-
-            flash(
-                "Profile updated successfully.",
-                "success"
-            )
-
-
-            return redirect(
-                url_for("student_profile")
-            )
-
-
-        # =================================================
-        # GET — RENDER EDIT PAGE
-        # =================================================
-
-        return render_template(
-            "student/profile/edit_profile.html",
-
-            dashboard="profile",
+            page_title="My Profile",
+            page_subtitle="Manage your personal and professional information.",
 
             student=student
         )
@@ -27085,18 +26545,18 @@ def student_profile_edit():
             conn.rollback()
 
         print("=" * 70)
-        print("STUDENT PROFILE UPDATE DATABASE ERROR:")
+        print("STUDENT PROFILE DATABASE ERROR:")
         print(type(e).__name__)
         print(e)
         print("=" * 70)
 
         flash(
-            "Unable to update your profile.",
+            "Unable to update Student Profile.",
             "error"
         )
 
         return redirect(
-            url_for("student_profile_edit")
+            url_for("student_dashboard")
         )
 
 
@@ -27110,18 +26570,18 @@ def student_profile_edit():
             conn.rollback()
 
         print("=" * 70)
-        print("STUDENT PROFILE UPDATE ERROR:")
+        print("STUDENT PROFILE ERROR:")
         print(type(e).__name__)
         print(e)
         print("=" * 70)
 
         flash(
-            "Unable to update your profile.",
+            "Unable to load Student Profile.",
             "error"
         )
 
         return redirect(
-            url_for("student_profile_edit")
+            url_for("student_dashboard")
         )
 
 
@@ -27135,12 +26595,7349 @@ def student_profile_edit():
 
 
 # =========================================================
-# STUDENT MODULE - OPPORTUNITIES
+# STUDENT ACADEMIC
 # =========================================================
+
+@app.route("/student/academic", methods=["GET", "POST"])
+@student_required
+def student_academic():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+
+            flash(
+                "Student session expired. Please login again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+
+        # =================================================
+        # UPDATE ACADEMIC INFORMATION
+        # =================================================
+
+        if request.method == "POST":
+
+            semester = request.form.get(
+                "semester",
+                ""
+            ).strip()
+
+            passing_year = request.form.get(
+                "passing_year",
+                ""
+            ).strip()
+
+            cgpa = request.form.get(
+                "cgpa",
+                ""
+            ).strip()
+
+            current_sgpa = request.form.get(
+                "current_sgpa",
+                ""
+            ).strip()
+
+            active_backlogs = request.form.get(
+                "active_backlogs",
+                "0"
+            ).strip()
+
+
+            # -------------------------------------------------
+            # VALIDATION
+            # -------------------------------------------------
+
+            try:
+
+                if semester:
+                    semester_value = int(semester)
+                else:
+                    semester_value = None
+
+
+                if passing_year:
+                    passing_year_value = int(passing_year)
+                else:
+                    passing_year_value = None
+
+
+                if cgpa:
+                    cgpa_value = float(cgpa)
+                else:
+                    cgpa_value = None
+
+
+                if current_sgpa:
+                    current_sgpa_value = float(current_sgpa)
+                else:
+                    current_sgpa_value = None
+
+
+                if active_backlogs:
+                    active_backlogs_value = int(
+                        active_backlogs
+                    )
+                else:
+                    active_backlogs_value = 0
+
+
+            except ValueError:
+
+                flash(
+                    "Please enter valid academic values.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_academic")
+                )
+
+
+            # -------------------------------------------------
+            # RANGE VALIDATION
+            # -------------------------------------------------
+
+            if semester_value is not None:
+
+                if semester_value < 1 or semester_value > 12:
+
+                    flash(
+                        "Semester must be between 1 and 12.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("student_academic")
+                    )
+
+
+            if cgpa_value is not None:
+
+                if cgpa_value < 0 or cgpa_value > 10:
+
+                    flash(
+                        "CGPA must be between 0 and 10.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("student_academic")
+                    )
+
+
+            if current_sgpa_value is not None:
+
+                if current_sgpa_value < 0 or current_sgpa_value > 10:
+
+                    flash(
+                        "Current SGPA must be between 0 and 10.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for("student_academic")
+                    )
+
+
+            if active_backlogs_value < 0:
+
+                flash(
+                    "Active backlogs cannot be negative.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_academic")
+                )
+
+
+            # -------------------------------------------------
+            # UPDATE DATABASE
+            # -------------------------------------------------
+
+            cursor.execute(
+                """
+                UPDATE students
+
+                SET
+                    semester = %s,
+                    passing_year = %s,
+                    cgpa = %s,
+                    current_sgpa = %s,
+                    active_backlogs = %s
+
+                WHERE user_id = %s
+                """,
+                (
+                    semester_value,
+                    passing_year_value,
+                    cgpa_value,
+                    current_sgpa_value,
+                    active_backlogs_value,
+                    user_id
+                )
+            )
+
+
+            # -------------------------------------------------
+            # COMMIT
+            # -------------------------------------------------
+
+            conn.commit()
+
+
+            flash(
+                "Academic information updated successfully.",
+                "success"
+            )
+
+            return redirect(
+                url_for("student_academic")
+            )
+
+
+        # =================================================
+        # LOAD ACADEMIC INFORMATION
+        # =================================================
+
+        cursor.execute(
+            """
+            SELECT
+
+                s.id,
+                s.user_id,
+                s.college_id,
+
+                s.enrollment_no,
+                s.course,
+                s.branch,
+                s.semester,
+                s.passing_year,
+
+                s.cgpa,
+                s.current_sgpa,
+                s.active_backlogs,
+
+                u.name AS name,
+                u.email AS email,
+
+                c.college_name,
+                c.college_code,
+                c.university_name
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            LEFT JOIN colleges c
+                ON s.college_id = c.id
+
+            WHERE s.user_id = %s
+
+            LIMIT 1
+            """,
+            (
+                user_id,
+            )
+        )
+
+
+        student = cursor.fetchone()
+
+
+        # =================================================
+        # STUDENT NOT FOUND
+        # =================================================
+
+        if not student:
+
+            flash(
+                "Student academic profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+
+        # =================================================
+        # RENDER ACADEMIC PAGE
+        # =================================================
+
+        return render_template(
+            "student/academic.html",
+
+            dashboard="academic",
+            active_page="academic",
+
+            page_title="Academic Information",
+            page_subtitle="View and manage your academic details.",
+
+            student=student
+        )
+
+
+    # =====================================================
+    # DATABASE ERROR
+    # =====================================================
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("STUDENT ACADEMIC DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update Academic Information.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+
+    # =====================================================
+    # GENERAL ERROR
+    # =====================================================
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("STUDENT ACADEMIC ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load Academic Information.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
 
 
 # =========================================================
-# STUDENT - OPPORTUNITIES LIST
+# STUDENT - SKILLS
+# =========================================================
+
+@app.route("/student/skills")
+@student_required
+def student_skills():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE s.user_id = %s
+
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET STUDENT SKILLS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                skill_name,
+                proficiency_level,
+                assessment_percentage,
+                verification_status,
+                last_assessed_at,
+                created_at
+
+            FROM student_skills
+
+            WHERE student_id = %s
+
+            ORDER BY
+                assessment_percentage DESC,
+                skill_name ASC
+        """, (
+            student_id,
+        ))
+
+        skills = cursor.fetchall()
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        total_skills = len(skills)
+
+        assessed_skills = 0
+        verified_skills = 0
+
+        for skill in skills:
+
+            if skill["assessment_percentage"] is not None:
+                assessed_skills += 1
+
+            if str(
+                skill["verification_status"] or ""
+            ).upper() == "VERIFIED":
+                verified_skills += 1
+
+        # -------------------------------------------------
+        # RENDER
+        # -------------------------------------------------
+
+        return render_template(
+            "student/skills.html",
+
+            dashboard="skills",
+            active_page="skills",
+
+            page_title="My Skills",
+            page_subtitle="Build and manage your technical and professional skills.",
+
+            student=student,
+            skills=skills,
+
+            total_skills=total_skills,
+            assessed_skills=assessed_skills,
+            verified_skills=verified_skills
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("STUDENT SKILLS DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load your skills.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("STUDENT SKILLS ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load your skills.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - ADD SKILL
+# =========================================================
+
+@app.route(
+    "/student/skills/add",
+    methods=["POST"]
+)
+@student_required
+def student_skill_add():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        skill_name = (
+            request.form.get("skill_name", "")
+            .strip()
+        )
+
+        proficiency_level = (
+            request.form.get("proficiency_level", "")
+            .strip()
+            .upper()
+        )
+
+        assessment_percentage = (
+            request.form.get(
+                "assessment_percentage",
+                ""
+            )
+            .strip()
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not skill_name:
+
+            flash(
+                "Skill name is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        if len(skill_name) > 150:
+
+            flash(
+                "Skill name cannot exceed 150 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        # -------------------------------------------------
+        # ACTUAL DB VALUES ARE UPPERCASE
+        # BEGINNER / INTERMEDIATE / ADVANCED / EXPERT
+        # -------------------------------------------------
+
+        allowed_levels = [
+            "BEGINNER",
+            "INTERMEDIATE",
+            "ADVANCED",
+            "EXPERT"
+        ]
+
+        if proficiency_level not in allowed_levels:
+
+            flash(
+                "Please select a valid proficiency level.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        # -------------------------------------------------
+        # ASSESSMENT PERCENTAGE
+        # -------------------------------------------------
+
+        if assessment_percentage == "":
+
+            assessment_value = None
+
+        else:
+
+            try:
+
+                assessment_value = float(
+                    assessment_percentage
+                )
+
+            except ValueError:
+
+                flash(
+                    "Assessment percentage must be a valid number.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_skills")
+                )
+
+            if (
+                assessment_value < 0
+                or assessment_value > 100
+            ):
+
+                flash(
+                    "Assessment percentage must be between 0 and 100.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_skills")
+                )
+
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
+
+        conn = get_db_connection()
+
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+        # -------------------------------------------------
+        # GET CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_dashboard")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # DUPLICATE CHECK
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id
+            FROM student_skills
+            WHERE student_id = %s
+              AND LOWER(TRIM(skill_name))
+                  = LOWER(TRIM(%s))
+            LIMIT 1
+        """, (
+            student_id,
+            skill_name
+        ))
+
+        existing_skill = cursor.fetchone()
+
+        if existing_skill:
+
+            flash(
+                "This skill is already added.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        # -------------------------------------------------
+        # INSERT
+        #
+        # ID IS GENERATED HERE BECAUSE student_skills.id
+        # DOES NOT HAVE A DATABASE DEFAULT.
+        # -------------------------------------------------
+
+        skill_id = str(
+            uuid.uuid4()
+        )
+
+        cursor.execute("""
+            INSERT INTO student_skills
+            (
+                id,
+                student_id,
+                skill_name,
+                proficiency_level,
+                assessment_percentage
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+        """, (
+            skill_id,
+            student_id,
+            skill_name,
+            proficiency_level,
+            assessment_value
+        ))
+
+        conn.commit()
+
+        flash(
+            "Skill added successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    # -----------------------------------------------------
+    # DATABASE ERROR
+    # -----------------------------------------------------
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("ADD STUDENT SKILL DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to add skill. Check terminal for database error.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    # -----------------------------------------------------
+    # GENERAL ERROR
+    # -----------------------------------------------------
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("ADD STUDENT SKILL ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to add skill.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    # -----------------------------------------------------
+    # CLOSE
+    # -----------------------------------------------------
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - UPDATE SKILL
+# =========================================================
+
+@app.route(
+    "/student/skills/<skill_id>/update",
+    methods=["POST"]
+)
+@student_required
+def student_skill_update(skill_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        skill_name = (
+            request.form.get("skill_name")
+            or ""
+        ).strip()
+
+        proficiency_level = (
+            request.form.get("proficiency_level")
+            or ""
+        ).strip()
+
+        assessment_percentage = (
+            request.form.get("assessment_percentage")
+            or ""
+        ).strip()
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not skill_name:
+
+            flash(
+                "Skill name is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        if len(skill_name) > 150:
+
+            flash(
+                "Skill name cannot exceed 150 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        allowed_levels = [
+            "Beginner",
+            "Intermediate",
+            "Advanced",
+            "Expert"
+        ]
+
+        if proficiency_level not in allowed_levels:
+
+            flash(
+                "Please select a valid proficiency level.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        # -------------------------------------------------
+        # PERCENTAGE
+        # -------------------------------------------------
+
+        if assessment_percentage == "":
+            assessment_value = 0
+
+        else:
+
+            try:
+
+                assessment_value = float(
+                    assessment_percentage
+                )
+
+            except ValueError:
+
+                flash(
+                    "Assessment percentage must be a number.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_skills")
+                )
+
+            if (
+                assessment_value < 0
+                or assessment_value > 100
+            ):
+
+                flash(
+                    "Assessment percentage must be between 0 and 100.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_skills")
+                )
+
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_dashboard")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # CHECK OWNERSHIP
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM student_skills
+
+            WHERE id = %s
+              AND student_id = %s
+
+            LIMIT 1
+        """, (
+            skill_id,
+            student_id
+        ))
+
+        existing_skill = cursor.fetchone()
+
+        if not existing_skill:
+
+            flash(
+                "Skill not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        # -------------------------------------------------
+        # DUPLICATE CHECK
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM student_skills
+
+            WHERE student_id = %s
+              AND LOWER(TRIM(skill_name)) = LOWER(TRIM(%s))
+              AND id != %s
+
+            LIMIT 1
+        """, (
+            student_id,
+            skill_name,
+            skill_id
+        ))
+
+        duplicate = cursor.fetchone()
+
+        if duplicate:
+
+            flash(
+                "Another skill with this name already exists.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        # -------------------------------------------------
+        # UPDATE
+        # -------------------------------------------------
+
+        cursor.execute("""
+            UPDATE student_skills
+
+            SET
+                skill_name = %s,
+                proficiency_level = %s,
+                assessment_percentage = %s
+
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            skill_name,
+            proficiency_level,
+            assessment_value,
+            skill_id,
+            student_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Skill updated successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("UPDATE STUDENT SKILL DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update skill.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("UPDATE STUDENT SKILL ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update skill.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - DELETE SKILL
+# =========================================================
+
+@app.route(
+    "/student/skills/<skill_id>/delete",
+    methods=["POST"]
+)
+@student_required
+def student_skill_delete(skill_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_dashboard")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # DELETE ONLY OWN SKILL
+        # -------------------------------------------------
+
+        cursor.execute("""
+            DELETE FROM student_skills
+
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            skill_id,
+            student_id
+        ))
+
+        if cursor.rowcount == 0:
+
+            flash(
+                "Skill not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skills")
+            )
+
+        conn.commit()
+
+        flash(
+            "Skill deleted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("DELETE STUDENT SKILL DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to delete skill.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("DELETE STUDENT SKILL ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to delete skill.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - CERTIFICATIONS
+# =========================================================
+
+@app.route("/student/certifications")
+@student_required
+def student_certifications():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET CERTIFICATIONS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                student_id,
+                certificate_name,
+                issuing_organization,
+                credential_id,
+                issue_date,
+                expiry_date,
+                certificate_url,
+                certificate_file,
+                description,
+                created_at,
+                updated_at
+            FROM student_certifications
+            WHERE student_id = %s
+            ORDER BY
+                issue_date DESC,
+                created_at DESC
+        """, (
+            student_id,
+        ))
+
+        certifications = cursor.fetchall()
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        total_certifications = len(certifications)
+
+        valid_certifications = 0
+        expired_certifications = 0
+        no_expiry_certifications = 0
+
+        for certification in certifications:
+
+            expiry_date = certification.get(
+                "expiry_date"
+            )
+
+            if not expiry_date:
+
+                no_expiry_certifications += 1
+
+            elif expiry_date >= __import__("datetime").date.today():
+
+                valid_certifications += 1
+
+            else:
+
+                expired_certifications += 1
+
+        return render_template(
+            "student/certifications.html",
+
+            student=student,
+
+            certifications=certifications,
+
+            total_certifications=total_certifications,
+
+            valid_certifications=valid_certifications,
+
+            expired_certifications=expired_certifications,
+
+            no_expiry_certifications=no_expiry_certifications,
+
+            active_page="certifications",
+
+            page_title="My Certifications",
+
+            page_subtitle="Manage your professional certifications and credentials."
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("STUDENT CERTIFICATIONS ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load certifications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# ADD CERTIFICATION
+# =========================================================
+
+@app.route(
+    "/student/certifications/add",
+    methods=["POST"]
+)
+@student_required
+def student_certification_add():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        certificate_name = (
+            request.form.get(
+                "certificate_name",
+                ""
+            )
+            .strip()
+        )
+
+        issuing_organization = (
+            request.form.get(
+                "issuing_organization",
+                ""
+            )
+            .strip()
+        )
+
+        credential_id = (
+            request.form.get(
+                "credential_id",
+                ""
+            )
+            .strip()
+        )
+
+        issue_date = (
+            request.form.get(
+                "issue_date",
+                ""
+            )
+            .strip()
+        )
+
+        expiry_date = (
+            request.form.get(
+                "expiry_date",
+                ""
+            )
+            .strip()
+        )
+
+        certificate_url = (
+            request.form.get(
+                "certificate_url",
+                ""
+            )
+            .strip()
+        )
+
+        description = (
+            request.form.get(
+                "description",
+                ""
+            )
+            .strip()
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not certificate_name:
+
+            flash(
+                "Certificate name is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        if len(certificate_name) > 200:
+
+            flash(
+                "Certificate name cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        if issuing_organization and len(
+            issuing_organization
+        ) > 200:
+
+            flash(
+                "Issuing organization cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        if credential_id and len(
+            credential_id
+        ) > 150:
+
+            flash(
+                "Credential ID cannot exceed 150 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        if certificate_url and len(
+            certificate_url
+        ) > 255:
+
+            flash(
+                "Certificate URL cannot exceed 255 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        # -------------------------------------------------
+        # DATE VALIDATION
+        # -------------------------------------------------
+
+        if issue_date and expiry_date:
+
+            if expiry_date < issue_date:
+
+                flash(
+                    "Expiry date cannot be before issue date.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_certifications")
+                )
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # DUPLICATE CHECK
+        # -------------------------------------------------
+
+        if credential_id:
+
+            cursor.execute("""
+                SELECT id
+                FROM student_certifications
+                WHERE student_id = %s
+                  AND credential_id = %s
+                LIMIT 1
+            """, (
+                student_id,
+                credential_id
+            ))
+
+            duplicate = cursor.fetchone()
+
+            if duplicate:
+
+                flash(
+                    "A certification with this Credential ID already exists.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_certifications")
+                )
+
+        # -------------------------------------------------
+        # FILE UPLOAD
+        # -------------------------------------------------
+
+        certificate_file_path = None
+
+        uploaded_file = request.files.get(
+            "certificate_file"
+        )
+
+        if uploaded_file and uploaded_file.filename:
+
+            original_filename = secure_filename(
+                uploaded_file.filename
+            )
+
+            if original_filename:
+
+                upload_directory = os.path.join(
+                    app.root_path,
+                    "static",
+                    "uploads",
+                    "certificates"
+                )
+
+                os.makedirs(
+                    upload_directory,
+                    exist_ok=True
+                )
+
+                unique_filename = (
+                    str(uuid.uuid4())
+                    + "_"
+                    + original_filename
+                )
+
+                file_path = os.path.join(
+                    upload_directory,
+                    unique_filename
+                )
+
+                uploaded_file.save(
+                    file_path
+                )
+
+                certificate_file_path = (
+                    "uploads/certificates/"
+                    + unique_filename
+                )
+
+        # -------------------------------------------------
+        # INSERT
+        # -------------------------------------------------
+
+        certification_id = str(
+            uuid.uuid4()
+        )
+
+        cursor.execute("""
+            INSERT INTO student_certifications
+            (
+                id,
+                student_id,
+                certificate_name,
+                issuing_organization,
+                credential_id,
+                issue_date,
+                expiry_date,
+                certificate_url,
+                certificate_file,
+                description
+            )
+            VALUES
+            (
+                %s, %s, %s, %s, %s,
+                NULLIF(%s, ''),
+                NULLIF(%s, ''),
+                %s, %s, %s
+            )
+        """, (
+            certification_id,
+            student_id,
+            certificate_name,
+            issuing_organization or None,
+            credential_id or None,
+            issue_date,
+            expiry_date,
+            certificate_url or None,
+            certificate_file_path,
+            description or None
+        ))
+
+        conn.commit()
+
+        flash(
+            "Certification added successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "student_certifications"
+            )
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("ADD CERTIFICATION ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to add certification.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_certifications")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# UPDATE CERTIFICATION
+# =========================================================
+
+@app.route(
+    "/student/certifications/<certification_id>/update",
+    methods=["POST"]
+)
+@student_required
+def student_certification_update(
+    certification_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        certificate_name = (
+            request.form.get(
+                "certificate_name",
+                ""
+            )
+            .strip()
+        )
+
+        issuing_organization = (
+            request.form.get(
+                "issuing_organization",
+                ""
+            )
+            .strip()
+        )
+
+        credential_id = (
+            request.form.get(
+                "credential_id",
+                ""
+            )
+            .strip()
+        )
+
+        issue_date = (
+            request.form.get(
+                "issue_date",
+                ""
+            )
+            .strip()
+        )
+
+        expiry_date = (
+            request.form.get(
+                "expiry_date",
+                ""
+            )
+            .strip()
+        )
+
+        certificate_url = (
+            request.form.get(
+                "certificate_url",
+                ""
+            )
+            .strip()
+        )
+
+        description = (
+            request.form.get(
+                "description",
+                ""
+            )
+            .strip()
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not certificate_name:
+
+            flash(
+                "Certificate name is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        if issue_date and expiry_date:
+
+            if expiry_date < issue_date:
+
+                flash(
+                    "Expiry date cannot be before issue date.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_certifications")
+                )
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # VERIFY OWNERSHIP
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                certificate_file
+            FROM student_certifications
+            WHERE id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (
+            certification_id,
+            student_id
+        ))
+
+        existing = cursor.fetchone()
+
+        if not existing:
+
+            flash(
+                "Certification not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        old_file = existing.get(
+            "certificate_file"
+        )
+
+        # -------------------------------------------------
+        # DUPLICATE CREDENTIAL CHECK
+        # -------------------------------------------------
+
+        if credential_id:
+
+            cursor.execute("""
+                SELECT id
+                FROM student_certifications
+                WHERE student_id = %s
+                  AND credential_id = %s
+                  AND id <> %s
+                LIMIT 1
+            """, (
+                student_id,
+                credential_id,
+                certification_id
+            ))
+
+            duplicate = cursor.fetchone()
+
+            if duplicate:
+
+                flash(
+                    "Another certification already uses this Credential ID.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_certifications")
+                )
+
+        # -------------------------------------------------
+        # OPTIONAL NEW FILE
+        # -------------------------------------------------
+
+        new_file_path = old_file
+
+        uploaded_file = request.files.get(
+            "certificate_file"
+        )
+
+        if uploaded_file and uploaded_file.filename:
+
+            original_filename = secure_filename(
+                uploaded_file.filename
+            )
+
+            if original_filename:
+
+                upload_directory = os.path.join(
+                    app.root_path,
+                    "static",
+                    "uploads",
+                    "certificates"
+                )
+
+                os.makedirs(
+                    upload_directory,
+                    exist_ok=True
+                )
+
+                unique_filename = (
+                    str(uuid.uuid4())
+                    + "_"
+                    + original_filename
+                )
+
+                file_path = os.path.join(
+                    upload_directory,
+                    unique_filename
+                )
+
+                uploaded_file.save(
+                    file_path
+                )
+
+                new_file_path = (
+                    "uploads/certificates/"
+                    + unique_filename
+                )
+
+                # Delete old file if it exists
+                if old_file:
+
+                    old_file_path = os.path.join(
+                        app.root_path,
+                        "static",
+                        old_file
+                    )
+
+                    if os.path.exists(
+                        old_file_path
+                    ):
+
+                        try:
+                            os.remove(
+                                old_file_path
+                            )
+                        except Exception:
+                            pass
+
+        # -------------------------------------------------
+        # UPDATE
+        # -------------------------------------------------
+
+        cursor.execute("""
+            UPDATE student_certifications
+            SET
+                certificate_name = %s,
+                issuing_organization = %s,
+                credential_id = %s,
+                issue_date = NULLIF(%s, ''),
+                expiry_date = NULLIF(%s, ''),
+                certificate_url = %s,
+                certificate_file = %s,
+                description = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            certificate_name,
+            issuing_organization or None,
+            credential_id or None,
+            issue_date,
+            expiry_date,
+            certificate_url or None,
+            new_file_path,
+            description or None,
+            certification_id,
+            student_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Certification updated successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "student_certifications"
+            )
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("UPDATE CERTIFICATION ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update certification.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_certifications")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# DELETE CERTIFICATION
+# =========================================================
+
+@app.route(
+    "/student/certifications/<certification_id>/delete",
+    methods=["POST"]
+)
+@student_required
+def student_certification_delete(
+    certification_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET CERTIFICATION
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                certificate_file
+            FROM student_certifications
+            WHERE id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (
+            certification_id,
+            student_id
+        ))
+
+        certification = cursor.fetchone()
+
+        if not certification:
+
+            flash(
+                "Certification not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_certifications")
+            )
+
+        # -------------------------------------------------
+        # DELETE DATABASE RECORD
+        # -------------------------------------------------
+
+        cursor.execute("""
+            DELETE FROM student_certifications
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            certification_id,
+            student_id
+        ))
+
+        conn.commit()
+
+        # -------------------------------------------------
+        # DELETE FILE
+        # -------------------------------------------------
+
+        certificate_file = certification.get(
+            "certificate_file"
+        )
+
+        if certificate_file:
+
+            file_path = os.path.join(
+                app.root_path,
+                "static",
+                certificate_file
+            )
+
+            if os.path.exists(
+                file_path
+            ):
+
+                try:
+                    os.remove(
+                        file_path
+                    )
+                except Exception:
+                    pass
+
+        flash(
+            "Certification deleted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "student_certifications"
+            )
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("DELETE CERTIFICATION ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to delete certification.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_certifications")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - PROJECTS
+# =========================================================
+
+@app.route("/student/projects")
+@student_required
+def student_projects():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET STUDENT PROJECTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                sp.id,
+                sp.student_id,
+                sp.industry_id,
+                sp.title,
+                sp.description,
+                sp.technology_stack,
+                sp.start_date,
+                sp.end_date,
+                sp.status,
+                sp.project_url,
+                sp.report_url,
+                sp.created_at,
+                sp.updated_at,
+
+                i.company_name AS industry_name
+
+            FROM student_projects sp
+
+            LEFT JOIN industries i
+                ON sp.industry_id = i.id
+
+            WHERE sp.student_id = %s
+
+            ORDER BY
+                sp.created_at DESC
+        """, (
+            student_id,
+        ))
+
+        projects = cursor.fetchall()
+
+        # -------------------------------------------------
+        # GET ACTIVE INDUSTRIES
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                company_name
+            FROM industries
+            WHERE status = 'ACTIVE'
+            ORDER BY company_name ASC
+        """)
+
+        industries = cursor.fetchall()
+
+        # -------------------------------------------------
+        # PROJECT STATISTICS
+        # -------------------------------------------------
+
+        total_projects = len(projects)
+
+        ongoing_projects = 0
+        completed_projects = 0
+        cancelled_projects = 0
+
+        for project in projects:
+
+            status = project.get("status")
+
+            if status == "ONGOING":
+                ongoing_projects += 1
+
+            elif status == "COMPLETED":
+                completed_projects += 1
+
+            elif status == "CANCELLED":
+                cancelled_projects += 1
+
+        return render_template(
+            "student/projects.html",
+
+            student=student,
+
+            projects=projects,
+
+            industries=industries,
+
+            total_projects=total_projects,
+
+            ongoing_projects=ongoing_projects,
+
+            completed_projects=completed_projects,
+
+            cancelled_projects=cancelled_projects,
+
+            active_page="projects",
+
+            page_title="My Projects",
+
+            page_subtitle="Manage and showcase your academic and professional projects."
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("STUDENT PROJECTS ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load projects.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# ADD PROJECT
+# =========================================================
+
+@app.route(
+    "/student/projects/add",
+    methods=["POST"]
+)
+@student_required
+def student_project_add():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        industry_id = (
+            request.form.get(
+                "industry_id",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        title = (
+            request.form.get(
+                "title",
+                ""
+            )
+            .strip()
+        )
+
+        description = (
+            request.form.get(
+                "description",
+                ""
+            )
+            .strip()
+        )
+
+        technology_stack = (
+            request.form.get(
+                "technology_stack",
+                ""
+            )
+            .strip()
+        )
+
+        start_date = (
+            request.form.get(
+                "start_date",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        end_date = (
+            request.form.get(
+                "end_date",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        status = (
+            request.form.get(
+                "status",
+                "ONGOING"
+            )
+            .strip()
+            .upper()
+        )
+
+        project_url = (
+            request.form.get(
+                "project_url",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        report_url = (
+            request.form.get(
+                "report_url",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not title:
+
+            flash(
+                "Project title is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        if len(title) > 200:
+
+            flash(
+                "Project title cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        allowed_statuses = {
+            "ONGOING",
+            "COMPLETED",
+            "CANCELLED"
+        }
+
+        if status not in allowed_statuses:
+
+            flash(
+                "Invalid project status.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        if start_date and end_date:
+
+            if end_date < start_date:
+
+                flash(
+                    "End date cannot be before start date.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_projects")
+                )
+
+        if project_url and len(project_url) > 255:
+
+            flash(
+                "Project URL cannot exceed 255 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        if report_url and len(report_url) > 255:
+
+            flash(
+                "Report URL cannot exceed 255 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # INDUSTRY VALIDATION
+        # -------------------------------------------------
+
+        if industry_id:
+
+            cursor.execute("""
+                SELECT id
+                FROM industries
+                WHERE id = %s
+                  AND status = 'ACTIVE'
+                LIMIT 1
+            """, (
+                industry_id,
+            ))
+
+            industry = cursor.fetchone()
+
+            if not industry:
+
+                flash(
+                    "Invalid industry selected.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("student_projects")
+                )
+
+        # -------------------------------------------------
+        # INSERT PROJECT
+        # -------------------------------------------------
+
+        project_id = str(
+            uuid.uuid4()
+        )
+
+        cursor.execute("""
+            INSERT INTO student_projects
+            (
+                id,
+                student_id,
+                industry_id,
+                title,
+                description,
+                technology_stack,
+                start_date,
+                end_date,
+                status,
+                project_url,
+                report_url
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+        """, (
+            project_id,
+            student_id,
+            industry_id,
+            title,
+            description or None,
+            technology_stack or None,
+            start_date,
+            end_date,
+            status,
+            project_url,
+            report_url
+        ))
+
+        conn.commit()
+
+        flash(
+            "Project added successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_projects")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("ADD STUDENT PROJECT ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to add project.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_projects")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PROJECT DETAILS
+# =========================================================
+
+@app.route(
+    "/student/projects/<project_id>"
+)
+@student_required
+def student_project_detail(project_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET PROJECT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                sp.id,
+                sp.student_id,
+                sp.industry_id,
+                sp.title,
+                sp.description,
+                sp.technology_stack,
+                sp.start_date,
+                sp.end_date,
+                sp.status,
+                sp.project_url,
+                sp.report_url,
+                sp.created_at,
+                sp.updated_at,
+
+                i.company_name AS industry_name
+
+            FROM student_projects sp
+
+            LEFT JOIN industries i
+                ON sp.industry_id = i.id
+
+            WHERE sp.id = %s
+              AND sp.student_id = %s
+
+            LIMIT 1
+        """, (
+            project_id,
+            student_id
+        ))
+
+        project = cursor.fetchone()
+
+        if not project:
+
+            flash(
+                "Project not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        return render_template(
+            "student/project_detail.html",
+            project=project,
+            active_page="projects",
+            page_title=project["title"],
+            page_subtitle="Project details"
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("STUDENT PROJECT DETAIL ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load project details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_projects")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# UPDATE PROJECT
+# =========================================================
+
+@app.route(
+    "/student/projects/<project_id>/update",
+    methods=["POST"]
+)
+@student_required
+def student_project_update(project_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        industry_id = (
+            request.form.get(
+                "industry_id",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        title = (
+            request.form.get(
+                "title",
+                ""
+            )
+            .strip()
+        )
+
+        description = (
+            request.form.get(
+                "description",
+                ""
+            )
+            .strip()
+        )
+
+        technology_stack = (
+            request.form.get(
+                "technology_stack",
+                ""
+            )
+            .strip()
+        )
+
+        start_date = (
+            request.form.get(
+                "start_date",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        end_date = (
+            request.form.get(
+                "end_date",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        status = (
+            request.form.get(
+                "status",
+                "ONGOING"
+            )
+            .strip()
+            .upper()
+        )
+
+        project_url = (
+            request.form.get(
+                "project_url",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        report_url = (
+            request.form.get(
+                "report_url",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not title:
+
+            flash(
+                "Project title is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "student_project_detail",
+                    project_id=project_id
+                )
+            )
+
+        allowed_statuses = {
+            "ONGOING",
+            "COMPLETED",
+            "CANCELLED"
+        }
+
+        if status not in allowed_statuses:
+
+            flash(
+                "Invalid project status.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "student_project_detail",
+                    project_id=project_id
+                )
+            )
+
+        if start_date and end_date:
+
+            if end_date < start_date:
+
+                flash(
+                    "End date cannot be before start date.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for(
+                        "student_project_detail",
+                        project_id=project_id
+                    )
+                )
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # OWNERSHIP CHECK
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM student_projects
+            WHERE id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (
+            project_id,
+            student_id
+        ))
+
+        existing_project = cursor.fetchone()
+
+        if not existing_project:
+
+            flash(
+                "Project not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        # -------------------------------------------------
+        # INDUSTRY VALIDATION
+        # -------------------------------------------------
+
+        if industry_id:
+
+            cursor.execute("""
+                SELECT id
+                FROM industries
+                WHERE id = %s
+                  AND status = 'ACTIVE'
+                LIMIT 1
+            """, (
+                industry_id,
+            ))
+
+            if not cursor.fetchone():
+
+                flash(
+                    "Invalid industry selected.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for(
+                        "student_project_detail",
+                        project_id=project_id
+                    )
+                )
+
+        # -------------------------------------------------
+        # UPDATE
+        # -------------------------------------------------
+
+        cursor.execute("""
+            UPDATE student_projects
+            SET
+                industry_id = %s,
+                title = %s,
+                description = %s,
+                technology_stack = %s,
+                start_date = %s,
+                end_date = %s,
+                status = %s,
+                project_url = %s,
+                report_url = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            industry_id,
+            title,
+            description or None,
+            technology_stack or None,
+            start_date,
+            end_date,
+            status,
+            project_url,
+            report_url,
+            project_id,
+            student_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Project updated successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "student_project_detail",
+                project_id=project_id
+            )
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("UPDATE STUDENT PROJECT ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update project.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "student_projects"
+            )
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# DELETE PROJECT
+# =========================================================
+
+@app.route(
+    "/student/projects/<project_id>/delete",
+    methods=["POST"]
+)
+@student_required
+def student_project_delete(project_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # DELETE ONLY OWN PROJECT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            DELETE FROM student_projects
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            project_id,
+            student_id
+        ))
+
+        if cursor.rowcount == 0:
+
+            flash(
+                "Project not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_projects")
+            )
+
+        conn.commit()
+
+        flash(
+            "Project deleted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_projects")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("DELETE STUDENT PROJECT ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to delete project.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_projects")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - ACHIEVEMENTS
+# =========================================================
+
+@app.route("/student/achievements")
+@student_required
+def student_achievements():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET ACHIEVEMENTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                student_id,
+                title,
+                description,
+                achievement_type,
+                achievement_date,
+                issuing_organization,
+                proof_url,
+                created_at,
+                updated_at
+            FROM student_achievements
+            WHERE student_id = %s
+            ORDER BY
+                achievement_date DESC,
+                created_at DESC
+        """, (
+            student_id,
+        ))
+
+        achievements = cursor.fetchall()
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        total_achievements = len(achievements)
+
+        dated_achievements = 0
+        with_proof = 0
+        organizations_count = set()
+
+        for achievement in achievements:
+
+            if achievement.get("achievement_date"):
+                dated_achievements += 1
+
+            if achievement.get("proof_url"):
+                with_proof += 1
+
+            organization = (
+                achievement.get(
+                    "issuing_organization"
+                )
+            )
+
+            if organization:
+                organizations_count.add(
+                    organization.strip().lower()
+                )
+
+        total_organizations = len(
+            organizations_count
+        )
+
+        return render_template(
+            "student/achievements.html",
+
+            student=student,
+
+            achievements=achievements,
+
+            total_achievements=total_achievements,
+
+            dated_achievements=dated_achievements,
+
+            with_proof=with_proof,
+
+            total_organizations=total_organizations,
+
+            active_page="achievements",
+
+            page_title="My Achievements",
+
+            page_subtitle="Showcase your accomplishments, awards and recognitions."
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("STUDENT ACHIEVEMENTS ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load achievements.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# ADD ACHIEVEMENT
+# =========================================================
+
+@app.route(
+    "/student/achievements/add",
+    methods=["POST"]
+)
+@student_required
+def student_achievement_add():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        title = (
+            request.form.get(
+                "title",
+                ""
+            )
+            .strip()
+        )
+
+        description = (
+            request.form.get(
+                "description",
+                ""
+            )
+            .strip()
+        )
+
+        achievement_type = (
+            request.form.get(
+                "achievement_type",
+                ""
+            )
+            .strip()
+        )
+
+        achievement_date = (
+            request.form.get(
+                "achievement_date",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        issuing_organization = (
+            request.form.get(
+                "issuing_organization",
+                ""
+            )
+            .strip()
+        )
+
+        proof_url = (
+            request.form.get(
+                "proof_url",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not title:
+
+            flash(
+                "Achievement title is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if len(title) > 200:
+
+            flash(
+                "Achievement title cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if achievement_type and len(
+            achievement_type
+        ) > 100:
+
+            flash(
+                "Achievement type cannot exceed 100 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if issuing_organization and len(
+            issuing_organization
+        ) > 200:
+
+            flash(
+                "Issuing organization cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if proof_url and len(proof_url) > 255:
+
+            flash(
+                "Proof URL cannot exceed 255 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # INSERT
+        # -------------------------------------------------
+
+        achievement_id = str(
+            uuid.uuid4()
+        )
+
+        cursor.execute("""
+            INSERT INTO student_achievements
+            (
+                id,
+                student_id,
+                title,
+                description,
+                achievement_type,
+                achievement_date,
+                issuing_organization,
+                proof_url
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+        """, (
+            achievement_id,
+            student_id,
+            title,
+            description or None,
+            achievement_type or None,
+            achievement_date,
+            issuing_organization or None,
+            proof_url
+        ))
+
+        conn.commit()
+
+        flash(
+            "Achievement added successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_achievements")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("ADD STUDENT ACHIEVEMENT ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to add achievement.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_achievements")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# UPDATE ACHIEVEMENT
+# =========================================================
+
+@app.route(
+    "/student/achievements/<achievement_id>/update",
+    methods=["POST"]
+)
+@student_required
+def student_achievement_update(
+    achievement_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        title = (
+            request.form.get(
+                "title",
+                ""
+            )
+            .strip()
+        )
+
+        description = (
+            request.form.get(
+                "description",
+                ""
+            )
+            .strip()
+        )
+
+        achievement_type = (
+            request.form.get(
+                "achievement_type",
+                ""
+            )
+            .strip()
+        )
+
+        achievement_date = (
+            request.form.get(
+                "achievement_date",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        issuing_organization = (
+            request.form.get(
+                "issuing_organization",
+                ""
+            )
+            .strip()
+        )
+
+        proof_url = (
+            request.form.get(
+                "proof_url",
+                ""
+            )
+            .strip()
+            or None
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if not title:
+
+            flash(
+                "Achievement title is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if len(title) > 200:
+
+            flash(
+                "Achievement title cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if achievement_type and len(
+            achievement_type
+        ) > 100:
+
+            flash(
+                "Achievement type cannot exceed 100 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if issuing_organization and len(
+            issuing_organization
+        ) > 200:
+
+            flash(
+                "Issuing organization cannot exceed 200 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        if proof_url and len(proof_url) > 255:
+
+            flash(
+                "Proof URL cannot exceed 255 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # OWNERSHIP CHECK
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM student_achievements
+            WHERE id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (
+            achievement_id,
+            student_id
+        ))
+
+        existing = cursor.fetchone()
+
+        if not existing:
+
+            flash(
+                "Achievement not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        # -------------------------------------------------
+        # UPDATE
+        # -------------------------------------------------
+
+        cursor.execute("""
+            UPDATE student_achievements
+            SET
+                title = %s,
+                description = %s,
+                achievement_type = %s,
+                achievement_date = %s,
+                issuing_organization = %s,
+                proof_url = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            title,
+            description or None,
+            achievement_type or None,
+            achievement_date,
+            issuing_organization or None,
+            proof_url,
+            achievement_id,
+            student_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Achievement updated successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_achievements")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("UPDATE STUDENT ACHIEVEMENT ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to update achievement.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_achievements")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# DELETE ACHIEVEMENT
+# =========================================================
+
+@app.route(
+    "/student/achievements/<achievement_id>/delete",
+    methods=["POST"]
+)
+@student_required
+def student_achievement_delete(
+    achievement_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # DELETE ONLY OWN ACHIEVEMENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            DELETE FROM student_achievements
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            achievement_id,
+            student_id
+        ))
+
+        if cursor.rowcount == 0:
+
+            flash(
+                "Achievement not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_achievements")
+            )
+
+        conn.commit()
+
+        flash(
+            "Achievement deleted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_achievements")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("DELETE STUDENT ACHIEVEMENT ERROR")
+        print(type(e).__name__)
+        print(e)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to delete achievement.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_achievements")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - DIGITAL PORTFOLIO
+# =========================================================
+
+@app.route("/student/portfolio")
+@student_required
+def student_portfolio():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email,
+                s.phone,
+                s.github_url,
+                s.linkedin_url,
+                s.portfolio_url
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET PORTFOLIO
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                student_id,
+                headline,
+                bio,
+                public_slug,
+                is_public,
+                created_at,
+                updated_at
+            FROM student_portfolios
+            WHERE student_id = %s
+            LIMIT 1
+        """, (
+            student_id,
+        ))
+
+        portfolio = cursor.fetchone()
+
+        # -------------------------------------------------
+        # GET SKILLS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                skill_name,
+                proficiency_level,
+                assessment_percentage,
+                verification_status
+            FROM student_skills
+            WHERE student_id = %s
+            ORDER BY
+                assessment_percentage DESC,
+                skill_name ASC
+        """, (
+            student_id,
+        ))
+
+        skills = cursor.fetchall()
+
+        # -------------------------------------------------
+        # GET CERTIFICATIONS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                certificate_name,
+                issuing_organization,
+                credential_id,
+                issue_date,
+                expiry_date,
+                certificate_url,
+                certificate_file,
+                description
+            FROM student_certifications
+            WHERE student_id = %s
+            ORDER BY
+                issue_date DESC,
+                created_at DESC
+        """, (
+            student_id,
+        ))
+
+        certifications = cursor.fetchall()
+
+        # -------------------------------------------------
+        # GET PROJECTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                sp.id,
+                sp.title,
+                sp.description,
+                sp.technology_stack,
+                sp.start_date,
+                sp.end_date,
+                sp.status,
+                sp.project_url,
+                sp.report_url,
+                i.company_name AS industry_name
+            FROM student_projects sp
+            LEFT JOIN industries i
+                ON sp.industry_id = i.id
+            WHERE sp.student_id = %s
+            ORDER BY
+                sp.created_at DESC
+        """, (
+            student_id,
+        ))
+
+        projects = cursor.fetchall()
+
+        # -------------------------------------------------
+        # GET ACHIEVEMENTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                title,
+                description,
+                achievement_type,
+                achievement_date,
+                issuing_organization,
+                proof_url
+            FROM student_achievements
+            WHERE student_id = %s
+            ORDER BY
+                achievement_date DESC,
+                created_at DESC
+        """, (
+            student_id,
+        ))
+
+        achievements = cursor.fetchall()
+
+        # -------------------------------------------------
+        # COUNTS
+        # -------------------------------------------------
+
+        portfolio_stats = {
+            "skills": len(skills),
+            "certifications": len(certifications),
+            "projects": len(projects),
+            "achievements": len(achievements)
+        }
+
+        return render_template(
+            "student/digital_portfolio.html",
+
+            student=student,
+
+            portfolio=portfolio,
+
+            skills=skills,
+
+            certifications=certifications,
+
+            projects=projects,
+
+            achievements=achievements,
+
+            portfolio_stats=portfolio_stats,
+
+            active_page="portfolio",
+
+            page_title="Digital Portfolio",
+
+            page_subtitle="Build and showcase your professional profile."
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("STUDENT PORTFOLIO ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load digital portfolio.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# CREATE / UPDATE DIGITAL PORTFOLIO
+# =========================================================
+
+@app.route(
+    "/student/portfolio/save",
+    methods=["POST"]
+)
+@student_required
+def student_portfolio_save():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # FORM DATA
+        # -------------------------------------------------
+
+        headline = (
+            request.form.get(
+                "headline",
+                ""
+            )
+            .strip()
+        )
+
+        bio = (
+            request.form.get(
+                "bio",
+                ""
+            )
+            .strip()
+        )
+
+        public_slug = (
+            request.form.get(
+                "public_slug",
+                ""
+            )
+            .strip()
+            .lower()
+        )
+
+        is_public = (
+            request.form.get(
+                "is_public"
+            ) == "1"
+        )
+
+        # -------------------------------------------------
+        # VALIDATION
+        # -------------------------------------------------
+
+        if headline and len(headline) > 255:
+
+            flash(
+                "Headline cannot exceed 255 characters.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_portfolio")
+            )
+
+        # -------------------------------------------------
+        # SLUG
+        # -------------------------------------------------
+
+        if public_slug:
+
+            public_slug = re.sub(
+                r"[^a-z0-9-]",
+                "-",
+                public_slug
+            )
+
+            public_slug = re.sub(
+                r"-+",
+                "-",
+                public_slug
+            )
+
+            public_slug = public_slug.strip("-")
+
+        if not public_slug:
+
+            base_name = (
+                student_name_for_slug
+                if False
+                else "student"
+            )
+
+            public_slug = (
+                base_name
+                + "-"
+                + str(uuid.uuid4())[:8]
+            )
+
+        if len(public_slug) > 150:
+
+            public_slug = public_slug[:150].rstrip("-")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                u.name
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # IF SLUG WAS NOT PROVIDED
+        # GENERATE FROM STUDENT NAME
+        # -------------------------------------------------
+
+        if (
+            not request.form.get(
+                "public_slug",
+                ""
+            ).strip()
+        ):
+
+            generated_slug = re.sub(
+                r"[^a-z0-9]+",
+                "-",
+                student["name"].lower()
+            ).strip("-")
+
+            if not generated_slug:
+
+                generated_slug = "student"
+
+            public_slug = (
+                generated_slug
+                + "-"
+                + str(uuid.uuid4())[:8]
+            )
+
+        # -------------------------------------------------
+        # CHECK EXISTING PORTFOLIO
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                public_slug
+            FROM student_portfolios
+            WHERE student_id = %s
+            LIMIT 1
+        """, (
+            student_id,
+        ))
+
+        existing = cursor.fetchone()
+
+        # -------------------------------------------------
+        # CHECK SLUG DUPLICATE
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                student_id
+            FROM student_portfolios
+            WHERE public_slug = %s
+            LIMIT 1
+        """, (
+            public_slug,
+        ))
+
+        slug_record = cursor.fetchone()
+
+        if (
+            slug_record
+            and slug_record["student_id"] != student_id
+        ):
+
+            flash(
+                "This public portfolio URL is already in use. Choose another slug.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_portfolio")
+            )
+
+        # -------------------------------------------------
+        # UPDATE EXISTING
+        # -------------------------------------------------
+
+        if existing:
+
+            cursor.execute("""
+                UPDATE student_portfolios
+                SET
+                    headline = %s,
+                    bio = %s,
+                    public_slug = %s,
+                    is_public = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE student_id = %s
+            """, (
+                headline or None,
+                bio or None,
+                public_slug,
+                1 if is_public else 0,
+                student_id
+            ))
+
+            message = (
+                "Digital portfolio updated successfully."
+            )
+
+        # -------------------------------------------------
+        # CREATE NEW
+        # -------------------------------------------------
+
+        else:
+
+            portfolio_id = str(
+                uuid.uuid4()
+            )
+
+            cursor.execute("""
+                INSERT INTO student_portfolios
+                (
+                    id,
+                    student_id,
+                    headline,
+                    bio,
+                    public_slug,
+                    is_public
+                )
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+            """, (
+                portfolio_id,
+                student_id,
+                headline or None,
+                bio or None,
+                public_slug,
+                1 if is_public else 0
+            ))
+
+            message = (
+                "Digital portfolio created successfully."
+            )
+
+        conn.commit()
+
+        flash(
+            message,
+            "success"
+        )
+
+        return redirect(
+            url_for("student_portfolio")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("SAVE STUDENT PORTFOLIO ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to save digital portfolio.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_portfolio")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# PUBLIC DIGITAL PORTFOLIO
+# =========================================================
+
+@app.route(
+    "/portfolio/<public_slug>"
+)
+def public_student_portfolio(public_slug):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET PORTFOLIO
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                sp.id,
+                sp.student_id,
+                sp.headline,
+                sp.bio,
+                sp.public_slug,
+                sp.is_public,
+
+                u.name,
+                u.email,
+
+                s.github_url,
+                s.linkedin_url,
+                s.portfolio_url
+
+            FROM student_portfolios sp
+
+            INNER JOIN students s
+                ON sp.student_id = s.id
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE sp.public_slug = %s
+              AND sp.is_public = 1
+
+            LIMIT 1
+        """, (
+            public_slug,
+        ))
+
+        portfolio = cursor.fetchone()
+
+        if not portfolio:
+
+            return render_template(
+                "student/portfolio_not_found.html"
+            ), 404
+
+        student_id = portfolio["student_id"]
+
+        # -------------------------------------------------
+        # SKILLS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                skill_name,
+                proficiency_level,
+                assessment_percentage,
+                verification_status
+            FROM student_skills
+            WHERE student_id = %s
+            ORDER BY
+                assessment_percentage DESC,
+                skill_name ASC
+        """, (
+            student_id,
+        ))
+
+        skills = cursor.fetchall()
+
+        # -------------------------------------------------
+        # CERTIFICATIONS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                certificate_name,
+                issuing_organization,
+                credential_id,
+                issue_date,
+                expiry_date,
+                certificate_url,
+                certificate_file,
+                description
+            FROM student_certifications
+            WHERE student_id = %s
+            ORDER BY
+                issue_date DESC,
+                created_at DESC
+        """, (
+            student_id,
+        ))
+
+        certifications = cursor.fetchall()
+
+        # -------------------------------------------------
+        # PROJECTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                sp.title,
+                sp.description,
+                sp.technology_stack,
+                sp.start_date,
+                sp.end_date,
+                sp.status,
+                sp.project_url,
+                sp.report_url,
+                i.company_name AS industry_name
+            FROM student_projects sp
+            LEFT JOIN industries i
+                ON sp.industry_id = i.id
+            WHERE sp.student_id = %s
+            ORDER BY
+                sp.created_at DESC
+        """, (
+            student_id,
+        ))
+
+        projects = cursor.fetchall()
+
+        # -------------------------------------------------
+        # ACHIEVEMENTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                title,
+                description,
+                achievement_type,
+                achievement_date,
+                issuing_organization,
+                proof_url
+            FROM student_achievements
+            WHERE student_id = %s
+            ORDER BY
+                achievement_date DESC,
+                created_at DESC
+        """, (
+            student_id,
+        ))
+
+        achievements = cursor.fetchall()
+
+        return render_template(
+            "student/public_portfolio.html",
+
+            portfolio=portfolio,
+
+            skills=skills,
+
+            certifications=certifications,
+
+            projects=projects,
+
+            achievements=achievements
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("PUBLIC PORTFOLIO ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        return "Unable to load portfolio.", 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - SKILL ASSESSMENT
+# STEP 3.2
+# =========================================================
+
+@app.route("/student/skill-assessment")
+@student_required
+def student_skill_assessment():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # ACTIVE ASSESSMENTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                sa.id,
+                sa.skill_id,
+                sa.title,
+                sa.description,
+                sa.duration_minutes,
+                sa.total_questions,
+                sa.passing_percentage,
+
+                sk.skill_name,
+                sk.skill_category,
+
+                COUNT(DISTINCT sq.id) AS question_count,
+
+                (
+                    SELECT COUNT(*)
+                    FROM student_skill_assessment_attempts saa2
+                    WHERE saa2.student_id = %s
+                      AND saa2.assessment_id = sa.id
+                      AND saa2.status IN ('COMPLETED', 'PASSED', 'FAILED')
+                ) AS completed_before,
+
+                (
+                    SELECT saa3.id
+                    FROM student_skill_assessment_attempts saa3
+                    WHERE saa3.student_id = %s
+                      AND saa3.assessment_id = sa.id
+                      AND saa3.status = 'IN_PROGRESS'
+                    ORDER BY saa3.started_at DESC
+                    LIMIT 1
+                ) AS in_progress_attempt_id
+
+            FROM skill_assessments sa
+
+            INNER JOIN skills sk
+                ON sa.skill_id = sk.id
+
+            LEFT JOIN skill_assessment_questions sq
+                ON sq.assessment_id = sa.id
+
+            WHERE sa.status = 'ACTIVE'
+              AND sk.status = 'ACTIVE'
+
+            GROUP BY
+                sa.id,
+                sa.skill_id,
+                sa.title,
+                sa.description,
+                sa.duration_minutes,
+                sa.total_questions,
+                sa.passing_percentage,
+                sk.skill_name,
+                sk.skill_category
+
+            HAVING COUNT(DISTINCT sq.id) > 0
+
+            ORDER BY
+                sk.skill_name ASC,
+                sa.created_at DESC
+        """, (
+            student_id,
+            student_id
+        ))
+
+        assessments = cursor.fetchall()
+
+        # -------------------------------------------------
+        # CURRENT IN-PROGRESS ATTEMPT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                saa.id,
+                saa.assessment_id,
+                saa.started_at,
+
+                sa.title,
+                sa.duration_minutes,
+                sa.total_questions,
+
+                sk.skill_name
+
+            FROM student_skill_assessment_attempts saa
+
+            INNER JOIN skill_assessments sa
+                ON saa.assessment_id = sa.id
+
+            INNER JOIN skills sk
+                ON sa.skill_id = sk.id
+
+            WHERE saa.student_id = %s
+              AND saa.status = 'IN_PROGRESS'
+              AND sa.status = 'ACTIVE'
+
+            ORDER BY saa.started_at DESC
+
+            LIMIT 1
+        """, (
+            student_id,
+        ))
+
+        active_attempt = cursor.fetchone()
+
+        return render_template(
+            "student/skill_assessment.html",
+
+            dashboard="skill-assessment",
+            active_page="skill-assessment",
+
+            page_title="Skill Assessment",
+            page_subtitle="Test your knowledge and measure your skill level.",
+
+            student=student,
+
+            assessments=assessments,
+
+            active_attempt=active_attempt
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("STUDENT SKILL ASSESSMENT DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+        print(e)
+
+        flash(
+            "Unable to load skill assessments.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("STUDENT SKILL ASSESSMENT ERROR:")
+        print(type(e).__name__)
+        print(e)
+
+        flash(
+            "Unable to load skill assessments.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# START ASSESSMENT
+# =========================================================
+
+@app.route(
+    "/student/skill-assessment/start/<assessment_id>"
+)
+@student_required
+def student_skill_assessment_start(assessment_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # ASSESSMENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                sa.id,
+                sa.skill_id,
+                sa.title,
+                sa.description,
+                sa.duration_minutes,
+                sa.total_questions,
+                sa.passing_percentage,
+
+                sk.skill_name,
+                sk.skill_category
+
+            FROM skill_assessments sa
+
+            INNER JOIN skills sk
+                ON sa.skill_id = sk.id
+
+            WHERE sa.id = %s
+              AND sa.status = 'ACTIVE'
+              AND sk.status = 'ACTIVE'
+
+            LIMIT 1
+        """, (
+            assessment_id,
+        ))
+
+        assessment = cursor.fetchone()
+
+        if not assessment:
+
+            flash(
+                "Assessment submitted successfully. Your score has been recorded.",
+                "success"
+            )
+
+            return redirect(
+                url_for(
+                    "student_assessment_result",
+                    attempt_id=attempt_id
+                )
+            )
+        # -------------------------------------------------
+        # COUNT QUESTIONS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM skill_assessment_questions
+            WHERE assessment_id = %s
+        """, (
+            assessment_id,
+        ))
+
+        question_count = (
+            cursor.fetchone()["total"] or 0
+        )
+
+        if question_count == 0:
+
+            flash(
+                "This assessment has no questions yet.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skill_assessment")
+            )
+
+        # -------------------------------------------------
+        # RESUME EXISTING ATTEMPT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM student_skill_assessment_attempts
+
+            WHERE student_id = %s
+              AND assessment_id = %s
+              AND status = 'IN_PROGRESS'
+
+            ORDER BY started_at DESC
+
+            LIMIT 1
+        """, (
+            student_id,
+            assessment_id
+        ))
+
+        existing_attempt = cursor.fetchone()
+
+        if existing_attempt:
+
+            return redirect(
+                url_for(
+                    "student_skill_assessment_take",
+                    attempt_id=existing_attempt["id"]
+                )
+            )
+
+        # -------------------------------------------------
+        # CREATE NEW ATTEMPT
+        # -------------------------------------------------
+
+        attempt_id = str(
+            uuid.uuid4()
+        )
+
+        cursor.execute("""
+            INSERT INTO student_skill_assessment_attempts
+            (
+                id,
+                student_id,
+                assessment_id,
+                score,
+                total_marks,
+                percentage,
+                status
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                0.00,
+                0.00,
+                0.00,
+                'IN_PROGRESS'
+            )
+        """, (
+            attempt_id,
+            student_id,
+            assessment_id
+        ))
+
+        conn.commit()
+
+        return redirect(
+            url_for(
+                "student_skill_assessment_take",
+                attempt_id=attempt_id
+            )
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("START SKILL ASSESSMENT DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+
+        flash(
+            "Unable to start assessment.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_assessment")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("START SKILL ASSESSMENT ERROR:")
+        print(type(e).__name__)
+        print(e)
+
+        flash(
+            "Unable to start assessment.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_assessment")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# TAKE / RESUME ASSESSMENT
+# =========================================================
+
+@app.route(
+    "/student/skill-assessment/take/<attempt_id>"
+)
+@student_required
+def student_skill_assessment_take(attempt_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # GET STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                user_id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET OWN ATTEMPT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                saa.id,
+                saa.student_id,
+                saa.assessment_id,
+                saa.started_at,
+                saa.status,
+
+                sa.title,
+                sa.description,
+                sa.duration_minutes,
+                sa.total_questions,
+                sa.passing_percentage,
+
+                sk.skill_name
+
+            FROM student_skill_assessment_attempts saa
+
+            INNER JOIN skill_assessments sa
+                ON saa.assessment_id = sa.id
+
+            INNER JOIN skills sk
+                ON sa.skill_id = sk.id
+
+            WHERE saa.id = %s
+              AND saa.student_id = %s
+              AND saa.status = 'IN_PROGRESS'
+
+            LIMIT 1
+        """, (
+            attempt_id,
+            student_id
+        ))
+
+        attempt = cursor.fetchone()
+
+        if not attempt:
+
+            flash(
+                "Assessment attempt not found or already completed.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skill_assessment")
+            )
+
+        # -------------------------------------------------
+        # QUESTIONS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                assessment_id,
+                question_text,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                marks,
+                question_order
+
+            FROM skill_assessment_questions
+
+            WHERE assessment_id = %s
+
+            ORDER BY
+                question_order ASC,
+                created_at ASC
+        """, (
+            attempt["assessment_id"],
+        ))
+
+        questions = cursor.fetchall()
+
+        if not questions:
+
+            flash(
+                "No questions are available for this assessment.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skill_assessment")
+            )
+
+        assessment = {
+            "title": attempt["title"],
+            "description": attempt["description"],
+            "duration_minutes": attempt["duration_minutes"],
+            "total_questions": len(questions),
+            "passing_percentage": attempt["passing_percentage"],
+            "skill_name": attempt["skill_name"]
+        }
+
+        return render_template(
+            "student/skill_assessment_take.html",
+
+            dashboard="skill-assessment",
+            active_page="skill-assessment",
+
+            page_title=attempt["title"],
+            page_subtitle="Complete the assessment before the timer ends.",
+
+            student=student,
+            attempt=attempt,
+            assessment=assessment,
+            questions=questions
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print("TAKE SKILL ASSESSMENT DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+
+        flash(
+            "Unable to load assessment.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_assessment")
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print("TAKE SKILL ASSESSMENT ERROR:")
+        print(type(e).__name__)
+        print(e)
+
+        flash(
+            "Unable to load assessment.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_assessment")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# SUBMIT ASSESSMENT
+# =========================================================
+
+@app.route(
+    "/student/skill-assessment/submit/<attempt_id>",
+    methods=["POST"]
+)
+@student_required
+def student_skill_assessment_submit(attempt_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # OWN IN-PROGRESS ATTEMPT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                saa.id,
+                saa.assessment_id,
+
+                sa.passing_percentage,
+
+                sk.skill_name
+
+            FROM student_skill_assessment_attempts saa
+
+            INNER JOIN skill_assessments sa
+                ON saa.assessment_id = sa.id
+
+            INNER JOIN skills sk
+                ON sa.skill_id = sk.id
+
+            WHERE saa.id = %s
+              AND saa.student_id = %s
+              AND saa.status = 'IN_PROGRESS'
+
+            LIMIT 1
+        """, (
+            attempt_id,
+            student_id
+        ))
+
+        attempt = cursor.fetchone()
+
+        if not attempt:
+
+            flash(
+                "Assessment attempt is invalid or already completed.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skill_assessment")
+            )
+
+        assessment_id = attempt["assessment_id"]
+
+        # -------------------------------------------------
+        # GET QUESTIONS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                correct_option,
+                marks
+
+            FROM skill_assessment_questions
+
+            WHERE assessment_id = %s
+
+            ORDER BY
+                question_order ASC,
+                created_at ASC
+        """, (
+            assessment_id,
+        ))
+
+        questions = cursor.fetchall()
+
+        if not questions:
+
+            flash(
+                "Assessment questions were not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_skill_assessment")
+            )
+
+        # -------------------------------------------------
+        # REMOVE ANY PREVIOUS ANSWERS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            DELETE FROM skill_assessment_answers
+            WHERE attempt_id = %s
+        """, (
+            attempt_id,
+        ))
+
+        total_marks = 0.00
+        score = 0.00
+
+        # -------------------------------------------------
+        # EVALUATE + SAVE ANSWERS
+        # -------------------------------------------------
+
+        for question in questions:
+
+            question_id = question["id"]
+
+            selected_option = (
+                request.form.get(
+                    "question_" + str(question_id)
+                )
+                or ""
+            ).strip().upper()
+
+            if selected_option not in [
+                "A",
+                "B",
+                "C",
+                "D"
+            ]:
+
+                selected_option = None
+
+            marks = float(
+                question["marks"] or 0
+            )
+
+            total_marks += marks
+
+            is_correct = (
+                selected_option is not None
+                and selected_option
+                    == str(
+                        question["correct_option"]
+                    ).upper()
+            )
+
+            marks_obtained = (
+                marks
+                if is_correct
+                else 0.00
+            )
+
+            if is_correct:
+                score += marks
+
+            answer_id = str(
+                uuid.uuid4()
+            )
+
+            cursor.execute("""
+                INSERT INTO skill_assessment_answers
+                (
+                    id,
+                    attempt_id,
+                    question_id,
+                    selected_option,
+                    is_correct,
+                    marks_obtained
+                )
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+            """, (
+                answer_id,
+                attempt_id,
+                question_id,
+                selected_option,
+                1 if is_correct else 0,
+                marks_obtained
+            ))
+
+        # -------------------------------------------------
+        # CALCULATE PERCENTAGE
+        # -------------------------------------------------
+
+        if total_marks > 0:
+
+            percentage = (
+                score / total_marks
+            ) * 100
+
+        else:
+
+            percentage = 0.00
+
+        passing_percentage = float(
+            attempt["passing_percentage"] or 0
+        )
+
+        passed = (
+            percentage >= passing_percentage
+        )
+
+        status = (
+            "PASSED"
+            if passed
+            else "FAILED"
+        )
+
+        # -------------------------------------------------
+        # UPDATE ATTEMPT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            UPDATE student_skill_assessment_attempts
+
+            SET
+                completed_at = CURRENT_TIMESTAMP,
+                score = %s,
+                total_marks = %s,
+                percentage = %s,
+                status = %s
+
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            round(score, 2),
+            round(total_marks, 2),
+            round(percentage, 2),
+            status,
+            attempt_id,
+            student_id
+        ))
+
+        # -------------------------------------------------
+        # UPDATE EXISTING STUDENT SKILL
+        # -------------------------------------------------
+        # Assessment result is reflected in student_skills
+        # only when the student already has that skill.
+
+        cursor.execute("""
+            UPDATE student_skills ss
+
+            INNER JOIN skills sk
+                ON LOWER(TRIM(ss.skill_name))
+                 = LOWER(TRIM(sk.skill_name))
+
+            SET
+                ss.assessment_percentage = %s,
+                ss.last_assessed_at = CURRENT_TIMESTAMP
+
+            WHERE ss.student_id = %s
+              AND sk.id = (
+                    SELECT skill_id
+                    FROM skill_assessments
+                    WHERE id = %s
+              )
+        """, (
+            round(percentage, 2),
+            student_id,
+            assessment_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Assessment submitted successfully. Your score has been recorded.",
+            "success"
+        )
+
+        # 3.3 will provide the dedicated result page.
+        return redirect(
+            url_for("student_skill_assessment")
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("SUBMIT SKILL ASSESSMENT DATABASE ERROR:")
+        print(type(e).__name__)
+        print(e)
+
+        flash(
+            "Unable to submit assessment.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_assessment")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("SUBMIT SKILL ASSESSMENT ERROR:")
+        print(type(e).__name__)
+        print(e)
+
+        flash(
+            "Unable to submit assessment.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_assessment")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - ASSESSMENT RESULT
+# STEP 3.3
+# =========================================================
+
+@app.route(
+    "/student/assessment-result/<attempt_id>"
+)
+@student_required
+def student_assessment_result(attempt_id):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE s.user_id = %s
+
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET OWN COMPLETED ATTEMPT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                saa.id,
+                saa.student_id,
+                saa.assessment_id,
+
+                saa.started_at,
+                saa.completed_at,
+
+                saa.score,
+                saa.total_marks,
+                saa.percentage,
+
+                saa.status,
+
+                sa.title,
+                sa.description,
+                sa.duration_minutes,
+                sa.total_questions,
+                sa.passing_percentage,
+
+                sk.id AS skill_id,
+                sk.skill_name,
+                sk.skill_category
+
+            FROM student_skill_assessment_attempts saa
+
+            INNER JOIN skill_assessments sa
+                ON saa.assessment_id = sa.id
+
+            INNER JOIN skills sk
+                ON sa.skill_id = sk.id
+
+            WHERE saa.id = %s
+              AND saa.student_id = %s
+              AND saa.status IN (
+                    'COMPLETED',
+                    'PASSED',
+                    'FAILED'
+              )
+
+            LIMIT 1
+        """, (
+            attempt_id,
+            student_id
+        ))
+
+        attempt = cursor.fetchone()
+
+        if not attempt:
+
+            flash(
+                "Assessment result not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for(
+                    "student_skill_assessment"
+                )
+            )
+
+        # -------------------------------------------------
+        # QUESTIONS + ANSWERS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                q.id AS question_id,
+                q.question_text,
+
+                q.option_a,
+                q.option_b,
+                q.option_c,
+                q.option_d,
+
+                q.correct_option,
+                q.marks,
+                q.question_order,
+
+                a.selected_option,
+                a.is_correct,
+                a.marks_obtained
+
+            FROM skill_assessment_questions q
+
+            LEFT JOIN skill_assessment_answers a
+                ON q.id = a.question_id
+                AND a.attempt_id = %s
+
+            WHERE q.assessment_id = %s
+
+            ORDER BY
+                q.question_order ASC,
+                q.created_at ASC
+
+        """, (
+            attempt_id,
+            attempt["assessment_id"]
+        ))
+
+        questions = cursor.fetchall()
+
+        # -------------------------------------------------
+        # RESULT STATISTICS
+        # -------------------------------------------------
+
+        total_questions = len(
+            questions
+        )
+
+        correct_answers = 0
+        incorrect_answers = 0
+        unanswered = 0
+
+        for question in questions:
+
+            selected = question[
+                "selected_option"
+            ]
+
+            if not selected:
+
+                unanswered += 1
+
+            elif question[
+                "is_correct"
+            ]:
+
+                correct_answers += 1
+
+            else:
+
+                incorrect_answers += 1
+
+        # -------------------------------------------------
+        # STATUS LABEL
+        # -------------------------------------------------
+
+        status = (
+            attempt["status"]
+            or "FAILED"
+        )
+
+        if status == "PASSED":
+
+            status_label = "Passed"
+
+        elif status == "FAILED":
+
+            status_label = "Failed"
+
+        else:
+
+            status_label = "Completed"
+
+        # -------------------------------------------------
+        # RENDER RESULT
+        # -------------------------------------------------
+
+        return render_template(
+            "student/assessment_result.html",
+
+            dashboard="assessment-results",
+            active_page="assessment-results",
+
+            page_title="Assessment Result",
+            page_subtitle="Review your assessment performance.",
+
+            student=student,
+
+            attempt=attempt,
+
+            questions=questions,
+
+            total_questions=total_questions,
+
+            correct_answers=correct_answers,
+
+            incorrect_answers=incorrect_answers,
+
+            unanswered=unanswered,
+
+            status_label=status_label
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print(
+            "STUDENT ASSESSMENT RESULT "
+            "DATABASE ERROR:"
+        )
+        print(
+            type(e).__name__
+        )
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load assessment result.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "student_skill_assessment"
+            )
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print(
+            "STUDENT ASSESSMENT RESULT ERROR:"
+        )
+        print(
+            type(e).__name__
+        )
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load assessment result.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "student_skill_assessment"
+            )
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - ASSESSMENT RESULT HISTORY
+# =========================================================
+
+@app.route(
+    "/student/assessment-results"
+)
+@student_required
+def student_assessment_results():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE s.user_id = %s
+
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # COMPLETED RESULTS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                saa.id,
+                saa.assessment_id,
+
+                saa.completed_at,
+                saa.score,
+                saa.total_marks,
+                saa.percentage,
+                saa.status,
+
+                sa.title,
+
+                sk.skill_name,
+                sk.skill_category
+
+            FROM student_skill_assessment_attempts saa
+
+            INNER JOIN skill_assessments sa
+                ON saa.assessment_id = sa.id
+
+            INNER JOIN skills sk
+                ON sa.skill_id = sk.id
+
+            WHERE saa.student_id = %s
+
+              AND saa.status IN (
+                    'COMPLETED',
+                    'PASSED',
+                    'FAILED'
+              )
+
+            ORDER BY
+                saa.completed_at DESC
+
+        """, (
+            student_id,
+        ))
+
+        results = cursor.fetchall()
+
+        return render_template(
+            "student/assessment_result.html",
+
+            dashboard="assessment-results",
+            active_page="assessment-results",
+
+            page_title="Assessment Results",
+            page_subtitle="Review your completed skill assessments.",
+
+            student=student,
+
+            results=results,
+
+            result_history=True
+        )
+
+    except mysql.connector.Error as e:
+
+        print("=" * 70)
+        print(
+            "ASSESSMENT RESULT HISTORY "
+            "DATABASE ERROR:"
+        )
+        print(
+            type(e).__name__
+        )
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load assessment results.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "student_skill_assessment"
+            )
+        )
+
+    except Exception as e:
+
+        print("=" * 70)
+        print(
+            "ASSESSMENT RESULT HISTORY ERROR:"
+        )
+        print(
+            type(e).__name__
+        )
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load assessment results.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "student_skill_assessment"
+            )
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - SKILL PROFILE
+# STEP 3.4
+# =========================================================
+
+@app.route("/student/skill-profile")
+@student_required
+def student_skill_profile():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE s.user_id = %s
+
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(url_for("login"))
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # SYNC STUDENT SKILLS -> SKILL PROFILES
+        #
+        # Only skills which exist in the master `skills`
+        # table are synchronized.
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                ss.id,
+                ss.skill_name,
+                ss.proficiency_level,
+                ss.assessment_percentage,
+                ss.verification_status
+
+            FROM student_skills ss
+
+            WHERE ss.student_id = %s
+
+            ORDER BY ss.skill_name ASC
+        """, (student_id,))
+
+        student_skills_data = cursor.fetchall()
+
+        for skill in student_skills_data:
+
+            cursor.execute("""
+                SELECT
+                    id,
+                    skill_name
+
+                FROM skills
+
+                WHERE skill_name = %s
+                  AND status = 'ACTIVE'
+
+                LIMIT 1
+            """, (
+                skill["skill_name"],
+            ))
+
+            master_skill = cursor.fetchone()
+
+            # If the skill is not yet in Skill Master,
+            # don't create an invalid profile because
+            # student_skill_profiles.skill_id is a FK.
+            if not master_skill:
+                continue
+
+            # -------------------------------------------------
+            # PROFICIENCY
+            # -------------------------------------------------
+
+            proficiency = (
+                skill["proficiency_level"]
+                or "BEGINNER"
+            ).upper()
+
+            allowed_levels = [
+                "BEGINNER",
+                "INTERMEDIATE",
+                "ADVANCED",
+                "EXPERT"
+            ]
+
+            if proficiency not in allowed_levels:
+
+                proficiency = "BEGINNER"
+
+            # -------------------------------------------------
+            # SCORE
+            # -------------------------------------------------
+
+            assessment_percentage = (
+                skill["assessment_percentage"]
+            )
+
+            if assessment_percentage is None:
+                assessment_percentage = 0
+
+            # -------------------------------------------------
+            # SOURCE
+            # -------------------------------------------------
+
+            source = "SELF_DECLARED"
+
+            if assessment_percentage > 0:
+                source = "ASSESSMENT"
+
+            verified = 0
+
+            if (
+                skill["verification_status"]
+                and str(
+                    skill["verification_status"]
+                ).upper()
+                in [
+                    "VERIFIED",
+                    "APPROVED"
+                ]
+            ):
+                verified = 1
+                source = "VERIFIED"
+
+            # -------------------------------------------------
+            # UPSERT PROFILE
+            # -------------------------------------------------
+
+            profile_id = str(uuid.uuid4())
+
+            cursor.execute("""
+                INSERT INTO student_skill_profiles
+                (
+                    id,
+                    student_id,
+                    skill_id,
+                    proficiency_level,
+                    skill_score,
+                    source,
+                    verified,
+                    last_assessed_at
+                )
+
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    CASE
+                        WHEN %s > 0
+                        THEN CURRENT_TIMESTAMP
+                        ELSE NULL
+                    END
+                )
+
+                ON DUPLICATE KEY UPDATE
+
+                    proficiency_level = VALUES(
+                        proficiency_level
+                    ),
+
+                    skill_score = VALUES(
+                        skill_score
+                    ),
+
+                    source = VALUES(
+                        source
+                    ),
+
+                    verified = VALUES(
+                        verified
+                    ),
+
+                    last_assessed_at =
+                        CASE
+                            WHEN VALUES(skill_score) > 0
+                            THEN CURRENT_TIMESTAMP
+                            ELSE last_assessed_at
+                        END
+            """, (
+                profile_id,
+                student_id,
+                master_skill["id"],
+                proficiency,
+                assessment_percentage,
+                source,
+                verified,
+                assessment_percentage
+            ))
+
+        conn.commit()
+
+        # -------------------------------------------------
+        # LOAD FINAL SKILL PROFILE
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                p.id,
+                p.student_id,
+                p.skill_id,
+
+                sk.skill_name,
+                sk.skill_category,
+                sk.description,
+
+                p.proficiency_level,
+                p.skill_score,
+                p.source,
+                p.verified,
+
+                p.last_assessed_at,
+                p.created_at,
+                p.updated_at
+
+            FROM student_skill_profiles p
+
+            INNER JOIN skills sk
+                ON p.skill_id = sk.id
+
+            WHERE p.student_id = %s
+
+            ORDER BY
+                p.skill_score DESC,
+                sk.skill_name ASC
+        """, (
+            student_id,
+        ))
+
+        profiles = cursor.fetchall()
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        total_skills = len(profiles)
+
+        assessed_skills = 0
+        verified_skills = 0
+
+        total_score = 0
+
+        beginner_count = 0
+        intermediate_count = 0
+        advanced_count = 0
+        expert_count = 0
+
+        for profile in profiles:
+
+            score = (
+                float(
+                    profile["skill_score"]
+                    or 0
+                )
+            )
+
+            total_score += score
+
+            if score > 0:
+                assessed_skills += 1
+
+            if profile["verified"]:
+                verified_skills += 1
+
+            level = (
+                profile["proficiency_level"]
+                or "BEGINNER"
+            )
+
+            if level == "BEGINNER":
+                beginner_count += 1
+
+            elif level == "INTERMEDIATE":
+                intermediate_count += 1
+
+            elif level == "ADVANCED":
+                advanced_count += 1
+
+            elif level == "EXPERT":
+                expert_count += 1
+
+        average_score = (
+            round(
+                total_score / total_skills,
+                2
+            )
+            if total_skills > 0
+            else 0
+        )
+
+        return render_template(
+            "student/skill_profile.html",
+
+            dashboard="skill-profile",
+            active_page="skill-profile",
+
+            page_title="My Skill Profile",
+            page_subtitle=(
+                "View your skills, proficiency "
+                "and assessment performance."
+            ),
+
+            student=student,
+
+            profiles=profiles,
+
+            total_skills=total_skills,
+            assessed_skills=assessed_skills,
+            verified_skills=verified_skills,
+            average_score=average_score,
+
+            beginner_count=beginner_count,
+            intermediate_count=intermediate_count,
+            advanced_count=advanced_count,
+            expert_count=expert_count
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("STUDENT SKILL PROFILE DATABASE ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load your skill profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("STUDENT SKILL PROFILE ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load your skill profile.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skills")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - SKILL GAP
+# STEP 3.5
+# =========================================================
+
+@app.route("/student/skill-gap")
+@student_required
+def student_skill_gap():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+            FROM students s
+            INNER JOIN users u
+                ON s.user_id = u.id
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(url_for("login"))
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET SKILL GAPS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                g.id,
+                g.student_id,
+                g.skill_id,
+
+                g.current_level,
+                g.required_level,
+
+                g.gap_score,
+                g.priority,
+                g.status,
+
+                sk.skill_name,
+                sk.skill_category,
+                sk.description,
+
+                g.created_at,
+                g.updated_at
+
+            FROM student_skill_gaps g
+
+            INNER JOIN skills sk
+                ON g.skill_id = sk.id
+
+            WHERE g.student_id = %s
+
+            ORDER BY
+
+                CASE g.priority
+                    WHEN 'CRITICAL' THEN 1
+                    WHEN 'HIGH' THEN 2
+                    WHEN 'MEDIUM' THEN 3
+                    WHEN 'LOW' THEN 4
+                    ELSE 5
+                END,
+
+                g.gap_score DESC,
+
+                sk.skill_name ASC
+        """, (student_id,))
+
+        gaps = cursor.fetchall()
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        total_gaps = len(gaps)
+
+        critical_gaps = 0
+        high_gaps = 0
+        medium_gaps = 0
+        low_gaps = 0
+
+        open_gaps = 0
+        improving_gaps = 0
+        resolved_gaps = 0
+
+        total_gap_score = 0
+
+        for gap in gaps:
+
+            gap_score = float(
+                gap["gap_score"] or 0
+            )
+
+            total_gap_score += gap_score
+
+            # Priority
+            if gap["priority"] == "CRITICAL":
+                critical_gaps += 1
+
+            elif gap["priority"] == "HIGH":
+                high_gaps += 1
+
+            elif gap["priority"] == "MEDIUM":
+                medium_gaps += 1
+
+            elif gap["priority"] == "LOW":
+                low_gaps += 1
+
+            # Status
+            if gap["status"] == "OPEN":
+                open_gaps += 1
+
+            elif gap["status"] == "IMPROVING":
+                improving_gaps += 1
+
+            elif gap["status"] == "RESOLVED":
+                resolved_gaps += 1
+
+        average_gap_score = (
+            round(
+                total_gap_score / total_gaps,
+                2
+            )
+            if total_gaps > 0
+            else 0
+        )
+
+        return render_template(
+            "student/skill_gap.html",
+
+            dashboard="skill-gap",
+            active_page="skill-gap",
+
+            page_title="Skill Gap",
+            page_subtitle=(
+                "Identify the skills you need to "
+                "improve for your career goals."
+            ),
+
+            student=student,
+
+            gaps=gaps,
+
+            total_gaps=total_gaps,
+
+            critical_gaps=critical_gaps,
+            high_gaps=high_gaps,
+            medium_gaps=medium_gaps,
+            low_gaps=low_gaps,
+
+            open_gaps=open_gaps,
+            improving_gaps=improving_gaps,
+            resolved_gaps=resolved_gaps,
+
+            average_gap_score=average_gap_score
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("STUDENT SKILL GAP DATABASE ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load skill gaps.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_profile")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print("STUDENT SKILL GAP ERROR")
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load skill gaps.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_profile")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - LEARNING RECOMMENDATIONS
+# STEP 3.6
+# =========================================================
+
+@app.route("/student/learning-recommendations")
+@student_required
+def student_learning_recommendations():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                s.id,
+                s.user_id,
+                u.name,
+                u.email
+
+            FROM students s
+
+            INNER JOIN users u
+                ON s.user_id = u.id
+
+            WHERE s.user_id = %s
+
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET LEARNING RECOMMENDATIONS
+        #
+        # Student Skill Gap
+        #      ↓
+        # learning_program_skills
+        #      ↓
+        # learning_programs
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                g.id AS gap_id,
+                g.skill_id,
+                g.current_level,
+                g.required_level,
+                g.gap_score,
+                g.priority,
+                g.status AS gap_status,
+
+                sk.skill_name,
+                sk.skill_category,
+
+                lp.id AS program_id,
+                lp.title,
+                lp.provider,
+                lp.description,
+                lp.learning_type,
+                lp.level,
+                lp.duration,
+                lp.url,
+
+                lps.relevance_score
+
+            FROM student_skill_gaps g
+
+            INNER JOIN skills sk
+                ON g.skill_id = sk.id
+
+            INNER JOIN learning_program_skills lps
+                ON g.skill_id = lps.skill_id
+
+            INNER JOIN learning_programs lp
+                ON lps.program_id = lp.id
+
+            WHERE g.student_id = %s
+
+              AND lp.status = 'ACTIVE'
+
+              AND g.status != 'RESOLVED'
+
+            ORDER BY
+
+                CASE g.priority
+                    WHEN 'CRITICAL' THEN 1
+                    WHEN 'HIGH' THEN 2
+                    WHEN 'MEDIUM' THEN 3
+                    WHEN 'LOW' THEN 4
+                    ELSE 5
+                END,
+
+                lps.relevance_score DESC,
+
+                lp.title ASC
+        """, (student_id,))
+
+        recommendation_rows = cursor.fetchall()
+
+        # -------------------------------------------------
+        # GROUP RECOMMENDATIONS BY SKILL
+        # -------------------------------------------------
+
+        recommendations = {}
+
+        for row in recommendation_rows:
+
+            skill_id = row["skill_id"]
+
+            if skill_id not in recommendations:
+
+                recommendations[skill_id] = {
+                    "skill_id": skill_id,
+                    "skill_name": row["skill_name"],
+                    "skill_category": row["skill_category"],
+                    "current_level": row["current_level"],
+                    "required_level": row["required_level"],
+                    "gap_score": row["gap_score"],
+                    "priority": row["priority"],
+                    "gap_status": row["gap_status"],
+                    "programs": []
+                }
+
+            recommendations[skill_id]["programs"].append({
+                "program_id": row["program_id"],
+                "title": row["title"],
+                "provider": row["provider"],
+                "description": row["description"],
+                "learning_type": row["learning_type"],
+                "level": row["level"],
+                "duration": row["duration"],
+                "url": row["url"],
+                "relevance_score": row["relevance_score"]
+            })
+
+        recommendations = list(
+            recommendations.values()
+        )
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        total_recommendations = 0
+        total_skills = len(recommendations)
+
+        high_priority_skills = 0
+        critical_priority_skills = 0
+
+        for recommendation in recommendations:
+
+            total_recommendations += len(
+                recommendation["programs"]
+            )
+
+            if recommendation["priority"] == "HIGH":
+                high_priority_skills += 1
+
+            elif recommendation["priority"] == "CRITICAL":
+                critical_priority_skills += 1
+
+        return render_template(
+            "student/learning_recommendations.html",
+
+            dashboard="learning-recommendations",
+            active_page="learning-recommendations",
+
+            page_title="Learning Recommendations",
+            page_subtitle=(
+                "Personalized learning resources "
+                "based on your skill gaps."
+            ),
+
+            student=student,
+
+            recommendations=recommendations,
+
+            total_recommendations=
+                total_recommendations,
+
+            total_skills=
+                total_skills,
+
+            high_priority_skills=
+                high_priority_skills,
+
+            critical_priority_skills=
+                critical_priority_skills
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print(
+            "STUDENT LEARNING RECOMMENDATIONS "
+            "DATABASE ERROR"
+        )
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load learning recommendations.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_gap")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print("=" * 70)
+        print(
+            "STUDENT LEARNING RECOMMENDATIONS ERROR"
+        )
+        print(type(e).__name__)
+        print(e)
+        print("=" * 70)
+
+        flash(
+            "Unable to load learning recommendations.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_skill_gap")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT - OPPORTUNITIES
+# PHASE 4.1 - OPPORTUNITIES UPGRADE
 # =========================================================
 
 @app.route("/student/opportunities")
@@ -27152,50 +33949,37 @@ def student_opportunities():
 
     try:
 
-        # =================================================
-        # CURRENT USER
-        # =================================================
-
         user_id = session.get("user_id")
 
         if not user_id:
-
             flash(
                 "Student session expired. Please login again.",
                 "error"
             )
+            return redirect(url_for("login"))
 
-            return redirect(
-                url_for("login")
-            )
-
-
-        # =================================================
-        # DATABASE CONNECTION
-        # =================================================
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
 
         conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
 
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
-
-        # =================================================
+        # -------------------------------------------------
         # CURRENT STUDENT
-        # =================================================
+        # -------------------------------------------------
 
         cursor.execute("""
             SELECT
-
                 s.id AS student_id,
-                s.college_id,
+                s.enrollment_no,
                 s.course,
                 s.branch,
                 s.semester,
                 s.cgpa,
                 s.active_backlogs,
                 s.profile_completed,
+                s.resume_url,
 
                 u.name,
                 u.email
@@ -27208,13 +33992,9 @@ def student_opportunities():
             WHERE s.user_id = %s
 
             LIMIT 1
-        """, (
-            user_id,
-        ))
-
+        """, (user_id,))
 
         student = cursor.fetchone()
-
 
         if not student:
 
@@ -27227,40 +34007,88 @@ def student_opportunities():
                 url_for("student_dashboard")
             )
 
+        student_id = student["student_id"]
 
-        student_id = student[
-            "student_id"
-        ]
-
-
-        # =================================================
+        # -------------------------------------------------
         # FILTERS
-        # =================================================
+        # -------------------------------------------------
 
         search = request.args.get(
             "search",
             ""
         ).strip()
 
-
         opportunity_type = request.args.get(
-            "type",
+            "opportunity_type",
             ""
         ).strip().upper()
-
 
         work_mode = request.args.get(
             "work_mode",
             ""
         ).strip().upper()
 
+        # -------------------------------------------------
+        # STUDENT SKILLS
+        # -------------------------------------------------
 
-        # =================================================
-        # OPPORTUNITIES QUERY
-        # =================================================
+        cursor.execute("""
+            SELECT
+                skill_name,
+                proficiency_level,
+                assessment_percentage
+
+            FROM student_skills
+
+            WHERE student_id = %s
+        """, (student_id,))
+
+        student_skill_rows = cursor.fetchall()
+
+        student_skills = []
+
+        for skill in student_skill_rows:
+
+            skill_name = (
+                str(skill["skill_name"])
+                .strip()
+                .lower()
+            )
+
+            if skill_name:
+                student_skills.append(
+                    skill_name
+                )
+
+        # -------------------------------------------------
+        # APPLICATION MAP
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                opportunity_id,
+                status
+
+            FROM student_applications
+
+            WHERE student_id = %s
+        """, (student_id,))
+
+        application_rows = cursor.fetchall()
+
+        application_map = {}
+
+        for application in application_rows:
+
+            application_map[
+                application["opportunity_id"]
+            ] = application["status"]
+
+        # -------------------------------------------------
+        # BASE OPPORTUNITY QUERY
+        # -------------------------------------------------
 
         query = """
-
             SELECT
 
                 o.id,
@@ -27283,23 +34111,15 @@ def student_opportunities():
                 o.status,
 
                 o.created_at,
-                o.updated_at,
 
                 i.company_name,
                 i.company_type,
-                i.industry_sector,
-
-                sa.status AS application_status,
-                sa.application_date
+                i.industry_sector
 
             FROM opportunities o
 
             INNER JOIN industries i
                 ON o.industry_id = i.id
-
-            LEFT JOIN student_applications sa
-                ON sa.opportunity_id = o.id
-                AND sa.student_id = %s
 
             WHERE o.status = 'OPEN'
 
@@ -27309,293 +34129,441 @@ def student_opportunities():
                     o.application_deadline IS NULL
                     OR o.application_deadline >= CURDATE()
               )
-
         """
 
+        params = []
 
-        params = [
-            student_id
-        ]
-
-
-        # =================================================
-        # SEARCH FILTER
-        # =================================================
+        # -------------------------------------------------
+        # SEARCH
+        # -------------------------------------------------
 
         if search:
 
             query += """
-
                 AND (
-
                     o.title LIKE %s
-
                     OR o.description LIKE %s
-
                     OR o.required_skills LIKE %s
-
-                    OR o.eligibility_criteria LIKE %s
-
                     OR i.company_name LIKE %s
-
-                    OR i.industry_sector LIKE %s
-
                 )
-
             """
 
-
             search_value = (
-                f"%{search}%"
+                "%" + search + "%"
             )
 
-
             params.extend([
-
-                search_value,
-                search_value,
                 search_value,
                 search_value,
                 search_value,
                 search_value
-
             ])
 
-
-        # =================================================
-        # OPPORTUNITY TYPE FILTER
-        # =================================================
+        # -------------------------------------------------
+        # OPPORTUNITY TYPE
+        # -------------------------------------------------
 
         allowed_types = [
-
-            "JOB",
             "INTERNSHIP",
+            "PLACEMENT",
             "PROJECT",
             "TRAINING",
-            "COLLABORATION"
-
+            "JOB"
         ]
-
 
         if opportunity_type in allowed_types:
 
             query += """
-
                 AND o.opportunity_type = %s
-
             """
 
             params.append(
                 opportunity_type
             )
 
-
-        # =================================================
-        # WORK MODE FILTER
-        # =================================================
+        # -------------------------------------------------
+        # WORK MODE
+        # -------------------------------------------------
 
         allowed_work_modes = [
-
             "ONSITE",
             "REMOTE",
             "HYBRID"
-
         ]
-
 
         if work_mode in allowed_work_modes:
 
             query += """
-
                 AND o.work_mode = %s
-
             """
 
             params.append(
                 work_mode
             )
 
-
-        # =================================================
-        # SORTING
-        # =================================================
+        # -------------------------------------------------
+        # ORDER
+        # -------------------------------------------------
 
         query += """
 
             ORDER BY
 
                 CASE
-
                     WHEN o.application_deadline IS NULL
                     THEN 1
-
                     ELSE 0
-
                 END,
 
                 o.application_deadline ASC,
 
                 o.created_at DESC
-
         """
-
 
         cursor.execute(
             query,
             params
         )
 
-
         opportunities = cursor.fetchall()
 
+        # -------------------------------------------------
+        # PROCESS EACH OPPORTUNITY
+        # -------------------------------------------------
 
-        # =================================================
-        # TOTAL OPEN OPPORTUNITIES
-        # =================================================
+        processed_opportunities = []
 
-        cursor.execute("""
-            SELECT COUNT(*) AS total
+        for opportunity in opportunities:
 
-            FROM opportunities o
+            # ---------------------------------------------
+            # REQUIRED SKILLS
+            # ---------------------------------------------
 
-            INNER JOIN industries i
-                ON o.industry_id = i.id
+            required_text = (
+                opportunity["required_skills"]
+                or ""
+            )
 
-            WHERE o.status = 'OPEN'
+            required_text = (
+                required_text
+                .replace(";", ",")
+                .replace("\n", ",")
+            )
 
-              AND i.status = 'ACTIVE'
+            required_skills = [
+                skill.strip().lower()
+                for skill in required_text.split(",")
+                if skill.strip()
+            ]
 
-              AND (
-                    o.application_deadline IS NULL
-                    OR o.application_deadline >= CURDATE()
-              )
-        """)
+            # ---------------------------------------------
+            # MATCHED SKILLS
+            # ---------------------------------------------
 
+            matched_skills = []
 
-        result = cursor.fetchone()
+            for required_skill in required_skills:
 
+                for student_skill in student_skills:
 
-        total_opportunities = (
-            result["total"]
-            if result
-            else 0
+                    if (
+                        required_skill in student_skill
+                        or
+                        student_skill in required_skill
+                    ):
+
+                        matched_skills.append(
+                            required_skill
+                        )
+
+                        break
+
+            # Remove duplicates
+            matched_skills = list(
+                dict.fromkeys(
+                    matched_skills
+                )
+            )
+
+            # ---------------------------------------------
+            # SKILL MATCH PERCENTAGE
+            # ---------------------------------------------
+
+            if required_skills:
+
+                skill_match_percentage = round(
+                    (
+                        len(matched_skills)
+                        /
+                        len(required_skills)
+                    ) * 100,
+                    2
+                )
+
+            else:
+
+                skill_match_percentage = 100
+
+            # ---------------------------------------------
+            # MISSING SKILLS
+            # ---------------------------------------------
+
+            missing_skills = [
+                skill
+                for skill in required_skills
+                if skill not in matched_skills
+            ]
+
+            # ---------------------------------------------
+            # CGPA ELIGIBILITY
+            # ---------------------------------------------
+
+            criteria_text = (
+                opportunity[
+                    "eligibility_criteria"
+                ]
+                or ""
+            ).lower()
+
+            cgpa_ok = True
+
+            cgpa_matches = re.findall(
+                r'(?:minimum\s*)?cgpa'
+                r'\s*(?:>=|>|:|is|of)?'
+                r'\s*(\d+(?:\.\d+)?)',
+                criteria_text
+            )
+
+            if cgpa_matches:
+
+                required_cgpa = float(
+                    cgpa_matches[0]
+                )
+
+                if student["cgpa"] is None:
+
+                    cgpa_ok = False
+
+                else:
+
+                    cgpa_ok = (
+                        float(student["cgpa"])
+                        >= required_cgpa
+                    )
+
+            # ---------------------------------------------
+            # BACKLOG ELIGIBILITY
+            # ---------------------------------------------
+
+            backlog_ok = True
+
+            if student["active_backlogs"]:
+
+                try:
+
+                    backlog_ok = (
+                        int(
+                            student[
+                                "active_backlogs"
+                            ]
+                        ) == 0
+                    )
+
+                except (ValueError, TypeError):
+
+                    backlog_ok = False
+
+            # ---------------------------------------------
+            # SKILL ELIGIBILITY
+            #
+            # Existing project logic considers a student
+            # skill-eligible when at least one required
+            # skill matches.
+            # ---------------------------------------------
+
+            skills_ok = (
+                not required_skills
+                or bool(matched_skills)
+            )
+
+            # ---------------------------------------------
+            # FINAL ELIGIBILITY
+            # ---------------------------------------------
+
+            eligible = (
+                cgpa_ok
+                and backlog_ok
+                and skills_ok
+            )
+
+            # ---------------------------------------------
+            # APPLICATION STATUS
+            # ---------------------------------------------
+
+            application_status = (
+                application_map.get(
+                    opportunity["id"]
+                )
+            )
+
+            # ---------------------------------------------
+            # DEADLINE DAYS
+            # ---------------------------------------------
+
+            deadline = (
+                opportunity[
+                    "application_deadline"
+                ]
+            )
+
+            days_left = None
+
+            if deadline:
+
+                try:
+
+                    days_left = (
+                        deadline
+                        - datetime.now().date()
+                    ).days
+
+                except Exception:
+
+                    days_left = None
+
+            # ---------------------------------------------
+            # ATTACH CALCULATED DATA
+            # ---------------------------------------------
+
+            opportunity[
+                "required_skills_list"
+            ] = required_skills
+
+            opportunity[
+                "matched_skills"
+            ] = matched_skills
+
+            opportunity[
+                "missing_skills"
+            ] = missing_skills
+
+            opportunity[
+                "skill_match_percentage"
+            ] = skill_match_percentage
+
+            opportunity[
+                "cgpa_ok"
+            ] = cgpa_ok
+
+            opportunity[
+                "backlog_ok"
+            ] = backlog_ok
+
+            opportunity[
+                "skills_ok"
+            ] = skills_ok
+
+            opportunity[
+                "eligible"
+            ] = eligible
+
+            opportunity[
+                "application_status"
+            ] = application_status
+
+            opportunity[
+                "days_left"
+            ] = days_left
+
+            processed_opportunities.append(
+                opportunity
+            )
+
+        # -------------------------------------------------
+        # STATS
+        # -------------------------------------------------
+
+        total_opportunities = len(
+            processed_opportunities
         )
 
-
-        # =================================================
-        # ACTIVE DEADLINES
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM opportunities o
-
-            INNER JOIN industries i
-                ON o.industry_id = i.id
-
-            WHERE o.status = 'OPEN'
-
-              AND i.status = 'ACTIVE'
-
-              AND o.application_deadline IS NOT NULL
-
-              AND o.application_deadline >= CURDATE()
-        """)
-
-
-        result = cursor.fetchone()
-
-
-        active_deadlines = (
-            result["total"]
-            if result
-            else 0
+        eligible_opportunities = sum(
+            1
+            for opportunity
+            in processed_opportunities
+            if opportunity["eligible"]
         )
 
-
-        # =================================================
-        # TOTAL STUDENT APPLICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM student_applications
-
-            WHERE student_id = %s
-        """, (
-            student_id,
-        ))
-
-
-        result = cursor.fetchone()
-
-
-        total_applications = (
-            result["total"]
-            if result
-            else 0
+        high_match_opportunities = sum(
+            1
+            for opportunity
+            in processed_opportunities
+            if opportunity[
+                "skill_match_percentage"
+            ] >= 75
         )
 
-
-        # =================================================
-        # SHORTLISTED APPLICATIONS
-        # =================================================
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-
-            FROM student_applications
-
-            WHERE student_id = %s
-
-              AND status = 'SHORTLISTED'
-        """, (
-            student_id,
-        ))
-
-
-        result = cursor.fetchone()
-
-
-        shortlisted_applications = (
-            result["total"]
-            if result
-            else 0
+        active_deadlines = sum(
+            1
+            for opportunity
+            in processed_opportunities
+            if (
+                opportunity["application_deadline"]
+                is not None
+            )
         )
 
+        total_applications = len(
+            application_rows
+        )
 
-        # =================================================
-        # RENDER
-        # =================================================
+        shortlisted_applications = sum(
+            1
+            for application
+            in application_rows
+            if application["status"]
+            == "SHORTLISTED"
+        )
 
         return render_template(
 
-            "student/opportunities/opportunities.html",
+            "student/opportunities.html",
 
             dashboard="opportunities",
+            active_page="opportunities",
 
             student=student,
 
-            opportunities=opportunities,
+            opportunities=
+                processed_opportunities,
 
-            total_opportunities=total_opportunities,
+            total_opportunities=
+                total_opportunities,
 
-            active_deadlines=active_deadlines,
+            eligible_opportunities=
+                eligible_opportunities,
 
-            total_applications=total_applications,
+            high_match_opportunities=
+                high_match_opportunities,
 
-            shortlisted_applications=shortlisted_applications,
+            active_deadlines=
+                active_deadlines,
+
+            total_applications=
+                total_applications,
+
+            shortlisted_applications=
+                shortlisted_applications,
 
             search=search,
 
-            opportunity_type=opportunity_type,
+            opportunity_type=
+                opportunity_type,
 
-            work_mode=work_mode
+            work_mode=
+                work_mode
 
         )
-
 
     except mysql.connector.Error as e:
 
@@ -27605,17 +34573,14 @@ def student_opportunities():
         print(e)
         print("=" * 70)
 
-
         flash(
             "Unable to load opportunities.",
             "error"
         )
 
-
         return redirect(
             url_for("student_dashboard")
         )
-
 
     except Exception as e:
 
@@ -27625,362 +34590,440 @@ def student_opportunities():
         print(e)
         print("=" * 70)
 
-
         flash(
             "Unable to load opportunities.",
             "error"
         )
 
-
         return redirect(
             url_for("student_dashboard")
         )
 
-
     finally:
 
         if cursor:
-
             cursor.close()
 
-
         if conn:
-
             conn.close()
 
 
-
 # =========================================================
-# STUDENT - OPPORTUNITY DETAIL
+# PHASE 4.2 - STUDENT OPPORTUNITY DETAILS
 # =========================================================
 
-@app.route(
-    "/student/opportunities/<opportunity_id>"
-)
+@app.route("/student/opportunities/<opportunity_id>")
 @student_required
-def student_opportunity_detail(
-    opportunity_id
-):
+def student_opportunity_detail(opportunity_id):
 
-    conn = None
+    connection = None
     cursor = None
 
     try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
 
-        # =================================================
-        # CURRENT USER
-        # =================================================
+        # -------------------------------------------------
+        # GET ACTUAL STUDENT ID
+        # -------------------------------------------------
 
-        user_id = session.get(
-            "user_id"
-        )
-
-
-        if not user_id:
-
-            flash(
-                "Student session expired. Please login again.",
-                "error"
-            )
-
-            return redirect(
-                url_for("login")
-            )
-
-
-        # =================================================
-        # DATABASE
-        # =================================================
-
-        conn = get_db_connection()
-
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
-
-        # =================================================
-        # CURRENT STUDENT
-        # =================================================
+        user_id = session.get("user_id")
 
         cursor.execute("""
-            SELECT
-
-                s.id AS student_id,
-                s.college_id,
-                s.course,
-                s.branch,
-                s.semester,
-                s.cgpa,
-                s.active_backlogs,
-                s.profile_completed,
-                s.resume_url,
-
-                u.name,
-                u.email
-
-            FROM students s
-
-            INNER JOIN users u
-                ON s.user_id = u.id
-
-            WHERE s.user_id = %s
-
+            SELECT id
+            FROM students
+            WHERE user_id = %s
             LIMIT 1
-        """, (
-            user_id,
-        ))
+        """, (user_id,))
+
+        student_row = cursor.fetchone()
+
+        if not student_row:
+            return "Student profile not found.", 404
+
+        student_id = student_row["id"]
 
 
-        student = cursor.fetchone()
+        # -------------------------------------------------
+        # GET STUDENT SKILLS
+        # -------------------------------------------------
 
+        cursor.execute("""
+            SELECT skill_name, proficiency_level
+            FROM student_skills
+            WHERE student_id = %s
+        """, (student_id,))
 
-        if not student:
+        student_skill_rows = cursor.fetchall()
 
-            flash(
-                "Student profile not found.",
-                "error"
-            )
+        student_skills = {
+            str(row["skill_name"]).strip().lower()
+            for row in student_skill_rows
+            if row.get("skill_name")
+        }
 
-            return redirect(
-                url_for("student_dashboard")
-            )
-
-
-        student_id = student[
-            "student_id"
-        ]
-
-
-        # =================================================
-        # OPPORTUNITY DETAIL
-        # =================================================
+        # -------------------------------------------------
+        # GET OPPORTUNITY
+        # -------------------------------------------------
 
         cursor.execute("""
             SELECT
-
                 o.id,
                 o.industry_id,
-
                 o.title,
                 o.opportunity_type,
                 o.description,
-
                 o.required_skills,
                 o.eligibility_criteria,
-
                 o.location,
                 o.work_mode,
-
                 o.stipend,
                 o.package,
-
                 o.application_deadline,
                 o.status,
-
                 o.created_at,
                 o.updated_at,
 
                 i.company_name,
-                i.company_type,
-                i.industry_sector,
-
-                sa.id AS application_id,
-                sa.status AS application_status,
-                sa.application_date,
-                sa.resume_url AS application_resume_url,
-                sa.cover_letter
+                i.industry_sector
 
             FROM opportunities o
 
-            INNER JOIN industries i
+            JOIN industries i
                 ON o.industry_id = i.id
 
-            LEFT JOIN student_applications sa
-                ON sa.opportunity_id = o.id
-                AND sa.student_id = %s
-
             WHERE o.id = %s
-
-              AND i.status = 'ACTIVE'
-
-            LIMIT 1
-        """, (
-
-            student_id,
-
-            opportunity_id
-
-        ))
-
+              AND o.status = 'OPEN'
+        """, (opportunity_id,))
 
         opportunity = cursor.fetchone()
 
+        # -------------------------------------------------
+        # OPPORTUNITY NOT FOUND
+        # -------------------------------------------------
 
         if not opportunity:
+            return "OPPORTUNITY NOT FOUND", 404
+        # -------------------------------------------------
+        # PARSE REQUIRED SKILLS
+        # -------------------------------------------------
 
-            flash(
-                "Opportunity not found or no longer available.",
-                "error"
+        required_skills = []
+
+        raw_required_skills = opportunity.get("required_skills")
+
+        if raw_required_skills:
+
+            required_skills = [
+                skill.strip()
+                for skill in re.split(
+                    r"[,;\n]+",
+                    raw_required_skills
+                )
+                if skill.strip()
+            ]
+
+        # -------------------------------------------------
+        # SKILL MATCH
+        # -------------------------------------------------
+
+        matched_skills = []
+        missing_skills = []
+
+        for required_skill in required_skills:
+
+            required_lower = required_skill.lower()
+
+            matched = False
+
+            for student_skill in student_skills:
+
+                if (
+                    required_lower in student_skill
+                    or student_skill in required_lower
+                ):
+                    matched = True
+                    break
+
+            if matched:
+                matched_skills.append(required_skill)
+            else:
+                missing_skills.append(required_skill)
+
+        # -------------------------------------------------
+        # MATCH PERCENTAGE
+        # -------------------------------------------------
+
+        if required_skills:
+
+            skill_match_percentage = round(
+                (
+                    len(matched_skills)
+                    / len(required_skills)
+                ) * 100,
+                2
             )
 
-            return redirect(
-                url_for("student_opportunities")
+        else:
+
+            skill_match_percentage = 100.0
+
+        # -------------------------------------------------
+        # STUDENT BASIC ELIGIBILITY DATA
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT 
+                s.id AS student_id, 
+                s.college_id, 
+                s.course, 
+                s.branch, 
+                s.semester, 
+                s.cgpa, 
+                s.active_backlogs, 
+                s.profile_completed, 
+                s.resume_url, 
+
+                u.name, 
+                u.email 
+
+            FROM students s 
+
+            INNER JOIN users u 
+                ON s.user_id = u.id 
+
+            WHERE s.user_id = %s 
+
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "STUDENT PROFILE NOT FOUND FOR CURRENT USER", 404
+        # -------------------------------------------------
+        # ELIGIBILITY
+        # -------------------------------------------------
+
+        cgpa_ok = True
+        backlog_ok = True
+        skills_ok = True
+
+        eligibility_text = (
+            opportunity.get("eligibility_criteria")
+            or ""
+        )
+
+        # -----------------------------------------------
+        # CGPA CHECK
+        # -----------------------------------------------
+
+        cgpa_match = re.search(
+            r"cgpa\s*(?:>=|>|:)?\s*(\d+(?:\.\d+)?)",
+            eligibility_text,
+            re.IGNORECASE
+        )
+
+        if cgpa_match:
+
+            required_cgpa = float(
+                cgpa_match.group(1)
             )
 
+            student_cgpa = float(
+                student.get("cgpa") or 0
+            )
 
-        # =================================================
-        # EXPIRED CHECK
-        # =================================================
+            cgpa_ok = student_cgpa >= required_cgpa
 
-        if (
-            opportunity["application_deadline"]
-            and
-            opportunity["application_deadline"]
-            < datetime.now().date()
+        # -----------------------------------------------
+        # BACKLOG CHECK
+        # -----------------------------------------------
+
+        if re.search(
+            r"no\s+backlog|no\s+active\s+backlog|zero\s+backlog",
+            eligibility_text,
+            re.IGNORECASE
         ):
 
-            flash(
-                "The application deadline has passed.",
-                "error"
+            active_backlogs = int(
+                student.get("active_backlogs") or 0
             )
 
-            return redirect(
-                url_for("student_opportunities")
+            backlog_ok = active_backlogs == 0
+
+        # -----------------------------------------------
+        # SKILL CHECK
+        # -----------------------------------------------
+
+        if required_skills:
+
+            skills_ok = len(matched_skills) > 0
+
+        # -------------------------------------------------
+        # FINAL ELIGIBILITY
+        # -------------------------------------------------
+
+        eligible = (
+            cgpa_ok
+            and backlog_ok
+            and skills_ok
+        )
+
+        # -------------------------------------------------
+        # DAYS LEFT
+        # -------------------------------------------------
+
+        days_left = None
+
+        if opportunity.get("application_deadline"):
+
+            from datetime import date
+
+            deadline = opportunity[
+                "application_deadline"
+            ]
+
+            days_left = (
+                deadline - date.today()
+            ).days
+
+        # -------------------------------------------------
+        # APPLICATION STATUS
+        # -------------------------------------------------
+
+        application_status = None
+
+        cursor.execute("""
+            SELECT status
+            FROM student_applications
+            WHERE student_id = %s
+              AND opportunity_id = %s
+            LIMIT 1
+        """, (
+            student_id,
+            opportunity_id
+        ))
+
+        application = cursor.fetchone()
+
+        if application:
+
+            application_status = application.get(
+                "status"
             )
 
+        # -------------------------------------------------
+        # ADD CALCULATED DATA
+        # -------------------------------------------------
 
-        # =================================================
-        # RENDER DETAIL PAGE
-        # =================================================
+        opportunity[
+            "required_skills_list"
+        ] = required_skills
+
+        opportunity[
+            "matched_skills"
+        ] = matched_skills
+
+        opportunity[
+            "missing_skills"
+        ] = missing_skills
+
+        opportunity[
+            "skill_match_percentage"
+        ] = skill_match_percentage
+
+        opportunity[
+            "cgpa_ok"
+        ] = cgpa_ok
+
+        opportunity[
+            "backlog_ok"
+        ] = backlog_ok
+
+        opportunity[
+            "skills_ok"
+        ] = skills_ok
+
+        opportunity[
+            "eligible"
+        ] = eligible
+
+        opportunity[
+            "days_left"
+        ] = days_left
+
+        opportunity[
+            "application_status"
+        ] = application_status
+
+        # -------------------------------------------------
+        # RENDER DETAILS PAGE
+        # -------------------------------------------------
 
         return render_template(
-
-            "student/opportunities/opportunity_detail.html",
-
-            dashboard="opportunities",
-
-            student=student,
-
-            opportunity=opportunity
-
+            "student/opportunity_detail.html",
+            opportunity=opportunity,
+            student=student
         )
-
-
-    except mysql.connector.Error as e:
-
-        print("=" * 70)
-        print("STUDENT OPPORTUNITY DETAIL DATABASE ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-
-        flash(
-            "Unable to load opportunity details.",
-            "error"
-        )
-
-
-        return redirect(
-            url_for("student_opportunities")
-        )
-
 
     except Exception as e:
-
-        print("=" * 70)
-        print("STUDENT OPPORTUNITY DETAIL ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-
-        flash(
-            "Unable to load opportunity details.",
-            "error"
-        )
-
-
-        return redirect(
-            url_for("student_opportunities")
-        )
-
+        print("STUDENT OPPORTUNITY DETAIL ERROR:", repr(e))
+        import traceback
+        traceback.print_exc()
+        return f"STUDENT OPPORTUNITY DETAIL ERROR: {e}", 500
 
     finally:
 
         if cursor:
-
             cursor.close()
 
-
-        if conn:
-
-            conn.close()
-
+        if connection:
+            connection.close()
 
 
 # =========================================================
-# STUDENT - APPLY TO OPPORTUNITY
+# PHASE 4.3 - STUDENT APPLICATIONS
 # =========================================================
+# ---------------------------------------------------------
+# APPLY FOR OPPORTUNITY
+# ---------------------------------------------------------
 
 @app.route(
     "/student/opportunities/<opportunity_id>/apply",
     methods=["POST"]
 )
 @student_required
-def student_apply_opportunity(
-    opportunity_id
-):
+def student_apply_opportunity(opportunity_id):
 
-    conn = None
+    connection = None
     cursor = None
 
     try:
 
-        # =================================================
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # -------------------------------------------------
         # CURRENT USER
-        # =================================================
+        # -------------------------------------------------
 
-        user_id = session.get(
-            "user_id"
-        )
+        user_id = session.get("user_id")
 
 
-        if not user_id:
-
-            flash(
-                "Student session expired. Please login again.",
-                "error"
-            )
-
-            return redirect(
-                url_for("login")
-            )
-
-
-        # =================================================
-        # DATABASE
-        # =================================================
-
-        conn = get_db_connection()
-
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
-
-        # =================================================
-        # CURRENT STUDENT
-        # =================================================
+        # -------------------------------------------------
+        # GET ACTUAL STUDENT
+        # -------------------------------------------------
 
         cursor.execute("""
             SELECT
-
                 s.id AS student_id,
+                s.course,
+                s.branch,
+                s.semester,
+                s.cgpa,
+                s.active_backlogs,
                 s.resume_url,
-                s.profile_completed,
-
                 u.name,
                 u.email
 
@@ -27992,195 +35035,112 @@ def student_apply_opportunity(
             WHERE s.user_id = %s
 
             LIMIT 1
-        """, (
-            user_id,
-        ))
-
+        """, (user_id,))
 
         student = cursor.fetchone()
 
-
         if not student:
+            return "Student profile not found.", 404
 
-            flash(
-                "Student profile not found.",
-                "error"
-            )
-
-            return redirect(
-                url_for("student_opportunities")
-            )
+        student_id = student["student_id"]
 
 
-        student_id = student[
-            "student_id"
-        ]
-
-
-        # =================================================
-        # OPPORTUNITY
-        # =================================================
+        # -------------------------------------------------
+        # GET OPPORTUNITY
+        # -------------------------------------------------
 
         cursor.execute("""
             SELECT
-
                 o.id,
                 o.title,
-
+                o.opportunity_type,
                 o.application_deadline,
-                o.status,
-
-                i.company_name,
-                i.status AS industry_status
+                o.status
 
             FROM opportunities o
-
-            INNER JOIN industries i
-                ON o.industry_id = i.id
 
             WHERE o.id = %s
 
             LIMIT 1
-        """, (
-            opportunity_id,
-        ))
-
+        """, (opportunity_id,))
 
         opportunity = cursor.fetchone()
 
-
         if not opportunity:
-
-            flash(
-                "Opportunity not found.",
-                "error"
-            )
-
-            return redirect(
-                url_for("student_opportunities")
-            )
+            return "Opportunity not found.", 404
 
 
-        # =================================================
-        # INDUSTRY STATUS
-        # =================================================
+        # -------------------------------------------------
+        # STATUS CHECK
+        # -------------------------------------------------
 
-        if opportunity[
-            "industry_status"
-        ] != "ACTIVE":
+        if opportunity["status"] != "OPEN":
 
-            flash(
-                "This industry is currently inactive.",
-                "error"
-            )
-
-            return redirect(
-                url_for("student_opportunities")
+            return (
+                "This opportunity is no longer open for applications.",
+                400
             )
 
 
-        # =================================================
-        # OPPORTUNITY STATUS
-        # =================================================
-
-        if opportunity[
-            "status"
-        ] != "OPEN":
-
-            flash(
-                "This opportunity is no longer open.",
-                "error"
-            )
-
-            return redirect(
-                url_for("student_opportunities")
-            )
-
-
-        # =================================================
+        # -------------------------------------------------
         # DEADLINE CHECK
-        # =================================================
+        # -------------------------------------------------
 
-        application_deadline = (
-            opportunity[
-                "application_deadline"
-            ]
-        )
+        if opportunity["application_deadline"]:
 
+            from datetime import date
 
-        if (
-            application_deadline
-            and
-            application_deadline
-            < datetime.now().date()
-        ):
+            if opportunity["application_deadline"] < date.today():
 
-            flash(
-                "The application deadline has passed.",
-                "error"
-            )
-
-            return redirect(
-                url_for("student_opportunities")
-            )
+                return (
+                    "Application deadline has passed.",
+                    400
+                )
 
 
-        # =================================================
-        # CHECK EXISTING APPLICATION
-        # =================================================
+        # -------------------------------------------------
+        # DUPLICATE APPLICATION CHECK
+        # -------------------------------------------------
 
         cursor.execute("""
             SELECT
-
                 id,
                 status
 
             FROM student_applications
 
             WHERE student_id = %s
-
               AND opportunity_id = %s
 
             LIMIT 1
         """, (
-
             student_id,
-
             opportunity_id
-
         ))
 
-
-        existing_application = (
-            cursor.fetchone()
-        )
+        existing_application = cursor.fetchone()
 
 
         if existing_application:
 
-            existing_status = (
-                existing_application[
-                    "status"
-                ]
-            )
-
-
-            flash(
-                f"You have already applied to this opportunity. Status: {existing_status}.",
-                "error"
-            )
-
             return redirect(
                 url_for(
-                    "student_opportunity_detail",
-                    opportunity_id=opportunity_id
+                    "student_application_detail",
+                    application_id=existing_application["id"]
                 )
             )
 
 
-        # =================================================
+        # -------------------------------------------------
+        # RESUME
+        # -------------------------------------------------
+
+        resume_url = student.get("resume_url")
+
+
+        # -------------------------------------------------
         # COVER LETTER
-        # =================================================
+        # -------------------------------------------------
 
         cover_letter = request.form.get(
             "cover_letter",
@@ -28188,307 +35148,133 @@ def student_apply_opportunity(
         ).strip()
 
 
-        # =================================================
-        # APPLICATION ID
-        # =================================================
+        # -------------------------------------------------
+        # CREATE APPLICATION
+        # -------------------------------------------------
 
-        application_id = str(
-            uuid.uuid4()
-        )
-
-
-        # =================================================
-        # INSERT APPLICATION
-        # =================================================
+        application_id = str(uuid.uuid4())
 
         cursor.execute("""
-            INSERT INTO student_applications (
-
+            INSERT INTO student_applications
+            (
                 id,
                 student_id,
                 opportunity_id,
-
                 application_date,
                 status,
-
                 resume_url,
                 cover_letter
-
             )
 
-            VALUES (
-
+            VALUES
+            (
                 %s,
                 %s,
                 %s,
-
-                NOW(),
+                CURRENT_TIMESTAMP,
                 'APPLIED',
-
                 %s,
-                NULLIF(%s, '')
-
+                %s
             )
         """, (
-
             application_id,
-
             student_id,
-
             opportunity_id,
-
-            student[
-                "resume_url"
-            ],
-
+            resume_url,
             cover_letter
-
         ))
 
 
-        # =================================================
-        # COMMIT
-        # =================================================
-
-        conn.commit()
+        connection.commit()
 
 
-        # =================================================
-        # SUCCESS
-        # =================================================
-
-        flash(
-            f"Application submitted successfully for {opportunity['title']}.",
-            "success"
-        )
-
+        # -------------------------------------------------
+        # REDIRECT TO APPLICATION DETAIL
+        # -------------------------------------------------
 
         return redirect(
             url_for(
-                "student_opportunity_detail",
-                opportunity_id=opportunity_id
-            )
-        )
-
-
-    except mysql.connector.Error as e:
-
-        if conn:
-
-            conn.rollback()
-
-
-        print("=" * 70)
-        print("STUDENT APPLICATION DATABASE ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-
-        flash(
-            "Unable to submit application.",
-            "error"
-        )
-
-
-        return redirect(
-            url_for(
-                "student_opportunity_detail",
-                opportunity_id=opportunity_id
+                "student_application_detail",
+                application_id=application_id
             )
         )
 
 
     except Exception as e:
 
-        if conn:
+        if connection:
+            connection.rollback()
 
-            conn.rollback()
-
-
-        print("=" * 70)
-        print("STUDENT APPLICATION ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-
-        flash(
-            "Unable to submit application.",
-            "error"
+        print(
+            "STUDENT APPLY OPPORTUNITY ERROR:",
+            repr(e)
         )
 
+        import traceback
+        traceback.print_exc()
 
-        return redirect(
-            url_for(
-                "student_opportunity_detail",
-                opportunity_id=opportunity_id
-            )
+        return (
+            f"STUDENT APPLY OPPORTUNITY ERROR: {e}",
+            500
         )
 
 
     finally:
 
         if cursor:
-
             cursor.close()
 
-
-        if conn:
-
-            conn.close()
+        if connection:
+            connection.close()
 
 
-# =========================================================
-# STUDENT MODULE - APPLICATIONS
-# =========================================================
-
-
-# =========================================================
-# STUDENT - MY APPLICATIONS
-# =========================================================
+# ---------------------------------------------------------
+# MY APPLICATIONS
+# ---------------------------------------------------------
 
 @app.route("/student/applications")
 @student_required
 def student_applications():
 
-    conn = None
+    connection = None
     cursor = None
 
     try:
-
-        # =================================================
-        # CURRENT USER
-        # =================================================
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
 
         user_id = session.get("user_id")
 
-        if not user_id:
-
-            flash(
-                "Student session expired. Please login again.",
-                "error"
-            )
-
-            return redirect(
-                url_for("login")
-            )
-
-
-        # =================================================
-        # DATABASE
-        # =================================================
-
-        conn = get_db_connection()
-
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
-
-        # =================================================
-        # CURRENT STUDENT
-        # =================================================
-
         cursor.execute("""
-            SELECT
-
-                s.id AS student_id,
-                s.college_id,
-                s.course,
-                s.branch,
-                s.semester,
-                s.cgpa,
-                s.profile_completed,
-
-                u.name,
-                u.email
-
+            SELECT s.id
             FROM students s
-
-            INNER JOIN users u
-                ON s.user_id = u.id
-
             WHERE s.user_id = %s
-
             LIMIT 1
-        """, (
-            user_id,
-        ))
-
+        """, (user_id,))
 
         student = cursor.fetchone()
 
-
         if not student:
+            return "Student profile not found", 404
 
-            flash(
-                "Student profile not found.",
-                "error"
-            )
+        student_id = student["id"]
 
-            return redirect(
-                url_for("student_dashboard")
-            )
-
-
-        student_id = student[
-            "student_id"
-        ]
-
-
-        # =================================================
-        # FILTERS
-        # =================================================
-
-        search = request.args.get(
-            "search",
-            ""
-        ).strip()
-
-
-        application_status = request.args.get(
-            "status",
-            ""
-        ).strip().upper()
-
-
-        # =================================================
-        # APPLICATION QUERY
-        # =================================================
-
-        query = """
-
+        cursor.execute("""
             SELECT
-
-                sa.id AS application_id,
-
-                sa.student_id,
-                sa.opportunity_id,
-
+                sa.id,
                 sa.application_date,
                 sa.status,
-
                 sa.resume_url,
                 sa.cover_letter,
 
+                o.id AS opportunity_id,
                 o.title,
                 o.opportunity_type,
-                o.description,
-
-                o.required_skills,
                 o.location,
                 o.work_mode,
-
-                o.stipend,
-                o.package,
-
                 o.application_deadline,
-                o.status AS opportunity_status,
 
-                i.id AS industry_id,
                 i.company_name,
-                i.company_type,
                 i.industry_sector
 
             FROM student_applications sa
@@ -28501,270 +35287,1110 @@ def student_applications():
 
             WHERE sa.student_id = %s
 
-        """
+            ORDER BY sa.application_date DESC
+        """, (student_id,))
 
+        applications = cursor.fetchall()
+
+        return render_template(
+            "student/applications.html",
+            applications=applications
+        )
+
+    except Exception as e:
+
+        print(
+            "STUDENT APPLICATIONS ERROR:",
+            repr(e)
+        )
+
+        import traceback
+        traceback.print_exc()
+
+        return f"STUDENT APPLICATIONS ERROR: {e}", 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# ---------------------------------------------------------
+# APPLICATION DETAIL
+# ---------------------------------------------------------
+
+@app.route("/student/applications/<application_id>")
+@student_required
+def student_application_detail(application_id):
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        user_id = session.get("user_id")
+
+        cursor.execute("""
+            SELECT s.id
+            FROM students s
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        cursor.execute("""
+            SELECT
+                sa.id,
+                sa.application_date,
+                sa.status,
+                sa.resume_url,
+                sa.cover_letter,
+                sa.created_at,
+                sa.updated_at,
+
+                o.id AS opportunity_id,
+                o.title,
+                o.opportunity_type,
+                o.description,
+                o.required_skills,
+                o.eligibility_criteria,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+                o.application_deadline,
+
+                i.company_name,
+                i.industry_sector
+
+            FROM student_applications sa
+
+            INNER JOIN opportunities o
+                ON sa.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON o.industry_id = i.id
+
+            WHERE sa.id = %s
+              AND sa.student_id = %s
+
+            LIMIT 1
+        """, (
+            application_id,
+            student_id
+        ))
+
+        application = cursor.fetchone()
+
+        if not application:
+            return "Application not found", 404
+
+        return render_template(
+            "student/application_detail.html",
+            application=application
+        )
+
+    except Exception as e:
+
+        print(
+            "STUDENT APPLICATION DETAIL ERROR:",
+            repr(e)
+        )
+
+        import traceback
+        traceback.print_exc()
+
+        return f"STUDENT APPLICATION DETAIL ERROR: {e}", 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# ---------------------------------------------------------
+# WITHDRAW APPLICATION
+# ---------------------------------------------------------
+
+@app.route(
+    "/student/applications/<application_id>/withdraw",
+    methods=["POST"]
+)
+@student_required
+def student_withdraw_application(application_id):
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        user_id = session.get("user_id")
+
+        cursor.execute("""
+            SELECT s.id
+            FROM students s
+            WHERE s.user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        cursor.execute("""
+            SELECT id, status
+            FROM student_applications
+            WHERE id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (
+            application_id,
+            student_id
+        ))
+
+        application = cursor.fetchone()
+
+        if not application:
+            return "Application not found", 404
+
+        # Only active APPLIED applications can be withdrawn
+
+        if application["status"] != "APPLIED":
+
+            return redirect(
+                url_for(
+                    "student_application_detail",
+                    application_id=application_id
+                )
+            )
+
+        cursor.execute("""
+            UPDATE student_applications
+            SET
+                status = 'WITHDRAWN',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+              AND student_id = %s
+        """, (
+            application_id,
+            student_id
+        ))
+
+        connection.commit()
+
+        return redirect(
+            url_for(
+                "student_application_detail",
+                application_id=application_id
+            )
+        )
+
+    except Exception as e:
+
+        if connection:
+            connection.rollback()
+
+        print(
+            "STUDENT WITHDRAW APPLICATION ERROR:",
+            repr(e)
+        )
+
+        import traceback
+        traceback.print_exc()
+
+        return f"STUDENT WITHDRAW APPLICATION ERROR: {e}", 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
+# PHASE 5.1 - STUDENT INTERNSHIPS
+# =========================================================
+
+@app.route("/student/internships")
+@student_required
+def student_internships():
+
+    connection = None
+    cursor = None
+
+    try:
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT USER
+        # -------------------------------------------------
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            return redirect(url_for("login"))
+
+        # -------------------------------------------------
+        # GET ACTUAL STUDENT ID
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found.", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # SEARCH
+        # -------------------------------------------------
+
+        search = request.args.get(
+            "search",
+            ""
+        ).strip()
+
+        # -------------------------------------------------
+        # STATUS FILTER
+        # -------------------------------------------------
+
+        status_filter = request.args.get(
+            "status",
+            ""
+        ).strip().upper()
+
+        allowed_statuses = [
+            "OFFERED",
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "TERMINATED"
+        ]
+
+        if status_filter not in allowed_statuses:
+            status_filter = ""
+
+        # -------------------------------------------------
+        # BASE QUERY
+        # -------------------------------------------------
+
+        query = """
+            SELECT
+
+                ins.id,
+                ins.application_id,
+                ins.student_id,
+                ins.opportunity_id,
+                ins.industry_id,
+
+                ins.start_date,
+                ins.expected_end_date,
+                ins.actual_end_date,
+
+                ins.status,
+                ins.progress_percentage,
+
+                ins.created_at,
+                ins.updated_at,
+
+                o.title,
+                o.opportunity_type,
+                o.location,
+                o.work_mode,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector
+
+            FROM internships ins
+
+            INNER JOIN opportunities o
+                ON ins.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON ins.industry_id = i.id
+
+            WHERE ins.student_id = %s
+        """
 
         params = [
             student_id
         ]
 
-
-        # =================================================
-        # SEARCH
-        # =================================================
+        # -------------------------------------------------
+        # SEARCH FILTER
+        # -------------------------------------------------
 
         if search:
 
             query += """
-
                 AND (
-
                     o.title LIKE %s
-
                     OR i.company_name LIKE %s
-
-                    OR o.opportunity_type LIKE %s
-
-                    OR o.required_skills LIKE %s
-
                     OR i.industry_sector LIKE %s
-
                 )
-
             """
 
-
-            search_value = (
-                f"%{search}%"
-            )
-
+            search_value = "%" + search + "%"
 
             params.extend([
-
-                search_value,
-                search_value,
                 search_value,
                 search_value,
                 search_value
-
             ])
 
-
-        # =================================================
+        # -------------------------------------------------
         # STATUS FILTER
-        # =================================================
+        # -------------------------------------------------
 
-        allowed_statuses = [
-
-            "APPLIED",
-            "SHORTLISTED",
-            "SELECTED",
-            "REJECTED",
-            "WITHDRAWN"
-
-        ]
-
-
-        if application_status in allowed_statuses:
+        if status_filter:
 
             query += """
-
-                AND sa.status = %s
-
+                AND ins.status = %s
             """
 
             params.append(
-                application_status
+                status_filter
             )
 
-
-        # =================================================
+        # -------------------------------------------------
         # ORDER
-        # =================================================
+        # -------------------------------------------------
 
         query += """
-
             ORDER BY
-
-                sa.application_date DESC
-
+                CASE
+                    WHEN ins.status = 'IN_PROGRESS' THEN 1
+                    WHEN ins.status = 'ACCEPTED' THEN 2
+                    WHEN ins.status = 'OFFERED' THEN 3
+                    WHEN ins.status = 'COMPLETED' THEN 4
+                    ELSE 5
+                END,
+                ins.start_date DESC,
+                ins.created_at DESC
         """
-
 
         cursor.execute(
             query,
             params
         )
 
+        internships = cursor.fetchall()
 
-        applications = cursor.fetchall()
-
-
-        # =================================================
+        # -------------------------------------------------
         # STATISTICS
-        # =================================================
+        # -------------------------------------------------
 
         cursor.execute("""
             SELECT
-
                 COUNT(*) AS total,
 
                 SUM(
-                    CASE
-                        WHEN status = 'APPLIED'
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS applied,
+                    status = 'OFFERED'
+                ) AS offered_count,
 
                 SUM(
-                    CASE
-                        WHEN status = 'SHORTLISTED'
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS shortlisted,
+                    status = 'ACCEPTED'
+                ) AS accepted_count,
 
                 SUM(
-                    CASE
-                        WHEN status = 'SELECTED'
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS selected,
+                    status = 'IN_PROGRESS'
+                ) AS in_progress_count,
 
                 SUM(
-                    CASE
-                        WHEN status = 'REJECTED'
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS rejected
+                    status = 'COMPLETED'
+                ) AS completed_count,
 
-            FROM student_applications
+                SUM(
+                    status = 'TERMINATED'
+                ) AS terminated_count
+
+            FROM internships
 
             WHERE student_id = %s
-
         """, (
             student_id,
         ))
 
+        stats = cursor.fetchone()
 
-        statistics = cursor.fetchone()
+        # -------------------------------------------------
+        # NORMALIZE NULL COUNTS
+        # -------------------------------------------------
 
+        stats = stats or {}
 
-        # =================================================
-        # SAFE STAT VALUES
-        # =================================================
+        total = stats.get("total") or 0
+        offered = stats.get("offered_count") or 0
+        accepted = stats.get("accepted_count") or 0
+        in_progress = stats.get("in_progress_count") or 0
+        completed = stats.get("completed_count") or 0
+        terminated = stats.get("terminated_count") or 0
 
-        total_applications = (
-            statistics["total"]
-            or 0
-        )
-
-
-        applied_applications = (
-            statistics["applied"]
-            or 0
-        )
-
-
-        shortlisted_applications = (
-            statistics["shortlisted"]
-            or 0
-        )
-
-
-        selected_applications = (
-            statistics["selected"]
-            or 0
-        )
-
-
-        rejected_applications = (
-            statistics["rejected"]
-            or 0
-        )
-
-
-        # =================================================
+        # -------------------------------------------------
         # RENDER
-        # =================================================
+        # -------------------------------------------------
 
         return render_template(
+            "student/internships.html",
 
-            "student/applications/applications.html",
+            internships=internships,
 
-            dashboard="applications",
-
-            student=student,
-
-            applications=applications,
-
-            total_applications=total_applications,
-
-            applied_applications=applied_applications,
-
-            shortlisted_applications=shortlisted_applications,
-
-            selected_applications=selected_applications,
-
-            rejected_applications=rejected_applications,
+            total_internships=total,
+            offered_internships=offered,
+            accepted_internships=accepted,
+            in_progress_internships=in_progress,
+            completed_internships=completed,
+            terminated_internships=terminated,
 
             search=search,
+            status_filter=status_filter,
 
-            application_status=application_status
-
+            active_page="internships"
         )
-
-
-    # =====================================================
-    # DATABASE ERROR
-    # =====================================================
-
-    except mysql.connector.Error as e:
-
-        print("=" * 70)
-        print("STUDENT APPLICATIONS DATABASE ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-
-        flash(
-            "Unable to load your applications.",
-            "error"
-        )
-
-
-        return redirect(
-            url_for("student_dashboard")
-        )
-
-
-    # =====================================================
-    # GENERAL ERROR
-    # =====================================================
 
     except Exception as e:
 
-        print("=" * 70)
-        print("STUDENT APPLICATIONS ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-
-        flash(
-            "Unable to load your applications.",
-            "error"
+        print(
+            "STUDENT INTERNSHIPS ERROR:",
+            repr(e)
         )
 
+        import traceback
+        traceback.print_exc()
 
-        return redirect(
-            url_for("student_dashboard")
+        return (
+            f"STUDENT INTERNSHIPS ERROR: {e}",
+            500
         )
 
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
+# STUDENT INTERNSHIP DETAIL
+# =========================================================
+
+@app.route(
+    "/student/internships/<internship_id>"
+)
+@student_required
+def student_internship_detail(internship_id):
+
+    connection = None
+    cursor = None
+
+    try:
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        user_id = session.get("user_id")
+
+        # -------------------------------------------------
+        # GET STUDENT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (
+            user_id,
+        ))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found.", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # GET INTERNSHIP
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+
+                ins.id,
+                ins.application_id,
+                ins.student_id,
+                ins.opportunity_id,
+                ins.industry_id,
+
+                ins.start_date,
+                ins.expected_end_date,
+                ins.actual_end_date,
+
+                ins.status,
+                ins.progress_percentage,
+
+                ins.created_at,
+                ins.updated_at,
+
+                o.title,
+                o.opportunity_type,
+                o.description,
+                o.required_skills,
+                o.location,
+                o.work_mode,
+                o.stipend,
+                o.package,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+
+                i.website
+
+            FROM internships ins
+
+            INNER JOIN opportunities o
+                ON ins.opportunity_id = o.id
+
+            INNER JOIN industries i
+                ON ins.industry_id = i.id
+
+            WHERE ins.id = %s
+              AND ins.student_id = %s
+
+            LIMIT 1
+        """, (
+            internship_id,
+            student_id
+        ))
+
+        internship = cursor.fetchone()
+
+        if not internship:
+            return "Internship not found.", 404
+
+        # -------------------------------------------------
+        # PROGRESS RECORDS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                title,
+                description,
+                progress_percentage,
+                progress_date,
+                status,
+                created_at
+
+            FROM internship_progress
+
+            WHERE internship_id = %s
+
+            ORDER BY
+                progress_date DESC,
+                created_at DESC
+        """, (
+            internship_id,
+        ))
+
+        progress_records = cursor.fetchall()
+
+        # -------------------------------------------------
+        # MENTORS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                mentor_name,
+                mentor_email,
+                mentor_phone,
+                designation,
+                assigned_at
+
+            FROM internship_mentors
+
+            WHERE internship_id = %s
+
+            ORDER BY assigned_at DESC
+        """, (
+            internship_id,
+        ))
+
+        mentors = cursor.fetchall()
+
+        # -------------------------------------------------
+        # FEEDBACK
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                f.id,
+                f.rating,
+                f.feedback,
+                f.technical_skills_rating,
+                f.communication_rating,
+                f.teamwork_rating,
+                f.professionalism_rating,
+                f.created_at,
+
+                u.name AS submitted_by_name,
+                u.email AS submitted_by_email
+
+            FROM internship_feedback f
+
+            INNER JOIN users u
+                ON f.submitted_by = u.id
+
+            WHERE f.internship_id = %s
+
+            ORDER BY f.created_at DESC
+        """, (
+            internship_id,
+        ))
+
+        feedback = cursor.fetchall()
+
+        # -------------------------------------------------
+        # COMPLETION
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                id,
+                completion_date,
+                certificate_url,
+                final_rating,
+                remarks,
+                created_at
+
+            FROM internship_completions
+
+            WHERE internship_id = %s
+
+            LIMIT 1
+        """, (
+            internship_id,
+        ))
+
+        completion = cursor.fetchone()
+
+        # -------------------------------------------------
+        # RENDER
+        # -------------------------------------------------
+
+        return render_template(
+            "student/internship_detail.html",
+
+            internship=internship,
+            progress_records=progress_records,
+            mentors=mentors,
+            feedback=feedback,
+            completion=completion,
+
+            active_page="internships"
+        )
+
+    except Exception as e:
+
+        print(
+            "STUDENT INTERNSHIP DETAIL ERROR:",
+            repr(e)
+        )
+
+        import traceback
+        traceback.print_exc()
+
+        return (
+            f"STUDENT INTERNSHIP DETAIL ERROR: {e}",
+            500
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
+# PHASE 5.3 - STUDENT INTERNSHIP PROGRESS
+# =========================================================
+
+@app.route(
+    "/student/internships/<internship_id>/progress",
+    methods=["GET", "POST"]
+)
+@student_required
+def student_internship_progress(internship_id):
+
+    connection = None
+    cursor = None
+
+    try:
+
+        # -------------------------------------------------
+        # CURRENT USER
+        # -------------------------------------------------
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            return "Unauthorized", 401
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # FIND STUDENT
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (user_id,)
+        )
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # VERIFY INTERNSHIP OWNERSHIP
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                i.id,
+                i.student_id,
+                i.start_date,
+                i.expected_end_date,
+                i.actual_end_date,
+                i.status,
+                i.progress_percentage,
+                o.title AS opportunity_title,
+                ind.name AS industry_name
+            FROM internships i
+            JOIN opportunities o
+                ON i.opportunity_id = o.id
+            JOIN industries ind
+                ON i.industry_id = ind.id
+            WHERE i.id = %s
+              AND i.student_id = %s
+            LIMIT 1
+            """,
+            (internship_id, student_id)
+        )
+
+        internship = cursor.fetchone()
+
+        if not internship:
+            return "Internship not found", 404
+
+        # -------------------------------------------------
+        # POST - ADD PROGRESS UPDATE
+        # -------------------------------------------------
+
+        if request.method == "POST":
+
+            title = request.form.get(
+                "title",
+                ""
+            ).strip()
+
+            description = request.form.get(
+                "description",
+                ""
+            ).strip()
+
+            progress_percentage = request.form.get(
+                "progress_percentage",
+                "0"
+            ).strip()
+
+            progress_date = request.form.get(
+                "progress_date",
+                ""
+            ).strip()
+
+            status = request.form.get(
+                "status",
+                "IN_PROGRESS"
+            ).strip().upper()
+
+            # ---------------------------------------------
+            # VALIDATE TITLE
+            # ---------------------------------------------
+
+            if not title:
+
+                flash(
+                    "Progress title is required.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for(
+                        "student_internship_progress",
+                        internship_id=internship_id
+                    )
+                )
+
+            # ---------------------------------------------
+            # VALIDATE PROGRESS PERCENTAGE
+            # ---------------------------------------------
+
+            try:
+
+                progress_percentage = float(
+                    progress_percentage
+                )
+
+            except (ValueError, TypeError):
+
+                flash(
+                    "Progress percentage must be a valid number.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for(
+                        "student_internship_progress",
+                        internship_id=internship_id
+                    )
+                )
+
+            if progress_percentage < 0:
+
+                progress_percentage = 0
+
+            if progress_percentage > 100:
+
+                progress_percentage = 100
+
+            # ---------------------------------------------
+            # VALIDATE DATE
+            # ---------------------------------------------
+
+            if not progress_date:
+
+                flash(
+                    "Progress date is required.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for(
+                        "student_internship_progress",
+                        internship_id=internship_id
+                    )
+                )
+
+            # ---------------------------------------------
+            # VALIDATE STATUS
+            # ---------------------------------------------
+
+            allowed_statuses = [
+                "PENDING",
+                "IN_PROGRESS",
+                "COMPLETED"
+            ]
+
+            if status not in allowed_statuses:
+
+                status = "IN_PROGRESS"
+
+            # ---------------------------------------------
+            # AUTO COMPLETE AT 100%
+            # ---------------------------------------------
+
+            if progress_percentage >= 100:
+
+                progress_percentage = 100
+                status = "COMPLETED"
+
+            # ---------------------------------------------
+            # CREATE PROGRESS ID
+            # ---------------------------------------------
+
+            progress_id = str(uuid.uuid4())
+
+            # ---------------------------------------------
+            # INSERT PROGRESS
+            # ---------------------------------------------
+
+            cursor.execute(
+                """
+                INSERT INTO internship_progress
+                (
+                    id,
+                    internship_id,
+                    title,
+                    description,
+                    progress_percentage,
+                    progress_date,
+                    status
+                )
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+                """,
+                (
+                    progress_id,
+                    internship_id,
+                    title,
+                    description if description else None,
+                    progress_percentage,
+                    progress_date,
+                    status
+                )
+            )
+
+            # ---------------------------------------------
+            # UPDATE OVERALL INTERNSHIP PROGRESS
+            # ---------------------------------------------
+
+            cursor.execute(
+                """
+                UPDATE internships
+                SET
+                    progress_percentage = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+                  AND student_id = %s
+                """,
+                (
+                    progress_percentage,
+                    internship_id,
+                    student_id
+                )
+            )
+
+            # ---------------------------------------------
+            # COMMIT
+            # ---------------------------------------------
+
+            connection.commit()
+
+            flash(
+                "Internship progress updated successfully.",
+                "success"
+            )
+
+            return redirect(
+                url_for(
+                    "student_internship_progress",
+                    internship_id=internship_id
+                )
+            )
+
+        # -------------------------------------------------
+        # GET - PROGRESS HISTORY
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                title,
+                description,
+                progress_percentage,
+                progress_date,
+                status,
+                created_at
+            FROM internship_progress
+            WHERE internship_id = %s
+            ORDER BY
+                progress_date DESC,
+                created_at DESC
+            """,
+            (internship_id,)
+        )
+
+        progress_updates = cursor.fetchall()
+
+        # -------------------------------------------------
+        # RENDER PAGE
+        # -------------------------------------------------
+
+        return render_template(
+            "student/internship_progress.html",
+            internship=internship,
+            progress_updates=progress_updates
+        )
+
+    except Exception as e:
+
+        if connection:
+
+            connection.rollback()
+
+        print(
+            "STUDENT INTERNSHIP PROGRESS ERROR:",
+            repr(e)
+        )
+
+        import traceback
+        traceback.print_exc()
+
+        return (
+            f"STUDENT INTERNSHIP PROGRESS ERROR: {e}",
+            500
+        )
 
     finally:
 
@@ -28772,78 +36398,1914 @@ def student_applications():
 
             cursor.close()
 
+        if connection:
 
-        if conn:
-
-            conn.close()
-
+            connection.close()
 
 
 # =========================================================
-# STUDENT - APPLICATION DETAIL
+# PHASE 5.4 - STUDENT MENTOR FEEDBACK
+# =========================================================
+
+@app.route("/student/internships/<internship_id>/mentor-feedback")
+@student_required
+def student_mentor_feedback(internship_id):
+
+    connection = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            return "Unauthorized", 401
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # FIND STUDENT
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (user_id,)
+        )
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # VERIFY INTERNSHIP
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                i.id,
+                i.student_id,
+                i.start_date,
+                i.expected_end_date,
+                i.actual_end_date,
+                i.status,
+                i.progress_percentage,
+                o.title AS opportunity_title,
+                ind.name AS industry_name
+            FROM internships i
+            JOIN opportunities o
+                ON i.opportunity_id = o.id
+            JOIN industries ind
+                ON i.industry_id = ind.id
+            WHERE i.id = %s
+              AND i.student_id = %s
+            LIMIT 1
+            """,
+            (internship_id, student_id)
+        )
+
+        internship = cursor.fetchone()
+
+        if not internship:
+            return "Internship not found", 404
+
+        # -------------------------------------------------
+        # MENTOR DETAILS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                mentor_name,
+                mentor_email,
+                mentor_phone,
+                designation,
+                assigned_at
+            FROM internship_mentors
+            WHERE internship_id = %s
+            ORDER BY assigned_at DESC
+            """,
+            (internship_id,)
+        )
+
+        mentors = cursor.fetchall()
+
+        # -------------------------------------------------
+        # FEEDBACK
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                f.id,
+                f.rating,
+                f.feedback,
+                f.technical_skills_rating,
+                f.communication_rating,
+                f.teamwork_rating,
+                f.professionalism_rating,
+                f.created_at,
+                u.full_name AS submitted_by_name,
+                u.role AS submitted_by_role
+            FROM internship_feedback f
+            LEFT JOIN users u
+                ON f.submitted_by = u.id
+            WHERE f.internship_id = %s
+            ORDER BY f.created_at DESC
+            """,
+            (internship_id,)
+        )
+
+        feedback_list = cursor.fetchall()
+
+        # -------------------------------------------------
+        # RENDER
+        # -------------------------------------------------
+
+        return render_template(
+            "student/mentor_feedback.html",
+            internship=internship,
+            mentors=mentors,
+            feedback_list=feedback_list
+        )
+
+    except Exception as e:
+
+        print(
+            "STUDENT MENTOR FEEDBACK ERROR:",
+            repr(e)
+        )
+
+        import traceback
+        traceback.print_exc()
+
+        return (
+            f"STUDENT MENTOR FEEDBACK ERROR: {e}",
+            500
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
+# PHASE 5.5 - STUDENT INTERNSHIP COMPLETION
+# =========================================================
+
+@app.route("/student/internships/<internship_id>/completion")
+@student_required
+def student_internship_completion(internship_id):
+
+    connection = None
+    cursor = None
+
+    try:
+
+        # -------------------------------------------------
+        # CURRENT USER
+        # -------------------------------------------------
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            return "Unauthorized", 401
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # FIND STUDENT
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (user_id,)
+        )
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # VERIFY INTERNSHIP
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                i.id,
+                i.student_id,
+                i.start_date,
+                i.expected_end_date,
+                i.actual_end_date,
+                i.status,
+                i.progress_percentage,
+                o.title AS opportunity_title,
+                ind.name AS industry_name
+            FROM internships i
+            JOIN opportunities o
+                ON i.opportunity_id = o.id
+            JOIN industries ind
+                ON i.industry_id = ind.id
+            WHERE i.id = %s
+              AND i.student_id = %s
+            LIMIT 1
+            """,
+            (internship_id, student_id)
+        )
+
+        internship = cursor.fetchone()
+
+        if not internship:
+            return "Internship not found", 404
+
+        # -------------------------------------------------
+        # COMPLETION RECORD
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                internship_id,
+                completion_date,
+                certificate_url,
+                final_rating,
+                remarks,
+                created_at
+            FROM internship_completions
+            WHERE internship_id = %s
+            LIMIT 1
+            """,
+            (internship_id,)
+        )
+
+        completion = cursor.fetchone()
+
+        # -------------------------------------------------
+        # FEEDBACK SUMMARY
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                AVG(rating) AS average_rating,
+                AVG(technical_skills_rating)
+                    AS technical_rating,
+                AVG(communication_rating)
+                    AS communication_rating,
+                AVG(teamwork_rating)
+                    AS teamwork_rating,
+                AVG(professionalism_rating)
+                    AS professionalism_rating
+            FROM internship_feedback
+            WHERE internship_id = %s
+            """,
+            (internship_id,)
+        )
+
+        feedback_summary = cursor.fetchone()
+
+        # -------------------------------------------------
+        # RENDER
+        # -------------------------------------------------
+
+        return render_template(
+            "student/internship_completion.html",
+            internship=internship,
+            completion=completion,
+            feedback_summary=feedback_summary
+        )
+
+    except Exception as e:
+
+        print(
+            "STUDENT INTERNSHIP COMPLETION ERROR:",
+            repr(e)
+        )
+
+        import traceback
+        traceback.print_exc()
+
+        return (
+            f"STUDENT INTERNSHIP COMPLETION ERROR: {e}",
+            500
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
+# PHASE 6.1 - STUDENT WORKSHOPS
+# =========================================================
+
+@app.route("/student/workshops")
+@student_required
+def student_workshops():
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get actual student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Get workshops + student's registration status
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                w.id,
+                w.title,
+                w.description,
+                w.topic,
+                w.start_date,
+                w.end_date,
+                w.mode,
+                w.registration_deadline,
+                w.status,
+                w.created_at,
+
+                swr.id AS registration_id,
+                swr.attendance_status,
+                swr.registration_date,
+                swr.attended_at,
+                swr.completed_at
+
+            FROM workshops w
+
+            LEFT JOIN student_workshop_registrations swr
+                ON swr.workshop_id = w.id
+                AND swr.student_id = %s
+
+            WHERE w.status IN ('OPEN', 'ONGOING', 'COMPLETED')
+
+            ORDER BY
+                CASE
+                    WHEN w.status = 'OPEN' THEN 1
+                    WHEN w.status = 'ONGOING' THEN 2
+                    ELSE 3
+                END,
+                w.start_date ASC
+        """, (student_id,))
+
+        workshops = cursor.fetchall()
+
+        # -------------------------------------------------
+        # Stats
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS total_registered
+            FROM student_workshop_registrations
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_registered = cursor.fetchone()["total_registered"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total_attended
+            FROM student_workshop_registrations
+            WHERE student_id = %s
+              AND attendance_status IN ('ATTENDED', 'COMPLETED')
+        """, (student_id,))
+
+        total_attended = cursor.fetchone()["total_attended"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total_completed
+            FROM student_workshop_registrations
+            WHERE student_id = %s
+              AND attendance_status = 'COMPLETED'
+        """, (student_id,))
+
+        total_completed = cursor.fetchone()["total_completed"]
+
+        return render_template(
+            "student/workshops.html",
+            workshops=workshops,
+            total_registered=total_registered,
+            total_attended=total_attended,
+            total_completed=total_completed,
+            active_page="workshops"
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# REGISTER FOR WORKSHOP
 # =========================================================
 
 @app.route(
-    "/student/applications/<application_id>"
+    "/student/workshops/<workshop_id>/register",
+    methods=["POST"]
 )
 @student_required
-def student_application_detail(
-    application_id
-):
+def student_register_workshop(workshop_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Check workshop
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                id,
+                title,
+                status,
+                registration_deadline
+            FROM workshops
+            WHERE id = %s
+            LIMIT 1
+        """, (workshop_id,))
+
+        workshop = cursor.fetchone()
+
+        if not workshop:
+            return "Workshop not found", 404
+
+        if workshop["status"] not in ("OPEN", "ONGOING"):
+            return "Workshop registration is not available", 400
+
+        # -------------------------------------------------
+        # Check deadline
+        # -------------------------------------------------
+        if workshop["registration_deadline"]:
+            today = datetime.now().date()
+
+            if workshop["registration_deadline"] < today:
+                return "Workshop registration deadline has passed", 400
+
+        # -------------------------------------------------
+        # Check existing registration
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM student_workshop_registrations
+            WHERE workshop_id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (workshop_id, student_id))
+
+        existing = cursor.fetchone()
+
+        if existing:
+            return redirect(url_for("student_workshops"))
+
+        # -------------------------------------------------
+        # Register student
+        # -------------------------------------------------
+        registration_id = str(uuid.uuid4())
+
+        cursor.execute("""
+            INSERT INTO student_workshop_registrations
+            (
+                id,
+                workshop_id,
+                student_id,
+                attendance_status
+            )
+            VALUES (%s, %s, %s, 'REGISTERED')
+        """, (
+            registration_id,
+            workshop_id,
+            student_id
+        ))
+
+        conn.commit()
+
+        return redirect(url_for("student_workshops"))
+
+    except Exception as e:
+        conn.rollback()
+        print("Workshop registration error:", e)
+        return "Unable to register for workshop", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# MARK WORKSHOP ATTENDANCE
+# =========================================================
+
+@app.route(
+    "/student/workshops/<workshop_id>/attend",
+    methods=["POST"]
+)
+@student_required
+def student_attend_workshop(workshop_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        cursor.execute("""
+            SELECT id, attendance_status
+            FROM student_workshop_registrations
+            WHERE workshop_id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (workshop_id, student_id))
+
+        registration = cursor.fetchone()
+
+        if not registration:
+            return "You are not registered for this workshop", 400
+
+        if registration["attendance_status"] == "COMPLETED":
+            return redirect(url_for("student_workshops"))
+
+        cursor.execute("""
+            UPDATE student_workshop_registrations
+            SET
+                attendance_status = 'ATTENDED',
+                attended_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (registration["id"],))
+
+        conn.commit()
+
+        return redirect(url_for("student_workshops"))
+
+    except Exception as e:
+        conn.rollback()
+        print("Workshop attendance error:", e)
+        return "Unable to mark attendance", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# COMPLETE WORKSHOP
+# =========================================================
+
+@app.route(
+    "/student/workshops/<workshop_id>/complete",
+    methods=["POST"]
+)
+@student_required
+def student_complete_workshop(workshop_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Get registration
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                swr.id,
+                swr.attendance_status,
+                w.title
+            FROM student_workshop_registrations swr
+
+            INNER JOIN workshops w
+                ON w.id = swr.workshop_id
+
+            WHERE swr.workshop_id = %s
+              AND swr.student_id = %s
+
+            LIMIT 1
+        """, (workshop_id, student_id))
+
+        registration = cursor.fetchone()
+
+        if not registration:
+            return "You are not registered for this workshop", 400
+
+        if registration["attendance_status"] not in (
+            "ATTENDED",
+            "COMPLETED"
+        ):
+            return "Workshop must be attended before completion", 400
+
+        # -------------------------------------------------
+        # Mark completed
+        # -------------------------------------------------
+        cursor.execute("""
+            UPDATE student_workshop_registrations
+            SET
+                attendance_status = 'COMPLETED',
+                completed_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (registration["id"],))
+
+        # -------------------------------------------------
+        # Achievement check
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM student_achievements
+            WHERE student_id = %s
+              AND title = %s
+            LIMIT 1
+        """, (
+            student_id,
+            registration["title"]
+        ))
+
+        achievement = cursor.fetchone()
+
+        # -------------------------------------------------
+        # Create achievement automatically
+        # -------------------------------------------------
+        if not achievement:
+
+            achievement_id = str(uuid.uuid4())
+
+            cursor.execute("""
+                INSERT INTO student_achievements
+                (
+                    id,
+                    student_id,
+                    title,
+                    description,
+                    achievement_type,
+                    achievement_date,
+                    issuing_organization
+                )
+                SELECT
+                    %s,
+                    %s,
+                    w.title,
+                    CONCAT(
+                        'Successfully completed workshop: ',
+                        w.title
+                    ),
+                    'WORKSHOP',
+                    COALESCE(w.end_date, CURDATE()),
+                    'SIH Academia–Industry Collaboration Portal'
+                FROM workshops w
+                WHERE w.id = %s
+            """, (
+                achievement_id,
+                student_id,
+                workshop_id
+            ))
+
+        conn.commit()
+
+        return redirect(url_for("student_workshops"))
+
+    except Exception as e:
+        conn.rollback()
+        print("Workshop completion error:", e)
+        return "Unable to complete workshop", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# PHASE 6.2 - STUDENT MENTORSHIP
+# =========================================================
+
+@app.route("/student/mentorship")
+@student_required
+def student_mentorship():
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get actual student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Available mentors
+        # users.name is the actual column
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                u.id,
+                u.name,
+                u.email,
+                u.profile_image,
+
+                m.id AS mentorship_id,
+                m.title AS mentorship_title,
+                m.goals,
+                m.start_date,
+                m.end_date,
+                m.status AS mentorship_status,
+                m.created_at AS mentorship_created_at
+
+            FROM users u
+
+            LEFT JOIN mentorships m
+                ON m.mentor_user_id = u.id
+                AND m.student_id = %s
+                AND m.status IN ('REQUESTED', 'ACTIVE')
+
+            WHERE u.role = 'MENTOR'
+              AND u.status = 'ACTIVE'
+
+            ORDER BY u.name ASC
+        """, (student_id,))
+
+        mentors = cursor.fetchall()
+
+        # -------------------------------------------------
+        # My mentorships
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                m.id,
+                m.title,
+                m.goals,
+                m.start_date,
+                m.end_date,
+                m.status,
+                m.created_at,
+
+                u.name AS mentor_name,
+                u.email AS mentor_email,
+                u.profile_image AS mentor_profile_image
+
+            FROM mentorships m
+
+            INNER JOIN users u
+                ON u.id = m.mentor_user_id
+
+            WHERE m.student_id = %s
+
+            ORDER BY m.created_at DESC
+        """, (student_id,))
+
+        my_mentorships = cursor.fetchall()
+
+        # -------------------------------------------------
+        # Stats
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM mentorships
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_requests = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM mentorships
+            WHERE student_id = %s
+              AND status = 'REQUESTED'
+        """, (student_id,))
+
+        pending_requests = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM mentorships
+            WHERE student_id = %s
+              AND status = 'ACTIVE'
+        """, (student_id,))
+
+        active_mentorships = cursor.fetchone()["total"]
+
+        return render_template(
+            "student/mentorship.html",
+            mentors=mentors,
+            my_mentorships=my_mentorships,
+            total_requests=total_requests,
+            pending_requests=pending_requests,
+            active_mentorships=active_mentorships,
+            active_page="mentorship"
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# REQUEST MENTORSHIP
+# =========================================================
+
+@app.route(
+    "/student/mentorship/<mentor_user_id>/request",
+    methods=["POST"]
+)
+@student_required
+def student_request_mentorship(mentor_user_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Verify mentor
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                id,
+                name,
+                email
+            FROM users
+            WHERE id = %s
+              AND role = 'MENTOR'
+              AND status = 'ACTIVE'
+            LIMIT 1
+        """, (mentor_user_id,))
+
+        mentor = cursor.fetchone()
+
+        if not mentor:
+            return "Mentor not found", 404
+
+        # -------------------------------------------------
+        # Prevent duplicate active/requested mentorship
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id, status
+            FROM mentorships
+            WHERE student_id = %s
+              AND mentor_user_id = %s
+              AND status IN ('REQUESTED', 'ACTIVE')
+            LIMIT 1
+        """, (student_id, mentor_user_id))
+
+        existing = cursor.fetchone()
+
+        if existing:
+            return redirect(url_for("student_mentorship"))
+
+        # -------------------------------------------------
+        # Optional form data
+        # -------------------------------------------------
+        title = request.form.get(
+            "title",
+            "Student Mentorship Request"
+        ).strip()
+
+        goals = request.form.get(
+            "goals",
+            ""
+        ).strip()
+
+        if not title:
+            title = "Student Mentorship Request"
+
+        # -------------------------------------------------
+        # Create request
+        # -------------------------------------------------
+        mentorship_id = str(uuid.uuid4())
+
+        cursor.execute("""
+            INSERT INTO mentorships
+            (
+                id,
+                student_id,
+                mentor_user_id,
+                title,
+                goals,
+                status
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                'REQUESTED'
+            )
+        """, (
+            mentorship_id,
+            student_id,
+            mentor_user_id,
+            title,
+            goals
+        ))
+
+        conn.commit()
+
+        return redirect(url_for("student_mentorship"))
+
+    except Exception as e:
+        conn.rollback()
+        print("Mentorship request error:", e)
+        return "Unable to send mentorship request", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# PHASE 6.3 - STUDENT LIVE PROJECTS
+# =========================================================
+
+@app.route("/student/live-projects")
+@student_required
+def student_live_projects():
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get actual student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Live projects + student's participation
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                lp.id,
+                lp.title,
+                lp.description,
+                lp.technology_stack,
+                lp.start_date,
+                lp.end_date,
+                lp.application_deadline,
+                lp.status,
+                lp.project_url,
+                lp.created_at,
+
+                u.name AS organizer_name,
+                u.email AS organizer_email,
+
+                slp.id AS participation_id,
+                slp.status AS participation_status,
+                slp.applied_at,
+                slp.started_at,
+                slp.completed_at
+
+            FROM live_projects lp
+
+            INNER JOIN users u
+                ON u.id = lp.organizer_user_id
+
+            LEFT JOIN student_live_projects slp
+                ON slp.live_project_id = lp.id
+                AND slp.student_id = %s
+
+            WHERE lp.status IN (
+                'OPEN',
+                'ONGOING',
+                'COMPLETED'
+            )
+
+            ORDER BY
+                CASE
+                    WHEN lp.status = 'OPEN' THEN 1
+                    WHEN lp.status = 'ONGOING' THEN 2
+                    ELSE 3
+                END,
+                lp.start_date ASC
+        """, (student_id,))
+
+        live_projects = cursor.fetchall()
+
+        # -------------------------------------------------
+        # My project count
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_live_projects
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_projects = cursor.fetchone()["total"]
+
+        # -------------------------------------------------
+        # Selected / active
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_live_projects
+            WHERE student_id = %s
+              AND status IN ('SELECTED', 'IN_PROGRESS')
+        """, (student_id,))
+
+        active_projects = cursor.fetchone()["total"]
+
+        # -------------------------------------------------
+        # Completed
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM student_live_projects
+            WHERE student_id = %s
+              AND status = 'COMPLETED'
+        """, (student_id,))
+
+        completed_projects = cursor.fetchone()["total"]
+
+        return render_template(
+            "student/live_projects.html",
+            live_projects=live_projects,
+            total_projects=total_projects,
+            active_projects=active_projects,
+            completed_projects=completed_projects,
+            active_page="live-projects"
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# APPLY FOR LIVE PROJECT
+# =========================================================
+
+@app.route(
+    "/student/live-projects/<project_id>/apply",
+    methods=["POST"]
+)
+@student_required
+def student_apply_live_project(project_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Verify project
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                id,
+                title,
+                status,
+                application_deadline
+            FROM live_projects
+            WHERE id = %s
+            LIMIT 1
+        """, (project_id,))
+
+        project = cursor.fetchone()
+
+        if not project:
+            return "Live project not found", 404
+
+        if project["status"] != "OPEN":
+            return "Applications are not open for this project", 400
+
+        # -------------------------------------------------
+        # Deadline
+        # -------------------------------------------------
+        if project["application_deadline"]:
+
+            if project["application_deadline"] < datetime.now().date():
+                return "Application deadline has passed", 400
+
+        # -------------------------------------------------
+        # Duplicate application
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM student_live_projects
+            WHERE live_project_id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (project_id, student_id))
+
+        existing = cursor.fetchone()
+
+        if existing:
+            return redirect(
+                url_for("student_live_projects")
+            )
+
+        # -------------------------------------------------
+        # Apply
+        # -------------------------------------------------
+        participation_id = str(uuid.uuid4())
+
+        cursor.execute("""
+            INSERT INTO student_live_projects
+            (
+                id,
+                live_project_id,
+                student_id,
+                status
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                'APPLIED'
+            )
+        """, (
+            participation_id,
+            project_id,
+            student_id
+        ))
+
+        conn.commit()
+
+        return redirect(
+            url_for("student_live_projects")
+        )
+
+    except Exception as e:
+        conn.rollback()
+        print("Live project application error:", e)
+        return "Unable to apply for live project", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# START LIVE PROJECT
+# =========================================================
+
+@app.route(
+    "/student/live-projects/<project_id>/start",
+    methods=["POST"]
+)
+@student_required
+def student_start_live_project(project_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        cursor.execute("""
+            SELECT id, status
+            FROM student_live_projects
+            WHERE live_project_id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (project_id, student_id))
+
+        participation = cursor.fetchone()
+
+        if not participation:
+            return "Project participation not found", 404
+
+        if participation["status"] != "SELECTED":
+            return "Project must be selected before starting", 400
+
+        cursor.execute("""
+            UPDATE student_live_projects
+            SET
+                status = 'IN_PROGRESS',
+                started_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (participation["id"],))
+
+        conn.commit()
+
+        return redirect(
+            url_for("student_live_projects")
+        )
+
+    except Exception as e:
+        conn.rollback()
+        print("Live project start error:", e)
+        return "Unable to start live project", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# COMPLETE LIVE PROJECT
+# =========================================================
+
+@app.route(
+    "/student/live-projects/<project_id>/complete",
+    methods=["POST"]
+)
+@student_required
+def student_complete_live_project(project_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Participation
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                slp.id,
+                slp.status,
+                lp.title
+            FROM student_live_projects slp
+
+            INNER JOIN live_projects lp
+                ON lp.id = slp.live_project_id
+
+            WHERE slp.live_project_id = %s
+              AND slp.student_id = %s
+
+            LIMIT 1
+        """, (project_id, student_id))
+
+        participation = cursor.fetchone()
+
+        if not participation:
+            return "Project participation not found", 404
+
+        if participation["status"] != "IN_PROGRESS":
+            return "Project must be in progress before completion", 400
+
+        # -------------------------------------------------
+        # Complete participation
+        # -------------------------------------------------
+        cursor.execute("""
+            UPDATE student_live_projects
+            SET
+                status = 'COMPLETED',
+                completed_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (participation["id"],))
+
+        # -------------------------------------------------
+        # Achievement check
+        # -------------------------------------------------
+        achievement_title = (
+            "Live Project: " + participation["title"]
+        )
+
+        cursor.execute("""
+            SELECT id
+            FROM student_achievements
+            WHERE student_id = %s
+              AND title = %s
+            LIMIT 1
+        """, (
+            student_id,
+            achievement_title
+        ))
+
+        achievement = cursor.fetchone()
+
+        # -------------------------------------------------
+        # Add achievement
+        # -------------------------------------------------
+        if not achievement:
+
+            achievement_id = str(uuid.uuid4())
+
+            cursor.execute("""
+                INSERT INTO student_achievements
+                (
+                    id,
+                    student_id,
+                    title,
+                    description,
+                    achievement_type,
+                    achievement_date,
+                    issuing_organization
+                )
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    CURDATE(),
+                    %s
+                )
+            """, (
+                achievement_id,
+                student_id,
+                achievement_title,
+                "Successfully completed the live project: "
+                + participation["title"],
+                "LIVE_PROJECT",
+                "SIH Academia–Industry Collaboration Portal"
+            ))
+
+        conn.commit()
+
+        return redirect(
+            url_for("student_live_projects")
+        )
+
+    except Exception as e:
+        conn.rollback()
+        print("Live project completion error:", e)
+        return "Unable to complete live project", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# PHASE 6.4 - STUDENT INNOVATION CHALLENGES
+# =========================================================
+
+@app.route("/student/innovation-challenges")
+@student_required
+def student_innovation_challenges():
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get actual student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Get challenges
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                ic.id,
+                ic.title,
+                ic.description,
+                ic.organizer_user_id,
+                ic.registration_deadline,
+                ic.start_date,
+                ic.end_date,
+                ic.status,
+                ic.created_at,
+
+                u.name AS organizer_name,
+                u.email AS organizer_email,
+
+                icp.id AS participant_id,
+                icp.team_name,
+                icp.submission_url,
+                icp.status AS participation_status,
+                icp.created_at AS participation_created_at
+
+            FROM innovation_challenges ic
+
+            LEFT JOIN users u
+                ON u.id = ic.organizer_user_id
+
+            LEFT JOIN innovation_challenge_participants icp
+                ON icp.challenge_id = ic.id
+                AND icp.student_id = %s
+
+            WHERE ic.status IN (
+                'OPEN',
+                'CLOSED',
+                'COMPLETED'
+            )
+
+            ORDER BY
+                CASE
+                    WHEN ic.status = 'OPEN' THEN 1
+                    WHEN ic.status = 'CLOSED' THEN 2
+                    ELSE 3
+                END,
+                ic.start_date ASC
+        """, (student_id,))
+
+        challenges = cursor.fetchall()
+
+        # -------------------------------------------------
+        # Statistics
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM innovation_challenge_participants
+            WHERE student_id = %s
+        """, (student_id,))
+
+        total_participations = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM innovation_challenge_participants
+            WHERE student_id = %s
+              AND status IN ('SUBMITTED', 'SHORTLISTED')
+        """, (student_id,))
+
+        submitted_count = cursor.fetchone()["total"]
+
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM innovation_challenge_participants
+            WHERE student_id = %s
+              AND status = 'WINNER'
+        """, (student_id,))
+
+        winner_count = cursor.fetchone()["total"]
+
+        return render_template(
+            "student/innovation_challenges.html",
+            challenges=challenges,
+            total_participations=total_participations,
+            submitted_count=submitted_count,
+            winner_count=winner_count,
+            active_page="innovation-challenges"
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# REGISTER FOR INNOVATION CHALLENGE
+# =========================================================
+
+@app.route(
+    "/student/innovation-challenges/<challenge_id>/register",
+    methods=["POST"]
+)
+@student_required
+def student_register_innovation_challenge(challenge_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Verify challenge
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                id,
+                title,
+                status,
+                registration_deadline
+            FROM innovation_challenges
+            WHERE id = %s
+            LIMIT 1
+        """, (challenge_id,))
+
+        challenge = cursor.fetchone()
+
+        if not challenge:
+            return "Innovation challenge not found", 404
+
+        if challenge["status"] != "OPEN":
+            return "Registration is not open for this challenge", 400
+
+        # -------------------------------------------------
+        # Check deadline using MySQL date
+        # -------------------------------------------------
+        if challenge["registration_deadline"]:
+
+            cursor.execute("""
+                SELECT
+                    CASE
+                        WHEN %s < CURDATE()
+                        THEN 1
+                        ELSE 0
+                    END AS expired
+            """, (challenge["registration_deadline"],))
+
+            deadline_check = cursor.fetchone()
+
+            if deadline_check["expired"] == 1:
+                return "Registration deadline has passed", 400
+
+        # -------------------------------------------------
+        # Prevent duplicate registration
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM innovation_challenge_participants
+            WHERE challenge_id = %s
+              AND student_id = %s
+            LIMIT 1
+        """, (challenge_id, student_id))
+
+        existing = cursor.fetchone()
+
+        if existing:
+            return redirect(
+                url_for("student_innovation_challenges")
+            )
+
+        # -------------------------------------------------
+        # Team name
+        # -------------------------------------------------
+        team_name = request.form.get(
+            "team_name",
+            ""
+        ).strip()
+
+        if not team_name:
+            team_name = "Individual Participant"
+
+        # -------------------------------------------------
+        # Register
+        # -------------------------------------------------
+        participant_id = str(uuid.uuid4())
+
+        cursor.execute("""
+            INSERT INTO innovation_challenge_participants
+            (
+                id,
+                challenge_id,
+                student_id,
+                team_name,
+                status
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                %s,
+                'REGISTERED'
+            )
+        """, (
+            participant_id,
+            challenge_id,
+            student_id,
+            team_name
+        ))
+
+        conn.commit()
+
+        return redirect(
+            url_for("student_innovation_challenges")
+        )
+
+    except Exception as e:
+        conn.rollback()
+        print("Innovation challenge registration error:", e)
+        return "Unable to register for challenge", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# SUBMIT INNOVATION CHALLENGE
+# =========================================================
+
+@app.route(
+    "/student/innovation-challenges/<challenge_id>/submit",
+    methods=["POST"]
+)
+@student_required
+def student_submit_innovation_challenge(challenge_id):
+
+    user_id = session.get("user_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------------------------------
+        # Get student
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student profile not found", 404
+
+        student_id = student["id"]
+
+        # -------------------------------------------------
+        # Verify participant
+        # -------------------------------------------------
+        cursor.execute("""
+            SELECT
+                icp.id,
+                icp.status,
+                ic.status AS challenge_status
+            FROM innovation_challenge_participants icp
+
+            INNER JOIN innovation_challenges ic
+                ON ic.id = icp.challenge_id
+
+            WHERE icp.challenge_id = %s
+              AND icp.student_id = %s
+
+            LIMIT 1
+        """, (challenge_id, student_id))
+
+        participant = cursor.fetchone()
+
+        if not participant:
+            return "You are not registered for this challenge", 404
+
+        if participant["status"] not in (
+            "REGISTERED",
+            "SUBMITTED"
+        ):
+            return "Submission is not available for your current status", 400
+
+        # -------------------------------------------------
+        # Submission URL
+        # -------------------------------------------------
+        submission_url = request.form.get(
+            "submission_url",
+            ""
+        ).strip()
+
+        if not submission_url:
+            return "Submission URL is required", 400
+
+        # -------------------------------------------------
+        # Save submission
+        # -------------------------------------------------
+        cursor.execute("""
+            UPDATE innovation_challenge_participants
+            SET
+                submission_url = %s,
+                status = 'SUBMITTED'
+            WHERE id = %s
+        """, (
+            submission_url,
+            participant["id"]
+        ))
+
+        conn.commit()
+
+        return redirect(
+            url_for("student_innovation_challenges")
+        )
+
+    except Exception as e:
+        conn.rollback()
+        print("Innovation challenge submission error:", e)
+        return "Unable to submit challenge solution", 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# =========================================================
+# STUDENT NOTIFICATIONS
+# =========================================================
+
+@app.route("/student/notifications", methods=["GET"])
+@student_required
+def student_notifications():
 
     conn = None
     cursor = None
 
     try:
 
-        # =================================================
-        # CURRENT USER
-        # =================================================
-
-        user_id = session.get(
-            "user_id"
-        )
-
-
-        if not user_id:
-
-            flash(
-                "Student session expired. Please login again.",
-                "error"
-            )
-
-            return redirect(
-                url_for("login")
-            )
-
-
-        # =================================================
-        # DATABASE
-        # =================================================
+        user_id = session.get("user_id")
 
         conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
 
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
-
-        # =================================================
+        # -------------------------------------------------
         # CURRENT STUDENT
-        # =================================================
+        # -------------------------------------------------
 
         cursor.execute("""
             SELECT
-
-                s.id AS student_id,
-                s.college_id,
-                s.course,
-                s.branch,
-                s.semester,
-                s.cgpa,
-                s.profile_completed,
-                s.resume_url,
-
+                s.id,
+                s.user_id,
                 u.name,
                 u.email
 
@@ -28855,13 +38317,636 @@ def student_application_detail(
             WHERE s.user_id = %s
 
             LIMIT 1
-        """, (
-            user_id,
-        ))
-
+        """, (user_id,))
 
         student = cursor.fetchone()
 
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(url_for("login"))
+
+        # -------------------------------------------------
+        # SEARCH + FILTER
+        # -------------------------------------------------
+
+        search = request.args.get(
+            "search",
+            ""
+        ).strip()
+
+        selected_type = request.args.get(
+            "type",
+            ""
+        ).strip()
+
+        # -------------------------------------------------
+        # NOTIFICATION TYPES
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT DISTINCT
+                notification_type
+
+            FROM notifications
+
+            WHERE user_id = %s
+
+              AND notification_type IS NOT NULL
+
+              AND notification_type <> ''
+
+            ORDER BY notification_type
+        """, (user_id,))
+
+        notification_types = cursor.fetchall()
+
+        # -------------------------------------------------
+        # NOTIFICATIONS
+        # -------------------------------------------------
+
+        query = """
+            SELECT
+                id,
+                user_id,
+                title,
+                message,
+                notification_type,
+                is_read,
+                created_at
+
+            FROM notifications
+
+            WHERE user_id = %s
+        """
+
+        params = [user_id]
+
+        # SEARCH
+        if search:
+
+            query += """
+                AND (
+                    title LIKE %s
+                    OR message LIKE %s
+                    OR notification_type LIKE %s
+                )
+            """
+
+            search_value = f"%{search}%"
+
+            params.extend([
+                search_value,
+                search_value,
+                search_value
+            ])
+
+        # TYPE FILTER
+        if selected_type:
+
+            query += """
+                AND notification_type = %s
+            """
+
+            params.append(selected_type)
+
+        # LATEST FIRST
+        query += """
+            ORDER BY created_at DESC
+        """
+
+        cursor.execute(
+            query,
+            tuple(params)
+        )
+
+        notifications = cursor.fetchall()
+
+        # -------------------------------------------------
+        # NOTIFICATION STATISTICS
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total,
+
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN is_read = 0
+                            THEN 1
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS unread,
+
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN is_read = 1
+                            THEN 1
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS read_count
+
+            FROM notifications
+
+            WHERE user_id = %s
+        """, (user_id,))
+
+        notification_stats = cursor.fetchone()
+
+        stats = {
+            "total": notification_stats["total"] or 0,
+            "unread": notification_stats["unread"] or 0,
+            "read": notification_stats["read_count"] or 0
+        }
+
+        # -------------------------------------------------
+        # PAGE
+        # -------------------------------------------------
+
+        return render_template(
+            "student/notifications.html",
+
+            dashboard="notifications",
+            active_page="notifications",
+
+            page_title="Notifications",
+            page_subtitle=(
+                "Stay updated with important "
+                "activities and portal updates."
+            ),
+
+            student=student,
+
+            notifications=notifications,
+            notification_types=notification_types,
+
+            stats=stats,
+            unread_notifications=stats["unread"],
+
+            search=search,
+            selected_type=selected_type
+        )
+
+    except mysql.connector.Error as e:
+
+        print(
+            "STUDENT NOTIFICATIONS DB ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load notifications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    except Exception as e:
+
+        print(
+            "STUDENT NOTIFICATIONS ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load notifications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# MARK SINGLE NOTIFICATION AS READ
+# =========================================================
+
+@app.route(
+    "/student/notifications/<notification_id>/read",
+    methods=["POST"]
+)
+@student_required
+def student_mark_notification_read(
+    notification_id
+):
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE notifications
+
+            SET is_read = 1
+
+            WHERE id = %s
+              AND user_id = %s
+        """, (
+            notification_id,
+            user_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Notification marked as read.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_notifications")
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "MARK NOTIFICATION READ DB ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to update notification.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_notifications")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "MARK NOTIFICATION READ ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to update notification.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_notifications")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# MARK ALL STUDENT NOTIFICATIONS AS READ
+# =========================================================
+
+@app.route(
+    "/student/notifications/mark-all-read",
+    methods=["POST"]
+)
+@student_required
+def student_mark_all_notifications_read():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE notifications
+
+            SET is_read = 1
+
+            WHERE user_id = %s
+              AND is_read = 0
+        """, (user_id,))
+
+        conn.commit()
+
+        flash(
+            "All notifications marked as read.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_notifications")
+        )
+
+    except mysql.connector.Error as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "MARK ALL NOTIFICATIONS DB ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to update notifications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_notifications")
+        )
+
+    except Exception as e:
+
+        if conn:
+            conn.rollback()
+
+        print(
+            "MARK ALL NOTIFICATIONS ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to update notifications.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_notifications")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT SETTINGS
+# =========================================================
+
+@app.route("/student/settings")
+@student_required
+def student_settings():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # -------------------------------------------------
+        # CURRENT STUDENT / ACCOUNT
+        # -------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                u.id,
+                u.name,
+                u.email,
+                u.role,
+                u.status,
+                u.created_at,
+
+                s.id AS student_id,
+                s.profile_completed
+
+            FROM users u
+
+            LEFT JOIN students s
+                ON s.user_id = u.id
+
+            WHERE u.id = %s
+
+            LIMIT 1
+        """, (user_id,))
+
+        account = cursor.fetchone()
+
+        if not account:
+
+            flash(
+                "Account information not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_dashboard")
+            )
+
+        # -------------------------------------------------
+        # ACCOUNT REQUEST STATUS
+        # -------------------------------------------------
+
+        deactivation_request = None
+        deletion_request = None
+
+        # These tables will be created in the next step.
+        # Keep safe defaults until then.
+
+        try:
+
+            cursor.execute("""
+                SELECT
+                    id,
+                    reason,
+                    status,
+                    requested_at
+                FROM student_account_requests
+
+                WHERE student_id = %s
+                  AND request_type = 'DEACTIVATION'
+                  AND status = 'PENDING'
+
+                ORDER BY requested_at DESC
+
+                LIMIT 1
+            """, (account["student_id"],))
+
+            deactivation_request = cursor.fetchone()
+
+        except mysql.connector.Error:
+
+            conn.rollback()
+
+
+        try:
+
+            cursor.execute("""
+                SELECT
+                    id,
+                    reason,
+                    status,
+                    requested_at
+                FROM student_account_requests
+
+                WHERE student_id = %s
+                  AND request_type = 'DELETION'
+                  AND status = 'PENDING'
+
+                ORDER BY requested_at DESC
+
+                LIMIT 1
+            """, (account["student_id"],))
+
+            deletion_request = cursor.fetchone()
+
+        except mysql.connector.Error:
+
+            conn.rollback()
+
+        # -------------------------------------------------
+        # SETTINGS PAGE
+        # -------------------------------------------------
+
+        return render_template(
+            "student/settings.html",
+
+            dashboard="settings",
+            active_page="settings",
+
+            page_title="Settings",
+            page_subtitle=(
+                "Manage your account, privacy "
+                "and account controls."
+            ),
+
+            student=account,
+            account=account,
+
+            deactivation_request=deactivation_request,
+            deletion_request=deletion_request
+        )
+
+    except mysql.connector.Error as e:
+
+        print(
+            "STUDENT SETTINGS DB ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load settings.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    except Exception as e:
+
+        print(
+            "STUDENT SETTINGS ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to load settings.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_dashboard")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT ACCOUNT DEACTIVATION REQUEST
+# =========================================================
+
+@app.route(
+    "/student/settings/deactivation-request",
+    methods=["POST"]
+)
+@student_required
+def student_request_deactivation():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+        reason = request.form.get(
+            "reason",
+            ""
+        ).strip()
+
+        if not reason:
+
+            flash(
+                "Please provide a reason for deactivation.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_settings")
+            )
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # CURRENT STUDENT
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
 
         if not student:
 
@@ -28874,169 +38959,262 @@ def student_application_detail(
                 url_for("student_dashboard")
             )
 
+        student_id = student["id"]
 
-        student_id = student[
-            "student_id"
-        ]
-
-
-        # =================================================
-        # APPLICATION DETAIL
-        #
-        # IMPORTANT:
-        # student_id condition ensures that a student
-        # cannot open another student's application.
-        # =================================================
+        # CHECK EXISTING REQUEST
 
         cursor.execute("""
-            SELECT
+            SELECT id
+            FROM student_account_requests
 
-                sa.id AS application_id,
-
-                sa.student_id,
-                sa.opportunity_id,
-
-                sa.application_date,
-                sa.status,
-
-                sa.resume_url,
-                sa.cover_letter,
-
-                o.title,
-                o.opportunity_type,
-                o.description,
-
-                o.required_skills,
-                o.eligibility_criteria,
-
-                o.location,
-                o.work_mode,
-
-                o.stipend,
-                o.package,
-
-                o.application_deadline,
-                o.status AS opportunity_status,
-
-                o.created_at AS opportunity_created_at,
-
-                i.id AS industry_id,
-                i.company_name,
-                i.company_type,
-                i.industry_sector
-
-            FROM student_applications sa
-
-            INNER JOIN opportunities o
-                ON sa.opportunity_id = o.id
-
-            INNER JOIN industries i
-                ON o.industry_id = i.id
-
-            WHERE sa.id = %s
-
-              AND sa.student_id = %s
+            WHERE student_id = %s
+              AND request_type = 'DEACTIVATION'
+              AND status = 'PENDING'
 
             LIMIT 1
+        """, (student_id,))
 
-        """, (
+        existing = cursor.fetchone()
 
-            application_id,
-
-            student_id
-
-        ))
-
-
-        application = cursor.fetchone()
-
-
-        if not application:
+        if existing:
 
             flash(
-                "Application not found.",
-                "error"
+                "A deactivation request is already pending.",
+                "warning"
             )
 
             return redirect(
-                url_for("student_applications")
+                url_for("student_settings")
             )
 
+        # CREATE REQUEST
 
-        # =================================================
-        # RENDER DETAIL
-        # =================================================
+        cursor.execute("""
+            INSERT INTO student_account_requests
+            (
+                id,
+                student_id,
+                request_type,
+                reason,
+                status
+            )
 
-        return render_template(
+            VALUES
+            (
+                %s,
+                %s,
+                'DEACTIVATION',
+                %s,
+                'PENDING'
+            )
+        """, (
+            str(uuid.uuid4()),
+            student_id,
+            reason
+        ))
 
-            "student/applications/application_detail.html",
+        conn.commit()
 
-            dashboard="applications",
-
-            student=student,
-
-            application=application
-
+        flash(
+            "Account deactivation request submitted.",
+            "success"
         )
 
-
-    # =====================================================
-    # DATABASE ERROR
-    # =====================================================
+        return redirect(
+            url_for("student_settings")
+        )
 
     except mysql.connector.Error as e:
 
-        print("=" * 70)
-        print("STUDENT APPLICATION DETAIL DATABASE ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
+        if conn:
+            conn.rollback()
 
+        print(
+            "DEACTIVATION REQUEST DB ERROR:",
+            e
+        )
 
         flash(
-            "Unable to load application details.",
+            "Unable to submit deactivation request.",
             "error"
         )
 
-
         return redirect(
-            url_for("student_applications")
+            url_for("student_settings")
         )
-
-
-    # =====================================================
-    # GENERAL ERROR
-    # =====================================================
-
-    except Exception as e:
-
-        print("=" * 70)
-        print("STUDENT APPLICATION DETAIL ERROR")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-
-        flash(
-            "Unable to load application details.",
-            "error"
-        )
-
-
-        return redirect(
-            url_for("student_applications")
-        )
-
 
     finally:
 
         if cursor:
-
             cursor.close()
 
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# STUDENT ACCOUNT DELETION REQUEST
+# =========================================================
+
+@app.route(
+    "/student/settings/deletion-request",
+    methods=["POST"]
+)
+@student_required
+def student_request_deletion():
+
+    conn = None
+    cursor = None
+
+    try:
+
+        user_id = session.get("user_id")
+        reason = request.form.get(
+            "reason",
+            ""
+        ).strip()
+
+        confirmation = request.form.get(
+            "confirm_delete"
+        )
+
+        if not reason:
+
+            flash(
+                "Please provide a reason for account deletion.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_settings")
+            )
+
+        if confirmation != "YES":
+
+            flash(
+                "Please confirm the account deletion request.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_settings")
+            )
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # CURRENT STUDENT
+
+        cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE user_id = %s
+            LIMIT 1
+        """, (user_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_dashboard")
+            )
+
+        student_id = student["id"]
+
+        # CHECK EXISTING REQUEST
+
+        cursor.execute("""
+            SELECT id
+            FROM student_account_requests
+
+            WHERE student_id = %s
+              AND request_type = 'DELETION'
+              AND status = 'PENDING'
+
+            LIMIT 1
+        """, (student_id,))
+
+        existing = cursor.fetchone()
+
+        if existing:
+
+            flash(
+                "An account deletion request is already pending.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("student_settings")
+            )
+
+        # CREATE REQUEST
+
+        cursor.execute("""
+            INSERT INTO student_account_requests
+            (
+                id,
+                student_id,
+                request_type,
+                reason,
+                status
+            )
+
+            VALUES
+            (
+                %s,
+                %s,
+                'DELETION',
+                %s,
+                'PENDING'
+            )
+        """, (
+            str(uuid.uuid4()),
+            student_id,
+            reason
+        ))
+
+        conn.commit()
+
+        flash(
+            "Account deletion request submitted for admin review.",
+            "success"
+        )
+
+        return redirect(
+            url_for("student_settings")
+        )
+
+    except mysql.connector.Error as e:
 
         if conn:
+            conn.rollback()
 
+        print(
+            "DELETION REQUEST DB ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to submit deletion request.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_settings")
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
             conn.close()
 
 
@@ -29053,34 +39231,17 @@ def student_collaborations():
 
     try:
 
-        # =================================================
-        # CURRENT USER
-        # =================================================
-
         user_id = session.get("user_id")
 
         if not user_id:
-
             flash(
                 "Student session expired. Please login again.",
                 "error"
             )
-
-            return redirect(
-                url_for("login")
-            )
-
-
-        # =================================================
-        # DATABASE
-        # =================================================
+            return redirect(url_for("login"))
 
         conn = get_db_connection()
-
-        cursor = conn.cursor(
-            dictionary=True
-        )
-
+        cursor = conn.cursor(dictionary=True)
 
         # =================================================
         # CURRENT STUDENT
@@ -29088,19 +39249,9 @@ def student_collaborations():
 
         cursor.execute("""
             SELECT
-
                 s.id AS student_id,
                 s.user_id,
                 s.college_id,
-
-                s.enrollment_no,
-                s.course,
-                s.branch,
-                s.semester,
-
-                s.cgpa,
-                s.active_backlogs,
-                s.profile_completed,
 
                 u.name,
                 u.email,
@@ -29120,13 +39271,9 @@ def student_collaborations():
             WHERE s.user_id = %s
 
             LIMIT 1
-        """, (
-            user_id,
-        ))
-
+        """, (user_id,))
 
         student = cursor.fetchone()
-
 
         if not student:
 
@@ -29139,22 +39286,18 @@ def student_collaborations():
                 url_for("student_dashboard")
             )
 
-
-        student_id = student["student_id"]
         college_id = student["college_id"]
-
 
         if not college_id:
 
             flash(
-                "Your college information is not available.",
+                "College information is not available.",
                 "error"
             )
 
             return redirect(
                 url_for("student_dashboard")
             )
-
 
         # =================================================
         # FILTERS
@@ -29165,28 +39308,21 @@ def student_collaborations():
             ""
         ).strip()
 
-
         selected_status = request.args.get(
             "status",
             ""
         ).strip().upper()
 
-
         selected_type = request.args.get(
             "collaboration_type",
             ""
-        ).strip()
-
+        ).strip().upper()
 
         # =================================================
-        # MAIN COLLABORATIONS QUERY
-        #
-        # Student sees collaborations associated
-        # with his/her college.
+        # COLLABORATIONS
         # =================================================
 
         query = """
-
             SELECT
 
                 c.id,
@@ -29197,7 +39333,6 @@ def student_collaborations():
 
                 c.title,
                 c.description,
-
                 c.collaboration_type,
 
                 c.start_date,
@@ -29222,30 +39357,17 @@ def student_collaborations():
 
                 i.address AS industry_address,
                 i.city AS industry_city,
-                i.state AS industry_state,
-
-                cl.college_name,
-                cl.college_code
+                i.state AS industry_state
 
             FROM collaborations c
 
             INNER JOIN industries i
                 ON c.industry_id = i.id
 
-            INNER JOIN colleges cl
-                ON c.college_id = cl.id
-
             WHERE c.college_id = %s
-
-              AND i.status = 'ACTIVE'
-
         """
 
-
-        params = [
-            college_id
-        ]
-
+        params = [college_id]
 
         # =================================================
         # SEARCH
@@ -29254,35 +39376,21 @@ def student_collaborations():
         if search:
 
             query += """
-
                 AND (
-
                     c.title LIKE %s
-
                     OR c.description LIKE %s
-
                     OR c.collaboration_type LIKE %s
 
                     OR i.company_name LIKE %s
-
                     OR i.company_type LIKE %s
-
                     OR i.industry_sector LIKE %s
-
                     OR i.contact_person LIKE %s
-
                 )
-
             """
 
-
-            search_value = (
-                f"%{search}%"
-            )
-
+            search_value = f"%{search}%"
 
             params.extend([
-
                 search_value,
                 search_value,
                 search_value,
@@ -29290,65 +39398,44 @@ def student_collaborations():
                 search_value,
                 search_value,
                 search_value
-
             ])
-
 
         # =================================================
         # STATUS FILTER
         # =================================================
 
-        allowed_statuses = [
-
-            "PENDING",
-            "ACTIVE",
-            "COMPLETED",
-            "REJECTED",
-            "CANCELLED"
-
-        ]
-
-
-        if selected_status in allowed_statuses:
+        if selected_status:
 
             query += """
-
                 AND UPPER(c.status) = %s
-
             """
 
             params.append(
                 selected_status
             )
 
-
         # =================================================
-        # COLLABORATION TYPE FILTER
+        # TYPE FILTER
         # =================================================
 
         if selected_type:
 
             query += """
-
-                AND c.collaboration_type = %s
-
+                AND UPPER(c.collaboration_type) = %s
             """
 
             params.append(
                 selected_type
             )
 
-
         # =================================================
         # ORDER
         # =================================================
 
         query += """
-
             ORDER BY
 
                 CASE
-
                     WHEN UPPER(c.status) = 'ACTIVE'
                     THEN 1
 
@@ -29359,22 +39446,17 @@ def student_collaborations():
                     THEN 3
 
                     ELSE 4
-
                 END,
 
                 c.created_at DESC
-
         """
-
 
         cursor.execute(
             query,
             tuple(params)
         )
 
-
         collaborations = cursor.fetchall()
-
 
         # =================================================
         # COLLABORATION TYPES
@@ -29382,7 +39464,6 @@ def student_collaborations():
 
         cursor.execute("""
             SELECT DISTINCT
-
                 collaboration_type
 
             FROM collaborations
@@ -29391,17 +39472,12 @@ def student_collaborations():
 
               AND collaboration_type IS NOT NULL
 
-              AND TRIM(collaboration_type) != ''
+              AND TRIM(collaboration_type) <> ''
 
-            ORDER BY collaboration_type ASC
-
-        """, (
-            college_id,
-        ))
-
+            ORDER BY collaboration_type
+        """, (college_id,))
 
         collaboration_types = cursor.fetchall()
-
 
         # =================================================
         # STATISTICS
@@ -29448,34 +39524,17 @@ def student_collaborations():
             FROM collaborations
 
             WHERE college_id = %s
+        """, (college_id,))
 
-        """, (
-            college_id,
-        ))
-
-
-        stats = cursor.fetchone() or {}
-
+        stats_row = cursor.fetchone() or {}
 
         stats = {
-
-            "total":
-                stats.get("total") or 0,
-
-            "pending":
-                stats.get("pending") or 0,
-
-            "active":
-                stats.get("active") or 0,
-
-            "completed":
-                stats.get("completed") or 0,
-
-            "closed":
-                stats.get("closed") or 0
-
+            "total": stats_row.get("total") or 0,
+            "pending": stats_row.get("pending") or 0,
+            "active": stats_row.get("active") or 0,
+            "completed": stats_row.get("completed") or 0,
+            "closed": stats_row.get("closed") or 0
         }
-
 
         # =================================================
         # ACTIVE INDUSTRY PARTNERS
@@ -29494,302 +39553,262 @@ def student_collaborations():
             WHERE c.college_id = %s
 
               AND i.status = 'ACTIVE'
-
-        """, (
-            college_id,
-        ))
-
+        """, (college_id,))
 
         active_industry_partners = (
-            cursor.fetchone()["total"]
-            or 0
+            cursor.fetchone()["total"] or 0
         )
-
 
         # =================================================
         # RENDER
         # =================================================
 
         return render_template(
-
-            "student/collaborations/collaborations.html",
-
+            "student/collaborations.html",
+            
             dashboard="collaborations",
+            active_page="collaborations",
+
+            page_title="Collaborations",
+            page_subtitle=(
+                "Explore industry collaborations "
+                "associated with your college."
+            ),
 
             student=student,
 
             collaborations=collaborations,
-
             collaboration_types=collaboration_types,
 
             stats=stats,
-
-            active_industry_partners=
-                active_industry_partners,
+            active_industry_partners=active_industry_partners,
 
             search=search,
-
-            selected_status=
-                selected_status,
-
-            selected_type=
-                selected_type
-
+            selected_status=selected_status,
+            selected_type=selected_type
         )
-
-
-    # =====================================================
-    # DATABASE ERROR
-    # =====================================================
 
     except mysql.connector.Error as e:
 
-        print("=" * 70)
         print(
-            "STUDENT COLLABORATIONS DATABASE ERROR:"
+            "STUDENT COLLABORATIONS DATABASE ERROR:",
+            e
         )
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
 
         flash(
             "Unable to load collaborations.",
             "error"
         )
 
-
         return redirect(
             url_for("student_dashboard")
         )
-
-
-    # =====================================================
-    # GENERAL ERROR
-    # =====================================================
 
     except Exception as e:
 
-        print("=" * 70)
         print(
-            "STUDENT COLLABORATIONS ERROR:"
+            "STUDENT COLLABORATIONS ERROR:",
+            e
         )
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
 
         flash(
             "Unable to load collaborations.",
             "error"
         )
 
-
         return redirect(
             url_for("student_dashboard")
         )
-
 
     finally:
 
         if cursor:
-
             cursor.close()
 
-
         if conn:
-
             conn.close()
 
 
 # =========================================================
-# STUDENT MODULE - NOTIFICATIONS
+# STUDENT - COLLABORATION DETAIL
 # =========================================================
 
-@app.route("/student/notifications")
+@app.route(
+    "/student/collaborations/<collaboration_id>"
+)
 @student_required
-def student_notifications():
+def student_collaboration_detail(
+    collaboration_id
+):
 
     conn = None
     cursor = None
 
     try:
-        user_id = session.get("user_id")
 
-        if not user_id:
-            flash("Student session expired. Please login again.", "error")
-            return redirect(url_for("login"))
+        user_id = session.get("user_id")
 
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # -------------------------------------------------
-        # GET STUDENT DETAILS
-        # -------------------------------------------------
+        # =================================================
+        # CURRENT STUDENT
+        # =================================================
+
         cursor.execute("""
             SELECT
                 s.id AS student_id,
-                s.user_id,
-                s.enrollment_no,
-                s.course,
-                s.branch,
-                s.semester,
-                s.cgpa,
-                s.active_backlogs,
-                s.profile_completed,
+                s.college_id,
                 u.name,
                 u.email
+
             FROM students s
+
             INNER JOIN users u
                 ON s.user_id = u.id
+
             WHERE s.user_id = %s
+
             LIMIT 1
         """, (user_id,))
 
         student = cursor.fetchone()
 
         if not student:
-            flash("Student profile not found.", "error")
-            return redirect(url_for("student_dashboard"))
 
-        # -------------------------------------------------
-        # FILTERS
-        # -------------------------------------------------
-        search = request.args.get("search", "").strip()
-        selected_type = request.args.get("type", "").strip()
+            flash(
+                "Student profile not found.",
+                "error"
+            )
 
-        # -------------------------------------------------
-        # GET NOTIFICATIONS
-        # -------------------------------------------------
-        query = """
-            SELECT
-                id,
-                user_id,
-                title,
-                message,
-                notification_type,
-                is_read,
-                created_at
-            FROM notifications
-            WHERE user_id = %s
-        """
+            return redirect(
+                url_for("student_dashboard")
+            )
 
-        params = [user_id]
+        # =================================================
+        # COLLABORATION
+        # Ownership is verified through student's college
+        # =================================================
 
-        # Search
-        if search:
-            query += """
-                AND (
-                    title LIKE %s
-                    OR message LIKE %s
-                    OR notification_type LIKE %s
-                )
-            """
-
-            search_value = f"%{search}%"
-
-            params.extend([
-                search_value,
-                search_value,
-                search_value
-            ])
-
-        # Notification type filter
-        if selected_type:
-            query += """
-                AND notification_type = %s
-            """
-
-            params.append(selected_type)
-
-        query += """
-            ORDER BY
-                is_read ASC,
-                created_at DESC
-        """
-
-        cursor.execute(query, tuple(params))
-        notifications = cursor.fetchall()
-
-        # -------------------------------------------------
-        # NOTIFICATION TYPES
-        # -------------------------------------------------
-        cursor.execute("""
-            SELECT DISTINCT notification_type
-            FROM notifications
-            WHERE user_id = %s
-              AND notification_type IS NOT NULL
-              AND TRIM(notification_type) != ''
-            ORDER BY notification_type ASC
-        """, (user_id,))
-
-        notification_types = cursor.fetchall()
-
-        # -------------------------------------------------
-        # NOTIFICATION STATS
-        # -------------------------------------------------
         cursor.execute("""
             SELECT
-                COUNT(*) AS total,
-                SUM(
-                    CASE
-                        WHEN is_read = 0 THEN 1
-                        ELSE 0
-                    END
-                ) AS unread,
-                SUM(
-                    CASE
-                        WHEN is_read = 1 THEN 1
-                        ELSE 0
-                    END
-                ) AS read_count
-            FROM notifications
-            WHERE user_id = %s
-        """, (user_id,))
 
-        stats = cursor.fetchone() or {}
+                c.id,
+                c.college_id,
+                c.industry_id,
 
-        stats = {
-            "total": stats.get("total") or 0,
-            "unread": stats.get("unread") or 0,
-            "read": stats.get("read_count") or 0
-        }
+                c.initiated_by,
 
-        # -------------------------------------------------
-        # RENDER PAGE
-        # -------------------------------------------------
+                c.title,
+                c.description,
+                c.collaboration_type,
+
+                c.start_date,
+                c.end_date,
+
+                c.status,
+
+                c.created_at,
+                c.updated_at,
+
+                col.college_name,
+                col.college_code,
+                col.university_name,
+
+                i.company_name,
+                i.company_type,
+                i.industry_sector,
+
+                i.contact_person,
+                i.designation,
+
+                i.email AS industry_email,
+                i.phone AS industry_phone,
+
+                i.website AS industry_website,
+
+                i.address AS industry_address,
+                i.city AS industry_city,
+                i.state AS industry_state
+
+            FROM collaborations c
+
+            INNER JOIN colleges col
+                ON c.college_id = col.id
+
+            INNER JOIN industries i
+                ON c.industry_id = i.id
+
+            WHERE c.id = %s
+
+              AND c.college_id = %s
+
+            LIMIT 1
+        """, (
+            collaboration_id,
+            student["college_id"]
+        ))
+
+        collaboration = cursor.fetchone()
+
+        if not collaboration:
+
+            flash(
+                "Collaboration not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("student_collaborations")
+            )
+
+        # =================================================
+        # RENDER
+        # =================================================
+
         return render_template(
-            "student/notifications/notifications.html",
-            dashboard="notifications",
+            "student/collaborations/collaboration_detail.html",
+
+            dashboard="collaborations",
+            active_page="collaborations",
+
+            page_title="Collaboration Details",
+
             student=student,
-            notifications=notifications,
-            notification_types=notification_types,
-            stats=stats,
-            search=search,
-            selected_type=selected_type
+            collaboration=collaboration
         )
 
     except mysql.connector.Error as e:
 
-        print("=" * 70)
-        print("STUDENT NOTIFICATIONS DATABASE ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
+        print(
+            "STUDENT COLLABORATION DETAIL DB ERROR:",
+            e
+        )
 
-        flash("Unable to load notifications.", "error")
-        return redirect(url_for("student_dashboard"))
+        flash(
+            "Unable to load collaboration details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_collaborations")
+        )
 
     except Exception as e:
 
-        print("=" * 70)
-        print("STUDENT NOTIFICATIONS ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
+        print(
+            "STUDENT COLLABORATION DETAIL ERROR:",
+            e
+        )
 
-        flash("Unable to load notifications.", "error")
-        return redirect(url_for("student_dashboard"))
+        flash(
+            "Unable to load collaboration details.",
+            "error"
+        )
+
+        return redirect(
+            url_for("student_collaborations")
+        )
 
     finally:
 
@@ -29800,190 +39819,9 @@ def student_notifications():
             conn.close()
 
 
-# =========================================================
-# STUDENT MODULE - MARK NOTIFICATION AS READ
-# =========================================================
-
-@app.route(
-    "/student/notifications/<notification_id>/read",
-    methods=["POST"]
-)
-@student_required
-def student_mark_notification_read(notification_id):
-
-    conn = None
-    cursor = None
-
-    try:
-
-        user_id = session.get("user_id")
-
-        if not user_id:
-            return jsonify({
-                "success": False,
-                "message": "Student session expired."
-            }), 401
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # -------------------------------------------------
-        # IMPORTANT:
-        # user_id condition prevents one student from
-        # modifying another student's notification.
-        # -------------------------------------------------
-        cursor.execute("""
-            UPDATE notifications
-            SET is_read = 1
-            WHERE id = %s
-              AND user_id = %s
-        """, (
-            notification_id,
-            user_id
-        ))
-
-        conn.commit()
-
-        if cursor.rowcount == 0:
-            return jsonify({
-                "success": False,
-                "message": "Notification not found."
-            }), 404
-
-        return jsonify({
-            "success": True,
-            "message": "Notification marked as read."
-        })
-
-    except mysql.connector.Error as e:
-
-        if conn:
-            conn.rollback()
-
-        print("=" * 70)
-        print("MARK NOTIFICATION READ DATABASE ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-        return jsonify({
-            "success": False,
-            "message": "Unable to update notification."
-        }), 500
-
-    except Exception as e:
-
-        if conn:
-            conn.rollback()
-
-        print("=" * 70)
-        print("MARK NOTIFICATION READ ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-        return jsonify({
-            "success": False,
-            "message": "Unable to update notification."
-        }), 500
-
-    finally:
-
-        if cursor:
-            cursor.close()
-
-        if conn:
-            conn.close()
-
-
-# =========================================================
-# STUDENT MODULE - MARK ALL NOTIFICATIONS AS READ
-# =========================================================
-
-@app.route(
-    "/student/notifications/mark-all-read",
-    methods=["POST"]
-)
-@student_required
-def student_mark_all_notifications_read():
-
-    conn = None
-    cursor = None
-
-    try:
-
-        user_id = session.get("user_id")
-
-        if not user_id:
-            return jsonify({
-                "success": False,
-                "message": "Student session expired."
-            }), 401
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE notifications
-            SET is_read = 1
-            WHERE user_id = %s
-              AND is_read = 0
-        """, (user_id,))
-
-        updated_count = cursor.rowcount
-
-        conn.commit()
-
-        return jsonify({
-            "success": True,
-            "message": "All notifications marked as read.",
-            "updated": updated_count
-        })
-
-    except mysql.connector.Error as e:
-
-        if conn:
-            conn.rollback()
-
-        print("=" * 70)
-        print("MARK ALL NOTIFICATIONS DATABASE ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-        return jsonify({
-            "success": False,
-            "message": "Unable to update notifications."
-        }), 500
-
-    except Exception as e:
-
-        if conn:
-            conn.rollback()
-
-        print("=" * 70)
-        print("MARK ALL NOTIFICATIONS ERROR:")
-        print(type(e).__name__)
-        print(e)
-        print("=" * 70)
-
-        return jsonify({
-            "success": False,
-            "message": "Unable to update notifications."
-        }), 500
-
-    finally:
-
-        if cursor:
-            cursor.close()
-
-        if conn:
-            conn.close()
-
-           
-# =========================================================
-# LOGOUT
-# =========================================================
+#=============================================
+#LOGOUT
+#=============================================
 
 @app.route("/logout")
 def logout():

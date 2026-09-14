@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Workshops | Student Portal</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/student/student_base.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/student/student_workshops.css') }}">
+</head>
+
+<body>
+
+<div class="student-layout">
+
+    {% include 'student/components/student_sidebar.html' %}
+
+    <main class="student-main">
+
+        {% include 'student/components/student_topbar.html' %}
+
+        <section class="workshops-page">
+
+            <!-- HEADER -->
+            <div class="workshops-header">
+
+                <div>
+                    <div class="page-eyebrow">STUDENT ENGAGEMENT</div>
+
+                    <h1>Workshops</h1>
+
+                    <p>
+                        Discover workshops, register, attend and build
+                        achievements through learning experiences.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- STATS -->
+            <div class="workshop-stats">
+
+                <div class="workshop-stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div>
+                        <span>Total Registered</span>
+                        <strong>{{ total_registered }}</strong>
+                    </div>
+                </div>
+
+                <div class="workshop-stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div>
+                        <span>Attended</span>
+                        <strong>{{ total_attended }}</strong>
+                    </div>
+                </div>
+
+                <div class="workshop-stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div>
+                        <span>Completed</span>
+                        <strong>{{ total_completed }}</strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- SEARCH -->
+            <div class="workshop-toolbar">
+
+                <div class="workshop-search">
+                    <span>🔎</span>
+
+                    <input
+                        type="text"
+                        id="workshopSearch"
+                        placeholder="Search workshops, topics...">
+                </div>
+
+                <button
+                    type="button"
+                    id="clearWorkshopSearch"
+                    class="clear-search-btn">
+                    Clear
+                </button>
+
+            </div>
+
+
+            <!-- WORKSHOP GRID -->
+            <div class="workshop-grid" id="workshopGrid">
+
+                {% if workshops %}
+
+                    {% for workshop in workshops %}
+
+                    <article
+                        class="workshop-card"
+                        data-title="{{ workshop.title|lower }}"
+                        data-topic="{{ (workshop.topic or '')|lower }}">
+
+                        <div class="workshop-card-top">
+
+                            <span class="workshop-mode">
+                                {{ workshop.mode or 'N/A' }}
+                            </span>
+
+                            <span class="workshop-status status-{{ workshop.status|lower }}">
+                                {{ workshop.status }}
+                            </span>
+
+                        </div>
+
+
+                        <h2>{{ workshop.title }}</h2>
+
+
+                        {% if workshop.topic %}
+                        <div class="workshop-topic">
+                            🧠 {{ workshop.topic }}
+                        </div>
+                        {% endif %}
+
+
+                        {% if workshop.description %}
+                        <p class="workshop-description">
+                            {{ workshop.description }}
+                        </p>
+                        {% endif %}
+
+
+                        <div class="workshop-info">
+
+                            <div>
+                                <span>📅 Start</span>
+                                <strong>
+                                    {{ workshop.start_date or 'Not specified' }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>📅 End</span>
+                                <strong>
+                                    {{ workshop.end_date or 'Not specified' }}
+                                </strong>
+                            </div>
+
+                            {% if workshop.registration_deadline %}
+                            <div>
+                                <span>⏳ Registration Deadline</span>
+                                <strong>
+                                    {{ workshop.registration_deadline }}
+                                </strong>
+                            </div>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- ACTION AREA -->
+
+                        {% if workshop.registration_id %}
+
+                            {% if workshop.attendance_status == 'REGISTERED' %}
+
+                                <div class="workshop-registered-box">
+                                    <span>✓ Registered</span>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for(
+                                            'student_attend_workshop',
+                                            workshop_id=workshop.id
+                                        ) }}">
+
+                                        <button
+                                            type="submit"
+                                            class="workshop-btn attend-btn">
+                                            🎓 Mark Attend
+                                        </button>
+
+                                    </form>
+                                </div>
+
+                            {% elif workshop.attendance_status == 'ATTENDED' %}
+
+                                <div class="workshop-registered-box attended-box">
+                                    <span>✓ Attended</span>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for(
+                                            'student_complete_workshop',
+                                            workshop_id=workshop.id
+                                        ) }}">
+
+                                        <button
+                                            type="submit"
+                                            class="workshop-btn complete-btn">
+                                            🏆 Complete Workshop
+                                        </button>
+
+                                    </form>
+                                </div>
+
+                            {% elif workshop.attendance_status == 'COMPLETED' %}
+
+                                <div class="workshop-completed-box">
+                                    <span>🏆 Completed</span>
+                                    <small>Achievement added to your profile</small>
+                                </div>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_register_workshop',
+                                    workshop_id=workshop.id
+                                ) }}"
+                                class="register-form">
+
+                                <button
+                                    type="submit"
+                                    class="workshop-btn register-btn">
+
+                                    📝 Register
+
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </article>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="workshop-empty">
+                        <div>📚</div>
+
+                        <h3>No workshops available</h3>
+
+                        <p>
+                            New workshops will appear here when they are published.
+                        </p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- SEARCH EMPTY -->
+            <div
+                id="workshopSearchEmpty"
+                class="workshop-empty search-empty"
+                style="display:none;">
+
+                <div>🔍</div>
+
+                <h3>No matching workshops</h3>
+
+                <p>
+                    Try a different workshop name or topic.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/student/student_base.js') }}">
+</script>
+
+<script
+    src="{{ url_for('static', filename='js/student/workshops.js') }}">
+</script>
+
+</body>
+</html>

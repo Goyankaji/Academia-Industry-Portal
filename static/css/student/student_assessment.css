@@ -1,0 +1,674 @@
+/* =========================================================
+   STUDENT - SKILL ASSESSMENT
+========================================================= */
+
+.assessment-page-header,
+.assessment-taking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.assessment-page-header h1,
+.assessment-taking-header h1 {
+    margin: 0 0 7px;
+    font-size: 30px;
+}
+
+.assessment-page-header p,
+.assessment-taking-header p {
+    margin: 0;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.assessment-section {
+    margin-top: 20px;
+}
+
+.section-heading {
+    margin-bottom: 20px;
+}
+
+.section-heading h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+}
+
+.section-heading p {
+    margin: 0;
+    color: #6b7280;
+}
+
+.assessment-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.assessment-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px;
+}
+
+.assessment-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.assessment-card h2 {
+    margin: 9px 0 4px;
+    font-size: 20px;
+}
+
+.assessment-card p {
+    color: #6b7280;
+}
+
+.skill-name {
+    margin: 0;
+    font-weight: 600;
+}
+
+.assessment-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.assessment-badge {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.assessment-description {
+    min-height: 44px;
+    line-height: 1.6;
+}
+
+.assessment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.assessment-meta span {
+    padding: 7px 10px;
+    background: #f9fafb;
+    border-radius: 7px;
+    color: #4b5563;
+    font-size: 12px;
+}
+
+.assessment-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.completed-label {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.assessment-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.assessment-btn.primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.assessment-btn.large {
+    padding: 13px 24px;
+}
+
+.empty-assessment {
+    background: #ffffff;
+    border: 1px dashed #d1d5db;
+    border-radius: 14px;
+    text-align: center;
+    padding: 55px 25px;
+}
+
+.empty-icon {
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.empty-assessment h2 {
+    margin: 0 0 8px;
+}
+
+.empty-assessment p {
+    max-width: 550px;
+    margin: 0 auto;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.active-assessment-card {
+    margin-bottom: 24px;
+    border-left: 4px solid #2563eb;
+}
+
+.active-assessment-card .assessment-btn {
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   TAKING ASSESSMENT
+========================================================= */
+
+.timer-box {
+    min-width: 150px;
+    padding: 15px 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.timer-box span {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.timer-box strong {
+    font-size: 25px;
+}
+
+.question-progress {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.progress-text {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 9px;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.progress-track {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0;
+    height: 100%;
+    background: #2563eb;
+    transition: width 0.25s ease;
+}
+
+.questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.question-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.question-number {
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.question-card h2 {
+    margin: 0 0 20px;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.option-item:hover {
+    background: #f9fafb;
+}
+
+.option-item:has(input:checked) {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.option-item input {
+    display: none;
+}
+
+.option-letter {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.option-item:has(input:checked) .option-letter {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.assessment-submit-area {
+    margin-top: 24px;
+    padding: 22px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.assessment-submit-area p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.flash-container {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.flash-message.success {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.flash-message.error {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+    .assessment-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .assessment-page-header,
+    .assessment-taking-header {
+        flex-direction: column;
+    }
+
+    .timer-box {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .assessment-submit-area {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* =========================================================
+   ASSESSMENT RESULT
+========================================================= */
+
+.result-overview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.result-title-block h2 {
+    margin: 8px 0 6px;
+    font-size: 28px;
+}
+
+.result-title-block p {
+    margin: 0;
+    color: #64748b;
+}
+
+.result-status {
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    background: #f1f5f9;
+}
+
+.result-status.passed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.result-status.failed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+
+/* =========================================================
+   RESULT STATS
+========================================================= */
+
+.result-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.result-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.result-stat-icon {
+    font-size: 28px;
+}
+
+.result-stat-card div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.result-stat-card span {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.result-stat-card strong {
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   RESULT INFO
+========================================================= */
+
+.result-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #e2e8f0;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.result-info > div {
+    background: #ffffff;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.result-info span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.result-info strong {
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   QUESTION REVIEW
+========================================================= */
+
+.question-review {
+    margin-top: 20px;
+}
+
+.review-question {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 18px;
+}
+
+.review-question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.review-question h3 {
+    margin: 0 0 18px;
+    font-size: 17px;
+    line-height: 1.5;
+}
+
+.answer-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.answer-badge.correct {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.answer-badge.incorrect {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.answer-badge.unanswered {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* =========================================================
+   REVIEW OPTIONS
+========================================================= */
+
+.review-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.review-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 13px;
+}
+
+.review-option strong {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+}
+
+.review-option.correct-option {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.review-option.wrong-option {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+
+/* =========================================================
+   REVIEW FOOTER
+========================================================= */
+
+.review-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.review-footer strong {
+    color: #0f172a;
+}
+
+
+/* =========================================================
+   RESULT ACTIONS
+========================================================= */
+
+.result-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 28px;
+    margin-bottom: 40px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .result-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .result-info {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .review-options {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .result-overview {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .result-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .result-info {
+        grid-template-columns: 1fr;
+    }
+
+    .result-actions {
+        flex-direction: column;
+    }
+
+}

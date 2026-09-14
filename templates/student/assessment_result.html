@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ page_title or "Assessment Result" }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_assessment.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>
+                        {{ page_title or "Assessment Results" }}
+                    </h1>
+
+                    <p>
+                        {{ page_subtitle or
+                           "Review your assessment performance." }}
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <a
+                        href="{{ url_for(
+                            'student_skill_assessment'
+                        ) }}"
+                        class="assessment-btn secondary"
+                    >
+                        🧠 Take Assessment
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 RESULT HISTORY
+            ================================================== -->
+
+            {% if result_history %}
+
+                {% if results %}
+
+                    <section class="assessment-section">
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Your Assessment History
+                            </h2>
+
+                            <p>
+                                All your completed skill assessments.
+                            </p>
+
+                        </div>
+
+
+                        <div class="assessment-grid">
+
+                            {% for result in results %}
+
+                                <article
+                                    class="assessment-card"
+                                >
+
+                                    <div
+                                        class="assessment-card-header"
+                                    >
+
+                                        <div>
+
+                                            <span
+                                                class="assessment-category"
+                                            >
+                                                {{ result.skill_category
+                                                   or "Skill" }}
+                                            </span>
+
+                                            <h3>
+                                                {{ result.title }}
+                                            </h3>
+
+                                            <p>
+                                                {{ result.skill_name }}
+                                            </p>
+
+                                        </div>
+
+
+                                        {% if result.status == "PASSED" %}
+
+                                            <span
+                                                class="assessment-status passed"
+                                            >
+                                                Passed
+                                            </span>
+
+                                        {% elif result.status == "FAILED" %}
+
+                                            <span
+                                                class="assessment-status failed"
+                                            >
+                                                Failed
+                                            </span>
+
+                                        {% else %}
+
+                                            <span
+                                                class="assessment-status"
+                                            >
+                                                {{ result.status }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div
+                                        class="assessment-result-summary"
+                                    >
+
+                                        <div>
+
+                                            <span>
+                                                Score
+                                            </span>
+
+                                            <strong>
+                                                {{ result.score }}
+                                                /
+                                                {{ result.total_marks }}
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <span>
+                                                Percentage
+                                            </span>
+
+                                            <strong>
+                                                {{ result.percentage }}%
+                                            </strong>
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                    <div
+                                        class="assessment-card-footer"
+                                    >
+
+                                        <small>
+
+                                            {% if result.completed_at %}
+
+                                                Completed:
+                                                {{ result.completed_at }}
+
+                                            {% else %}
+
+                                                Completed
+
+                                            {% endif %}
+
+                                        </small>
+
+
+                                        <a
+                                            href="{{ url_for(
+                                                'student_assessment_result',
+                                                attempt_id=result.id
+                                            ) }}"
+                                            class="assessment-btn primary"
+                                        >
+                                            View Result
+                                        </a>
+
+                                    </div>
+
+                                </article>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </section>
+
+                {% else %}
+
+                    <section
+                        class="assessment-empty-state"
+                    >
+
+                        <div class="empty-icon">
+                            📊
+                        </div>
+
+                        <h2>
+                            No Assessment Results Yet
+                        </h2>
+
+                        <p>
+                            You have not completed any skill
+                            assessment yet.
+                        </p>
+
+                        <a
+                            href="{{ url_for(
+                                'student_skill_assessment'
+                            ) }}"
+                            class="assessment-btn primary"
+                        >
+                            Take Your First Assessment
+                        </a>
+
+                    </section>
+
+                {% endif %}
+
+
+            <!-- =================================================
+                 SINGLE RESULT
+            ================================================== -->
+
+            {% else %}
+
+
+                <section
+                    class="result-overview"
+                >
+
+                    <div
+                        class="result-title-block"
+                    >
+
+                        <span
+                            class="assessment-category"
+                        >
+                            {{ attempt.skill_category
+                               or "Skill Assessment" }}
+                        </span>
+
+                        <h2>
+                            {{ attempt.title }}
+                        </h2>
+
+                        <p>
+                            {{ attempt.skill_name }}
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        class="result-status
+                        {% if attempt.status == 'PASSED' %}
+                            passed
+                        {% elif attempt.status == 'FAILED' %}
+                            failed
+                        {% endif %}"
+                    >
+
+                        {% if attempt.status == "PASSED" %}
+
+                            🎉 PASSED
+
+                        {% elif attempt.status == "FAILED" %}
+
+                            ❌ FAILED
+
+                        {% else %}
+
+                            ✓ COMPLETED
+
+                        {% endif %}
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     SCORE CARDS
+                ================================================== -->
+
+                <section
+                    class="result-stats"
+                >
+
+                    <div class="result-stat-card">
+
+                        <span class="result-stat-icon">
+                            🎯
+                        </span>
+
+                        <div>
+
+                            <span>
+                                Score
+                            </span>
+
+                            <strong>
+                                {{ attempt.score }}
+                                /
+                                {{ attempt.total_marks }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-stat-card">
+
+                        <span class="result-stat-icon">
+                            📊
+                        </span>
+
+                        <div>
+
+                            <span>
+                                Percentage
+                            </span>
+
+                            <strong>
+                                {{ attempt.percentage }}%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-stat-card">
+
+                        <span class="result-stat-icon">
+                            ✓
+                        </span>
+
+                        <div>
+
+                            <span>
+                                Correct
+                            </span>
+
+                            <strong>
+                                {{ correct_answers }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-stat-card">
+
+                        <span class="result-stat-icon">
+                            ✗
+                        </span>
+
+                        <div>
+
+                            <span>
+                                Incorrect
+                            </span>
+
+                            <strong>
+                                {{ incorrect_answers }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     PASSING INFORMATION
+                ================================================== -->
+
+                <section class="result-info">
+
+                    <div>
+
+                        <span>
+                            Passing Percentage
+                        </span>
+
+                        <strong>
+                            {{ attempt.passing_percentage }}%
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Total Questions
+                        </span>
+
+                        <strong>
+                            {{ total_questions }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Unanswered
+                        </span>
+
+                        <strong>
+                            {{ unanswered }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Completed At
+                        </span>
+
+                        <strong>
+
+                            {% if attempt.completed_at %}
+
+                                {{ attempt.completed_at }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     QUESTION REVIEW
+                ================================================== -->
+
+                <section class="question-review">
+
+                    <div class="section-heading">
+
+                        <h2>
+                            Question Review
+                        </h2>
+
+                        <p>
+                            Review your answers and performance.
+                        </p>
+
+                    </div>
+
+
+                    {% for question in questions %}
+
+                        <article
+                            class="review-question"
+                        >
+
+                            <div
+                                class="review-question-header"
+                            >
+
+                                <span>
+                                    Question
+                                    {{ loop.index }}
+                                </span>
+
+
+                                {% if question.is_correct %}
+
+                                    <span
+                                        class="answer-badge correct"
+                                    >
+                                        ✓ Correct
+                                    </span>
+
+                                {% elif question.selected_option %}
+
+                                    <span
+                                        class="answer-badge incorrect"
+                                    >
+                                        ✗ Incorrect
+                                    </span>
+
+                                {% else %}
+
+                                    <span
+                                        class="answer-badge unanswered"
+                                    >
+                                        — Unanswered
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <h3>
+                                {{ question.question_text }}
+                            </h3>
+
+
+                            <div
+                                class="review-options"
+                            >
+
+                                <div
+                                    class="
+                                    review-option
+                                    {% if question.correct_option == 'A' %}
+                                        correct-option
+                                    {% endif %}
+                                    {% if question.selected_option == 'A'
+                                          and question.correct_option != 'A' %}
+                                        wrong-option
+                                    {% endif %}
+                                    "
+                                >
+
+                                    <strong>
+                                        A
+                                    </strong>
+
+                                    <span>
+                                        {{ question.option_a }}
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="
+                                    review-option
+                                    {% if question.correct_option == 'B' %}
+                                        correct-option
+                                    {% endif %}
+                                    {% if question.selected_option == 'B'
+                                          and question.correct_option != 'B' %}
+                                        wrong-option
+                                    {% endif %}
+                                    "
+                                >
+
+                                    <strong>
+                                        B
+                                    </strong>
+
+                                    <span>
+                                        {{ question.option_b }}
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="
+                                    review-option
+                                    {% if question.correct_option == 'C' %}
+                                        correct-option
+                                    {% endif %}
+                                    {% if question.selected_option == 'C'
+                                          and question.correct_option != 'C' %}
+                                        wrong-option
+                                    {% endif %}
+                                    "
+                                >
+
+                                    <strong>
+                                        C
+                                    </strong>
+
+                                    <span>
+                                        {{ question.option_c }}
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="
+                                    review-option
+                                    {% if question.correct_option == 'D' %}
+                                        correct-option
+                                    {% endif %}
+                                    {% if question.selected_option == 'D'
+                                          and question.correct_option != 'D' %}
+                                        wrong-option
+                                    {% endif %}
+                                    "
+                                >
+
+                                    <strong>
+                                        D
+                                    </strong>
+
+                                    <span>
+                                        {{ question.option_d }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="review-footer"
+                            >
+
+                                <span>
+                                    Your Answer:
+                                    <strong>
+                                        {{ question.selected_option
+                                           or "Not Answered" }}
+                                    </strong>
+                                </span>
+
+
+                                <span>
+                                    Correct Answer:
+                                    <strong>
+                                        {{ question.correct_option }}
+                                    </strong>
+                                </span>
+
+
+                                <span>
+                                    Marks:
+                                    <strong>
+                                        {{ question.marks_obtained
+                                           or 0 }}
+                                        /
+                                        {{ question.marks or 0 }}
+                                    </strong>
+                                </span>
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                </section>
+
+
+                <!-- =================================================
+                     ACTIONS
+                ================================================== -->
+
+                <section class="result-actions">
+
+                    <a
+                        href="{{ url_for(
+                            'student_skill_assessment'
+                        ) }}"
+                        class="assessment-btn primary"
+                    >
+                        🧠 Take Another Assessment
+                    </a>
+
+
+                    <a
+                        href="{{ url_for(
+                            'student_assessment_results'
+                        ) }}"
+                        class="assessment-btn secondary"
+                    >
+                        📊 View All Results
+                    </a>
+
+                </section>
+
+            {% endif %}
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+</body>
+
+</html>

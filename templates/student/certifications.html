@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Certifications</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_base.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_certifications.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>
+                        My Certifications
+                    </h1>
+
+                    <p>
+                        Manage your professional certifications
+                        and credentials.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="openAddCertification"
+                >
+                    + Add Certification
+                </button>
+
+            </section>
+
+
+            <!-- =================================================
+                 STATISTICS
+            ================================================== -->
+
+            <section class="certification-stats">
+
+                <div class="cert-stat-card">
+
+                    <div class="cert-stat-icon">
+                        🏆
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Certifications
+                        </span>
+
+                        <strong>
+                            {{ total_certifications }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="cert-stat-card">
+
+                    <div class="cert-stat-icon">
+                        ✅
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Valid
+                        </span>
+
+                        <strong>
+                            {{ valid_certifications }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="cert-stat-card">
+
+                    <div class="cert-stat-icon">
+                        ⚠️
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Expired
+                        </span>
+
+                        <strong>
+                            {{ expired_certifications }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="cert-stat-card">
+
+                    <div class="cert-stat-icon">
+                        ♾️
+                    </div>
+
+                    <div>
+
+                        <span>
+                            No Expiry
+                        </span>
+
+                        <strong>
+                            {{ no_expiry_certifications }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CERTIFICATION LIST
+            ================================================== -->
+
+            <section class="certifications-section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2>
+                            Your Certifications
+                        </h2>
+
+                        <p>
+                            Certificates you have earned.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {% if certifications %}
+
+                    <div class="certification-grid">
+
+                        {% for certification in certifications %}
+
+                            <article
+                                class="certification-card"
+                                data-certification-id="{{ certification.id }}"
+                            >
+
+                                <div class="certification-card-header">
+
+                                    <div class="certificate-icon">
+                                        🏆
+                                    </div>
+
+                                    <div class="certificate-title">
+
+                                        <h3>
+                                            {{ certification.certificate_name }}
+                                        </h3>
+
+                                        {% if certification.issuing_organization %}
+
+                                            <p>
+                                                {{ certification.issuing_organization }}
+                                            </p>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="certification-details">
+
+                                    {% if certification.credential_id %}
+
+                                        <div class="detail-row">
+
+                                            <span>
+                                                Credential ID
+                                            </span>
+
+                                            <strong>
+                                                {{ certification.credential_id }}
+                                            </strong>
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                    {% if certification.issue_date %}
+
+                                        <div class="detail-row">
+
+                                            <span>
+                                                Issue Date
+                                            </span>
+
+                                            <strong>
+                                                {{ certification.issue_date.strftime('%d %b %Y') }}
+                                            </strong>
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                    <div class="detail-row">
+
+                                        <span>
+                                            Expiry
+                                        </span>
+
+                                        <strong>
+
+                                            {% if certification.expiry_date %}
+
+                                                {{ certification.expiry_date.strftime('%d %b %Y') }}
+
+                                                {% if certification.expiry_date < today %}
+
+                                                    <span class="status-badge expired">
+                                                        Expired
+                                                    </span>
+
+                                                {% else %}
+
+                                                    <span class="status-badge valid">
+                                                        Valid
+                                                    </span>
+
+                                                {% endif %}
+
+                                            {% else %}
+
+                                                <span class="status-badge valid">
+                                                    No Expiry
+                                                </span>
+
+                                            {% endif %}
+
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                {% if certification.description %}
+
+                                    <p class="certification-description">
+                                        {{ certification.description }}
+                                    </p>
+
+                                {% endif %}
+
+
+                                <div class="certification-links">
+
+                                    {% if certification.certificate_url %}
+
+                                        <a
+                                            href="{{ certification.certificate_url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="btn btn-outline"
+                                        >
+                                            View Certificate
+                                        </a>
+
+                                    {% endif %}
+
+
+                                    {% if certification.certificate_file %}
+
+                                        <a
+                                            href="{{ url_for('static', filename=certification.certificate_file) }}"
+                                            target="_blank"
+                                            class="btn btn-outline"
+                                        >
+                                            Open File
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="certification-actions">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary edit-certification"
+                                        data-id="{{ certification.id }}"
+                                    >
+                                        Edit
+                                    </button>
+
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('student_certification_delete', certification_id=certification.id) }}"
+                                        class="delete-certification-form"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger"
+                                        >
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+
+                                <!-- Hidden edit data -->
+
+                                <div
+                                    class="certification-data"
+                                    hidden
+                                    data-name="{{ certification.certificate_name }}"
+                                    data-organization="{{ certification.issuing_organization or '' }}"
+                                    data-credential="{{ certification.credential_id or '' }}"
+                                    data-issue-date="{{ certification.issue_date.strftime('%Y-%m-%d') if certification.issue_date else '' }}"
+                                    data-expiry-date="{{ certification.expiry_date.strftime('%Y-%m-%d') if certification.expiry_date else '' }}"
+                                    data-url="{{ certification.certificate_url or '' }}"
+                                    data-description="{{ certification.description or '' }}"
+                                ></div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            🏆
+                        </div>
+
+                        <h3>
+                            No Certifications Yet
+                        </h3>
+
+                        <p>
+                            Add your professional certifications
+                            to strengthen your profile.
+                        </p>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="openAddCertificationEmpty"
+                        >
+                            + Add Your First Certification
+                        </button>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ADD / EDIT MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="certificationModal"
+    hidden
+>
+
+    <div class="certification-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2 id="modalTitle">
+                    Add Certification
+                </h2>
+
+                <p>
+                    Enter your certificate details.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closeCertificationModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            id="certificationForm"
+            method="POST"
+            action="{{ url_for('student_certification_add') }}"
+            enctype="multipart/form-data"
+        >
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Certificate Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        name="certificate_name"
+                        id="certificate_name"
+                        maxlength="200"
+                        required
+                        placeholder="e.g. Python Programming Certification"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Issuing Organization
+                    </label>
+
+                    <input
+                        type="text"
+                        name="issuing_organization"
+                        id="issuing_organization"
+                        maxlength="200"
+                        placeholder="e.g. Coursera"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Credential ID
+                    </label>
+
+                    <input
+                        type="text"
+                        name="credential_id"
+                        id="credential_id"
+                        maxlength="150"
+                        placeholder="e.g. ABC123XYZ"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Issue Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="issue_date"
+                        id="issue_date"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Expiry Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="expiry_date"
+                        id="expiry_date"
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Certificate URL
+                    </label>
+
+                    <input
+                        type="url"
+                        name="certificate_url"
+                        id="certificate_url"
+                        maxlength="255"
+                        placeholder="https://..."
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Certificate File
+                    </label>
+
+                    <input
+                        type="file"
+                        name="certificate_file"
+                        id="certificate_file"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                    >
+
+                    <small>
+                        PDF, PNG or JPG
+                    </small>
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Description
+                    </label>
+
+                    <textarea
+                        name="description"
+                        id="description"
+                        rows="4"
+                        placeholder="Add a short description about this certification..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelCertification"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save Certification
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/student/certifications.js') }}"
+></script>
+
+</body>
+</html>

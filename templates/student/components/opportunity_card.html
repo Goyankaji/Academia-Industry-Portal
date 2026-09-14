@@ -1,0 +1,187 @@
+<!-- =========================================================
+     STUDENT OPPORTUNITY CARD
+     Reusable Component
+========================================================= -->
+
+<article class="student-opportunity-card">
+
+    <!-- Opportunity Header -->
+    <div class="opportunity-card-header">
+
+        <div class="opportunity-card-company-icon">
+            💼
+        </div>
+
+        <div class="opportunity-card-heading">
+
+            <h3 class="opportunity-card-title">
+                {% if opportunity.title is defined and opportunity.title %}
+                    {{ opportunity.title }}
+                {% else %}
+                    Opportunity
+                {% endif %}
+            </h3>
+
+            <p class="opportunity-card-company">
+
+                {% if opportunity.company_name is defined and opportunity.company_name %}
+                    {{ opportunity.company_name }}
+
+                {% elif opportunity.industry_name is defined and opportunity.industry_name %}
+                    {{ opportunity.industry_name }}
+
+                {% elif opportunity.company is defined and opportunity.company %}
+                    {{ opportunity.company }}
+
+                {% else %}
+                    Company
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Opportunity Details -->
+    <div class="opportunity-card-details">
+
+
+        {% if opportunity.location is defined and opportunity.location %}
+
+            <div class="opportunity-detail-item">
+                <span class="detail-icon">📍</span>
+                <span>{{ opportunity.location }}</span>
+            </div>
+
+        {% endif %}
+
+
+        {% if opportunity.work_mode is defined and opportunity.work_mode %}
+
+            <div class="opportunity-detail-item">
+                <span class="detail-icon">💻</span>
+                <span>{{ opportunity.work_mode }}</span>
+            </div>
+
+        {% elif opportunity.mode is defined and opportunity.mode %}
+
+            <div class="opportunity-detail-item">
+                <span class="detail-icon">💻</span>
+                <span>{{ opportunity.mode }}</span>
+            </div>
+
+        {% endif %}
+
+
+        {% if opportunity.opportunity_type is defined and opportunity.opportunity_type %}
+
+            <div class="opportunity-detail-item">
+                <span class="detail-icon">📋</span>
+                <span>{{ opportunity.opportunity_type }}</span>
+            </div>
+
+        {% elif opportunity.type is defined and opportunity.type %}
+
+            <div class="opportunity-detail-item">
+                <span class="detail-icon">📋</span>
+                <span>{{ opportunity.type }}</span>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Description -->
+    {% if opportunity.description is defined and opportunity.description %}
+
+        <p class="opportunity-card-description">
+
+            {{ opportunity.description|truncate(120, true, '...') }}
+
+        </p>
+
+    {% endif %}
+
+
+    <!-- Skills -->
+    {% if opportunity.skills is defined and opportunity.skills %}
+
+        <div class="opportunity-card-skills">
+
+            {% for skill in opportunity.skills[:4] %}
+
+                <span class="opportunity-skill-tag">
+                    {{ skill }}
+                </span>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- Footer -->
+    <div class="opportunity-card-footer">
+
+
+        <!-- Deadline -->
+        <div class="opportunity-deadline">
+
+            {% if opportunity.application_deadline is defined and opportunity.application_deadline %}
+
+                <span class="deadline-label">
+                    Deadline
+                </span>
+
+                <span class="deadline-value">
+                    {{ opportunity.application_deadline }}
+                </span>
+
+            {% elif opportunity.deadline is defined and opportunity.deadline %}
+
+                <span class="deadline-label">
+                    Deadline
+                </span>
+
+                <span class="deadline-value">
+                    {{ opportunity.deadline }}
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- View Button -->
+        {% if opportunity.id is defined and opportunity.id %}
+
+            <a
+                href="{{ url_for('student_opportunity_detail', opportunity_id=opportunity.id) }}"
+                class="opportunity-card-action">
+
+                View Opportunity
+                <span>→</span>
+
+            </a>
+
+        {% else %}
+
+            <a
+                href="#"
+                class="opportunity-card-action disabled"
+                aria-disabled="true">
+
+                View Opportunity
+                <span>→</span>
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</article>

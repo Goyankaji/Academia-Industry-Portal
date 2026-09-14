@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ page_title or "My Profile" }}</title>
+
+    <!-- Student Base CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/student/student_base.css') }}">
+
+    <!-- Student Profile CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/student/student_profile.css') }}">
+
+</head>
+
+<body>
+
+<div class="student-page">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <!-- =====================================================
+         MAIN AREA
+    ====================================================== -->
+    <div class="student-main">
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+        {% include "student/components/student_topbar.html" %}
+
+
+        <!-- =================================================
+             PROFILE CONTENT
+        ================================================== -->
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+            <section class="profile-page-header">
+
+                <div>
+
+                    <span class="profile-eyebrow">
+                        MY PROFILE
+                    </span>
+
+                    <h1>
+                        Personal Profile
+                    </h1>
+
+                    <p>
+                        Manage your personal and professional information.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PROFILE OVERVIEW
+            ================================================== -->
+            <section class="profile-overview-card">
+
+                <div class="profile-avatar">
+
+                    {% if student.name %}
+                        {{ student.name[0]|upper }}
+                    {% else %}
+                        S
+                    {% endif %}
+
+                </div>
+
+
+                <div class="profile-overview-info">
+
+                    <h2>
+                        {{ student.name or "Student" }}
+                    </h2>
+
+                    <p>
+                        {{ student.email or "Email not available" }}
+                    </p>
+
+                    {% if student.college_name %}
+
+                        <span>
+                            🎓 {{ student.college_name }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="profile-completion-mini">
+
+                    <span>
+                        Profile Completion
+                    </span>
+
+                    <strong>
+                        {{ student.profile_completed|int }}%
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PROFILE FORM
+            ================================================== -->
+            <form method="POST"
+                  action="{{ url_for('student_profile') }}"
+                  class="profile-form">
+
+
+                <!-- =================================================
+                     PERSONAL INFORMATION
+                ================================================== -->
+                <section class="profile-section">
+
+                    <div class="profile-section-header">
+
+                        <div>
+
+                            <h2>
+                                Personal Information
+                            </h2>
+
+                            <p>
+                                Keep your basic personal details up to date.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-form-grid">
+
+
+                        <!-- FULL NAME -->
+                        <div class="profile-form-group">
+
+                            <label for="name">
+                                Full Name
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value="{{ student.name or '' }}"
+                                placeholder="Enter your full name"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- EMAIL -->
+                        <div class="profile-form-group">
+
+                            <label for="email">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                value="{{ student.email or '' }}"
+                                placeholder="Enter your email address"
+                                readonly
+                            >
+
+                            <small>
+                                Email cannot be changed from this page.
+                            </small>
+
+                        </div>
+
+
+                        <!-- PHONE -->
+                        <div class="profile-form-group">
+
+                            <label for="phone">
+                                Phone Number
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                value="{{ student.phone or '' }}"
+                                placeholder="Enter your phone number"
+                                maxlength="15"
+                            >
+
+                        </div>
+
+
+                        <!-- DATE OF BIRTH -->
+                        <div class="profile-form-group">
+
+                            <label for="dob">
+                                Date of Birth
+                            </label>
+
+                            <input
+                                type="date"
+                                id="dob"
+                                name="dob"
+                                value="{{ student.dob or '' }}"
+                            >
+
+                        </div>
+
+
+                        <!-- GENDER -->
+                        <div class="profile-form-group">
+
+                            <label for="gender">
+                                Gender
+                            </label>
+
+                            <select
+                                id="gender"
+                                name="gender"
+                            >
+
+                                <option value="">
+                                    Select Gender
+                                </option>
+
+                                <option value="MALE"
+                                    {% if student.gender == "MALE" %}
+                                        selected
+                                    {% endif %}>
+                                    Male
+                                </option>
+
+                                <option value="FEMALE"
+                                    {% if student.gender == "FEMALE" %}
+                                        selected
+                                    {% endif %}>
+                                    Female
+                                </option>
+
+                                <option value="OTHER"
+                                    {% if student.gender == "OTHER" %}
+                                        selected
+                                    {% endif %}>
+                                    Other
+                                </option>
+
+                                <option value="PREFER_NOT_TO_SAY"
+                                    {% if student.gender == "PREFER_NOT_TO_SAY" %}
+                                        selected
+                                    {% endif %}>
+                                    Prefer not to say
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- ADDRESS -->
+                        <div class="profile-form-group profile-form-group-full">
+
+                            <label for="address">
+                                Address
+                            </label>
+
+                            <textarea
+                                id="address"
+                                name="address"
+                                rows="4"
+                                placeholder="Enter your address"
+                            >{{ student.address or '' }}</textarea>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     ACADEMIC INFORMATION
+                ================================================== -->
+                <section class="profile-section">
+
+                    <div class="profile-section-header">
+
+                        <div>
+
+                            <h2>
+                                Academic Information
+                            </h2>
+
+                            <p>
+                                Your registered academic information.
+                                Academic details can be managed from the
+                                Academic section.
+                            </p>
+
+                        </div>
+
+
+                        <a href="{{ url_for('student_academic') }}"
+                           class="profile-section-link">
+                            Manage Academic →
+                        </a>
+
+                    </div>
+
+
+                    <div class="profile-info-grid">
+
+
+                        <!-- COLLEGE -->
+                        <div class="profile-info-item">
+
+                            <span>
+                                College
+                            </span>
+
+                            <strong>
+                                {{ student.college_name or "Not available" }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- UNIVERSITY -->
+                        <div class="profile-info-item">
+
+                            <span>
+                                University
+                            </span>
+
+                            <strong>
+                                {{ student.university_name or "Not available" }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- ENROLLMENT NUMBER -->
+                        <div class="profile-info-item">
+
+                            <span>
+                                Enrollment Number
+                            </span>
+
+                            <strong>
+                                {{ student.enrollment_no or "Not available" }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- COURSE -->
+                        <div class="profile-info-item">
+
+                            <span>
+                                Course
+                            </span>
+
+                            <strong>
+                                {{ student.course or "Not available" }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- BRANCH -->
+                        <div class="profile-info-item">
+
+                            <span>
+                                Branch
+                            </span>
+
+                            <strong>
+                                {{ student.branch or "Not available" }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- SEMESTER -->
+                        <div class="profile-info-item">
+
+                            <span>
+                                Semester
+                            </span>
+
+                            <strong>
+                                {{ student.semester or "Not available" }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     PROFESSIONAL LINKS
+                ================================================== -->
+                <section class="profile-section">
+
+                    <div class="profile-section-header">
+
+                        <div>
+
+                            <h2>
+                                Professional Links
+                            </h2>
+
+                            <p>
+                                Add links to your professional profiles
+                                and portfolio.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-form-grid">
+
+
+                        <!-- LINKEDIN -->
+                        <div class="profile-form-group">
+
+                            <label for="linkedin_url">
+                                LinkedIn Profile
+                            </label>
+
+                            <input
+                                type="url"
+                                id="linkedin_url"
+                                name="linkedin_url"
+                                value="{{ student.linkedin_url or '' }}"
+                                placeholder="https://linkedin.com/in/your-profile"
+                            >
+
+                        </div>
+
+
+                        <!-- GITHUB -->
+                        <div class="profile-form-group">
+
+                            <label for="github_url">
+                                GitHub Profile
+                            </label>
+
+                            <input
+                                type="url"
+                                id="github_url"
+                                name="github_url"
+                                value="{{ student.github_url or '' }}"
+                                placeholder="https://github.com/your-username"
+                            >
+
+                        </div>
+
+
+                        <!-- PORTFOLIO -->
+                        <div class="profile-form-group">
+
+                            <label for="portfolio_url">
+                                Portfolio Website
+                            </label>
+
+                            <input
+                                type="url"
+                                id="portfolio_url"
+                                name="portfolio_url"
+                                value="{{ student.portfolio_url or '' }}"
+                                placeholder="https://yourportfolio.com"
+                            >
+
+                        </div>
+
+
+                        <!-- RESUME -->
+                        <div class="profile-form-group">
+
+                            <label for="resume_url">
+                                Resume URL
+                            </label>
+
+                            <input
+                                type="url"
+                                id="resume_url"
+                                name="resume_url"
+                                value="{{ student.resume_url or '' }}"
+                                placeholder="https://example.com/resume.pdf"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     FORM ACTIONS
+                ================================================== -->
+                <div class="profile-form-actions">
+
+                    <button
+                        type="reset"
+                        class="student-btn student-btn-secondary">
+                        Reset
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="student-btn student-btn-primary">
+                        Save Changes
+                    </button>
+
+                </div>
+
+
+            </form>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script src="{{ url_for('static',
+                         filename='js/student/student_base.js') }}">
+</script>
+
+<script src="{{ url_for('static',
+                         filename='js/student/profile.js') }}">
+</script>
+
+</body>
+</html>

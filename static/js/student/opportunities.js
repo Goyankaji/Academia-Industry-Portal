@@ -1,329 +1,160 @@
-/* =========================================================
-   STUDENT OPPORTUNITIES JS
-   ========================================================= */
-
-
 document.addEventListener(
     "DOMContentLoaded",
     function () {
 
 
-        /* =================================================
-           DATE FORMAT
-           ================================================= */
+        // =====================================================
+        // SKILL MATCH PROGRESS BARS
+        // =====================================================
 
-        const deadlineElements =
+        const matchBars =
             document.querySelectorAll(
-                "[data-deadline]"
+                ".skill-match-fill"
             );
 
 
-        deadlineElements.forEach(
-            function (element) {
+        matchBars.forEach(
+            function (bar) {
 
-                const rawDate =
-                    element.dataset.deadline;
-
-
-                if (
-                    !rawDate ||
-                    rawDate === "None"
-                ) {
-
-                    return;
-
-                }
-
-
-                const date =
-                    new Date(rawDate);
-
-
-                if (
-                    Number.isNaN(
-                        date.getTime()
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                element.textContent =
-                    date.toLocaleDateString(
-                        "en-IN",
-                        {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric"
-                        }
+                let percentage =
+                    parseFloat(
+                        bar.dataset.width || "0"
                     );
+
+
+                // Keep percentage between 0 and 100
+
+                if (percentage < 0) {
+                    percentage = 0;
+                }
+
+                if (percentage > 100) {
+                    percentage = 100;
+                }
+
+
+                // Small delay for animation
+
+                setTimeout(
+                    function () {
+
+                        bar.style.width =
+                            percentage + "%";
+
+                    },
+                    100
+                );
 
             }
         );
 
 
-
-        /* =================================================
-           SEARCH INPUT
-           ================================================= */
+        // =====================================================
+        // CLIENT SIDE SEARCH
+        // =====================================================
 
         const searchInput =
             document.getElementById(
                 "opportunitySearch"
             );
 
-
-        if (searchInput) {
-
-            searchInput.addEventListener(
-                "keydown",
-                function (event) {
-
-                    if (
-                        event.key === "Enter"
-                    ) {
-
-                        event.preventDefault();
-
-
-                        if (
-                            searchInput.form
-                        ) {
-
-                            searchInput.form.submit();
-
-                        }
-
-                    }
-
-                }
-            );
-
-        }
-
-
-
-        /* =================================================
-           AUTO SUBMIT FILTERS
-           ================================================= */
-
-        const typeFilter =
+        const opportunityGrid =
             document.getElementById(
-                "opportunityType"
+                "opportunityGrid"
             );
 
 
-        const workModeFilter =
-            document.getElementById(
-                "workMode"
-            );
+        if (
+            searchInput &&
+            opportunityGrid
+        ) {
 
-
-        function submitFilters() {
-
-            const form =
-                document.getElementById(
-                    "opportunityFilterForm"
+            const cards =
+                opportunityGrid.querySelectorAll(
+                    ".opportunity-card"
                 );
 
 
-            if (form) {
-
-                form.submit();
-
-            }
-
-        }
-
-
-        if (typeFilter) {
-
-            typeFilter.addEventListener(
-                "change",
-                submitFilters
-            );
-
-        }
-
-
-        if (workModeFilter) {
-
-            workModeFilter.addEventListener(
-                "change",
-                submitFilters
-            );
-
-        }
-
-
-
-        /* =================================================
-           DETAIL PAGE — APPLICATION FORM
-           ================================================= */
-
-        const openApplicationBtn =
-            document.getElementById(
-                "openApplicationBtn"
-            );
-
-
-        const cancelApplicationBtn =
-            document.getElementById(
-                "cancelApplicationBtn"
-            );
-
-
-        const applicationFormWrapper =
-            document.getElementById(
-                "applicationFormWrapper"
-            );
-
-
-        if (
-            openApplicationBtn &&
-            applicationFormWrapper
-        ) {
-
-            openApplicationBtn.addEventListener(
-                "click",
-                function () {
-
-                    applicationFormWrapper.classList.add(
-                        "visible"
-                    );
-
-
-                    openApplicationBtn.style.display =
-                        "none";
-
-
-                    applicationFormWrapper
-                        .scrollIntoView({
-                            behavior: "smooth",
-                            block: "start"
-                        });
-
-                }
-            );
-
-        }
-
-
-
-        /* =================================================
-           CANCEL APPLICATION
-           ================================================= */
-
-        if (
-            cancelApplicationBtn &&
-            applicationFormWrapper
-        ) {
-
-            cancelApplicationBtn.addEventListener(
-                "click",
-                function () {
-
-                    applicationFormWrapper.classList.remove(
-                        "visible"
-                    );
-
-
-                    if (openApplicationBtn) {
-
-                        openApplicationBtn.style.display =
-                            "";
-
-                    }
-
-                }
-            );
-
-        }
-
-
-
-        /* =================================================
-           COVER LETTER COUNTER
-           ================================================= */
-
-        const coverLetter =
-            document.getElementById(
-                "cover_letter"
-            );
-
-
-        const coverLetterCount =
-            document.getElementById(
-                "coverLetterCount"
-            );
-
-
-        function updateCoverLetterCount() {
-
-            if (
-                !coverLetter ||
-                !coverLetterCount
-            ) {
-
-                return;
-
-            }
-
-
-            coverLetterCount.textContent =
-                coverLetter.value.length;
-
-        }
-
-
-        if (coverLetter) {
-
-            coverLetter.addEventListener(
+            searchInput.addEventListener(
                 "input",
-                updateCoverLetterCount
+                function () {
+
+                    const searchValue =
+                        searchInput.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    cards.forEach(
+                        function (card) {
+
+                            const title =
+                                card.dataset.title || "";
+
+                            const company =
+                                card.dataset.company || "";
+
+
+                            const matches =
+                                title.includes(
+                                    searchValue
+                                )
+                                ||
+                                company.includes(
+                                    searchValue
+                                );
+
+
+                            if (matches) {
+
+                                card.style.display =
+                                    "";
+
+                            } else {
+
+                                card.style.display =
+                                    "none";
+
+                            }
+
+                        }
+                    );
+
+                }
             );
-
-
-            updateCoverLetterCount();
 
         }
 
 
+        // =====================================================
+        // FILTER FORM
+        // =====================================================
 
-        /* =================================================
-           APPLICATION SUBMIT
-           ================================================= */
-
-        const applicationForm =
+        const filterForm =
             document.getElementById(
-                "studentApplicationForm"
+                "opportunityFilterForm"
             );
 
 
-        const submitApplicationBtn =
-            document.getElementById(
-                "submitApplicationBtn"
-            );
+        if (filterForm) {
 
-
-        if (applicationForm) {
-
-            applicationForm.addEventListener(
+            filterForm.addEventListener(
                 "submit",
                 function () {
 
-                    if (
-                        submitApplicationBtn
-                    ) {
+                    const submitButton =
+                        filterForm.querySelector(
+                            ".filter-btn"
+                        );
 
-                        submitApplicationBtn.disabled =
+
+                    if (submitButton) {
+
+                        submitButton.disabled =
                             true;
 
-
-                        submitApplicationBtn.textContent =
-                            "Submitting...";
+                        submitButton.textContent =
+                            "Loading...";
 
                     }
 
@@ -333,32 +164,105 @@ document.addEventListener(
         }
 
 
+        // =====================================================
+        // OPPORTUNITY CARD CLICK FEEDBACK
+        // =====================================================
 
-        /* =================================================
-           PREVENT DOUBLE CLICK
-           ================================================= */
-
-        const applyButtons =
+        const detailButtons =
             document.querySelectorAll(
-                ".apply-btn"
+                ".view-opportunity-btn, " +
+                ".apply-opportunity-btn"
             );
 
 
-        applyButtons.forEach(
+        detailButtons.forEach(
             function (button) {
 
                 button.addEventListener(
                     "click",
                     function () {
 
-                        button.style.pointerEvents =
-                            "none";
+                        button.classList.add(
+                            "loading"
+                        );
 
                     }
                 );
 
             }
         );
+
+
+        // =====================================================
+        // DEADLINE WARNING
+        // =====================================================
+
+        const urgentDeadlines =
+            document.querySelectorAll(
+                ".deadline-urgent"
+            );
+
+
+        urgentDeadlines.forEach(
+            function (deadline) {
+
+                deadline.classList.add(
+                    "deadline-pulse"
+                );
+
+            }
+        );
+
+
+        // =====================================================
+        // SMOOTH CARD APPEARANCE
+        // =====================================================
+
+        const cards =
+            document.querySelectorAll(
+                ".opportunity-card"
+            );
+
+
+        cards.forEach(
+            function (card, index) {
+
+                card.style.animationDelay =
+                    (index * 0.04) + "s";
+
+                card.classList.add(
+                    "opportunity-card-loaded"
+                );
+
+            }
+        );
+
+
+        // =====================================================
+        // CLEAR SEARCH WHEN CLICKING CLEAR
+        // =====================================================
+
+        const clearButton =
+            document.querySelector(
+                ".clear-filter-btn"
+            );
+
+
+        if (clearButton) {
+
+            clearButton.addEventListener(
+                "click",
+                function () {
+
+                    if (searchInput) {
+                        searchInput.value = "";
+                    }
+
+                }
+            );
+
+        }
+
 
     }
 );

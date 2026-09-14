@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ assessment.title }} - Skill Assessment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student/student_base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student/student_assessment.css') }}">
+</head>
+<body>
+<div class="student-page">
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <section class="assessment-taking-header">
+                <div>
+                    <span class="assessment-badge">{{ assessment.skill_name }}</span>
+                    <h1>{{ assessment.title }}</h1>
+                    {% if assessment.description %}
+                        <p>{{ assessment.description }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="timer-box">
+                    <span>Time Remaining</span>
+                    <strong id="assessmentTimer"
+                            data-duration="{{ assessment.duration_minutes }}">
+                        {{ assessment.duration_minutes }}:00
+                    </strong>
+                </div>
+            </section>
+
+            <form method="POST"
+                  action="{{ url_for('student_skill_assessment_submit', attempt_id=attempt.id) }}"
+                  id="assessmentForm">
+
+                <input type="hidden" name="question_count" value="{{ questions|length }}">
+
+                <div class="question-progress">
+                    <div class="progress-text">
+                        <span>Assessment Progress</span>
+                        <span id="answeredCount">0 / {{ questions|length }}</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="assessmentProgress"></div>
+                    </div>
+                </div>
+
+                <div class="questions-list">
+
+                    {% for question in questions %}
+                        <article class="question-card"
+                                 data-question-number="{{ loop.index }}">
+
+                            <div class="question-number">
+                                Question {{ loop.index }} of {{ questions|length }}
+                            </div>
+
+                            <h2>{{ question.question_text }}</h2>
+
+                            <div class="options-grid">
+
+                                <label class="option-item">
+                                    <input type="radio"
+                                           name="question_{{ question.id }}"
+                                           value="A">
+                                    <span class="option-letter">A</span>
+                                    <span>{{ question.option_a }}</span>
+                                </label>
+
+                                <label class="option-item">
+                                    <input type="radio"
+                                           name="question_{{ question.id }}"
+                                           value="B">
+                                    <span class="option-letter">B</span>
+                                    <span>{{ question.option_b }}</span>
+                                </label>
+
+                                <label class="option-item">
+                                    <input type="radio"
+                                           name="question_{{ question.id }}"
+                                           value="C">
+                                    <span class="option-letter">C</span>
+                                    <span>{{ question.option_c }}</span>
+                                </label>
+
+                                <label class="option-item">
+                                    <input type="radio"
+                                           name="question_{{ question.id }}"
+                                           value="D">
+                                    <span class="option-letter">D</span>
+                                    <span>{{ question.option_d }}</span>
+                                </label>
+
+                            </div>
+                        </article>
+                    {% endfor %}
+
+                </div>
+
+                <div class="assessment-submit-area">
+                    <p>
+                        You can submit once you have answered the questions.
+                        Unanswered questions will be treated as incorrect.
+                    </p>
+
+                    <button type="submit"
+                            class="assessment-btn primary large"
+                            id="submitAssessment">
+                        Submit Assessment
+                    </button>
+                </div>
+
+            </form>
+
+        </main>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/student/assessment.js') }}"></script>
+</body>
+</html>

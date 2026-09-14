@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        My Internships | Student Portal
+    </title>
+
+
+    <!-- =====================================================
+         STUDENT BASE CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+
+    <!-- =====================================================
+         INTERNSHIP CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_internship.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="student-page">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% set active_page = "internships" %}
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="student-main">
+
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <div class="internship-page">
+
+
+            <!-- =============================================
+                 PAGE HEADER
+            ============================================== -->
+
+            <div class="internship-page-header">
+
+                <div>
+
+                    <div class="page-breadcrumb">
+                        Student Portal / Internship / My Internships
+                    </div>
+
+                    <h1>
+                        My Internships
+                    </h1>
+
+                    <p>
+                        Track your internship offers, active internships,
+                        progress and completion.
+                    </p>
+
+                </div>
+
+
+                <div class="internship-header-actions">
+
+                    <a
+                        href="{{ url_for('student_opportunities') }}"
+                        class="internship-secondary-btn"
+                    >
+                        ← Find Opportunities
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 STATISTICS
+            ============================================== -->
+
+            <div class="internship-stats-grid">
+
+
+                <div class="internship-stat-card">
+
+                    <div class="internship-stat-icon">
+                        🎓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Internships
+                        </span>
+
+                        <strong>
+                            {{ total_internships }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="internship-stat-card">
+
+                    <div class="internship-stat-icon">
+                        🎁
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Offers
+                        </span>
+
+                        <strong>
+                            {{ offered_internships }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="internship-stat-card">
+
+                    <div class="internship-stat-icon">
+                        ▶️
+                    </div>
+
+                    <div>
+
+                        <span>
+                            In Progress
+                        </span>
+
+                        <strong>
+                            {{ in_progress_internships }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="internship-stat-card">
+
+                    <div class="internship-stat-icon">
+                        ✅
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Completed
+                        </span>
+
+                        <strong>
+                            {{ completed_internships }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 FILTERS
+            ============================================== -->
+
+            <div class="internship-filters">
+
+                <form
+                    method="GET"
+                    action="{{ url_for('student_internships') }}"
+                    id="internshipFilterForm"
+                >
+
+
+                    <!-- SEARCH -->
+
+                    <div class="internship-search-box">
+
+                        <span class="internship-search-icon">
+                            🔍
+                        </span>
+
+                        <input
+                            type="text"
+                            name="search"
+                            id="internshipSearch"
+                            value="{{ search }}"
+                            placeholder="Search internship, company or sector..."
+                            autocomplete="off"
+                        >
+
+                        {% if search %}
+
+                        <button
+                            type="button"
+                            class="internship-clear-search"
+                            id="clearInternshipSearch"
+                        >
+                            ×
+                        </button>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="internship-filter-control">
+
+                        <label for="internshipStatus">
+                            Status
+                        </label>
+
+                        <select
+                            name="status"
+                            id="internshipStatus"
+                        >
+
+                            <option
+                                value=""
+                                {% if not status_filter %}selected{% endif %}
+                            >
+                                All Status
+                            </option>
+
+                            <option
+                                value="OFFERED"
+                                {% if status_filter == "OFFERED" %}selected{% endif %}
+                            >
+                                Offered
+                            </option>
+
+                            <option
+                                value="ACCEPTED"
+                                {% if status_filter == "ACCEPTED" %}selected{% endif %}
+                            >
+                                Accepted
+                            </option>
+
+                            <option
+                                value="IN_PROGRESS"
+                                {% if status_filter == "IN_PROGRESS" %}selected{% endif %}
+                            >
+                                In Progress
+                            </option>
+
+                            <option
+                                value="COMPLETED"
+                                {% if status_filter == "COMPLETED" %}selected{% endif %}
+                            >
+                                Completed
+                            </option>
+
+                            <option
+                                value="TERMINATED"
+                                {% if status_filter == "TERMINATED" %}selected{% endif %}
+                            >
+                                Terminated
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- FILTER BUTTON -->
+
+                    <button
+                        type="submit"
+                        class="internship-filter-btn"
+                    >
+                        Apply Filter
+                    </button>
+
+
+                    <!-- CLEAR -->
+
+                    {% if search or status_filter %}
+
+                    <a
+                        href="{{ url_for('student_internships') }}"
+                        class="internship-clear-btn"
+                    >
+                        Clear
+                    </a>
+
+                    {% endif %}
+
+                </form>
+
+            </div>
+
+
+            <!-- =============================================
+                 SECTION HEADER
+            ============================================== -->
+
+            <div class="internship-section-header">
+
+                <div>
+
+                    <h2>
+                        Your Internships
+                    </h2>
+
+                    <p>
+
+                        {{ total_internships }}
+
+                        {% if total_internships == 1 %}
+                            internship
+                        {% else %}
+                            internships
+                        {% endif %}
+
+                        in your career journey
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 INTERNSHIP LIST
+            ============================================== -->
+
+            {% if internships %}
+
+            <div
+                class="internship-list"
+                id="internshipList"
+            >
+
+
+                {% for internship in internships %}
+
+                <article
+                    class="internship-card"
+
+                    data-search="
+                        {{ internship.title|lower }}
+                        {{ internship.company_name|lower }}
+                        {{ (internship.industry_sector or '')|lower }}
+                    "
+
+                    data-status="{{ internship.status }}"
+                >
+
+
+                    <!-- =====================================
+                         CARD HEADER
+                    ====================================== -->
+
+                    <div class="internship-card-top">
+
+
+                        <div class="internship-company">
+
+
+                            <div class="company-avatar">
+
+                                {{ internship.company_name[:1]|upper }}
+
+                            </div>
+
+
+                            <div>
+
+                                <h3>
+                                    {{ internship.title }}
+                                </h3>
+
+                                <p>
+                                    {{ internship.company_name }}
+                                </p>
+
+                                {% if internship.industry_sector %}
+
+                                <small>
+                                    {{ internship.industry_sector }}
+                                </small>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS BADGE -->
+
+                        {% if internship.status == "OFFERED" %}
+
+                        <span class="internship-status offered">
+                            Offered
+                        </span>
+
+
+                        {% elif internship.status == "ACCEPTED" %}
+
+                        <span class="internship-status accepted">
+                            Accepted
+                        </span>
+
+
+                        {% elif internship.status == "IN_PROGRESS" %}
+
+                        <span class="internship-status in-progress">
+                            In Progress
+                        </span>
+
+
+                        {% elif internship.status == "COMPLETED" %}
+
+                        <span class="internship-status completed">
+                            Completed
+                        </span>
+
+
+                        {% elif internship.status == "TERMINATED" %}
+
+                        <span class="internship-status terminated">
+                            Terminated
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- =====================================
+                         DETAILS
+                    ====================================== -->
+
+                    <div class="internship-card-details">
+
+
+                        <div class="internship-detail-item">
+
+                            <span class="detail-label">
+                                📍 Location
+                            </span>
+
+                            <strong>
+                                {{ internship.location or "Not specified" }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-detail-item">
+
+                            <span class="detail-label">
+                                💼 Work Mode
+                            </span>
+
+                            <strong>
+                                {{ internship.work_mode or "Not specified" }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-detail-item">
+
+                            <span class="detail-label">
+                                📅 Start Date
+                            </span>
+
+                            <strong>
+
+                                {% if internship.start_date %}
+
+                                    {{ internship.start_date.strftime('%d %b %Y') }}
+
+                                {% else %}
+
+                                    Not started
+
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-detail-item">
+
+                            <span class="detail-label">
+                                🗓 Expected End
+                            </span>
+
+                            <strong>
+
+                                {% if internship.expected_end_date %}
+
+                                    {{ internship.expected_end_date.strftime('%d %b %Y') }}
+
+                                {% else %}
+
+                                    Not specified
+
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         PROGRESS
+                    ====================================== -->
+
+                    <div class="internship-progress-section">
+
+
+                        <div class="progress-header">
+
+                            <span>
+                                Internship Progress
+                            </span>
+
+                            <strong>
+                                {{ internship.progress_percentage or 0 }}%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-progress-track">
+
+                            <div
+                                class="internship-progress-fill"
+                                data-progress="{{ internship.progress_percentage or 0 }}"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         CARD FOOTER
+                    ====================================== -->
+
+                    <div class="internship-card-footer">
+
+
+                        <div class="internship-meta">
+
+                            {% if internship.status == "IN_PROGRESS" %}
+
+                            <span class="active-indicator">
+                                ● Active Internship
+                            </span>
+
+
+                            {% elif internship.status == "COMPLETED" %}
+
+                            <span>
+                                ✓ Internship Completed
+                            </span>
+
+
+                            {% elif internship.status == "OFFERED" %}
+
+                            <span>
+                                New Internship Offer
+                            </span>
+
+
+                            {% elif internship.status == "ACCEPTED" %}
+
+                            <span>
+                                Internship Accepted
+                            </span>
+
+
+                            {% elif internship.status == "TERMINATED" %}
+
+                            <span>
+                                Internship Terminated
+                            </span>
+
+
+                            {% else %}
+
+                            <span>
+                                Internship Record
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <a
+                            href="{{ url_for(
+                                'student_internship_detail',
+                                internship_id=internship.id
+                            ) }}"
+                            class="internship-view-btn"
+                        >
+                            View Details →
+                        </a>
+
+                    </div>
+
+                </article>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- =============================================
+                 CLIENT-SIDE SEARCH EMPTY
+            ============================================== -->
+
+            <div
+                id="internshipNoSearchResults"
+                class="internship-empty-state"
+                style="display: none;"
+            >
+
+                <div class="empty-icon">
+                    🔍
+                </div>
+
+                <h3>
+                    No matching internships
+                </h3>
+
+                <p>
+                    Try a different search term.
+                </p>
+
+            </div>
+
+
+            {% else %}
+
+
+            <!-- =============================================
+                 NO INTERNSHIPS
+            ============================================== -->
+
+            <div class="internship-empty-state">
+
+                <div class="empty-icon">
+                    🎓
+                </div>
+
+                <h3>
+                    No internships yet
+                </h3>
+
+                <p>
+                    Once an industry selects your application,
+                    your internship will appear here.
+                </p>
+
+                <a
+                    href="{{ url_for('student_opportunities') }}"
+                    class="internship-primary-btn"
+                >
+                    Explore Opportunities
+                </a>
+
+            </div>
+
+            {% endif %}
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     INTERNSHIP JAVASCRIPT
+========================================================= -->
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/internships.js'
+    ) }}"
+></script>
+
+
+</body>
+
+</html>

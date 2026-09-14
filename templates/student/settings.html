@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Settings | Student Portal</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/student/student_base.css'
+          ) }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/student/student_settings.css'
+          ) }}">
+
+</head>
+
+
+<body>
+
+
+<div class="student-page">
+
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <div class="student-main">
+
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <section class="settings-header">
+
+                <span class="settings-eyebrow">
+                    STUDENT PORTAL / ACCOUNT CONTROL
+                </span>
+
+                <h1>
+                    Settings
+                </h1>
+
+                <p>
+                    Manage your account security, privacy,
+                    notifications and account controls.
+                </p>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ACCOUNT OVERVIEW
+            ================================================== -->
+
+            <section class="settings-account-card">
+
+                <div class="account-avatar">
+                    {{ (account.name or "S")[0]|upper }}
+                </div>
+
+
+                <div class="account-info">
+
+                    <span class="settings-label">
+                        ACCOUNT
+                    </span>
+
+                    <h2>
+                        {{ account.name }}
+                    </h2>
+
+                    <p>
+                        {{ account.email }}
+                    </p>
+
+                </div>
+
+
+                <div class="account-status">
+
+                    <span class="status-dot"></span>
+
+                    {{ account.status or "ACTIVE" }}
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 SECURITY
+            ================================================== -->
+
+            <section class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <div>
+
+                        <span class="settings-section-eyebrow">
+                            SECURITY
+                        </span>
+
+                        <h2>
+                            Account Security
+                        </h2>
+
+                        <p>
+                            Protect your student account.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        🔐
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Change Password
+                        </h3>
+
+                        <p>
+                            Update your password regularly
+                            to keep your account secure.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="settings-action-btn"
+                        onclick="openPasswordModal()"
+                    >
+                        Change
+                    </button>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        🛡️
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Account Security
+                        </h3>
+
+                        <p>
+                            Your account is protected by
+                            authenticated student access.
+                        </p>
+
+                    </div>
+
+                    <span class="settings-status">
+                        Protected
+                    </span>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 PRIVACY
+            ================================================== -->
+
+            <section class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <div>
+
+                        <span class="settings-section-eyebrow">
+                            PRIVACY
+                        </span>
+
+                        <h2>
+                            Profile Visibility
+                        </h2>
+
+                        <p>
+                            Control how your student profile
+                            can be discovered.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        👁️
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Industry Visibility
+                        </h3>
+
+                        <p>
+                            Allow registered industries to
+                            discover your student profile.
+                        </p>
+
+                    </div>
+
+                    <label class="settings-switch">
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        🎓
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Placement Cell Visibility
+                        </h3>
+
+                        <p>
+                            Allow your college placement cell
+                            to access your career profile.
+                        </p>
+
+                    </div>
+
+                    <label class="settings-switch">
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        💼
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Portfolio Visibility
+                        </h3>
+
+                        <p>
+                            Make your digital portfolio
+                            accessible through your profile.
+                        </p>
+
+                    </div>
+
+                    <label class="settings-switch">
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span></span>
+
+                    </label>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 NOTIFICATION PREFERENCES
+            ================================================== -->
+
+            <section class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <div>
+
+                        <span class="settings-section-eyebrow">
+                            NOTIFICATIONS
+                        </span>
+
+                        <h2>
+                            Notification Preferences
+                        </h2>
+
+                        <p>
+                            Choose which updates you want to receive.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        🔔
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Portal Notifications
+                        </h3>
+
+                        <p>
+                            Receive important portal updates
+                            and system notifications.
+                        </p>
+
+                    </div>
+
+                    <label class="settings-switch">
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        💼
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Opportunity Alerts
+                        </h3>
+
+                        <p>
+                            Get notified about relevant
+                            opportunities.
+                        </p>
+
+                    </div>
+
+                    <label class="settings-switch">
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        📄
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Application Updates
+                        </h3>
+
+                        <p>
+                            Receive updates when your
+                            applications change status.
+                        </p>
+
+                    </div>
+
+                    <label class="settings-switch">
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span></span>
+
+                    </label>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DATA
+            ================================================== -->
+
+            <section class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <div>
+
+                        <span class="settings-section-eyebrow">
+                            YOUR DATA
+                        </span>
+
+                        <h2>
+                            Data Management
+                        </h2>
+
+                        <p>
+                            Manage your personal portal data.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="settings-option">
+
+                    <div class="settings-option-icon">
+                        📥
+                    </div>
+
+                    <div class="settings-option-content">
+
+                        <h3>
+                            Export My Data
+                        </h3>
+
+                        <p>
+                            Request a copy of your student
+                            information and career data.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="settings-action-btn"
+                        onclick="requestDataExport()"
+                    >
+                        Request
+                    </button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ACCOUNT CONTROL
+            ================================================== -->
+
+            <section class="settings-section danger-section">
+
+                <div class="settings-section-header">
+
+                    <div>
+
+                        <span class="settings-section-eyebrow danger-text">
+                            ACCOUNT CONTROL
+                        </span>
+
+                        <h2>
+                            Account Actions
+                        </h2>
+
+                        <p>
+                            These actions require administrative review.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DEACTIVATION -->
+
+                <div class="danger-option">
+
+                    <div class="danger-option-content">
+
+                        <h3>
+                            ⏸️ Deactivate Account
+                        </h3>
+
+                        <p>
+                            Temporarily disable your account.
+                            Your data will remain stored securely.
+                        </p>
+
+
+                        {% if deactivation_request %}
+
+                            <span class="request-pending">
+                                Request Pending
+                            </span>
+
+                        {% else %}
+
+                        <button
+                            type="button"
+                            class="danger-outline-btn"
+                            onclick="openDeactivationModal()"
+                        >
+                            Request Deactivation
+                        </button>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DELETE -->
+
+                <div class="danger-option delete-option">
+
+                    <div class="danger-option-content">
+
+                        <h3>
+                            🗑️ Delete Account
+                        </h3>
+
+                        <p>
+                            Request permanent deletion of your
+                            student account and associated data.
+                            This requires admin approval.
+                        </p>
+
+
+                        {% if deletion_request %}
+
+                            <span class="request-pending">
+                                Deletion Request Pending
+                            </span>
+
+                        {% else %}
+
+                        <button
+                            type="button"
+                            class="danger-btn"
+                            onclick="openDeletionModal()"
+                        >
+                            Request Account Deletion
+                        </button>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 LOGOUT
+            ================================================== -->
+
+            <section class="logout-section">
+
+                <div>
+
+                    <h3>
+                        Ready to leave?
+                    </h3>
+
+                    <p>
+                        Sign out from your student account.
+                    </p>
+
+                </div>
+
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="logout-btn"
+                >
+                    🚪 Logout
+                </a>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     PASSWORD MODAL
+========================================================= -->
+
+<div
+    id="passwordModal"
+    class="settings-modal"
+>
+
+    <div class="settings-modal-box">
+
+        <button
+            class="modal-close"
+            onclick="closePasswordModal()"
+        >
+            ×
+        </button>
+
+        <h2>
+            Change Password
+        </h2>
+
+        <p>
+            Password change will be connected to the
+            authentication system.
+        </p>
+
+        <button
+            type="button"
+            class="notification-primary-btn"
+            onclick="closePasswordModal()"
+        >
+            Close
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     DEACTIVATION MODAL
+========================================================= -->
+
+<div
+    id="deactivationModal"
+    class="settings-modal"
+>
+
+    <div class="settings-modal-box">
+
+        <button
+            class="modal-close"
+            onclick="closeDeactivationModal()"
+        >
+            ×
+        </button>
+
+        <h2>
+            Deactivate Account
+        </h2>
+
+        <p>
+            Your request will be reviewed by an administrator.
+        </p>
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'student_request_deactivation'
+            ) }}"
+        >
+
+            <textarea
+                name="reason"
+                placeholder="Why do you want to deactivate your account?"
+                required
+            ></textarea>
+
+            <button
+                type="submit"
+                class="danger-outline-btn"
+            >
+                Submit Request
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     DELETE MODAL
+========================================================= -->
+
+<div
+    id="deletionModal"
+    class="settings-modal"
+>
+
+    <div class="settings-modal-box delete-modal">
+
+        <button
+            class="modal-close"
+            onclick="closeDeletionModal()"
+        >
+            ×
+        </button>
+
+        <h2>
+            Delete Account
+        </h2>
+
+        <p>
+            This is a permanent account deletion request.
+            An administrator must approve it before deletion.
+        </p>
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'student_request_deletion'
+            ) }}"
+        >
+
+            <textarea
+                name="reason"
+                placeholder="Why do you want to delete your account?"
+                required
+            ></textarea>
+
+
+            <label class="delete-confirmation">
+
+                <input
+                    type="checkbox"
+                    id="deleteConfirm"
+                    name="confirm_delete"
+                    value="YES"
+                    required
+                >
+
+                I understand that this is a permanent
+                deletion request.
+
+            </label>
+
+
+            <button
+                type="submit"
+                class="danger-btn"
+            >
+                Submit Deletion Request
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/settings.js'
+    ) }}"
+></script>
+
+
+</body>
+
+</html>

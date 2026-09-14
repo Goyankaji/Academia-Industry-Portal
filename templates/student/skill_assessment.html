@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Assessment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student/student_base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student/student_assessment.css') }}">
+</head>
+<body>
+<div class="student-page">
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <section class="assessment-page-header">
+                <div>
+                    <h1>Skill Assessment</h1>
+                    <p>Test your knowledge and measure your current skill level.</p>
+                </div>
+            </section>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% if active_attempt %}
+                <section class="assessment-card active-assessment-card">
+                    <div class="assessment-card-top">
+                        <div>
+                            <span class="assessment-badge">IN PROGRESS</span>
+                            <h2>{{ active_attempt.title }}</h2>
+                            <p>{{ active_attempt.skill_name }}</p>
+                        </div>
+                        <div class="assessment-meta">
+                            <span>Questions: {{ active_attempt.total_questions }}</span>
+                            <span>Duration: {{ active_attempt.duration_minutes }} min</span>
+                        </div>
+                    </div>
+
+                    <a class="assessment-btn primary"
+                       href="{{ url_for('student_skill_assessment_take', attempt_id=active_attempt.id) }}">
+                        Continue Assessment
+                    </a>
+                </section>
+            {% endif %}
+
+            <section class="assessment-section">
+                <div class="section-heading">
+                    <div>
+                        <h2>Available Assessments</h2>
+                        <p>Choose an assessment to test your skills.</p>
+                    </div>
+                </div>
+
+                {% if assessments %}
+                    <div class="assessment-grid">
+                        {% for assessment in assessments %}
+                            <article class="assessment-card">
+                                <div class="assessment-card-top">
+                                    <div>
+                                        <span class="assessment-badge">{{ assessment.skill_category or 'Skill' }}</span>
+                                        <h2>{{ assessment.title }}</h2>
+                                        <p class="skill-name">{{ assessment.skill_name }}</p>
+                                    </div>
+                                    <div class="assessment-icon">🧠</div>
+                                </div>
+
+                                {% if assessment.description %}
+                                    <p class="assessment-description">
+                                        {{ assessment.description }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="assessment-meta">
+                                    <span>📝 {{ assessment.question_count }} Questions</span>
+                                    <span>⏱ {{ assessment.duration_minutes }} min</span>
+                                    <span>🎯 Pass: {{ assessment.passing_percentage }}%</span>
+                                </div>
+
+                                <div class="assessment-card-footer">
+                                    {% if assessment.completed_before %}
+                                        <span class="completed-label">
+                                            Previously attempted
+                                        </span>
+                                    {% endif %}
+
+                                    {% if assessment.in_progress_attempt_id %}
+                                        <a class="assessment-btn primary"
+                                           href="{{ url_for('student_skill_assessment_take', attempt_id=assessment.in_progress_attempt_id) }}">
+                                            Continue
+                                        </a>
+                                    {% else %}
+                                        <a class="assessment-btn primary"
+                                           href="{{ url_for('student_skill_assessment_start', assessment_id=assessment.id) }}">
+                                            Start Assessment
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-assessment">
+                        <div class="empty-icon">🧠</div>
+                        <h2>No Assessments Available</h2>
+                        <p>
+                            There are no active skill assessments available right now.
+                            Assessments will appear here when they are published.
+                        </p>
+                    </div>
+                {% endif %}
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/student/assessment.js') }}"></script>
+</body>
+</html>

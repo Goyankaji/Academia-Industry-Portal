@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ page_title or "My Skills | Student Portal" }}
+    </title>
+
+
+    <!-- Student Base CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+
+    <!-- Skills CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_skills.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="student-page">
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+
+    <!-- =================================================
+         MAIN AREA
+    ================================================== -->
+
+    <div class="student-main">
+
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        {% include "student/components/student_topbar.html" %}
+
+
+
+        <!-- =================================================
+             CONTENT
+        ================================================== -->
+
+        <main class="student-content">
+
+
+            <!-- =============================================
+                 PAGE HEADER
+            ============================================== -->
+
+            <section class="skills-page-header">
+
+
+                <div>
+
+                    <span class="skills-eyebrow">
+                        MY PROFILE
+                    </span>
+
+
+                    <h1>
+                        My Skills
+                    </h1>
+
+
+                    <p>
+                        Build and manage your technical
+                        and professional skills.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="skills-add-btn"
+                    id="openAddSkillBtn"
+                >
+
+                    <span>
+                        +
+                    </span>
+
+                    Add Skill
+
+                </button>
+
+
+            </section>
+
+
+
+            <!-- =============================================
+                 FLASH MESSAGE
+            ============================================== -->
+
+            {% with messages =
+                get_flashed_messages(with_categories=true)
+            %}
+
+                {% if messages %}
+
+                    <div class="skills-flash-container">
+
+                        {% for category, message in messages %}
+
+                            <div
+                                class="skills-flash-message
+                                {% if category == 'success' %}
+                                    success
+                                {% else %}
+                                    error
+                                {% endif %}"
+                            >
+
+                                <span class="flash-icon">
+
+                                    {% if category == 'success' %}
+                                        ✓
+                                    {% else %}
+                                        !
+                                    {% endif %}
+
+                                </span>
+
+
+                                <span>
+                                    {{ message }}
+                                </span>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endwith %}
+
+
+
+            <!-- =============================================
+                 SUMMARY CARDS
+            ============================================== -->
+
+            <section class="skills-summary">
+
+
+                <!-- Total Skills -->
+
+                <div class="skill-summary-card">
+
+                    <div class="summary-icon blue">
+                        🧠
+                    </div>
+
+
+                    <div>
+
+                        <span class="summary-label">
+                            Total Skills
+                        </span>
+
+
+                        <strong class="summary-value">
+                            {{ total_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Assessed -->
+
+                <div class="skill-summary-card">
+
+                    <div class="summary-icon purple">
+                        📊
+                    </div>
+
+
+                    <div>
+
+                        <span class="summary-label">
+                            Assessed
+                        </span>
+
+
+                        <strong class="summary-value">
+                            {{ assessed_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Verified -->
+
+                <div class="skill-summary-card">
+
+                    <div class="summary-icon green">
+                        ✓
+                    </div>
+
+
+                    <div>
+
+                        <span class="summary-label">
+                            Verified
+                        </span>
+
+
+                        <strong class="summary-value">
+                            {{ verified_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =============================================
+                 SKILLS CARD
+            ============================================== -->
+
+            <section class="skills-content-card">
+
+
+                <div class="skills-content-header">
+
+                    <div>
+
+                        <h2>
+                            Your Skills
+                        </h2>
+
+                        <p>
+                            Skills added to your student profile
+                        </p>
+
+                    </div>
+
+
+                    {% if skills %}
+
+                        <span class="skills-count">
+                            {{ total_skills }}
+                            {% if total_skills == 1 %}
+                                Skill
+                            {% else %}
+                                Skills
+                            {% endif %}
+                        </span>
+
+                    {% endif %}
+
+
+                </div>
+
+
+
+                <!-- =========================================
+                     SKILLS EXIST
+                ========================================== -->
+
+                {% if skills %}
+
+
+                    <div class="skills-grid">
+
+
+                        {% for skill in skills %}
+
+
+                            <article class="student-skill-card">
+
+
+                                <!-- CARD HEADER -->
+
+                                <div class="skill-card-header">
+
+
+                                    <div class="skill-title-area">
+
+
+                                        <div class="skill-icon-box">
+                                            🧠
+                                        </div>
+
+
+                                        <div class="skill-title">
+
+                                            <h3>
+                                                {{ skill.skill_name }}
+                                            </h3>
+
+
+                                            <span class="skill-proficiency">
+                                                {{ skill.proficiency_level }}
+                                            </span>
+
+                                        </div>
+
+
+                                    </div>
+
+
+
+                                    <!-- ACTIONS -->
+
+                                    <div class="skill-card-actions">
+
+
+                                        <button
+                                            type="button"
+                                            class="skill-action-btn edit-skill-btn"
+
+                                            data-id="{{ skill.id }}"
+                                            data-name="{{ skill.skill_name }}"
+                                            data-level="{{ skill.proficiency_level }}"
+                                            data-percentage="{{ skill.assessment_percentage or 0 }}"
+                                        >
+
+                                            ✏️
+
+                                        </button>
+
+
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for(
+                                                'student_skill_delete',
+                                                skill_id=skill.id
+                                            ) }}"
+                                            class="delete-skill-form"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="skill-action-btn delete-skill-btn"
+                                            >
+
+                                                🗑️
+
+                                            </button>
+
+                                        </form>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+
+                                <!-- ASSESSMENT -->
+
+                                <div class="skill-assessment">
+
+
+                                    <div class="assessment-header">
+
+                                        <span>
+                                            Assessment Score
+                                        </span>
+
+
+                                        <strong>
+                                            {{ skill.assessment_percentage or 0 }}%
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="skill-progress">
+
+                                        <div
+                                            class="skill-progress-bar"
+                                            data-progress="{{ skill.assessment_percentage or 0 }}"
+                                        ></div>
+
+                                    </div>
+
+
+                                </div>
+
+
+
+                                <!-- FOOTER -->
+
+                                <div class="skill-card-footer">
+
+
+                                    {% if
+                                        skill.verification_status
+                                        and
+                                        skill.verification_status|upper
+                                        == "VERIFIED"
+                                    %}
+
+                                        <span
+                                            class="verification-badge verified"
+                                        >
+                                            ✓ Verified
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="verification-badge pending"
+                                        >
+                                            ⏳ Pending Verification
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if skill.last_assessed_at %}
+
+                                        <span class="assessment-date">
+
+                                            Last assessed:
+                                            {{ skill.last_assessed_at }}
+
+                                        </span>
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+                            </article>
+
+
+                        {% endfor %}
+
+
+                    </div>
+
+
+                {% else %}
+
+
+                    <!-- =====================================
+                         EMPTY STATE
+                    ====================================== -->
+
+                    <div class="skills-empty-state">
+
+
+                        <div class="empty-skill-icon">
+                            🧠
+                        </div>
+
+
+                        <h3>
+                            No Skills Added Yet
+                        </h3>
+
+
+                        <p>
+                            Start building your professional
+                            skill profile by adding your first skill.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="skills-empty-add-btn"
+                            id="openEmptyAddSkillBtn"
+                        >
+
+                            + Add Your First Skill
+
+                        </button>
+
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     SKILL MODAL
+====================================================== -->
+
+<div
+    class="skill-modal-overlay"
+    id="skillModal"
+>
+
+
+    <div class="skill-modal">
+
+
+        <!-- HEADER -->
+
+        <div class="skill-modal-header">
+
+
+            <div>
+
+                <h2 id="skillModalTitle">
+                    Add Skill
+                </h2>
+
+
+                <p id="skillModalSubtitle">
+                    Add a skill to your student profile.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="skill-modal-close"
+                id="closeSkillModalBtn"
+            >
+                ×
+            </button>
+
+
+        </div>
+
+
+
+        <!-- FORM -->
+
+        <form
+            method="POST"
+            action="{{ url_for('student_skill_add') }}"
+            id="skillForm"
+        >
+
+
+            <div class="skill-modal-body">
+
+
+                <!-- Skill -->
+
+                <div class="skill-form-group">
+
+                    <label for="skill_name">
+
+                        Skill Name
+                        <span>*</span>
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="skill_name"
+                        name="skill_name"
+                        maxlength="150"
+                        placeholder="e.g. Python, Java, SQL"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- Proficiency -->
+
+                <div class="skill-form-group">
+
+                    <label for="proficiency_level">
+
+                        Proficiency Level
+                        <span>*</span>
+
+                    </label>
+
+
+                    <select
+                        id="proficiency_level"
+                        name="proficiency_level"
+                        required
+                    >
+
+                        <option value="">
+                            Select proficiency level
+                        </option>
+
+                        <option value="Beginner">
+                            Beginner
+                        </option>
+
+                        <option value="Intermediate">
+                            Intermediate
+                        </option>
+
+                        <option value="Advanced">
+                            Advanced
+                        </option>
+
+                        <option value="Expert">
+                            Expert
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- Assessment -->
+
+                <div class="skill-form-group">
+
+                    <label for="assessment_percentage">
+
+                        Assessment Percentage
+
+                    </label>
+
+
+                    <div class="percentage-field">
+
+                        <input
+                            type="number"
+                            id="assessment_percentage"
+                            name="assessment_percentage"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value="0"
+                        >
+
+
+                        <span>
+                            %
+                        </span>
+
+                    </div>
+
+
+                    <small>
+                        Keep 0 if this skill has not been formally assessed.
+                    </small>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- FOOTER -->
+
+            <div class="skill-modal-footer">
+
+
+                <button
+                    type="button"
+                    class="skill-cancel-btn"
+                    id="cancelSkillBtn"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="skill-save-btn"
+                    id="saveSkillBtn"
+                >
+
+                    <span id="saveSkillText">
+                        Save Skill
+                    </span>
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     STUDENT BASE JS
+====================================================== -->
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}"
+></script>
+
+
+
+<!-- =====================================================
+     SKILLS JS
+====================================================== -->
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/skills.js'
+    ) }}"
+></script>
+
+
+</body>
+
+</html>

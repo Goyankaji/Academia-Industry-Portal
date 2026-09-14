@@ -1,0 +1,501 @@
+<!-- =========================================================
+     STUDENT SIDEBAR
+     SIH Academia–Industry Collaboration Portal
+========================================================= -->
+
+<aside class="student-sidebar" id="studentSidebar">
+
+    <!-- Sidebar Header -->
+    <div class="student-sidebar-header">
+
+        <a href="{{ url_for('student_dashboard') }}"
+           class="student-brand">
+
+            <div class="student-brand-icon">
+                SIH
+            </div>
+
+            <div class="student-brand-text">
+                <span class="brand-title">Student Portal</span>
+                <span class="brand-subtitle">Academia • Industry</span>
+            </div>
+
+        </a>
+
+        <!-- Mobile Close -->
+        <button
+            type="button"
+            class="sidebar-close-btn"
+            id="sidebarCloseBtn"
+            aria-label="Close sidebar">
+            ×
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
+
+    <nav class="student-navigation" aria-label="Student Navigation">
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <a
+            href="{{ url_for('student_dashboard') }}"
+            class="student-nav-item {% if active_page == 'dashboard' %}active{% endif %}"
+            data-page="dashboard">
+
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Dashboard</span>
+
+        </a>
+
+
+        <!-- =================================================
+             MY PROFILE
+        ================================================== -->
+
+        <div class="student-nav-section">
+
+            <div class="student-nav-section-title">
+                MY PROFILE
+            </div>
+
+
+            <!-- PROFILE - ACTIVE -->
+            <a
+                href="{{ url_for('student_profile') }}"
+                class="student-nav-item {% if active_page == 'profile' %}active{% endif %}"
+                data-page="profile">
+
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profile</span>
+
+            </a>
+
+
+            <!-- ACADEMIC - ACTIVE -->
+            <a
+                href="{{ url_for('student_academic') }}"
+                class="student-nav-item {% if active_page == 'academic' %}active{% endif %}"
+                data-page="academic">
+
+                <span class="nav-icon">🎓</span>
+                <span class="nav-label">Academic</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_skills') }}"
+                class="student-nav-item {% if active_page == 'skills' %}active{% endif %}"
+                data-page="skills">
+
+                <span class="nav-icon">⚡</span>
+                <span class="nav-label">Skills</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_certifications') }}"
+                class="student-nav-item {% if active_page == 'certifications' %}active{% endif %}"
+                data-page="certifications">
+
+                <span class="nav-icon">📜</span>
+                <span class="nav-label">Certifications</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_projects') }}"
+                class="student-nav-item {% if active_page == 'projects' %}active{% endif %}"
+                data-page="projects">
+
+                <span class="nav-icon">📁</span>
+                <span class="nav-label">Projects</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_achievements') }}"
+                class="student-nav-item {% if active_page == 'achievements' %}active{% endif %}"
+                data-page="achievements">
+
+                <span class="nav-icon">🏆</span>
+                <span class="nav-label">Achievements</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_portfolio') }}"
+                class="student-nav-item {% if active_page == 'portfolio' %}active{% endif %}"
+                data-page="portfolio">
+
+                <span class="nav-icon">💼</span>
+                <span class="nav-label">Digital Portfolio</span>
+
+            </a>
+
+        </div>
+
+
+        <!-- =================================================
+             SKILL INTELLIGENCE
+        ================================================== -->
+
+        <div class="student-nav-section">
+
+            <div class="student-nav-section-title">
+                SKILL INTELLIGENCE
+            </div>
+
+
+            <a
+                href="{{ url_for('student_skill_assessment') }}"
+                class="student-nav-item {% if active_page == 'skill-assessment' %}active{% endif %}"
+                data-page="skill-assessment">
+
+                <span class="nav-icon">🧠</span>
+                <span class="nav-label">Skill Assessment</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_assessment_results') }}"
+                class="student-nav-item {% if active_page == 'assessment-results' %}active{% endif %}"
+                data-page="assessment-results">
+
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Assessment Results</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_skill_profile') }}"
+                class="student-nav-item {% if active_page == 'skill-profile' %}active{% endif %}"
+                data-page="skill-profile">
+
+                <span class="nav-icon">🎯</span>
+                <span class="nav-label">Skill Profile</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_skill_gap') }}"
+                class="student-nav-item {% if active_page == 'skill-gap' %}active{% endif %}"
+                data-page="skill-gap">
+
+                <span class="nav-icon">📉</span>
+                <span class="nav-label">Skill Gap</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_learning_recommendations') }}"
+                class="student-nav-item {% if active_page == 'learning-recommendations' %}active{% endif %}"
+                data-page="learning-recommendations"
+            >
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">
+                    Learning Recommendations
+                </span>
+            </a>
+
+        </div>
+
+
+        <!-- =================================================
+             OPPORTUNITIES
+        ================================================== -->
+
+        <div class="student-nav-section">
+
+            <div class="student-nav-section-title">
+                OPPORTUNITIES
+            </div>
+
+
+            <a
+                href="{{ url_for('student_opportunities') }}"
+                class="student-nav-item
+                    {% if active_page == 'opportunities' %}active{% endif %}"
+                data-page="opportunities"
+            >
+                <span class="nav-icon">💼</span>
+                <span class="nav-label">
+                    Opportunities
+                </span>
+            </a>
+
+
+
+            <a
+                href="{{ url_for('student_applications') }}"
+                class="student-nav-item {% if active_page == 'applications' %}active{% endif %}"
+                data-page="applications">
+
+                <span class="nav-icon">📄</span>
+                <span class="nav-label">Applications</span>
+
+            </a>
+
+        </div>
+
+
+        <!-- =================================================
+             COLLABORATIONS
+        ================================================== -->
+
+        <div class="student-nav-section">
+
+            <a
+                href="{{ url_for('student_collaborations') }}"
+                class="student-nav-item
+                {% if active_page == 'collaborations' %}
+                    active
+                {% endif %}"
+                data-page="collaborations">
+
+                <span class="nav-icon">
+                    🤝
+                </span>
+
+                <span class="nav-label">
+                    Collaborations
+                </span>
+
+            </a>
+
+        </div>
+
+
+        <!-- =================================================
+             INTERNSHIP
+        ================================================== -->
+
+        <div class="student-nav-section">
+
+            <div class="student-nav-section-title">
+                INTERNSHIP
+            </div>
+
+
+            <a
+                href="{{ url_for('student_internships') }}"
+                class="student-nav-item {% if active_page == 'internships' %}active{% endif %}"
+                data-page="internships">
+
+                <span class="nav-icon">🎓</span>
+                <span class="nav-label">My Internships</span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="student-nav-item coming-soon"
+                data-page="internship-progress"
+                data-coming-soon="true">
+
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Progress</span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="student-nav-item coming-soon"
+                data-page="mentor-feedback"
+                data-coming-soon="true">
+
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Mentor Feedback</span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="student-nav-item coming-soon"
+                data-page="internship-completion"
+                data-coming-soon="true">
+
+                <span class="nav-icon">✅</span>
+                <span class="nav-label">Completion</span>
+
+            </a>
+
+        </div>
+
+
+        <!-- =================================================
+             ENGAGEMENT
+        ================================================== -->
+
+        <div class="student-nav-section">
+
+            <div class="student-nav-section-title">
+                ENGAGEMENT
+            </div>
+
+
+            <a
+                href="{{ url_for('student_workshops') }}"
+                class="student-nav-item {% if active_page == 'workshops' %}active{% endif %}"
+                data-page="workshops">
+
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Workshops</span>
+
+            </a>
+
+
+            <a href="{{ url_for('student_mentorship') }}"
+            class="student-nav-item {% if active_page == 'mentorship' %}active{% endif %}"
+            data-page="mentorship">
+
+                <span class="nav-icon">🤝</span>
+                <span class="nav-label">Mentorship</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_live_projects') }}"
+                class="student-nav-item {% if active_page == 'live-projects' %}active{% endif %}"
+                data-page="live-projects">
+
+                <span class="nav-icon">🚀</span>
+                <span class="nav-label">Live Projects</span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('student_innovation_challenges') }}"
+                class="student-nav-item {% if active_page == 'innovation-challenges' %}active{% endif %}"
+                data-page="innovation-challenges">
+
+                <span class="nav-icon">💡</span>
+                <span class="nav-label">Innovation Challenges</span>
+
+            </a>
+
+        </div>
+
+
+        <!-- =================================================
+             SYSTEM
+        ================================================== -->
+
+        <div class="student-nav-section">
+
+            <div class="student-nav-section-title">
+                SYSTEM
+            </div>
+
+
+            <a
+                href="{{ url_for('student_notifications') }}"
+                class="student-nav-item
+                {% if active_page == 'notifications' %}
+                    active
+                {% endif %}"
+                data-page="notifications"
+            >
+
+                <span class="nav-icon">
+                    🔔
+                </span>
+
+                <span class="nav-label">
+                    Notifications
+                </span>
+
+                {% if unread_notifications and unread_notifications > 0 %}
+
+                <span class="notification-sidebar-badge">
+                    {{ unread_notifications }}
+                </span>
+
+                {% endif %}
+
+            </a>
+
+
+
+            <a
+                href="{{ url_for('student_settings') }}"
+                class="student-nav-item
+                {% if active_page == 'settings' %}
+                    active
+                {% endif %}"
+                data-page="settings"
+            >
+                <span class="nav-icon">
+                    ⚙️
+                </span>
+
+                <span class="nav-label">
+                    Settings
+                </span>
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         SIDEBAR FOOTER
+    ====================================================== -->
+
+    <div class="student-sidebar-footer">
+
+        <div class="sidebar-user-mini">
+
+            <div class="sidebar-user-avatar">
+                {{ (session.get('user_name') or 'S')[0]|upper }}
+            </div>
+
+            <div class="sidebar-user-info">
+
+                <span class="sidebar-user-name">
+                    {{ session.get('user_name') or 'Student' }}
+                </span>
+
+                <span class="sidebar-user-role">
+                    Student
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('logout') }}"
+            class="student-logout-btn">
+
+            <span class="nav-icon">↪</span>
+            <span class="nav-label">Logout</span>
+
+        </a>
+
+    </div>
+
+</aside>

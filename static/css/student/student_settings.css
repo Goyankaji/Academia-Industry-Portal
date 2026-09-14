@@ -1,0 +1,386 @@
+/* =========================================================
+   STUDENT SETTINGS
+========================================================= */
+
+.settings-header {
+    margin-bottom: 28px;
+}
+
+.settings-eyebrow,
+.settings-section-eyebrow,
+.settings-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    opacity: 0.55;
+}
+
+.settings-header h1 {
+    margin: 7px 0;
+    font-size: 32px;
+}
+
+.settings-header p {
+    margin: 0;
+    opacity: 0.65;
+}
+
+
+/* ACCOUNT */
+
+.settings-account-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(127,127,127,.16);
+    border-radius: 16px;
+}
+
+.account-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.account-info {
+    flex: 1;
+}
+
+.account-info h2 {
+    margin: 5px 0 3px;
+    font-size: 19px;
+}
+
+.account-info p {
+    margin: 0;
+    font-size: 13px;
+    opacity: .6;
+}
+
+.account-status {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+
+/* SECTIONS */
+
+.settings-section {
+    margin-bottom: 24px;
+    border: 1px solid rgba(127,127,127,.16);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.settings-section-header {
+    padding: 22px 24px;
+    border-bottom: 1px solid rgba(127,127,127,.12);
+}
+
+.settings-section-header h2 {
+    margin: 5px 0;
+    font-size: 20px;
+}
+
+.settings-section-header p {
+    margin: 0;
+    font-size: 13px;
+    opacity: .6;
+}
+
+
+/* OPTIONS */
+
+.settings-option {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(127,127,127,.10);
+}
+
+.settings-option:last-child {
+    border-bottom: none;
+}
+
+.settings-option-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+
+.settings-option-content {
+    flex: 1;
+}
+
+.settings-option-content h3 {
+    margin: 0 0 5px;
+    font-size: 14px;
+}
+
+.settings-option-content p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    opacity: .6;
+}
+
+.settings-action-btn {
+    border: 1px solid rgba(127,127,127,.25);
+    border-radius: 8px;
+    padding: 8px 14px;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.settings-status {
+    font-size: 11px;
+    font-weight: 700;
+    opacity: .6;
+}
+
+
+/* SWITCH */
+
+.settings-switch {
+    position: relative;
+    width: 42px;
+    height: 23px;
+    flex-shrink: 0;
+}
+
+.settings-switch input {
+    display: none;
+}
+
+.settings-switch span {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.settings-switch span:before {
+    content: "";
+    position: absolute;
+    width: 17px;
+    height: 17px;
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: white;
+    transition: .2s;
+}
+
+.settings-switch input:checked + span:before {
+    transform: translateX(19px);
+}
+
+
+/* DANGER */
+
+.danger-section {
+    border-color: rgba(220,70,70,.22);
+}
+
+.danger-text {
+    opacity: .8;
+}
+
+.danger-option {
+    padding: 22px 24px;
+    border-bottom: 1px solid rgba(127,127,127,.10);
+}
+
+.danger-option:last-child {
+    border-bottom: none;
+}
+
+.danger-option h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+}
+
+.danger-option p {
+    margin: 0 0 14px;
+    max-width: 700px;
+    font-size: 12px;
+    line-height: 1.6;
+    opacity: .6;
+}
+
+.danger-outline-btn,
+.danger-btn {
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.danger-outline-btn {
+    background: transparent;
+    border: 1px solid rgba(220,70,70,.5);
+}
+
+.danger-btn {
+    border: none;
+}
+
+.request-pending {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+/* LOGOUT */
+
+.logout-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 24px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(127,127,127,.16);
+    border-radius: 14px;
+}
+
+.logout-section h3 {
+    margin: 0 0 5px;
+    font-size: 14px;
+}
+
+.logout-section p {
+    margin: 0;
+    font-size: 12px;
+    opacity: .6;
+}
+
+.logout-btn {
+    text-decoration: none;
+    border: 1px solid rgba(127,127,127,.25);
+    border-radius: 8px;
+    padding: 9px 15px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* MODAL */
+
+.settings-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,.55);
+}
+
+.settings-modal.show {
+    display: flex;
+}
+
+.settings-modal-box {
+    width: min(500px, 100%);
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid rgba(127,127,127,.2);
+    background: #fff;
+    color: #111;
+    position: relative;
+}
+
+.settings-modal-box h2 {
+    margin: 0 0 8px;
+}
+
+.settings-modal-box p {
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: .7;
+}
+
+.settings-modal-box textarea {
+    width: 100%;
+    min-height: 110px;
+    box-sizing: border-box;
+    margin: 15px 0;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 9px;
+    resize: vertical;
+}
+
+.modal-close {
+    position: absolute;
+    right: 14px;
+    top: 10px;
+    border: none;
+    background: transparent;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.delete-confirmation {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 650px) {
+
+    .settings-account-card,
+    .settings-option,
+    .logout-section {
+        align-items: flex-start;
+    }
+
+    .settings-option {
+        flex-wrap: wrap;
+    }
+
+    .settings-option-content {
+        min-width: 200px;
+    }
+
+    .account-status {
+        width: 100%;
+    }
+
+}

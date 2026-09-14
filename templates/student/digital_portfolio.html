@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Digital Portfolio</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_base.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_portfolio.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>
+                        Digital Portfolio
+                    </h1>
+
+                    <p>
+                        Build and showcase your professional profile.
+                    </p>
+
+                </div>
+
+                <div class="portfolio-actions">
+
+                    {% if portfolio and portfolio.is_public %}
+
+                        <a
+                            href="{{ url_for('public_student_portfolio', public_slug=portfolio.public_slug) }}"
+                            target="_blank"
+                            class="btn btn-outline"
+                        >
+                            🌐 View Public Portfolio
+                        </a>
+
+                    {% endif %}
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="openPortfolioEditor"
+                    >
+                        ✏️ Edit Portfolio
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PORTFOLIO PREVIEW
+            ================================================== -->
+
+            <section class="portfolio-preview">
+
+                <div class="portfolio-hero">
+
+                    <div class="portfolio-avatar">
+
+                        {% if student.name %}
+
+                            {{ student.name[0]|upper }}
+
+                        {% else %}
+
+                            S
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="portfolio-hero-content">
+
+                        <h1>
+                            {{ student.name }}
+                        </h1>
+
+                        <h2>
+
+                            {% if portfolio and portfolio.headline %}
+
+                                {{ portfolio.headline }}
+
+                            {% else %}
+
+                                Student | Aspiring Professional
+
+                            {% endif %}
+
+                        </h2>
+
+
+                        {% if portfolio and portfolio.bio %}
+
+                            <p>
+                                {{ portfolio.bio }}
+                            </p>
+
+                        {% else %}
+
+                            <p>
+                                Create your portfolio bio to introduce
+                                yourself professionally.
+                            </p>
+
+                        {% endif %}
+
+
+                        <div class="professional-links">
+
+                            {% if student.github_url %}
+
+                                <a
+                                    href="{{ student.github_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    GitHub
+                                </a>
+
+                            {% endif %}
+
+
+                            {% if student.linkedin_url %}
+
+                                <a
+                                    href="{{ student.linkedin_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    LinkedIn
+                                </a>
+
+                            {% endif %}
+
+
+                            {% if student.portfolio_url %}
+
+                                <a
+                                    href="{{ student.portfolio_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Website
+                                </a>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     PORTFOLIO STATS
+                ================================================== -->
+
+                <div class="portfolio-stat-grid">
+
+                    <div class="portfolio-stat">
+
+                        <strong>
+                            {{ portfolio_stats.skills }}
+                        </strong>
+
+                        <span>
+                            Skills
+                        </span>
+
+                    </div>
+
+
+                    <div class="portfolio-stat">
+
+                        <strong>
+                            {{ portfolio_stats.certifications }}
+                        </strong>
+
+                        <span>
+                            Certifications
+                        </span>
+
+                    </div>
+
+
+                    <div class="portfolio-stat">
+
+                        <strong>
+                            {{ portfolio_stats.projects }}
+                        </strong>
+
+                        <span>
+                            Projects
+                        </span>
+
+                    </div>
+
+
+                    <div class="portfolio-stat">
+
+                        <strong>
+                            {{ portfolio_stats.achievements }}
+                        </strong>
+
+                        <span>
+                            Achievements
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     SKILLS
+                ================================================== -->
+
+                <section class="portfolio-section">
+
+                    <div class="portfolio-section-header">
+
+                        <h2>
+                            Skills
+                        </h2>
+
+                    </div>
+
+
+                    {% if skills %}
+
+                        <div class="skill-list">
+
+                            {% for skill in skills %}
+
+                                <div class="portfolio-skill">
+
+                                    <div class="skill-info">
+
+                                        <strong>
+                                            {{ skill.skill_name }}
+                                        </strong>
+
+                                        <span>
+                                            {{ skill.proficiency_level }}
+                                        </span>
+
+                                    </div>
+
+
+                                    {% if skill.assessment_percentage is not none %}
+
+                                        <div class="skill-progress">
+
+                                            <div
+                                                class="skill-progress-bar"
+                                                data-progress="{{ skill.assessment_percentage|default(0) }}"
+                                            ></div>
+
+                                        </div>
+
+                                        <small>
+                                            {{ skill.assessment_percentage }}%
+                                        </small>
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="empty-text">
+                            No skills added yet.
+                        </p>
+
+                    {% endif %}
+
+                </section>
+
+
+                <!-- =================================================
+                     CERTIFICATIONS
+                ================================================== -->
+
+                <section class="portfolio-section">
+
+                    <div class="portfolio-section-header">
+
+                        <h2>
+                            Certifications
+                        </h2>
+
+                    </div>
+
+
+                    {% if certifications %}
+
+                        <div class="portfolio-card-grid">
+
+                            {% for certification in certifications %}
+
+                                <article class="portfolio-item-card">
+
+                                    <div class="item-icon">
+                                        🏆
+                                    </div>
+
+                                    <div>
+
+                                        <h3>
+                                            {{ certification.certificate_name }}
+                                        </h3>
+
+                                        {% if certification.issuing_organization %}
+
+                                            <p>
+                                                {{ certification.issuing_organization }}
+                                            </p>
+
+                                        {% endif %}
+
+                                        {% if certification.issue_date %}
+
+                                            <small>
+                                                Issued:
+                                                {{ certification.issue_date.strftime('%d %b %Y') }}
+                                            </small>
+
+                                        {% endif %}
+
+                                        {% if certification.certificate_url %}
+
+                                            <div class="item-link">
+
+                                                <a
+                                                    href="{{ certification.certificate_url }}"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    View Certificate →
+                                                </a>
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </article>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="empty-text">
+                            No certifications added yet.
+                        </p>
+
+                    {% endif %}
+
+                </section>
+
+
+                <!-- =================================================
+                     PROJECTS
+                ================================================== -->
+
+                <section class="portfolio-section">
+
+                    <div class="portfolio-section-header">
+
+                        <h2>
+                            Projects
+                        </h2>
+
+                    </div>
+
+
+                    {% if projects %}
+
+                        <div class="portfolio-card-grid">
+
+                            {% for project in projects %}
+
+                                <article class="portfolio-item-card">
+
+                                    <div class="item-icon">
+                                        🚀
+                                    </div>
+
+                                    <div>
+
+                                        <h3>
+                                            {{ project.title }}
+                                        </h3>
+
+
+                                        {% if project.industry_name %}
+
+                                            <p>
+                                                {{ project.industry_name }}
+                                            </p>
+
+                                        {% endif %}
+
+
+                                        {% if project.description %}
+
+                                            <p>
+                                                {{ project.description[:150] }}
+
+                                                {% if project.description|length > 150 %}
+                                                    ...
+                                                {% endif %}
+
+                                            </p>
+
+                                        {% endif %}
+
+
+                                        {% if project.technology_stack %}
+
+                                            <div class="technology-text">
+                                                {{ project.technology_stack }}
+                                            </div>
+
+                                        {% endif %}
+
+
+                                        {% if project.project_url %}
+
+                                            <div class="item-link">
+
+                                                <a
+                                                    href="{{ project.project_url }}"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    View Project →
+                                                </a>
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </article>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="empty-text">
+                            No projects added yet.
+                        </p>
+
+                    {% endif %}
+
+                </section>
+
+
+                <!-- =================================================
+                     ACHIEVEMENTS
+                ================================================== -->
+
+                <section class="portfolio-section">
+
+                    <div class="portfolio-section-header">
+
+                        <h2>
+                            Achievements
+                        </h2>
+
+                    </div>
+
+
+                    {% if achievements %}
+
+                        <div class="achievement-timeline">
+
+                            {% for achievement in achievements %}
+
+                                <div class="timeline-item">
+
+                                    <div class="timeline-icon">
+                                        🏆
+                                    </div>
+
+                                    <div>
+
+                                        <h3>
+                                            {{ achievement.title }}
+                                        </h3>
+
+
+                                        {% if achievement.achievement_type %}
+
+                                            <span class="achievement-type">
+                                                {{ achievement.achievement_type }}
+                                            </span>
+
+                                        {% endif %}
+
+
+                                        {% if achievement.issuing_organization %}
+
+                                            <p>
+                                                {{ achievement.issuing_organization }}
+                                            </p>
+
+                                        {% endif %}
+
+
+                                        {% if achievement.description %}
+
+                                            <p>
+                                                {{ achievement.description }}
+                                            </p>
+
+                                        {% endif %}
+
+
+                                        {% if achievement.achievement_date %}
+
+                                            <small>
+                                                {{ achievement.achievement_date.strftime('%d %b %Y') }}
+                                            </small>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="empty-text">
+                            No achievements added yet.
+                        </p>
+
+                    {% endif %}
+
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PORTFOLIO EDITOR
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="portfolioEditor"
+    hidden
+>
+
+    <div class="portfolio-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    Edit Digital Portfolio
+                </h2>
+
+                <p>
+                    Customize how your portfolio appears.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closePortfolioEditor"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('student_portfolio_save') }}"
+        >
+
+            <div class="form-group">
+
+                <label>
+                    Professional Headline
+                </label>
+
+                <input
+                    type="text"
+                    name="headline"
+                    maxlength="255"
+                    value="{{ portfolio.headline if portfolio else '' }}"
+                    placeholder="e.g. Full Stack Developer | Python Enthusiast"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Bio
+                </label>
+
+                <textarea
+                    name="bio"
+                    rows="6"
+                    placeholder="Write a short professional introduction..."
+                >{{ portfolio.bio if portfolio else '' }}</textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Public Portfolio Slug
+                </label>
+
+                <div class="slug-input">
+
+                    <span>
+                        /portfolio/
+                    </span>
+
+                    <input
+                        type="text"
+                        name="public_slug"
+                        maxlength="150"
+                        value="{{ portfolio.public_slug if portfolio else '' }}"
+                        placeholder="your-name"
+                    >
+
+                </div>
+
+                <small>
+                    Use lowercase letters, numbers and hyphens.
+                </small>
+
+            </div>
+
+
+            <div class="public-toggle">
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        name="is_public"
+                        value="1"
+                        {% if not portfolio or portfolio.is_public %}checked{% endif %}
+                    >
+
+                    <span>
+                        Make my portfolio public
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelPortfolioEditor"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save Portfolio
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/student/portfolio.js') }}"
+></script>
+
+</body>
+</html>

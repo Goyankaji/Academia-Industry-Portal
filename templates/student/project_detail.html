@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ project.title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_base.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_projects.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <div class="detail-page-header">
+
+                <a
+                    href="{{ url_for('student_projects') }}"
+                    class="back-link"
+                >
+                    ← Back to Projects
+                </a>
+
+            </div>
+
+
+            <section class="project-detail-card">
+
+                <div class="detail-title-row">
+
+                    <div>
+
+                        <div class="large-project-icon">
+                            🚀
+                        </div>
+
+                    </div>
+
+                    <div class="detail-title-content">
+
+                        <h1>
+                            {{ project.title }}
+                        </h1>
+
+                        <span
+                            class="project-status {{ project.status|lower }}"
+                        >
+                            {{ project.status }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="detail-grid">
+
+                    <div class="detail-item">
+
+                        <span>
+                            Industry
+                        </span>
+
+                        <strong>
+                            {{ project.industry_name or "Academic / Personal" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-item">
+
+                        <span>
+                            Start Date
+                        </span>
+
+                        <strong>
+                            {% if project.start_date %}
+                                {{ project.start_date.strftime('%d %b %Y') }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-item">
+
+                        <span>
+                            End Date
+                        </span>
+
+                        <strong>
+                            {% if project.end_date %}
+                                {{ project.end_date.strftime('%d %b %Y') }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {% if project.technology_stack %}
+
+                    <div class="detail-section">
+
+                        <h3>
+                            Technology Stack
+                        </h3>
+
+                        <p>
+                            {{ project.technology_stack }}
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+                {% if project.description %}
+
+                    <div class="detail-section">
+
+                        <h3>
+                            Description
+                        </h3>
+
+                        <p class="description-text">
+                            {{ project.description }}
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="detail-links">
+
+                    {% if project.project_url %}
+
+                        <a
+                            href="{{ project.project_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-primary"
+                        >
+                            Open Project
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if project.report_url %}
+
+                        <a
+                            href="{{ project.report_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-outline"
+                        >
+                            View Report
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="detail-actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="openEditProject"
+                    >
+                        Edit Project
+                    </button>
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('student_project_delete', project_id=project.id) }}"
+                        id="deleteProjectForm"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                        >
+                            Delete Project
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 EDIT FORM
+            ================================================== -->
+
+            <section
+                class="edit-project-section"
+                id="editProjectSection"
+                hidden
+            >
+
+                <div class="edit-section-header">
+
+                    <div>
+
+                        <h2>
+                            Edit Project
+                        </h2>
+
+                        <p>
+                            Update your project information.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="closeEditProject"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+
+                <form
+                    method="POST"
+                    action="{{ url_for('student_project_update', project_id=project.id) }}"
+                >
+
+                    <div class="form-grid">
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Project Title *
+                            </label>
+
+                            <input
+                                type="text"
+                                name="title"
+                                maxlength="200"
+                                required
+                                value="{{ project.title }}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Industry
+                            </label>
+
+                            <select name="industry_id">
+
+                                <option value="">
+                                    Academic / Personal Project
+                                </option>
+
+                                {% for industry in industries %}
+
+                                    <option
+                                        value="{{ industry.id }}"
+                                        {% if project.industry_id == industry.id %}selected{% endif %}
+                                    >s
+                                        {{ industry.company_name }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Status
+                            </label>
+
+                            <select name="status">
+
+                                <option
+                                    value="ONGOING"
+                                    {% if project.status == "ONGOING" %}selected{% endif %}
+                                >
+                                    Ongoing
+                                </option>
+
+                                <option
+                                    value="COMPLETED"
+                                    {% if project.status == "COMPLETED" %}selected{% endif %}
+                                >
+                                    Completed
+                                </option>
+
+                                <option
+                                    value="CANCELLED"
+                                    {% if project.status == "CANCELLED" %}selected{% endif %}
+                                >
+                                    Cancelled
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Technology Stack
+                            </label>
+
+                            <input
+                                type="text"
+                                name="technology_stack"
+                                value="{{ project.technology_stack or '' }}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Start Date
+                            </label>
+
+                            <input
+                                type="date"
+                                name="start_date"
+                                value="{{ project.start_date.strftime('%Y-%m-%d') if project.start_date else '' }}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                End Date
+                            </label>
+
+                            <input
+                                type="date"
+                                name="end_date"
+                                value="{{ project.end_date.strftime('%Y-%m-%d') if project.end_date else '' }}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Project URL
+                            </label>
+
+                            <input
+                                type="url"
+                                name="project_url"
+                                value="{{ project.project_url or '' }}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Report URL
+                            </label>
+
+                            <input
+                                type="url"
+                                name="report_url"
+                                value="{{ project.report_url or '' }}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Description
+                            </label>
+
+                            <textarea
+                                name="description"
+                                rows="5"
+                            >{{ project.description or '' }}</textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="modal-actions">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Save Changes
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/student/projects.js') }}"
+></script>
+
+</body>
+</html>

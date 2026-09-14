@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Internship Completion | Student Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_internship.css'
+        ) }}"
+    >
+
+</head>
+
+<body>
+
+<div class="student-layout">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <main class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <div class="internship-page">
+
+            <!-- HEADER -->
+
+            <div class="internship-page-header">
+
+                <div>
+
+                    <span class="internship-eyebrow">
+                        INTERNSHIP
+                    </span>
+
+                    <h1>
+                        Internship Completion
+                    </h1>
+
+                    <p>
+                        View your internship completion details,
+                        certificate and final evaluation.
+                    </p>
+
+                </div>
+
+                <a
+                    href="{{ url_for(
+                        'student_internship_detail',
+                        internship_id=internship.id
+                    ) }}"
+                    class="internship-back-btn"
+                >
+                    ← Back to Internship
+                </a>
+
+            </div>
+
+
+            <!-- INTERNSHIP SUMMARY -->
+
+            <section class="internship-progress-summary">
+
+                <div class="internship-summary-info">
+
+                    <h2>
+                        {{ internship.opportunity_title }}
+                    </h2>
+
+                    <p>
+                        {{ internship.industry_name }}
+                    </p>
+
+                    <span class="internship-status-badge">
+                        {{ internship.status.replace('_', ' ') }}
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            {% if completion %}
+
+                <!-- COMPLETION STATUS -->
+
+                <section class="internship-completion-banner">
+
+                    <div class="internship-completion-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span class="internship-section-label">
+                            COMPLETED
+                        </span>
+
+                        <h2>
+                            Internship Successfully Completed
+                        </h2>
+
+                        <p>
+                            Your internship completion record
+                            has been submitted.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- COMPLETION DETAILS -->
+
+                <section class="internship-progress-card">
+
+                    <div class="internship-section-heading">
+
+                        <span class="internship-section-label">
+                            COMPLETION DETAILS
+                        </span>
+
+                        <h2>
+                            Internship Completion Record
+                        </h2>
+
+                    </div>
+
+
+                    <div class="internship-completion-details">
+
+                        <div class="internship-completion-detail">
+
+                            <span>
+                                Completion Date
+                            </span>
+
+                            <strong>
+                                {{ completion.completion_date.strftime(
+                                    '%d %b %Y'
+                                ) }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-completion-detail">
+
+                            <span>
+                                Final Rating
+                            </span>
+
+                            <strong>
+
+                                {% if completion.final_rating is not none %}
+                                    ⭐ {{ completion.final_rating }}/5
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-completion-detail">
+
+                            <span>
+                                Final Progress
+                            </span>
+
+                            <strong>
+                                {{ internship.progress_percentage or 0 }}%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-completion-detail">
+
+                            <span>
+                                Internship Status
+                            </span>
+
+                            <strong>
+                                {{ internship.status.replace('_', ' ') }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CERTIFICATE -->
+
+                <section class="internship-progress-card">
+
+                    <div class="internship-section-heading">
+
+                        <span class="internship-section-label">
+                            CERTIFICATE
+                        </span>
+
+                        <h2>
+                            Completion Certificate
+                        </h2>
+
+                    </div>
+
+
+                    {% if completion.certificate_url %}
+
+                        <div class="internship-certificate-box">
+
+                            <div>
+
+                                <div class="internship-certificate-icon">
+                                    📜
+                                </div>
+
+                                <div>
+
+                                    <h3>
+                                        Internship Certificate
+                                    </h3>
+
+                                    <p>
+                                        Your internship completion
+                                        certificate is available.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            <a
+                                href="{{ completion.certificate_url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="internship-primary-btn"
+                            >
+                                View Certificate
+                            </a>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="internship-empty-state">
+
+                            <div class="internship-empty-icon">
+                                📜
+                            </div>
+
+                            <h3>
+                                Certificate Not Available Yet
+                            </h3>
+
+                            <p>
+                                Your certificate will appear here
+                                once it is uploaded.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </section>
+
+
+                <!-- FINAL REMARKS -->
+
+                <section class="internship-progress-card">
+
+                    <div class="internship-section-heading">
+
+                        <span class="internship-section-label">
+                            REMARKS
+                        </span>
+
+                        <h2>
+                            Final Remarks
+                        </h2>
+
+                    </div>
+
+
+                    {% if completion.remarks %}
+
+                        <div class="internship-completion-remarks">
+
+                            <p>
+                                {{ completion.remarks }}
+                            </p>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="internship-empty-state">
+
+                            <p>
+                                No final remarks have been added.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </section>
+
+
+                <!-- FEEDBACK SUMMARY -->
+
+                <section class="internship-progress-card">
+
+                    <div class="internship-section-heading">
+
+                        <span class="internship-section-label">
+                            EVALUATION
+                        </span>
+
+                        <h2>
+                            Final Evaluation Summary
+                        </h2>
+
+                    </div>
+
+
+                    <div class="internship-completion-ratings">
+
+                        <div>
+
+                            <span>
+                                Overall
+                            </span>
+
+                            <strong>
+                                {% if feedback_summary.average_rating is not none %}
+                                    {{ "%.2f"|format(
+                                        feedback_summary.average_rating
+                                    ) }}/5
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Technical Skills
+                            </span>
+
+                            <strong>
+                                {% if feedback_summary.technical_rating is not none %}
+                                    {{ "%.2f"|format(
+                                        feedback_summary.technical_rating
+                                    ) }}/5
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Communication
+                            </span>
+
+                            <strong>
+                                {% if feedback_summary.communication_rating is not none %}
+                                    {{ "%.2f"|format(
+                                        feedback_summary.communication_rating
+                                    ) }}/5
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Teamwork
+                            </span>
+
+                            <strong>
+                                {% if feedback_summary.teamwork_rating is not none %}
+                                    {{ "%.2f"|format(
+                                        feedback_summary.teamwork_rating
+                                    ) }}/5
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Professionalism
+                            </span>
+
+                            <strong>
+                                {% if feedback_summary.professionalism_rating is not none %}
+                                    {{ "%.2f"|format(
+                                        feedback_summary.professionalism_rating
+                                    ) }}/5
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+            {% else %}
+
+                <!-- NOT COMPLETED -->
+
+                <section class="internship-progress-card">
+
+                    <div class="internship-empty-state">
+
+                        <div class="internship-empty-icon">
+                            🎓
+                        </div>
+
+                        <h2>
+                            Internship Not Completed Yet
+                        </h2>
+
+                        <p>
+                            Your internship completion certificate
+                            and final evaluation will appear here
+                            after the internship is completed.
+                        </p>
+
+                    </div>
+
+                </section>
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}"
+></script>
+
+</body>
+
+</html>

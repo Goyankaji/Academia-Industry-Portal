@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Skill Gap</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_skills.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>
+                        Skill Gap
+                    </h1>
+
+                    <p>
+                        Identify the skills you need to
+                        improve for your career goals.
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <a
+                        href="{{ url_for(
+                            'student_skill_profile'
+                        ) }}"
+                        class="skill-btn secondary"
+                    >
+                        🎯 Skill Profile
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 STATS
+            ================================================== -->
+
+            <section class="skill-gap-stats">
+
+                <div class="gap-stat-card">
+
+                    <div class="gap-stat-icon">
+                        📉
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Gaps
+                        </span>
+
+                        <strong>
+                            {{ total_gaps }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="gap-stat-card critical-card">
+
+                    <div class="gap-stat-icon">
+                        🔴
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Critical
+                        </span>
+
+                        <strong>
+                            {{ critical_gaps }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="gap-stat-card high-card">
+
+                    <div class="gap-stat-icon">
+                        🟠
+                    </div>
+
+                    <div>
+
+                        <span>
+                            High Priority
+                        </span>
+
+                        <strong>
+                            {{ high_gaps }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="gap-stat-card">
+
+                    <div class="gap-stat-icon">
+                        🎯
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Average Gap
+                        </span>
+
+                        <strong>
+                            {{ average_gap_score }}%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 STATUS SUMMARY
+            ================================================== -->
+
+            <section class="gap-status-summary">
+
+                <div>
+
+                    <span>
+                        Open
+                    </span>
+
+                    <strong>
+                        {{ open_gaps }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Improving
+                    </span>
+
+                    <strong>
+                        {{ improving_gaps }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Resolved
+                    </span>
+
+                    <strong>
+                        {{ resolved_gaps }}
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 GAP LIST
+            ================================================== -->
+
+            {% if gaps %}
+
+                <section class="skill-gap-section">
+
+                    <div class="section-heading">
+
+                        <h2>
+                            Skills To Improve
+                        </h2>
+
+                        <p>
+                            Focus on the highest-priority
+                            skill gaps first.
+                        </p>
+
+                    </div>
+
+
+                    <div class="skill-gap-list">
+
+                        {% for gap in gaps %}
+
+                            <article
+                                class="skill-gap-card"
+                                data-gap-score="{{ gap.gap_score or 0 }}"
+                            >
+
+                                <div
+                                    class="skill-gap-header"
+                                >
+
+                                    <div>
+
+                                        <span
+                                            class="gap-category"
+                                        >
+                                            {{ gap.skill_category
+                                               or "Skill" }}
+                                        </span>
+
+                                        <h3>
+                                            {{ gap.skill_name }}
+                                        </h3>
+
+                                    </div>
+
+
+                                    <span
+                                        class="gap-priority
+                                        {{ gap.priority|lower }}"
+                                    >
+                                        {{ gap.priority }}
+                                    </span>
+
+                                </div>
+
+
+                                <!-- LEVEL COMPARISON -->
+
+                                <div
+                                    class="level-comparison"
+                                >
+
+                                    <div>
+
+                                        <span>
+                                            Current Level
+                                        </span>
+
+                                        <strong>
+                                            {{ gap.current_level
+                                               or "Not Assessed" }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="comparison-arrow">
+                                        →
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Required Level
+                                        </span>
+
+                                        <strong>
+                                            {{ gap.required_level
+                                               or "Not Defined" }}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- GAP SCORE -->
+
+                                <div class="gap-score-section">
+
+                                    <div
+                                        class="gap-score-header"
+                                    >
+
+                                        <span>
+                                            Gap Score
+                                        </span>
+
+                                        <strong>
+                                            {{ gap.gap_score or 0 }}%
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div
+                                        class="gap-score-track"
+                                    >
+
+                                        <div
+                                            class="gap-score-bar"
+                                            data-score="{{ gap.gap_score or 0 }}"
+                                        ></div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- STATUS -->
+
+                                <div
+                                    class="skill-gap-footer"
+                                >
+
+                                    <span>
+
+                                        Status:
+
+                                        <strong>
+                                            {{ gap.status }}
+                                        </strong>
+
+                                    </span>
+
+
+                                    {% if gap.status == "RESOLVED" %}
+
+                                        <span
+                                            class="gap-status resolved"
+                                        >
+                                            ✓ Resolved
+                                        </span>
+
+                                    {% elif gap.status == "IMPROVING" %}
+
+                                        <span
+                                            class="gap-status improving"
+                                        >
+                                            ↗ Improving
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="gap-status open"
+                                        >
+                                            ! Needs Improvement
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+
+            {% else %}
+
+                <!-- =================================================
+                     EMPTY STATE
+                ================================================== -->
+
+                <section
+                    class="skill-gap-empty"
+                >
+
+                    <div class="empty-icon">
+                        🎯
+                    </div>
+
+                    <h2>
+                        No Skill Gaps Identified Yet
+                    </h2>
+
+                    <p>
+                        Your skill gaps will appear here when
+                        your current skill profile is compared
+                        with required skill levels.
+                    </p>
+
+                    <div
+                        class="gap-empty-note"
+                    >
+                        <strong>
+                            How it works
+                        </strong>
+
+                        <span>
+                            Your current skill level is compared
+                            with industry-required skill levels
+                            to identify areas that need improvement.
+                        </span>
+                    </div>
+
+                    <a
+                        href="{{ url_for(
+                            'student_skill_profile'
+                        ) }}"
+                        class="skill-btn primary"
+                    >
+                        View Skill Profile
+                    </a>
+
+                </section>
+
+            {% endif %}
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/skill_gap.js'
+    ) }}"
+></script>
+
+</body>
+
+</html>

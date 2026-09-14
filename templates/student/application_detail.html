@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Application Details | Student Portal</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+          filename='css/student/student_base.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+          filename='css/student/student_applications.css') }}">
+</head>
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <!-- HEADER -->
+            <section class="application-detail-header">
+
+                <a href="{{ url_for('student_applications') }}"
+                   class="application-back-btn">
+                    ← Back to My Applications
+                </a>
+
+                <div class="application-detail-heading">
+
+                    <div>
+                        <span class="application-detail-type">
+                            {{ application.opportunity_type }}
+                        </span>
+
+                        <h1>
+                            {{ application.title }}
+                        </h1>
+
+                        <p>
+                            🏢 {{ application.company_name }}
+                        </p>
+                    </div>
+
+                    <span class="application-status-badge
+                                 status-{{ application.status|lower }}">
+                        {{ application.status }}
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- MAIN CONTENT -->
+            <div class="application-detail-layout">
+
+                <!-- LEFT -->
+                <div class="application-detail-left">
+
+
+                    <!-- STATUS -->
+                    <section class="application-detail-card">
+
+                        <div class="application-section-title">
+                            <span>📋</span>
+                            <h2>Application Status</h2>
+                        </div>
+
+                        <div class="application-status-info">
+
+                            <div>
+                                <small>Current Status</small>
+
+                                <strong>
+                                    {{ application.status }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <small>Application Date</small>
+
+                                <strong>
+                                    {% if application.application_date %}
+                                        {{ application.application_date.strftime("%d %b %Y, %I:%M %p") }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- OPPORTUNITY -->
+                    <section class="application-detail-card">
+
+                        <div class="application-section-title">
+                            <span>💼</span>
+                            <h2>Opportunity Information</h2>
+                        </div>
+
+                        <div class="application-info-grid">
+
+                            <div>
+                                <small>Opportunity</small>
+                                <strong>
+                                    {{ application.title }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <small>Company</small>
+                                <strong>
+                                    {{ application.company_name }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <small>Opportunity Type</small>
+                                <strong>
+                                    {{ application.opportunity_type }}
+                                </strong>
+                            </div>
+
+                            {% if application.industry_sector %}
+                            <div>
+                                <small>Industry</small>
+                                <strong>
+                                    {{ application.industry_sector }}
+                                </strong>
+                            </div>
+                            {% endif %}
+
+                            {% if application.location %}
+                            <div>
+                                <small>Location</small>
+                                <strong>
+                                    {{ application.location }}
+                                </strong>
+                            </div>
+                            {% endif %}
+
+                            {% if application.work_mode %}
+                            <div>
+                                <small>Work Mode</small>
+                                <strong>
+                                    {{ application.work_mode }}
+                                </strong>
+                            </div>
+                            {% endif %}
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- DESCRIPTION -->
+                    {% if application.description %}
+
+                    <section class="application-detail-card">
+
+                        <div class="application-section-title">
+                            <span>📝</span>
+                            <h2>Opportunity Description</h2>
+                        </div>
+
+                        <p class="application-description">
+                            {{ application.description }}
+                        </p>
+
+                    </section>
+
+                    {% endif %}
+
+
+                    <!-- SUBMITTED DATA -->
+                    <section class="application-detail-card">
+
+                        <div class="application-section-title">
+                            <span>📄</span>
+                            <h2>Submitted Application</h2>
+                        </div>
+
+
+                        <!-- RESUME -->
+                        <div class="submitted-application-item">
+
+                            <div class="submitted-file-icon">
+                                📎
+                            </div>
+
+                            <div>
+
+                                <small>Resume</small>
+
+                                {% if application.resume_url %}
+
+                                    <a href="{{ application.resume_url }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        View Submitted Resume
+                                    </a>
+
+                                {% else %}
+
+                                    <p class="application-empty-text">
+                                        No resume submitted.
+                                    </p>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- COVER LETTER -->
+                        <div class="cover-letter-section">
+
+                            <small>Cover Letter</small>
+
+                            {% if application.cover_letter %}
+
+                                <p>
+                                    {{ application.cover_letter }}
+                                </p>
+
+                            {% else %}
+
+                                <p class="application-empty-text">
+                                    No cover letter submitted.
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- TIMELINE -->
+                    <section class="application-detail-card">
+
+                        <div class="application-section-title">
+                            <span>🕒</span>
+                            <h2>Application Timeline</h2>
+                        </div>
+
+                        <div class="application-timeline">
+
+                            <div class="timeline-entry">
+
+                                <div class="timeline-dot"></div>
+
+                                <div>
+                                    <strong>
+                                        Application Submitted
+                                    </strong>
+
+                                    <span>
+                                        {% if application.application_date %}
+                                            {{ application.application_date.strftime("%d %b %Y, %I:%M %p") }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            {% if application.updated_at %}
+
+                            <div class="timeline-entry">
+
+                                <div class="timeline-dot"></div>
+
+                                <div>
+                                    <strong>
+                                        Last Updated
+                                    </strong>
+
+                                    <span>
+                                        {{ application.updated_at.strftime("%d %b %Y, %I:%M %p") }}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+
+                <!-- RIGHT -->
+                <aside class="application-detail-right">
+
+
+                    <!-- STATUS -->
+                    <div class="application-sidebar-card">
+
+                        <h3>Current Status</h3>
+
+                        <div class="large-application-status
+                                    status-{{ application.status|lower }}">
+                            {{ application.status }}
+                        </div>
+
+                        <p>
+                            Your application is currently
+                            <strong>
+                                {{ application.status|lower }}
+                            </strong>.
+                        </p>
+
+                    </div>
+
+
+                    <!-- DEADLINE -->
+                    {% if application.application_deadline %}
+
+                    <div class="application-sidebar-card">
+
+                        <h3>Application Deadline</h3>
+
+                        <strong class="application-deadline">
+                            {{ application.application_deadline.strftime("%d %b %Y") }}
+                        </strong>
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <!-- ACTIONS -->
+                    <div class="application-sidebar-card">
+
+                        <h3>Actions</h3>
+
+                        <a href="{{ url_for('student_opportunities') }}"
+                           class="application-sidebar-action">
+                            Browse Opportunities
+                        </a>
+
+
+                        {% if application.status == "APPLIED" %}
+
+                        <form method="POST"
+                              action="{{ url_for(
+                                  'student_withdraw_application',
+                                  application_id=application.id
+                              ) }}"
+                              id="withdrawApplicationForm">
+
+                            <button type="submit"
+                                    class="application-sidebar-action
+                                           withdraw-detail-btn">
+                                Withdraw Application
+                            </button>
+
+                        </form>
+
+                        {% endif %}
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<script src="{{ url_for('static',
+             filename='js/student/applications.js') }}"></script>
+
+</body>
+</html>

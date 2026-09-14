@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Mentorship | Student Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_engagement.css'
+        ) }}">
+
+</head>
+
+
+<body>
+
+<div class="student-layout">
+
+    {% include 'student/components/student_sidebar.html' %}
+
+
+    <main class="student-main">
+
+        {% include 'student/components/student_topbar.html' %}
+
+
+        <section class="mentorship-page">
+
+
+            <!-- =========================================
+                 HEADER
+            ========================================== -->
+
+            <div class="engagement-header">
+
+                <div>
+
+                    <div class="engagement-eyebrow">
+                        STUDENT ENGAGEMENT
+                    </div>
+
+                    <h1>Mentorship</h1>
+
+                    <p>
+                        Connect with mentors and get guidance
+                        for your academic and career journey.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 STATS
+            ========================================== -->
+
+            <div class="mentorship-stats">
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        🤝
+                    </div>
+
+                    <div>
+
+                        <span>Total Requests</span>
+
+                        <strong>
+                            {{ total_requests }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        ⏳
+                    </div>
+
+                    <div>
+
+                        <span>Pending</span>
+
+                        <strong>
+                            {{ pending_requests }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        👨‍🏫
+                    </div>
+
+                    <div>
+
+                        <span>Active Mentorships</span>
+
+                        <strong>
+                            {{ active_mentorships }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 AVAILABLE MENTORS
+            ========================================== -->
+
+            <div class="engagement-section-header">
+
+                <div>
+
+                    <h2>Available Mentors</h2>
+
+                    <p>
+                        Choose a mentor and send a mentorship request.
+                    </p>
+
+                </div>
+
+                <div class="engagement-search">
+
+                    🔎
+
+                    <input
+                        type="text"
+                        id="mentorSearch"
+                        placeholder="Search mentors...">
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="mentor-grid"
+                id="mentorGrid">
+
+
+                {% if mentors %}
+
+                    {% for mentor in mentors %}
+
+                    <article
+                        class="mentor-card"
+                        data-name="{{ mentor.name|lower }}"
+                        data-email="{{ mentor.email|lower }}">
+
+
+                        <!-- PROFILE -->
+
+                        <div class="mentor-profile">
+
+                            {% if mentor.profile_image %}
+
+                                <img
+                                    src="{{ mentor.profile_image }}"
+                                    alt="Mentor">
+
+                            {% else %}
+
+                                <div class="mentor-avatar">
+                                    {{ mentor.name[:1]|upper }}
+                                </div>
+
+                            {% endif %}
+
+
+                            <div>
+
+                                <h3>
+                                    {{ mentor.name }}
+                                </h3>
+
+                                <span>
+                                    Mentor
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- EMAIL -->
+
+                        <div class="mentor-email">
+
+                            ✉️ {{ mentor.email }}
+
+                        </div>
+
+
+                        <!-- EXISTING REQUEST -->
+
+                        {% if mentor.mentorship_id %}
+
+                            <div class="mentor-request-status">
+
+                                {% if mentor.mentorship_status == 'REQUESTED' %}
+
+                                    <span class="status-pending">
+                                        ⏳ Request Pending
+                                    </span>
+
+                                {% elif mentor.mentorship_status == 'ACTIVE' %}
+
+                                    <span class="status-active">
+                                        ✓ Active Mentorship
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                        {% else %}
+
+                            <!-- REQUEST FORM -->
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_request_mentorship',
+                                    mentor_user_id=mentor.id
+                                ) }}"
+                                class="mentor-request-form">
+
+
+                                <input
+                                    type="hidden"
+                                    name="title"
+                                    value="Student Mentorship Request">
+
+
+                                <textarea
+                                    name="goals"
+                                    placeholder="What would you like guidance with? (optional)"
+                                    rows="3"></textarea>
+
+
+                                <button
+                                    type="submit"
+                                    class="engagement-primary-btn">
+
+                                    🤝 Request Mentorship
+
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+
+                    </article>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <div class="engagement-empty">
+
+                        <div class="empty-icon">
+                            👨‍🏫
+                        </div>
+
+                        <h3>
+                            No mentors available
+                        </h3>
+
+                        <p>
+                            Mentor profiles will appear here
+                            when they are available.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+
+            <!-- =========================================
+                 MY MENTORSHIPS
+            ========================================== -->
+
+            <div class="engagement-section-header my-mentorship-header">
+
+                <div>
+
+                    <h2>My Mentorships</h2>
+
+                    <p>
+                        Track your mentorship requests and active mentorships.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="my-mentorship-list">
+
+
+                {% if my_mentorships %}
+
+                    {% for mentorship in my_mentorships %}
+
+                    <div class="my-mentorship-card">
+
+
+                        <div class="my-mentorship-main">
+
+                            <div class="my-mentor-avatar">
+
+                                {{ mentorship.mentor_name[:1]|upper }}
+
+                            </div>
+
+
+                            <div>
+
+                                <h3>
+                                    {{ mentorship.title }}
+                                </h3>
+
+                                <p>
+                                    Mentor:
+                                    <strong>
+                                        {{ mentorship.mentor_name }}
+                                    </strong>
+                                </p>
+
+                                {% if mentorship.goals %}
+
+                                <p class="mentorship-goals">
+
+                                    {{ mentorship.goals }}
+
+                                </p>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="my-mentorship-right">
+
+                            <span
+                                class="mentorship-status
+                                status-{{ mentorship.status|lower }}">
+
+                                {{ mentorship.status }}
+
+                            </span>
+
+
+                            {% if mentorship.start_date %}
+
+                            <small>
+
+                                Start:
+                                {{ mentorship.start_date }}
+
+                            </small>
+
+                            {% endif %}
+
+                        </div>
+
+
+                    </div>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <div class="engagement-empty compact">
+
+                        <div class="empty-icon">
+                            🤝
+                        </div>
+
+                        <h3>
+                            No mentorship requests yet
+                        </h3>
+
+                        <p>
+                            Choose a mentor above to start your mentorship journey.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+
+            <!-- SEARCH EMPTY -->
+
+            <div
+                id="mentorSearchEmpty"
+                class="engagement-empty"
+                style="display:none;">
+
+                <div class="empty-icon">
+                    🔍
+                </div>
+
+                <h3>
+                    No matching mentors
+                </h3>
+
+                <p>
+                    Try another mentor name or email.
+                </p>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}">
+</script>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/mentorship.js'
+    ) }}">
+</script>
+
+
+</body>
+
+</html>

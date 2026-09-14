@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Innovation Challenges | Student Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_engagement.css'
+        ) }}">
+
+</head>
+
+
+<body>
+
+<div class="student-layout">
+
+    {% include 'student/components/student_sidebar.html' %}
+
+
+    <main class="student-main">
+
+        {% include 'student/components/student_topbar.html' %}
+
+
+        <section class="innovation-page">
+
+
+            <!-- =========================================
+                 HEADER
+            ========================================== -->
+
+            <div class="engagement-header">
+
+                <div>
+
+                    <div class="engagement-eyebrow">
+                        STUDENT ENGAGEMENT
+                    </div>
+
+                    <h1>
+                        Innovation Challenges
+                    </h1>
+
+                    <p>
+                        Participate in innovation challenges,
+                        showcase your ideas and compete with others.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 STATS
+            ========================================== -->
+
+            <div class="innovation-stats">
+
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        💡
+                    </div>
+
+                    <div>
+
+                        <span>My Participations</span>
+
+                        <strong>
+                            {{ total_participations }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        📤
+                    </div>
+
+                    <div>
+
+                        <span>Submitted</span>
+
+                        <strong>
+                            {{ submitted_count }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        🏆
+                    </div>
+
+                    <div>
+
+                        <span>Wins</span>
+
+                        <strong>
+                            {{ winner_count }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =========================================
+                 SECTION HEADER
+            ========================================== -->
+
+            <div class="engagement-section-header">
+
+                <div>
+
+                    <h2>
+                        Innovation Challenges
+                    </h2>
+
+                    <p>
+                        Explore challenges and participate in competitions.
+                    </p>
+
+                </div>
+
+
+                <div class="engagement-search">
+
+                    🔎
+
+                    <input
+                        type="text"
+                        id="challengeSearch"
+                        placeholder="Search challenges...">
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 CHALLENGE GRID
+            ========================================== -->
+
+            <div
+                class="innovation-grid"
+                id="challengeGrid">
+
+
+                {% if challenges %}
+
+
+                    {% for challenge in challenges %}
+
+                    <article
+                        class="innovation-card"
+                        data-title="{{ challenge.title|lower }}"
+                        data-description="{{ (challenge.description or '')|lower }}">
+
+
+                        <!-- STATUS -->
+
+                        <div class="innovation-card-top">
+
+                            <span class="innovation-status">
+
+                                {{ challenge.status }}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- TITLE -->
+
+                        <h3>
+                            {{ challenge.title }}
+                        </h3>
+
+
+                        <!-- DESCRIPTION -->
+
+                        {% if challenge.description %}
+
+                        <p class="innovation-description">
+
+                            {{ challenge.description }}
+
+                        </p>
+
+                        {% endif %}
+
+
+                        <!-- ORGANIZER -->
+
+                        {% if challenge.organizer_name %}
+
+                        <div class="innovation-organizer">
+
+                            <span>
+                                Organizer
+                            </span>
+
+                            <strong>
+                                {{ challenge.organizer_name }}
+                            </strong>
+
+                        </div>
+
+                        {% endif %}
+
+
+                        <!-- DATES -->
+
+                        <div class="innovation-info">
+
+
+                            {% if challenge.registration_deadline %}
+
+                            <div>
+
+                                <span>
+                                    Registration Deadline
+                                </span>
+
+                                <strong>
+                                    {{ challenge.registration_deadline }}
+                                </strong>
+
+                            </div>
+
+                            {% endif %}
+
+
+                            {% if challenge.start_date %}
+
+                            <div>
+
+                                <span>
+                                    Start
+                                </span>
+
+                                <strong>
+                                    {{ challenge.start_date }}
+                                </strong>
+
+                            </div>
+
+                            {% endif %}
+
+
+                            {% if challenge.end_date %}
+
+                            <div>
+
+                                <span>
+                                    End
+                                </span>
+
+                                <strong>
+                                    {{ challenge.end_date }}
+                                </strong>
+
+                            </div>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                        <!-- =================================
+                             NOT REGISTERED
+                        ================================== -->
+
+                        {% if not challenge.participant_id %}
+
+
+                            {% if challenge.status == 'OPEN' %}
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_register_innovation_challenge',
+                                    challenge_id=challenge.id
+                                ) }}"
+                                class="challenge-register-form">
+
+
+                                <input
+                                    type="text"
+                                    name="team_name"
+                                    placeholder="Team name (optional)"
+                                    maxlength="200">
+
+
+                                <button
+                                    type="submit"
+                                    class="engagement-primary-btn">
+
+                                    💡 Register for Challenge
+
+                                </button>
+
+
+                            </form>
+
+                            {% else %}
+
+                            <div class="challenge-status-box">
+
+                                Registration closed
+
+                            </div>
+
+                            {% endif %}
+
+
+                        {% else %}
+
+
+                            <!-- =================================
+                                 REGISTERED
+                            ================================== -->
+
+                            {% if challenge.participation_status == 'REGISTERED' %}
+
+
+                            <div class="challenge-registered-box">
+
+                                <span>
+                                    ✓ Registered
+                                </span>
+
+                                {% if challenge.team_name %}
+
+                                <small>
+                                    Team:
+                                    {{ challenge.team_name }}
+                                </small>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_submit_innovation_challenge',
+                                    challenge_id=challenge.id
+                                ) }}"
+                                class="challenge-submit-form">
+
+
+                                <input
+                                    type="url"
+                                    name="submission_url"
+                                    placeholder="Submission URL"
+                                    required>
+
+
+                                <button
+                                    type="submit"
+                                    class="engagement-primary-btn">
+
+                                    📤 Submit Solution
+
+                                </button>
+
+
+                            </form>
+
+
+                            <!-- =================================
+                                 SUBMITTED
+                            ================================== -->
+
+                            {% elif challenge.participation_status == 'SUBMITTED' %}
+
+
+                            <div class="challenge-status-box submitted">
+
+                                📤 Solution Submitted
+
+                                {% if challenge.submission_url %}
+
+                                <a
+                                    href="{{ challenge.submission_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+
+                                    View Submission
+
+                                </a>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- =================================
+                                 SHORTLISTED
+                            ================================== -->
+
+                            {% elif challenge.participation_status == 'SHORTLISTED' %}
+
+
+                            <div class="challenge-status-box shortlisted">
+
+                                ⭐ Shortlisted
+
+                                {% if challenge.submission_url %}
+
+                                <a
+                                    href="{{ challenge.submission_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+
+                                    View Submission
+
+                                </a>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- =================================
+                                 WINNER
+                            ================================== -->
+
+                            {% elif challenge.participation_status == 'WINNER' %}
+
+
+                            <div class="challenge-status-box winner">
+
+                                🏆 Winner
+
+                                <small>
+                                    Congratulations!
+                                </small>
+
+                                {% if challenge.submission_url %}
+
+                                <a
+                                    href="{{ challenge.submission_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+
+                                    View Submission
+
+                                </a>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- =================================
+                                 OTHER STATUS
+                            ================================== -->
+
+                            {% else %}
+
+                            <div class="challenge-status-box">
+
+                                {{ challenge.participation_status }}
+
+                            </div>
+
+                            {% endif %}
+
+
+                        {% endif %}
+
+
+                    </article>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+
+                    <div class="engagement-empty">
+
+                        <div class="empty-icon">
+                            💡
+                        </div>
+
+                        <h3>
+                            No innovation challenges available
+                        </h3>
+
+                        <p>
+                            New challenges will appear here when published.
+                        </p>
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+            <!-- SEARCH EMPTY -->
+
+            <div
+                id="challengeSearchEmpty"
+                class="engagement-empty"
+                style="display:none;">
+
+                <div class="empty-icon">
+                    🔍
+                </div>
+
+                <h3>
+                    No matching challenges
+                </h3>
+
+                <p>
+                    Try another challenge title or description.
+                </p>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}">
+</script>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/innovation_challenges.js'
+    ) }}">
+</script>
+
+
+</body>
+
+</html>

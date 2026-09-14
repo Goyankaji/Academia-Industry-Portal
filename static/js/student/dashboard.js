@@ -1,137 +1,92 @@
 /* =========================================================
-   STUDENT DASHBOARD JS
+   STUDENT DASHBOARD JAVASCRIPT
    ========================================================= */
-
 
 document.addEventListener("DOMContentLoaded", function () {
 
-
     /* =====================================================
-       PROFILE COMPLETION
+       PROFILE COMPLETION PROGRESS
        ===================================================== */
 
-    const progressBar =
-        document.querySelector(".completion-fill");
-
+    const progressBar = document.querySelector(
+        ".profile-progress-bar"
+    );
 
     if (progressBar) {
 
-        let progress =
-            parseInt(
-                progressBar.dataset.progress,
-                10
-            );
+        let progress = parseInt(
+            progressBar.getAttribute("data-progress") || "0",
+            10
+        );
 
+        /* Keep value safely between 0 and 100 */
+        progress = Math.max(0, Math.min(100, progress));
 
-        /*
-         * Safety check.
-         * Progress should always remain between 0 and 100.
-         */
-
-        if (isNaN(progress)) {
-
-            progress = 0;
-
-        }
-
-
-        progress =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    progress
-                )
-            );
-
-
-        /*
-         * Start from 0 so that the progress bar
-         * animates when the dashboard loads.
-         */
-
-        progressBar.style.width = "0%";
-
-
+        /* Small delay for smooth visual animation */
         setTimeout(function () {
-
-            progressBar.style.width =
-                progress + "%";
-
+            progressBar.style.width = progress + "%";
         }, 150);
-
     }
 
 
     /* =====================================================
-       STAT NUMBER ANIMATION
+       DASHBOARD ITEM HOVER ACCESSIBILITY
        ===================================================== */
 
-    const statNumbers =
-        document.querySelectorAll(
-            ".stat-number"
-        );
+    const dashboardItems = document.querySelectorAll(
+        ".dashboard-application-item, " +
+        ".dashboard-opportunity-item"
+    );
 
+    dashboardItems.forEach(function (item) {
 
-    statNumbers.forEach(function (element) {
+        item.addEventListener("mouseenter", function () {
+            item.classList.add("is-hovered");
+        });
 
-        const target =
-            parseInt(
-                element.textContent.trim(),
-                10
-            );
-
-
-        if (isNaN(target)) {
-
-            return;
-
-        }
-
-
-        /*
-         * Start from zero.
-         */
-
-        element.textContent = "0";
-
-
-        let current = 0;
-
-
-        const duration = 500;
-
-        const steps = 25;
-
-        const increment =
-            target / steps;
-
-
-        const interval =
-            duration / steps;
-
-
-        const counter =
-            setInterval(function () {
-
-                current += increment;
-
-
-                if (current >= target) {
-
-                    current = target;
-
-                    clearInterval(counter);
-
-                }
-
-
-                element.textContent =
-                    Math.round(current);
-
-            }, interval);
+        item.addEventListener("mouseleave", function () {
+            item.classList.remove("is-hovered");
+        });
 
     });
 
+
+    /* =====================================================
+       DASHBOARD CARD KEYBOARD ACCESSIBILITY
+       ===================================================== */
+
+    const journeyLinks = document.querySelectorAll(
+        ".journey-item > a"
+    );
+
+    journeyLinks.forEach(function (link) {
+
+        link.addEventListener("keydown", function (event) {
+
+            if (event.key === "Enter" || event.key === " ") {
+
+                if (
+                    link.getAttribute("href") === "#" &&
+                    link.hasAttribute("data-coming-soon")
+                ) {
+                    event.preventDefault();
+
+                    link.click();
+                }
+
+            }
+
+        });
+
+    });
+
+
+    /* =====================================================
+       DASHBOARD INITIALIZATION
+       ===================================================== */
+
+    document.body.classList.add(
+        "student-dashboard-ready"
+    );
 
 });

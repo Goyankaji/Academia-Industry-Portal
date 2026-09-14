@@ -1,0 +1,195 @@
+<!-- =========================================================
+     STUDENT APPLICATION CARD
+     Reusable Component
+========================================================= -->
+
+<article class="student-application-card">
+
+    <!-- Application Header -->
+    <div class="application-card-header">
+
+        <div class="application-card-icon">
+            📄
+        </div>
+
+        <div class="application-card-heading">
+
+            <h3 class="application-card-title">
+
+                {% if application.opportunity_title is defined and application.opportunity_title %}
+                    {{ application.opportunity_title }}
+
+                {% elif application.title is defined and application.title %}
+                    {{ application.title }}
+
+                {% else %}
+                    Application
+                {% endif %}
+
+            </h3>
+
+
+            <p class="application-card-company">
+
+                {% if application.company_name is defined and application.company_name %}
+                    {{ application.company_name }}
+
+                {% elif application.industry_name is defined and application.industry_name %}
+                    {{ application.industry_name }}
+
+                {% elif application.company is defined and application.company %}
+                    {{ application.company }}
+
+                {% else %}
+                    Company
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Application Information -->
+    <div class="application-card-details">
+
+
+        <!-- Applied Date -->
+        {% if application.applied_at is defined and application.applied_at %}
+
+            <div class="application-detail-item">
+
+                <span class="application-detail-label">
+                    Applied
+                </span>
+
+                <span class="application-detail-value">
+                    {{ application.applied_at }}
+                </span>
+
+            </div>
+
+        {% elif application.application_date is defined and application.application_date %}
+
+            <div class="application-detail-item">
+
+                <span class="application-detail-label">
+                    Applied
+                </span>
+
+                <span class="application-detail-value">
+                    {{ application.application_date }}
+                </span>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- Opportunity Type -->
+        {% if application.opportunity_type is defined and application.opportunity_type %}
+
+            <div class="application-detail-item">
+
+                <span class="application-detail-label">
+                    Type
+                </span>
+
+                <span class="application-detail-value">
+                    {{ application.opportunity_type }}
+                </span>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Status -->
+    <div class="application-card-status-row">
+
+        <span class="application-status-label">
+            Status
+        </span>
+
+
+        {% set application_status =
+            application.status|default('PENDING')|upper %}
+
+
+        {% if application_status in ['SELECTED', 'ACCEPTED', 'APPROVED'] %}
+
+            <span class="application-status-badge status-success">
+                ✓ {{ application_status|title }}
+            </span>
+
+
+        {% elif application_status in ['SHORTLISTED', 'UNDER_REVIEW', 'INTERVIEW'] %}
+
+            <span class="application-status-badge status-warning">
+                ◉ {{ application_status|replace('_', ' ')|title }}
+            </span>
+
+
+        {% elif application_status in ['REJECTED', 'DECLINED', 'CANCELLED'] %}
+
+            <span class="application-status-badge status-danger">
+                ✕ {{ application_status|replace('_', ' ')|title }}
+            </span>
+
+
+        {% elif application_status in ['WITHDRAWN'] %}
+
+            <span class="application-status-badge status-neutral">
+                ○ Withdrawn
+            </span>
+
+
+        {% else %}
+
+            <span class="application-status-badge status-pending">
+                ● {{ application_status|replace('_', ' ')|title }}
+            </span>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="application-card-footer">
+
+
+        {% if application.id is defined and application.id %}
+
+            <a
+                href="{{ url_for(
+                    'student_application_detail',
+                    application_id=application.id
+                ) }}"
+                class="application-card-action">
+
+                View Application
+                <span>→</span>
+
+            </a>
+
+        {% else %}
+
+            <a
+                href="#"
+                class="application-card-action disabled"
+                aria-disabled="true">
+
+                View Application
+                <span>→</span>
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</article>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Learning Recommendations</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_skills.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <main class="student-content">
+
+
+            <!-- HEADER -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>
+                        Learning Recommendations
+                    </h1>
+
+                    <p>
+                        Personalized learning resources
+                        based on your skill gaps.
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <a
+                        href="{{ url_for(
+                            'student_skill_gap'
+                        ) }}"
+                        class="skill-btn secondary"
+                    >
+                        📉 View Skill Gaps
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- STATS -->
+
+            <section class="learning-stats">
+
+                <div class="learning-stat-card">
+
+                    <div class="learning-stat-icon">
+                        📚
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Recommendations
+                        </span>
+
+                        <strong>
+                            {{ total_recommendations }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="learning-stat-card">
+
+                    <div class="learning-stat-icon">
+                        🎯
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Skills Covered
+                        </span>
+
+                        <strong>
+                            {{ total_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="learning-stat-card">
+
+                    <div class="learning-stat-icon">
+                        🔴
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Critical Skills
+                        </span>
+
+                        <strong>
+                            {{ critical_priority_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="learning-stat-card">
+
+                    <div class="learning-stat-icon">
+                        🟠
+                    </div>
+
+                    <div>
+
+                        <span>
+                            High Priority
+                        </span>
+
+                        <strong>
+                            {{ high_priority_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            {% if recommendations %}
+
+
+                <!-- RECOMMENDATIONS -->
+
+                <section class="learning-section">
+
+                    <div class="section-heading">
+
+                        <h2>
+                            Recommended For You
+                        </h2>
+
+                        <p>
+                            These learning resources can
+                            help you improve your skill gaps.
+                        </p>
+
+                    </div>
+
+
+                    <div class="learning-skill-list">
+
+
+                        {% for recommendation
+                              in recommendations %}
+
+
+                            <div
+                                class="learning-skill-group"
+                            >
+
+                                <!-- SKILL HEADER -->
+
+                                <div
+                                    class="learning-skill-header"
+                                >
+
+                                    <div>
+
+                                        <span
+                                            class="learning-category"
+                                        >
+                                            {{
+                                                recommendation
+                                                .skill_category
+                                                or "Skill"
+                                            }}
+                                        </span>
+
+                                        <h3>
+                                            {{
+                                                recommendation
+                                                .skill_name
+                                            }}
+                                        </h3>
+
+                                    </div>
+
+
+                                    <div
+                                        class="learning-gap-info"
+                                    >
+
+                                        <span>
+                                            Gap
+                                        </span>
+
+                                        <strong>
+                                            {{
+                                                recommendation
+                                                .gap_score
+                                                or 0
+                                            }}%
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- LEVEL INFO -->
+
+                                <div
+                                    class="learning-level-row"
+                                >
+
+                                    <div>
+
+                                        <span>
+                                            Current
+                                        </span>
+
+                                        <strong>
+                                            {{
+                                                recommendation
+                                                .current_level
+                                                or "Not Assessed"
+                                            }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+                                        →
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Required
+                                        </span>
+
+                                        <strong>
+                                            {{
+                                                recommendation
+                                                .required_level
+                                                or "Not Defined"
+                                            }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <span
+                                        class="learning-priority
+                                        {{
+                                            recommendation
+                                            .priority
+                                            | lower
+                                        }}"
+                                    >
+                                        {{
+                                            recommendation
+                                            .priority
+                                        }}
+                                    </span>
+
+                                </div>
+
+
+                                <!-- PROGRAMS -->
+
+                                <div
+                                    class="learning-program-grid"
+                                >
+
+                                    {% for program
+                                          in recommendation.programs %}
+
+
+                                        <article
+                                            class="learning-program-card"
+                                        >
+
+                                            <div
+                                                class="learning-program-top"
+                                            >
+
+                                                <span
+                                                    class="program-type"
+                                                >
+                                                    {{
+                                                        program
+                                                        .learning_type
+                                                    }}
+                                                </span>
+
+                                                <span
+                                                    class="relevance-score"
+                                                >
+                                                    {{
+                                                        program
+                                                        .relevance_score
+                                                    }}%
+                                                    Match
+                                                </span>
+
+                                            </div>
+
+
+                                            <h4>
+                                                {{
+                                                    program.title
+                                                }}
+                                            </h4>
+
+
+                                            {% if program.provider %}
+
+                                                <p
+                                                    class="program-provider"
+                                                >
+                                                    By
+                                                    {{
+                                                        program
+                                                        .provider
+                                                    }}
+                                                </p>
+
+                                            {% endif %}
+
+
+                                            {% if program.description %}
+
+                                                <p
+                                                    class="program-description"
+                                                >
+                                                    {{
+                                                        program
+                                                        .description
+                                                    }}
+                                                </p>
+
+                                            {% endif %}
+
+
+                                            <div
+                                                class="program-meta"
+                                            >
+
+                                                {% if program.level %}
+
+                                                    <span>
+                                                        📊
+                                                        {{
+                                                            program.level
+                                                        }}
+                                                    </span>
+
+                                                {% endif %}
+
+
+                                                {% if program.duration %}
+
+                                                    <span>
+                                                        ⏱
+                                                        {{
+                                                            program.duration
+                                                        }}
+                                                    </span>
+
+                                                {% endif %}
+
+                                            </div>
+
+
+                                            {% if program.url %}
+
+                                                <a
+                                                    href="{{ program.url }}"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="learning-btn"
+                                                >
+                                                    Start Learning ↗
+                                                </a>
+
+                                            {% else %}
+
+                                                <button
+                                                    type="button"
+                                                    class="learning-btn disabled"
+                                                    disabled
+                                                >
+                                                    Link Not Available
+                                                </button>
+
+                                            {% endif %}
+
+                                        </article>
+
+
+                                    {% endfor %}
+
+                                </div>
+
+                            </div>
+
+
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+
+            {% else %}
+
+
+                <!-- EMPTY STATE -->
+
+                <section
+                    class="learning-empty"
+                >
+
+                    <div class="learning-empty-icon">
+                        📚
+                    </div>
+
+                    <h2>
+                        No Learning Recommendations Yet
+                    </h2>
+
+                    <p>
+                        Learning recommendations will
+                        appear here when matching learning
+                        programs are available for your
+                        skill gaps.
+                    </p>
+
+
+                    <div
+                        class="learning-flow"
+                    >
+
+                        <div>
+                            🎯
+                            <span>
+                                Skill Gap
+                            </span>
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div>
+                            📚
+                            <span>
+                                Learning Program
+                            </span>
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div>
+                            🚀
+                            <span>
+                                Improve Skill
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{{ url_for(
+                            'student_skill_gap'
+                        ) }}"
+                        class="skill-btn primary"
+                    >
+                        View My Skill Gaps
+                    </a>
+
+                </section>
+
+
+            {% endif %}
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/learning.js'
+    ) }}"
+></script>
+
+</body>
+
+</html>

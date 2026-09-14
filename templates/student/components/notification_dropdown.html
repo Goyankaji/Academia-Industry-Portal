@@ -1,0 +1,172 @@
+<!-- =========================================================
+     STUDENT NOTIFICATION DROPDOWN
+     SIH Academia–Industry Collaboration Portal
+========================================================= -->
+
+<div
+    class="notification-dropdown"
+    id="notificationDropdown"
+    role="dialog"
+    aria-label="Notifications"
+    aria-hidden="true">
+
+
+    <!-- Header -->
+    <div class="notification-dropdown-header">
+
+        <div>
+            <h3>Notifications</h3>
+
+            <span class="notification-count-text">
+                {% if unread_notifications is defined and unread_notifications|int > 0 %}
+                    {{ unread_notifications }} unread
+                {% else %}
+                    You're all caught up
+                {% endif %}
+            </span>
+        </div>
+
+
+        {% if unread_notifications is defined and unread_notifications|int > 0 %}
+
+            <button
+                type="button"
+                class="mark-all-read-btn"
+                id="markAllNotificationsRead">
+
+                Mark all as read
+
+            </button>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Notification List -->
+    <div class="notification-list" id="notificationList">
+
+
+        {% if recent_notifications is defined and recent_notifications %}
+
+            {% for notification in recent_notifications %}
+
+                <div
+                    class="notification-item {% if notification.is_read is defined and not notification.is_read %}unread{% endif %}"
+                    data-notification-id="{{ notification.id if notification.id is defined else '' }}">
+
+
+                    <!-- Notification Icon -->
+                    <div class="notification-item-icon">
+
+                        {% set notification_type = notification.type|default('GENERAL')|upper %}
+
+                        {% if notification_type == 'APPLICATION' %}
+                            📄
+                        {% elif notification_type == 'OPPORTUNITY' %}
+                            💼
+                        {% elif notification_type == 'INTERNSHIP' %}
+                            🎓
+                        {% elif notification_type == 'ASSESSMENT' %}
+                            🧠
+                        {% elif notification_type == 'LEARNING' %}
+                            📚
+                        {% elif notification_type == 'WORKSHOP' %}
+                            🧑‍🏫
+                        {% elif notification_type == 'MENTOR' %}
+                            👨‍🏫
+                        {% else %}
+                            🔔
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Notification Content -->
+                    <div class="notification-item-content">
+
+                        <div class="notification-item-title">
+
+                            {{ notification.title
+                               if notification.title is defined
+                               else 'New Notification' }}
+
+                        </div>
+
+
+                        <div class="notification-item-message">
+
+                            {{ notification.message
+                               if notification.message is defined
+                               else '' }}
+
+                        </div>
+
+
+                        <div class="notification-item-time">
+
+                            {% if notification.created_at is defined %}
+                                {{ notification.created_at }}
+                            {% else %}
+                                Recently
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Unread Indicator -->
+                    {% if notification.is_read is defined and not notification.is_read %}
+
+                        <span
+                            class="notification-unread-dot"
+                            aria-label="Unread notification">
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <!-- Empty State -->
+            <div class="notification-empty">
+
+                <div class="notification-empty-icon">
+                    🔔
+                </div>
+
+                <h4>No notifications</h4>
+
+                <p>
+                    You're all caught up. New updates will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="notification-dropdown-footer">
+
+        <a
+            href="#"
+            class="view-all-notifications"
+            data-page="notifications"
+            data-coming-soon="true">
+
+            View all notifications
+            <span>→</span>
+
+        </a>
+
+    </div>
+
+</div>

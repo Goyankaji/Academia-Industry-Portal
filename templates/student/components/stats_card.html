@@ -1,0 +1,74 @@
+<!-- =========================================================
+     STUDENT STATS CARD
+     Reusable Dashboard Component
+========================================================= -->
+
+<div class="student-stat-card
+            {% if card_variant is defined and card_variant %}
+                stat-{{ card_variant }}
+            {% endif %}">
+
+    <!-- Icon -->
+    <div class="student-stat-icon">
+
+        {% if card_icon is defined and card_icon %}
+            {{ card_icon }}
+        {% else %}
+            📊
+        {% endif %}
+
+    </div>
+
+
+    <!-- Content -->
+    <div class="student-stat-content">
+
+        <div class="student-stat-title">
+
+            {% if card_title is defined and card_title %}
+                {{ card_title }}
+            {% else %}
+                Statistic
+            {% endif %}
+
+        </div>
+
+
+        <div class="student-stat-value">
+
+            {% if card_value is defined %}
+                {{ card_value }}
+            {% else %}
+                0
+            {% endif %}
+
+        </div>
+
+
+        {% if card_description is defined and card_description %}
+
+            <div class="student-stat-description">
+                {{ card_description }}
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Optional Link -->
+    {% if card_link is defined and card_link %}
+
+        <a
+            href="{{ card_link }}"
+            class="student-stat-link"
+            aria-label="View {{ card_title|default('details') }}">
+
+            <span>View</span>
+            <span>→</span>
+
+        </a>
+
+    {% endif %}
+
+</div>

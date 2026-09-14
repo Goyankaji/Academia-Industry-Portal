@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Internship Detail | Student Portal
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_internship.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="student-page">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% set active_page = "internships" %}
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <div class="internship-page">
+
+
+            <!-- =================================================
+                 BACK BUTTON
+            ================================================== -->
+
+            <div style="margin-bottom: 18px;">
+
+                <a
+                    href="{{ url_for('student_internships') }}"
+                    class="internship-secondary-btn"
+                >
+                    ← Back to My Internships
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <div class="internship-page-header">
+
+                <div>
+
+                    <div class="page-breadcrumb">
+                        Student Portal /
+                        Internship /
+                        {{ internship.opportunity_title }}
+                    </div>
+
+                    <h1>
+                        {{ internship.opportunity_title }}
+                    </h1>
+
+                    <p>
+                        {{ internship.industry_name }}
+                    </p>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div>
+
+                    {% if internship.status == "OFFERED" %}
+
+                        <span class="internship-status offered">
+                            Offered
+                        </span>
+
+                    {% elif internship.status == "ACCEPTED" %}
+
+                        <span class="internship-status accepted">
+                            Accepted
+                        </span>
+
+                    {% elif internship.status == "IN_PROGRESS" %}
+
+                        <span class="internship-status in-progress">
+                            In Progress
+                        </span>
+
+                    {% elif internship.status == "COMPLETED" %}
+
+                        <span class="internship-status completed">
+                            Completed
+                        </span>
+
+                    {% elif internship.status == "TERMINATED" %}
+
+                        <span class="internship-status terminated">
+                            Terminated
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 QUICK ACTIONS
+            ================================================== -->
+
+            <section
+                class="internship-card"
+                style="margin-bottom:20px;"
+            >
+
+                <h2>
+                    Internship Actions
+                </h2>
+
+                <div
+                    style="
+                        display:flex;
+                        flex-wrap:wrap;
+                        gap:10px;
+                        margin-top:16px;
+                    "
+                >
+
+                    <!-- PROGRESS -->
+
+                    <a
+                        href="{{ url_for(
+                            'student_internship_progress',
+                            internship_id=internship.id
+                        ) }}"
+                        class="internship-primary-btn"
+                    >
+                        📈 View Progress
+                    </a>
+
+
+                    <!-- MENTOR FEEDBACK -->
+
+                    <a
+                        href="{{ url_for(
+                            'student_mentor_feedback',
+                            internship_id=internship.id
+                        ) }}"
+                        class="internship-secondary-btn"
+                    >
+                        💬 Mentor Feedback
+                    </a>
+
+
+                    <!-- COMPLETION -->
+
+                    <a
+                        href="{{ url_for(
+                            'student_internship_completion',
+                            internship_id=internship.id
+                        ) }}"
+                        class="internship-secondary-btn"
+                    >
+                        ✅ Completion
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 MAIN GRID
+            ================================================== -->
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:minmax(0, 2fr) minmax(280px, 1fr);
+                    gap:20px;
+                "
+            >
+
+
+                <!-- =================================================
+                     LEFT COLUMN
+                ================================================== -->
+
+                <div>
+
+
+                    <!-- =================================================
+                         INTERNSHIP OVERVIEW
+                    ================================================== -->
+
+                    <section class="internship-card">
+
+                        <h2>
+                            Internship Overview
+                        </h2>
+
+                        <p
+                            style="
+                                color:#64748b;
+                                font-size:12px;
+                                line-height:1.7;
+                                margin-top:10px;
+                            "
+                        >
+                            You are currently viewing your internship
+                            details, progress, mentor information,
+                            feedback and completion record.
+                        </p>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         PROGRESS SUMMARY
+                    ================================================== -->
+
+                    <section
+                        class="internship-card"
+                        style="margin-top:20px;"
+                    >
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:center;
+                                margin-bottom:15px;
+                            "
+                        >
+
+                            <h2>
+                                Internship Progress
+                            </h2>
+
+                            <strong
+                                style="
+                                    color:#2563eb;
+                                    font-size:18px;
+                                "
+                            >
+                                {{ internship.progress_percentage or 0 }}%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="internship-progress-track">
+
+                            <div
+                                class="internship-progress-fill"
+                                data-progress="{{ internship.progress_percentage or 0 }}"
+                            ></div>
+
+                        </div>
+
+
+                        {% if progress_updates %}
+
+                            <div style="margin-top:22px;">
+
+                                {% for item in progress_updates %}
+
+                                    <div
+                                        style="
+                                            padding:14px 0;
+                                            border-bottom:1px solid #f1f5f9;
+                                        "
+                                    >
+
+                                        <div
+                                            style="
+                                                display:flex;
+                                                justify-content:space-between;
+                                                gap:10px;
+                                            "
+                                        >
+
+                                            <strong
+                                                style="
+                                                    color:#334155;
+                                                    font-size:12px;
+                                                "
+                                            >
+                                                {{ item.title }}
+                                            </strong>
+
+                                            <span
+                                                style="
+                                                    color:#94a3b8;
+                                                    font-size:10px;
+                                                "
+                                            >
+
+                                                {% if item.progress_date %}
+                                                    {{ item.progress_date.strftime('%d %b %Y') }}
+                                                {% endif %}
+
+                                            </span>
+
+                                        </div>
+
+
+                                        {% if item.description %}
+
+                                            <p
+                                                style="
+                                                    color:#64748b;
+                                                    font-size:11px;
+                                                    line-height:1.6;
+                                                    margin:6px 0;
+                                                "
+                                            >
+                                                {{ item.description }}
+                                            </p>
+
+                                        {% endif %}
+
+
+                                        <span
+                                            style="
+                                                color:#2563eb;
+                                                font-size:10px;
+                                                font-weight:600;
+                                            "
+                                        >
+                                            {{ item.progress_percentage or 0 }}%
+                                            ·
+                                            {{ item.status }}
+                                        </span>
+
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% else %}
+
+                            <p
+                                style="
+                                    color:#94a3b8;
+                                    font-size:11px;
+                                    margin-top:18px;
+                                "
+                            >
+                                No progress updates available yet.
+                            </p>
+
+                        {% endif %}
+
+
+                        <div style="margin-top:18px;">
+
+                            <a
+                                href="{{ url_for(
+                                    'student_internship_progress',
+                                    internship_id=internship.id
+                                ) }}"
+                                class="internship-secondary-btn"
+                            >
+                                Manage Progress →
+                            </a>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         MENTOR
+                    ================================================== -->
+
+                    <section
+                        class="internship-card"
+                        style="margin-top:20px;"
+                    >
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:center;
+                                gap:15px;
+                            "
+                        >
+
+                            <h2>
+                                Internship Mentor
+                            </h2>
+
+                            <a
+                                href="{{ url_for(
+                                    'student_mentor_feedback',
+                                    internship_id=internship.id
+                                ) }}"
+                                class="internship-secondary-btn"
+                            >
+                                View Feedback →
+                            </a>
+
+                        </div>
+
+
+                        {% if mentor %}
+
+                            <div
+                                style="
+                                    display:flex;
+                                    gap:15px;
+                                    align-items:center;
+                                    margin-top:16px;
+                                "
+                            >
+
+                                <div
+                                    style="
+                                        width:48px;
+                                        height:48px;
+                                        border-radius:50%;
+                                        display:flex;
+                                        align-items:center;
+                                        justify-content:center;
+                                        background:#eff6ff;
+                                        color:#2563eb;
+                                        font-weight:700;
+                                    "
+                                >
+                                    {{ mentor.mentor_name[:1]|upper }}
+                                </div>
+
+
+                                <div>
+
+                                    <strong
+                                        style="
+                                            display:block;
+                                            color:#0f172a;
+                                            font-size:13px;
+                                        "
+                                    >
+                                        {{ mentor.mentor_name }}
+                                    </strong>
+
+
+                                    {% if mentor.designation %}
+
+                                        <span
+                                            style="
+                                                display:block;
+                                                color:#64748b;
+                                                font-size:11px;
+                                                margin-top:3px;
+                                            "
+                                        >
+                                            {{ mentor.designation }}
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if mentor.mentor_email %}
+
+                                        <span
+                                            style="
+                                                display:block;
+                                                color:#94a3b8;
+                                                font-size:10px;
+                                                margin-top:4px;
+                                            "
+                                        >
+                                            {{ mentor.mentor_email }}
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if mentor.mentor_phone %}
+
+                                        <span
+                                            style="
+                                                display:block;
+                                                color:#94a3b8;
+                                                font-size:10px;
+                                                margin-top:4px;
+                                            "
+                                        >
+                                            {{ mentor.mentor_phone }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        {% else %}
+
+                            <p
+                                style="
+                                    color:#94a3b8;
+                                    font-size:11px;
+                                    margin-top:12px;
+                                "
+                            >
+                                Mentor has not been assigned yet.
+                            </p>
+
+                        {% endif %}
+
+                    </section>
+
+
+                    <!-- =================================================
+                         FEEDBACK SUMMARY
+                    ================================================== -->
+
+                    <section
+                        class="internship-card"
+                        style="margin-top:20px;"
+                    >
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:center;
+                                gap:15px;
+                            "
+                        >
+
+                            <h2>
+                                Mentor / Industry Feedback
+                            </h2>
+
+                            <a
+                                href="{{ url_for(
+                                    'student_mentor_feedback',
+                                    internship_id=internship.id
+                                ) }}"
+                                class="internship-secondary-btn"
+                            >
+                                View All →
+                            </a>
+
+                        </div>
+
+
+                        {% if feedback_list %}
+
+                            {% for item in feedback_list[:2] %}
+
+                                <div
+                                    style="
+                                        margin-top:16px;
+                                        padding:15px;
+                                        background:#f8fafc;
+                                        border-radius:10px;
+                                        border:1px solid #eef2f7;
+                                    "
+                                >
+
+                                    <div
+                                        style="
+                                            display:flex;
+                                            justify-content:space-between;
+                                            gap:10px;
+                                        "
+                                    >
+
+                                        <strong
+                                            style="
+                                                color:#334155;
+                                                font-size:12px;
+                                            "
+                                        >
+                                            {{ item.submitted_by_name or "Industry Mentor" }}
+                                        </strong>
+
+
+                                        {% if item.rating is not none %}
+
+                                            <strong
+                                                style="
+                                                    color:#2563eb;
+                                                    font-size:11px;
+                                                "
+                                            >
+                                                ⭐ {{ item.rating }}/5
+                                            </strong>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    {% if item.feedback %}
+
+                                        <p
+                                            style="
+                                                color:#64748b;
+                                                font-size:11px;
+                                                line-height:1.7;
+                                                margin:10px 0;
+                                            "
+                                        >
+                                            {{ item.feedback }}
+                                        </p>
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <p
+                                style="
+                                    color:#94a3b8;
+                                    font-size:11px;
+                                    margin-top:12px;
+                                "
+                            >
+                                No feedback has been submitted yet.
+                            </p>
+
+                        {% endif %}
+
+                    </section>
+
+
+                    <!-- =================================================
+                         COMPLETION
+                    ================================================== -->
+
+                    <section
+                        class="internship-card"
+                        style="margin-top:20px;"
+                    >
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:center;
+                                gap:15px;
+                            "
+                        >
+
+                            <h2>
+                                Internship Completion
+                            </h2>
+
+                            <a
+                                href="{{ url_for(
+                                    'student_internship_completion',
+                                    internship_id=internship.id
+                                ) }}"
+                                class="internship-secondary-btn"
+                            >
+                                View Completion →
+                            </a>
+
+                        </div>
+
+
+                        {% if completion %}
+
+                            <div style="margin-top:15px;">
+
+                                <p
+                                    style="
+                                        color:#334155;
+                                        font-size:12px;
+                                    "
+                                >
+                                    <strong>
+                                        Completion Date:
+                                    </strong>
+
+                                    {{ completion.completion_date.strftime('%d %b %Y') }}
+
+                                </p>
+
+
+                                {% if completion.final_rating is not none %}
+
+                                    <p
+                                        style="
+                                            color:#334155;
+                                            font-size:12px;
+                                        "
+                                    >
+                                        <strong>
+                                            Final Rating:
+                                        </strong>
+
+                                        ⭐ {{ completion.final_rating }}/5
+
+                                    </p>
+
+                                {% endif %}
+
+
+                                {% if completion.certificate_url %}
+
+                                    <a
+                                        href="{{ completion.certificate_url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="internship-primary-btn"
+                                    >
+                                        View Certificate
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        {% else %}
+
+                            <p
+                                style="
+                                    color:#94a3b8;
+                                    font-size:11px;
+                                    margin-top:12px;
+                                "
+                            >
+                                Internship completion details will appear
+                                here after the internship is completed.
+                            </p>
+
+                        {% endif %}
+
+                    </section>
+
+
+                </div>
+
+
+                <!-- =================================================
+                     RIGHT COLUMN
+                ================================================== -->
+
+                <aside>
+
+
+                    <!-- =================================================
+                         STATUS / PROGRESS
+                    ================================================== -->
+
+                    <section class="internship-card">
+
+                        <h2>
+                            Internship Status
+                        </h2>
+
+
+                        <div
+                            style="
+                                margin-top:18px;
+                                display:grid;
+                                gap:15px;
+                            "
+                        >
+
+                            <div>
+
+                                <span class="detail-label">
+                                    Current Status
+                                </span>
+
+                                <strong>
+                                    {{ internship.status.replace('_', ' ') }}
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="detail-label">
+                                    Progress
+                                </span>
+
+                                <strong>
+                                    {{ internship.progress_percentage or 0 }}%
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="detail-label">
+                                    Start Date
+                                </span>
+
+                                <strong>
+
+                                    {% if internship.start_date %}
+                                        {{ internship.start_date.strftime('%d %b %Y') }}
+                                    {% else %}
+                                        Not started
+                                    {% endif %}
+
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="detail-label">
+                                    Expected End
+                                </span>
+
+                                <strong>
+
+                                    {% if internship.expected_end_date %}
+                                        {{ internship.expected_end_date.strftime('%d %b %Y') }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="detail-label">
+                                    Actual End
+                                </span>
+
+                                <strong>
+
+                                    {% if internship.actual_end_date %}
+                                        {{ internship.actual_end_date.strftime('%d %b %Y') }}
+                                    {% else %}
+                                        Not completed
+                                    {% endif %}
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         QUICK NAVIGATION
+                    ================================================== -->
+
+                    <section
+                        class="internship-card"
+                        style="margin-top:20px;"
+                    >
+
+                        <h2>
+                            Internship Journey
+                        </h2>
+
+                        <div
+                            style="
+                                display:grid;
+                                gap:10px;
+                                margin-top:16px;
+                            "
+                        >
+
+                            <a
+                                href="{{ url_for(
+                                    'student_internship_progress',
+                                    internship_id=internship.id
+                                ) }}"
+                                class="internship-secondary-btn"
+                            >
+                                📈 Progress
+                            </a>
+
+
+                            <a
+                                href="{{ url_for(
+                                    'student_mentor_feedback',
+                                    internship_id=internship.id
+                                ) }}"
+                                class="internship-secondary-btn"
+                            >
+                                💬 Mentor Feedback
+                            </a>
+
+
+                            <a
+                                href="{{ url_for(
+                                    'student_internship_completion',
+                                    internship_id=internship.id
+                                ) }}"
+                                class="internship-secondary-btn"
+                            >
+                                ✅ Completion
+                            </a>
+
+                        </div>
+
+                    </section>
+
+
+                </aside>
+
+
+            </div>
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}"
+></script>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/internships.js'
+    ) }}"
+></script>
+
+
+</body>
+
+</html>

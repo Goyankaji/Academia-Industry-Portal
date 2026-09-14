@@ -1,0 +1,979 @@
+/* =========================================================
+   STUDENT ENGAGEMENT
+   Workshops / Mentorship / Live Projects /
+   Innovation Challenges
+   ========================================================= */
+
+
+/* =========================================================
+   COMMON PAGE
+   ========================================================= */
+
+.mentorship-page {
+    padding: 52px 36px 40px;
+    max-width: 1500px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.engagement-header {
+    padding-top: 0;
+    margin-bottom: 30px;
+}
+
+.engagement-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    opacity: 0.65;
+    margin-bottom: 8px;
+}
+
+.engagement-header h1 {
+    margin: 0;
+    font-size: 32px;
+    line-height: 1.2;
+}
+
+.engagement-header p {
+    margin: 10px 0 0;
+    font-size: 15px;
+    line-height: 1.6;
+    opacity: 0.7;
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.mentorship-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 35px;
+}
+
+.engagement-stat-card {
+    min-height: 82px;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    padding: 18px 20px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.engagement-stat-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255,255,255,0.08);
+
+    font-size: 22px;
+}
+
+.engagement-stat-card span {
+    display: block;
+    font-size: 13px;
+    opacity: 0.65;
+}
+
+.engagement-stat-card strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 24px;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
+
+.engagement-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+.engagement-section-header h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.engagement-section-header p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    opacity: 0.65;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.engagement-search {
+    width: 320px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 0 13px;
+
+    box-sizing: border-box;
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+}
+
+.engagement-search input {
+    width: 100%;
+    flex: 1;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+    color: inherit;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   MENTOR GRID
+   ========================================================= */
+
+.mentor-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 20px;
+
+    margin-bottom: 42px;
+}
+
+.mentor-card {
+    padding: 22px;
+
+    box-sizing: border-box;
+
+    border-radius: 16px;
+
+    background: rgba(255,255,255,0.04);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.mentor-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 10px 28px rgba(0,0,0,0.16);
+}
+
+
+/* =========================================================
+   MENTOR PROFILE
+   ========================================================= */
+
+.mentor-profile {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    margin-bottom: 16px;
+}
+
+.mentor-profile img,
+.mentor-avatar {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+
+    border-radius: 50%;
+}
+
+.mentor-profile img {
+    object-fit: cover;
+}
+
+.mentor-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(37,99,235,0.18);
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.mentor-profile h3 {
+    margin: 0;
+
+    font-size: 18px;
+}
+
+.mentor-profile span {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    opacity: 0.6;
+}
+
+
+/* =========================================================
+   EMAIL
+   ========================================================= */
+
+.mentor-email {
+    padding: 10px 0;
+
+    font-size: 13px;
+
+    opacity: 0.7;
+
+    border-top:
+        1px solid rgba(255,255,255,0.07);
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.07);
+}
+
+
+/* =========================================================
+   REQUEST FORM
+   ========================================================= */
+
+.mentor-request-form {
+    margin-top: 15px;
+}
+
+.mentor-request-form textarea {
+    width: 100%;
+    min-height: 72px;
+
+    box-sizing: border-box;
+
+    padding: 10px 11px;
+
+    resize: vertical;
+
+    border-radius: 9px;
+
+    border:
+        1px solid rgba(255,255,255,0.10);
+
+    background:
+        rgba(255,255,255,0.04);
+
+    color: inherit;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    margin-bottom: 10px;
+}
+
+.mentor-request-form textarea:focus {
+    border-color: rgba(37,99,235,0.55);
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
+
+.engagement-primary-btn {
+    width: 100%;
+    min-height: 42px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.engagement-primary-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.engagement-primary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   REQUEST STATUS
+   ========================================================= */
+
+.mentor-request-status {
+    margin-top: 15px;
+}
+
+.status-pending,
+.status-active {
+    display: inline-flex;
+
+    padding: 8px 12px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-pending {
+    background: rgba(245,158,11,0.12);
+}
+
+.status-active {
+    background: rgba(34,197,94,0.12);
+}
+
+
+/* =========================================================
+   MY MENTORSHIPS
+   ========================================================= */
+
+.my-mentorship-header {
+    margin-top: 10px;
+}
+
+.my-mentorship-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+.my-mentorship-card {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 18px 20px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.04);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+}
+
+.my-mentorship-main {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    min-width: 0;
+}
+
+.my-mentor-avatar {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(37,99,235,0.18);
+
+    font-weight: 700;
+}
+
+.my-mentorship-main h3 {
+    margin: 0;
+
+    font-size: 17px;
+}
+
+.my-mentorship-main p {
+    margin: 5px 0 0;
+
+    font-size: 13px;
+
+    opacity: 0.7;
+}
+
+.mentorship-goals {
+    max-width: 650px;
+
+    line-height: 1.5;
+}
+
+.my-mentorship-right {
+    display: flex;
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 7px;
+}
+
+.mentorship-status {
+    display: inline-flex;
+
+    padding: 7px 11px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    background: rgba(255,255,255,0.08);
+}
+
+.status-requested {
+    background: rgba(245,158,11,0.12);
+}
+
+.status-active {
+    background: rgba(34,197,94,0.12);
+}
+
+.status-completed {
+    background: rgba(59,130,246,0.12);
+}
+
+.status-cancelled {
+    background: rgba(239,68,68,0.12);
+}
+
+.my-mentorship-right small {
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.engagement-empty {
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    padding: 55px 20px;
+
+    opacity: 0.7;
+}
+
+.engagement-empty.compact {
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.engagement-empty h3 {
+    margin: 0 0 7px;
+
+    font-size: 19px;
+}
+
+.engagement-empty p {
+    margin: 0;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .mentor-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .mentorship-page {
+        padding: 35px 20px 35px;
+    }
+
+    .mentorship-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .engagement-section-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .engagement-search {
+        width: 100%;
+    }
+
+    .mentor-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .my-mentorship-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .my-mentorship-right {
+        align-items: flex-start;
+    }
+}
+
+
+@media (max-width: 550px) {
+
+    .mentorship-page {
+        padding: 25px 15px 30px;
+    }
+
+    .engagement-header h1 {
+        font-size: 28px;
+    }
+}
+/* =========================================================
+   PHASE 6.3 - LIVE PROJECTS
+   ========================================================= */
+
+.live-projects-page {
+    padding: 52px 36px 40px;
+    max-width: 1500px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.live-project-top {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+}
+
+.live-project-status {
+    display: inline-flex;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    background: rgba(37, 99, 235, 0.12);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.live-project-card h3 {
+    margin: 0 0 10px;
+    font-size: 19px;
+    line-height: 1.4;
+}
+
+.live-project-description {
+    min-height: 65px;
+
+    margin: 0 0 15px;
+
+    font-size: 13px;
+    line-height: 1.6;
+
+    opacity: 0.7;
+}
+
+.live-project-tech {
+    padding: 10px 0;
+
+    font-size: 12px;
+    line-height: 1.5;
+
+    border-top:
+        1px solid rgba(255,255,255,0.07);
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.07);
+
+    opacity: 0.75;
+}
+
+.live-project-info {
+    margin: 14px 0;
+}
+
+.live-project-info > div {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 5px 0;
+}
+
+.live-project-info span {
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.live-project-info strong {
+    font-size: 12px;
+    text-align: right;
+}
+
+.project-status-box {
+    padding: 12px;
+
+    border-radius: 9px;
+
+    background: rgba(255,255,255,0.05);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.project-status-box small {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    opacity: 0.65;
+}
+
+.project-status-box.pending {
+    background: rgba(245,158,11,0.10);
+}
+
+.project-status-box.completed {
+    background: rgba(34,197,94,0.12);
+}
+
+.project-status-box.rejected {
+    background: rgba(239,68,68,0.10);
+}
+
+.complete-project-btn {
+    background: #15803d;
+}
+/* =========================================================
+   PHASE 6.4 - INNOVATION CHALLENGES
+   ========================================================= */
+
+.innovation-page {
+    padding: 52px 36px 40px;
+    max-width: 1500px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.innovation-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 38px;
+}
+
+.innovation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.innovation-card {
+    padding: 22px;
+    box-sizing: border-box;
+
+    border-radius: 16px;
+
+    background: rgba(255,255,255,0.04);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.innovation-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 10px 28px rgba(0,0,0,0.16);
+}
+
+.innovation-card-top {
+    display: flex;
+    justify-content: flex-end;
+
+    margin-bottom: 13px;
+}
+
+.innovation-status {
+    padding: 6px 11px;
+
+    border-radius: 20px;
+
+    background: rgba(37,99,235,0.12);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.innovation-card h3 {
+    margin: 0 0 12px;
+
+    font-size: 19px;
+    line-height: 1.4;
+}
+
+.innovation-description {
+    min-height: 65px;
+
+    margin: 0 0 15px;
+
+    font-size: 13px;
+    line-height: 1.6;
+
+    opacity: 0.72;
+}
+
+.innovation-organizer {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 9px 0;
+
+    border-top:
+        1px solid rgba(255,255,255,0.07);
+}
+
+.innovation-organizer span,
+.innovation-info span {
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.innovation-organizer strong {
+    font-size: 12px;
+}
+
+.innovation-info {
+    margin: 5px 0 15px;
+}
+
+.innovation-info > div {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 5px 0;
+}
+
+.innovation-info strong {
+    font-size: 12px;
+    text-align: right;
+}
+
+.challenge-register-form {
+    margin-top: 12px;
+}
+
+.challenge-register-form input,
+.challenge-submit-form input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    height: 40px;
+
+    padding: 0 11px;
+
+    margin-bottom: 10px;
+
+    border-radius: 9px;
+
+    border:
+        1px solid rgba(255,255,255,0.10);
+
+    background:
+        rgba(255,255,255,0.04);
+
+    color: inherit;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 13px;
+}
+
+.challenge-register-form input:focus,
+.challenge-submit-form input:focus {
+    border-color: rgba(37,99,235,0.55);
+}
+
+.challenge-submit-form {
+    margin-top: 10px;
+}
+
+.challenge-registered-box,
+.challenge-status-box {
+    padding: 11px 12px;
+
+    border-radius: 9px;
+
+    background: rgba(255,255,255,0.05);
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.challenge-registered-box span {
+    display: block;
+}
+
+.challenge-registered-box small {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    opacity: 0.65;
+}
+
+.challenge-status-box {
+    margin-top: 10px;
+}
+
+.challenge-status-box a {
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 12px;
+
+    text-decoration: none;
+}
+
+.challenge-status-box.submitted {
+    background: rgba(59,130,246,0.10);
+}
+
+.challenge-status-box.shortlisted {
+    background: rgba(245,158,11,0.12);
+}
+
+.challenge-status-box.winner {
+    background: rgba(34,197,94,0.13);
+}
+
+.challenge-status-box.winner small {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    opacity: 0.7;
+}
+
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+
+    .innovation-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+
+    .innovation-page {
+        padding: 35px 20px 35px;
+    }
+
+    .innovation-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .innovation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 550px) {
+
+    .innovation-page {
+        padding: 25px 15px 30px;
+    }
+}

@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ page_title or "Academic Information" }}</title>
+
+    <!-- =====================================================
+         STUDENT BASE CSS
+    ====================================================== -->
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+                           filename='css/student/student_base.css') }}">
+
+
+    <!-- =====================================================
+         STUDENT PROFILE / ACADEMIC CSS
+    ====================================================== -->
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+                           filename='css/student/student_profile.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="student-page">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <!-- =====================================================
+         MAIN AREA
+    ====================================================== -->
+
+    <div class="student-main">
+
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <!-- =================================================
+             ACADEMIC CONTENT
+        ================================================== -->
+
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+
+            <section class="profile-page-header">
+
+                <div>
+
+                    <span class="profile-eyebrow">
+                        ACADEMIC
+                    </span>
+
+                    <h1>
+                        Academic Information
+                    </h1>
+
+                    <p>
+                        Manage and track your academic performance
+                        and education details.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 STUDENT ACADEMIC OVERVIEW
+            ================================================== -->
+
+            <section class="profile-overview-card">
+
+
+                <!-- STUDENT AVATAR -->
+
+                <div class="profile-avatar">
+
+                    {% if student.name %}
+
+                        {{ student.name[0]|upper }}
+
+                    {% else %}
+
+                        S
+
+                    {% endif %}
+
+                </div>
+
+
+
+                <!-- STUDENT INFORMATION -->
+
+                <div class="profile-overview-info">
+
+                    <h2>
+                        {{ student.name or "Student" }}
+                    </h2>
+
+                    <p>
+                        {{ student.email or "Email not available" }}
+                    </p>
+
+
+                    {% if student.college_name %}
+
+                        <span>
+                            🎓 {{ student.college_name }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+
+                <!-- ACADEMIC STATUS -->
+
+                <div class="profile-completion-mini">
+
+                    <span>
+                        Current Semester
+                    </span>
+
+                    <strong>
+                        {{ student.semester or "—" }}
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 REGISTERED ACADEMIC INFORMATION
+            ================================================== -->
+
+            <section class="profile-section">
+
+
+                <div class="profile-section-header">
+
+                    <div>
+
+                        <h2>
+                            Registered Academic Information
+                        </h2>
+
+                        <p>
+                            These details were provided during
+                            student registration.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="profile-info-grid">
+
+
+                    <!-- COLLEGE -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            College
+                        </span>
+
+                        <strong>
+                            {{ student.college_name or "Not available" }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- UNIVERSITY -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            University
+                        </span>
+
+                        <strong>
+                            {{ student.university_name or "Not available" }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- COLLEGE CODE -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            College Code
+                        </span>
+
+                        <strong>
+                            {{ student.college_code or "Not available" }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- ENROLLMENT NUMBER -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Enrollment Number
+                        </span>
+
+                        <strong>
+                            {{ student.enrollment_no or "Not available" }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- COURSE -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Course
+                        </span>
+
+                        <strong>
+                            {{ student.course or "Not available" }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- BRANCH -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Branch
+                        </span>
+
+                        <strong>
+                            {{ student.branch or "Not available" }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ACADEMIC PERFORMANCE
+            ================================================== -->
+
+            <form
+                method="POST"
+                action="{{ url_for('student_academic') }}"
+                class="profile-form"
+            >
+
+
+                <section class="profile-section">
+
+
+                    <div class="profile-section-header">
+
+                        <div>
+
+                            <h2>
+                                Academic Performance
+                            </h2>
+
+                            <p>
+                                Update your current academic performance
+                                and progress.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="profile-form-grid">
+
+
+                        <!-- =================================================
+                             CURRENT SEMESTER
+                        ================================================== -->
+
+                        <div class="profile-form-group">
+
+                            <label for="semester">
+                                Current Semester
+                            </label>
+
+                            <input
+                                type="number"
+                                id="semester"
+                                name="semester"
+                                value="{{ student.semester or '' }}"
+                                min="1"
+                                max="12"
+                                placeholder="Enter semester"
+                            >
+
+                            <small>
+                                Enter your current semester.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             PASSING YEAR
+                        ================================================== -->
+
+                        <div class="profile-form-group">
+
+                            <label for="passing_year">
+                                Expected Passing Year
+                            </label>
+
+                            <input
+                                type="number"
+                                id="passing_year"
+                                name="passing_year"
+                                value="{{ student.passing_year or '' }}"
+                                min="2000"
+                                max="2100"
+                                placeholder="e.g. 2027"
+                            >
+
+                            <small>
+                                Enter your expected graduation year.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             CGPA
+                        ================================================== -->
+
+                        <div class="profile-form-group">
+
+                            <label for="cgpa">
+                                CGPA
+                            </label>
+
+                            <input
+                                type="number"
+                                id="cgpa"
+                                name="cgpa"
+                                value="{{ student.cgpa or '' }}"
+                                min="0"
+                                max="10"
+                                step="0.01"
+                                placeholder="e.g. 8.50"
+                            >
+
+                            <small>
+                                CGPA should be between 0 and 10.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             CURRENT SGPA
+                        ================================================== -->
+
+                        <div class="profile-form-group">
+
+                            <label for="current_sgpa">
+                                Current SGPA
+                            </label>
+
+                            <input
+                                type="number"
+                                id="current_sgpa"
+                                name="current_sgpa"
+                                value="{{ student.current_sgpa or '' }}"
+                                min="0"
+                                max="10"
+                                step="0.01"
+                                placeholder="e.g. 8.75"
+                            >
+
+                            <small>
+                                Enter your latest semester SGPA.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             ACTIVE BACKLOGS
+                        ================================================== -->
+
+                        <div class="profile-form-group">
+
+                            <label for="active_backlogs">
+                                Active Backlogs
+                            </label>
+
+                            <input
+                                type="number"
+                                id="active_backlogs"
+                                name="active_backlogs"
+                                value="{{ student.active_backlogs or 0 }}"
+                                min="0"
+                                step="1"
+                                placeholder="0"
+                            >
+
+                            <small>
+                                Enter the number of currently active
+                                backlogs.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             PASSING YEAR DISPLAY
+                        ================================================== -->
+
+                        <div class="profile-form-group">
+
+                            <label>
+                                Graduation Status
+                            </label>
+
+                            <div class="academic-status-box">
+
+                                {% if student.passing_year %}
+
+                                    <strong>
+                                        Expected {{ student.passing_year }}
+                                    </strong>
+
+                                    {% if student.semester %}
+
+                                        <span>
+                                            Semester
+                                            {{ student.semester }}
+                                        </span>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <strong>
+                                        Information not available
+                                    </strong>
+
+                                    <span>
+                                        Update your passing year above.
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     ACADEMIC FORM ACTIONS
+                ================================================== -->
+
+                <div class="profile-form-actions">
+
+
+                    <button
+                        type="reset"
+                        class="student-btn student-btn-secondary"
+                    >
+                        Reset
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="student-btn student-btn-primary"
+                    >
+                        Save Academic Details
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+
+            <!-- =================================================
+                 ACADEMIC SUMMARY
+            ================================================== -->
+
+            <section class="profile-section">
+
+
+                <div class="profile-section-header">
+
+                    <div>
+
+                        <h2>
+                            Academic Summary
+                        </h2>
+
+                        <p>
+                            Quick overview of your current academic
+                            standing.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="profile-info-grid">
+
+
+                    <!-- SEMESTER -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Current Semester
+                        </span>
+
+                        <strong>
+                            {% if student.semester %}
+                                Semester {{ student.semester }}
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- PASSING YEAR -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Expected Passing Year
+                        </span>
+
+                        <strong>
+                            {{ student.passing_year or "Not available" }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- CGPA -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            CGPA
+                        </span>
+
+                        <strong>
+                            {% if student.cgpa is not none %}
+                                {{ "%.2f"|format(student.cgpa) }}
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- SGPA -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Current SGPA
+                        </span>
+
+                        <strong>
+                            {% if student.current_sgpa is not none %}
+                                {{ "%.2f"|format(student.current_sgpa) }}
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- BACKLOGS -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Active Backlogs
+                        </span>
+
+                        <strong>
+                            {{ student.active_backlogs or 0 }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- ACADEMIC STATUS -->
+
+                    <div class="profile-info-item">
+
+                        <span>
+                            Academic Status
+                        </span>
+
+                        <strong>
+
+                            {% if student.active_backlogs and
+                                  student.active_backlogs > 0 %}
+
+                                Backlogs Present
+
+                            {% else %}
+
+                                No Active Backlogs
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     STUDENT BASE JAVASCRIPT
+========================================================= -->
+
+<script src="{{ url_for('static',
+                         filename='js/student/student_base.js') }}">
+</script>
+
+
+</body>
+</html>

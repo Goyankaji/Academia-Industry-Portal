@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ opportunity.title }} | Student Portal
+    </title>
+
+
+    <!-- STUDENT BASE CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+
+    <!-- OPPORTUNITY CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_opportunities.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="student-page">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <div class="student-main">
+
+
+        <!-- TOPBAR -->
+
+        {% include "student/components/student_topbar.html" %}
+
+
+
+        <!-- =================================================
+             CONTENT
+        ================================================== -->
+
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+
+            <section class="opportunity-detail-header">
+
+
+                <div>
+
+
+                    <!-- BACK -->
+
+                    <a
+                        href="{{ url_for('student_opportunities') }}"
+                        class="back-opportunity-btn"
+                    >
+                        ← Back to Opportunities
+                    </a>
+
+
+
+                    <!-- TYPE -->
+
+                    <div class="detail-type">
+
+                        {{ opportunity.opportunity_type }}
+
+                    </div>
+
+
+
+                    <!-- TITLE -->
+
+                    <h1>
+
+                        {{ opportunity.title }}
+
+                    </h1>
+
+
+
+                    <!-- COMPANY -->
+
+                    <p class="detail-company">
+
+                        🏢 {{ opportunity.company_name }}
+
+
+                        {% if opportunity.industry_sector %}
+
+                            <span>
+                                • {{ opportunity.industry_sector }}
+                            </span>
+
+                        {% endif %}
+
+                    </p>
+
+
+                </div>
+
+
+
+                <!-- HEADER STATUS -->
+
+                <div class="detail-header-status">
+
+
+                    {% if opportunity.application_status %}
+
+
+                        <span class="application-badge">
+
+                            {{ opportunity.application_status }}
+
+                        </span>
+
+
+                    {% elif opportunity.eligible %}
+
+
+                        <span
+                            class="eligibility-badge eligible"
+                        >
+                            ✓ Eligible
+                        </span>
+
+
+                    {% else %}
+
+
+                        <span
+                            class="eligibility-badge not-eligible"
+                        >
+                            ⚠ Check Eligibility
+                        </span>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 MAIN DETAIL GRID
+            ================================================== -->
+
+            <section class="opportunity-detail-grid">
+
+
+                <!-- =================================================
+                     LEFT SIDE
+                ================================================== -->
+
+                <div class="opportunity-detail-main">
+
+
+
+                    <!-- =============================================
+                         DESCRIPTION
+                    ============================================== -->
+
+                    <div class="detail-panel">
+
+
+                        <h2>
+                            About This Opportunity
+                        </h2>
+
+
+                        {% if opportunity.description %}
+
+
+                            <p class="detail-description">
+
+                                {{ opportunity.description }}
+
+                            </p>
+
+
+                        {% else %}
+
+
+                            <p class="detail-muted">
+
+                                No description has been provided.
+
+                            </p>
+
+
+                        {% endif %}
+
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                         REQUIRED SKILLS
+                    ============================================== -->
+
+                    <div class="detail-panel">
+
+
+                        <h2>
+                            Required Skills
+                        </h2>
+
+
+                        {% if opportunity.required_skills_list %}
+
+
+                            <div class="detail-skill-list">
+
+
+                                {% for skill in opportunity.required_skills_list %}
+
+
+                                    {% if skill in opportunity.matched_skills %}
+
+
+                                        <span
+                                            class="detail-skill matched"
+                                        >
+                                            ✓ {{ skill }}
+                                        </span>
+
+
+                                    {% else %}
+
+
+                                        <span
+                                            class="detail-skill missing"
+                                        >
+                                            {{ skill }}
+                                        </span>
+
+
+                                    {% endif %}
+
+
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        {% else %}
+
+
+                            <p class="detail-muted">
+
+                                No specific skills have been listed.
+
+                            </p>
+
+
+                        {% endif %}
+
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                         SKILL MATCH
+                    ============================================== -->
+
+                    <div class="detail-panel">
+
+
+                        <div class="detail-panel-heading">
+
+
+                            <h2>
+                                Skill Match
+                            </h2>
+
+
+                            <strong>
+                                {{ opportunity.skill_match_percentage }}%
+                            </strong>
+
+
+                        </div>
+
+
+
+                        <!-- PROGRESS -->
+
+                        <div class="detail-progress-track">
+
+
+                            <div
+                                class="detail-progress-fill"
+                                data-width="{{ opportunity.skill_match_percentage }}"
+                            ></div>
+
+
+                        </div>
+
+
+
+                        <!-- MATCHED SKILLS -->
+
+                        {% if opportunity.matched_skills %}
+
+
+                            <div class="detail-skill-group">
+
+
+                                <h3>
+                                    Matched Skills
+                                </h3>
+
+
+                                <div class="detail-skill-list">
+
+
+                                    {% for skill in opportunity.matched_skills %}
+
+
+                                        <span
+                                            class="detail-skill matched"
+                                        >
+                                            ✓ {{ skill }}
+                                        </span>
+
+
+                                    {% endfor %}
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        {% endif %}
+
+
+
+                        <!-- MISSING SKILLS -->
+
+                        {% if opportunity.missing_skills %}
+
+
+                            <div class="detail-skill-group">
+
+
+                                <h3>
+                                    Skills to Improve
+                                </h3>
+
+
+                                <div class="detail-skill-list">
+
+
+                                    {% for skill in opportunity.missing_skills %}
+
+
+                                        <span
+                                            class="detail-skill missing"
+                                        >
+                                            {{ skill }}
+                                        </span>
+
+
+                                    {% endfor %}
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        {% endif %}
+
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                         ELIGIBILITY
+                    ============================================== -->
+
+                    <div class="detail-panel">
+
+
+                        <h2>
+                            Eligibility Criteria
+                        </h2>
+
+
+                        {% if opportunity.eligibility_criteria %}
+
+
+                            <div class="eligibility-text">
+
+                                {{ opportunity.eligibility_criteria }}
+
+                            </div>
+
+
+                        {% else %}
+
+
+                            <p class="detail-muted">
+
+                                No specific eligibility criteria
+                                have been provided.
+
+                            </p>
+
+
+                        {% endif %}
+
+
+
+                        <!-- ELIGIBILITY CHECKS -->
+
+                        <div class="eligibility-check-list">
+
+
+                            <!-- CGPA -->
+
+                            <div
+                                class="eligibility-check-item
+                                {% if opportunity.cgpa_ok %}
+                                    passed
+                                {% else %}
+                                    failed
+                                {% endif %}"
+                            >
+
+
+                                <span>
+
+                                    {% if opportunity.cgpa_ok %}
+                                        ✓
+                                    {% else %}
+                                        ✕
+                                    {% endif %}
+
+                                </span>
+
+
+                                <div>
+
+
+                                    <strong>
+                                        CGPA Requirement
+                                    </strong>
+
+
+                                    <small>
+                                        Based on the eligibility criteria
+                                    </small>
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- BACKLOG -->
+
+                            <div
+                                class="eligibility-check-item
+                                {% if opportunity.backlog_ok %}
+                                    passed
+                                {% else %}
+                                    failed
+                                {% endif %}"
+                            >
+
+
+                                <span>
+
+                                    {% if opportunity.backlog_ok %}
+                                        ✓
+                                    {% else %}
+                                        ✕
+                                    {% endif %}
+
+                                </span>
+
+
+                                <div>
+
+
+                                    <strong>
+                                        Backlog Requirement
+                                    </strong>
+
+
+                                    <small>
+                                        Based on your current academic record
+                                    </small>
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- SKILLS -->
+
+                            <div
+                                class="eligibility-check-item
+                                {% if opportunity.skills_ok %}
+                                    passed
+                                {% else %}
+                                    failed
+                                {% endif %}"
+                            >
+
+
+                                <span>
+
+                                    {% if opportunity.skills_ok %}
+                                        ✓
+                                    {% else %}
+                                        ✕
+                                    {% endif %}
+
+                                </span>
+
+
+                                <div>
+
+
+                                    <strong>
+                                        Skill Requirement
+                                    </strong>
+
+
+                                    <small>
+                                        Based on your registered skills
+                                    </small>
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     RIGHT SIDEBAR
+                ================================================== -->
+
+                <aside class="opportunity-detail-sidebar">
+
+
+                    <!-- =============================================
+                         QUICK DETAILS
+                    ============================================== -->
+
+                    <div class="detail-panel">
+
+
+                        <h2>
+                            Opportunity Details
+                        </h2>
+
+
+                        <div class="detail-info-list">
+
+
+
+                            <!-- LOCATION -->
+
+                            {% if opportunity.location %}
+
+
+                                <div class="detail-info-item">
+
+
+                                    <span>
+                                        📍
+                                    </span>
+
+
+                                    <div>
+
+
+                                        <small>
+                                            Location
+                                        </small>
+
+
+                                        <strong>
+                                            {{ opportunity.location }}
+                                        </strong>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            {% endif %}
+
+
+
+                            <!-- WORK MODE -->
+
+                            {% if opportunity.work_mode %}
+
+
+                                <div class="detail-info-item">
+
+
+                                    <span>
+                                        💻
+                                    </span>
+
+
+                                    <div>
+
+
+                                        <small>
+                                            Work Mode
+                                        </small>
+
+
+                                        <strong>
+                                            {{ opportunity.work_mode }}
+                                        </strong>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            {% endif %}
+
+
+
+                            <!-- STIPEND -->
+
+                            {% if opportunity.opportunity_type == "INTERNSHIP"
+                                  and opportunity.stipend is not none %}
+
+
+                                <div class="detail-info-item">
+
+
+                                    <span>
+                                        💰
+                                    </span>
+
+
+                                    <div>
+
+
+                                        <small>
+                                            Stipend
+                                        </small>
+
+
+                                        <strong>
+                                            ₹{{ opportunity.stipend }}
+                                        </strong>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            {% endif %}
+
+
+
+                            <!-- PACKAGE -->
+
+                            {% if opportunity.opportunity_type in
+                                  ["PLACEMENT", "JOB"]
+                                  and opportunity.package is not none %}
+
+
+                                <div class="detail-info-item">
+
+
+                                    <span>
+                                        💼
+                                    </span>
+
+
+                                    <div>
+
+
+                                        <small>
+                                            Package
+                                        </small>
+
+
+                                        <strong>
+                                            ₹{{ opportunity.package }} LPA
+                                        </strong>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            {% endif %}
+
+
+
+                            <!-- DEADLINE -->
+
+                            {% if opportunity.application_deadline %}
+
+
+                                <div class="detail-info-item">
+
+
+                                    <span>
+                                        📅
+                                    </span>
+
+
+                                    <div>
+
+
+                                        <small>
+                                            Application Deadline
+                                        </small>
+
+
+                                        <strong>
+
+                                            {{
+                                                opportunity.application_deadline
+                                                .strftime("%d %b %Y")
+                                            }}
+
+                                        </strong>
+
+
+                                        {% if opportunity.days_left is not none %}
+
+
+                                            <small
+                                                class="
+                                                {% if opportunity.days_left <= 3 %}
+                                                    deadline-detail-urgent
+                                                {% endif %}
+                                                "
+                                            >
+
+
+                                                {% if opportunity.days_left < 0 %}
+
+                                                    Deadline Passed
+
+
+                                                {% elif opportunity.days_left == 0 %}
+
+                                                    Today
+
+
+                                                {% elif opportunity.days_left == 1 %}
+
+                                                    Tomorrow
+
+
+                                                {% else %}
+
+                                                    {{ opportunity.days_left }}
+                                                    days left
+
+                                                {% endif %}
+
+
+                                            </small>
+
+
+                                        {% endif %}
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                         ACTION
+                    ============================================== -->
+
+                    <div class="detail-action-panel">
+
+
+                        <!-- =========================================
+                             ALREADY APPLIED
+                        ========================================== -->
+
+                        {% if opportunity.application_status %}
+
+
+                            <div class="detail-applied-state">
+
+
+                                <span class="applied-icon">
+                                    ✓
+                                </span>
+
+
+                                <strong>
+                                    {{ opportunity.application_status }}
+                                </strong>
+
+
+                                <p>
+                                    You have already applied for
+                                    this opportunity.
+                                </p>
+
+
+                                <a
+                                    href="{{ url_for(
+                                        'student_applications'
+                                    ) }}"
+                                    class="detail-apply-btn"
+                                >
+                                    View My Applications
+                                </a>
+
+
+                            </div>
+
+
+
+                        <!-- =========================================
+                             ELIGIBLE
+                        ========================================== -->
+
+                        {% elif opportunity.eligible %}
+
+
+                            <h3>
+                                Ready to Apply?
+                            </h3>
+
+
+                            <p>
+                                You meet the current eligibility
+                                requirements for this opportunity.
+                            </p>
+
+
+
+                            <!-- =====================================
+                                 IMPORTANT:
+                                 APPLY MUST BE POST
+                            ====================================== -->
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_apply_opportunity',
+                                    opportunity_id=opportunity.id
+                                ) }}"
+                            >
+
+
+                                <button
+                                    type="submit"
+                                    class="detail-apply-btn"
+                                >
+                                    Apply Now
+                                </button>
+
+
+                            </form>
+
+
+                            <small class="apply-note">
+                                Your registered resume will be
+                                submitted with this application.
+                            </small>
+
+
+
+                        <!-- =========================================
+                             NOT ELIGIBLE
+                        ========================================== -->
+
+                        {% else %}
+
+
+                            <div class="detail-not-eligible-state">
+
+
+                                <span>
+                                    ⚠
+                                </span>
+
+
+                                <strong>
+                                    Eligibility Requirements Not Met
+                                </strong>
+
+
+                                <p>
+                                    Review the eligibility criteria
+                                    and improve the required skills
+                                    before applying.
+                                </p>
+
+
+                            </div>
+
+
+                        {% endif %}
+
+
+                    </div>
+
+
+                </aside>
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/opportunity_detail.js'
+    ) }}"
+></script>
+
+
+</body>
+
+</html>

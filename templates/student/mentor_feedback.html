@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Mentor Feedback | Student Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_internship.css'
+        ) }}"
+    >
+
+</head>
+
+<body>
+
+<div class="student-layout">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <main class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <div class="internship-page">
+
+            <!-- HEADER -->
+
+            <div class="internship-page-header">
+
+                <div>
+
+                    <span class="internship-eyebrow">
+                        INTERNSHIP
+                    </span>
+
+                    <h1>
+                        Mentor Feedback
+                    </h1>
+
+                    <p>
+                        View your mentor information and
+                        internship performance feedback.
+                    </p>
+
+                </div>
+
+                <a
+                    href="{{ url_for(
+                        'student_internship_detail',
+                        internship_id=internship.id
+                    ) }}"
+                    class="internship-back-btn"
+                >
+                    ← Back to Internship
+                </a>
+
+            </div>
+
+
+            <!-- INTERNSHIP INFO -->
+
+            <section class="internship-progress-summary">
+
+                <div class="internship-summary-info">
+
+                    <h2>
+                        {{ internship.opportunity_title }}
+                    </h2>
+
+                    <p>
+                        {{ internship.industry_name }}
+                    </p>
+
+                    <span class="internship-status-badge">
+                        {{ internship.status.replace('_', ' ') }}
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- MENTORS -->
+
+            <section class="internship-progress-card">
+
+                <div class="internship-section-heading">
+
+                    <span class="internship-section-label">
+                        MENTOR
+                    </span>
+
+                    <h2>
+                        Assigned Mentor
+                    </h2>
+
+                    <p>
+                        Your internship mentor information.
+                    </p>
+
+                </div>
+
+
+                {% if mentors %}
+
+                    <div class="mentor-feedback-grid">
+
+                        {% for mentor in mentors %}
+
+                            <div class="mentor-feedback-mentor-card">
+
+                                <div class="mentor-feedback-avatar">
+                                    {{ mentor.mentor_name[:1]|upper }}
+                                </div>
+
+                                <div>
+
+                                    <h3>
+                                        {{ mentor.mentor_name }}
+                                    </h3>
+
+                                    {% if mentor.designation %}
+                                        <p>
+                                            {{ mentor.designation }}
+                                        </p>
+                                    {% endif %}
+
+                                    {% if mentor.mentor_email %}
+                                        <p>
+                                            📧 {{ mentor.mentor_email }}
+                                        </p>
+                                    {% endif %}
+
+                                    {% if mentor.mentor_phone %}
+                                        <p>
+                                            📞 {{ mentor.mentor_phone }}
+                                        </p>
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="internship-empty-state">
+
+                        <div class="internship-empty-icon">
+                            👨‍🏫
+                        </div>
+
+                        <h3>
+                            No Mentor Assigned Yet
+                        </h3>
+
+                        <p>
+                            Mentor information will appear here
+                            once a mentor is assigned.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- FEEDBACK -->
+
+            <section class="internship-progress-card">
+
+                <div class="internship-section-heading">
+
+                    <span class="internship-section-label">
+                        PERFORMANCE
+                    </span>
+
+                    <h2>
+                        Mentor Feedback
+                    </h2>
+
+                    <p>
+                        Feedback submitted during your internship.
+                    </p>
+
+                </div>
+
+
+                {% if feedback_list %}
+
+                    <div class="mentor-feedback-list">
+
+                        {% for feedback in feedback_list %}
+
+                            <article
+                                class="mentor-feedback-card"
+                            >
+
+                                <div class="mentor-feedback-card-header">
+
+                                    <div>
+
+                                        <h3>
+                                            {{ feedback.submitted_by_name or "Mentor" }}
+                                        </h3>
+
+                                        {% if feedback.submitted_by_role %}
+                                            <span>
+                                                {{ feedback.submitted_by_role }}
+                                            </span>
+                                        {% endif %}
+
+                                    </div>
+
+                                    {% if feedback.rating is not none %}
+
+                                        <div class="mentor-feedback-overall-rating">
+
+                                            ⭐
+                                            {{ feedback.rating }}/5
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                {% if feedback.feedback %}
+
+                                    <div class="mentor-feedback-text">
+
+                                        <p>
+                                            {{ feedback.feedback }}
+                                        </p>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="mentor-feedback-ratings">
+
+                                    <div>
+                                        <span>
+                                            Technical Skills
+                                        </span>
+
+                                        <strong>
+                                            {{ feedback.technical_skills_rating
+                                            if feedback.technical_skills_rating
+                                            is not none else "—" }}
+                                        </strong>
+                                    </div>
+
+                                    <div>
+                                        <span>
+                                            Communication
+                                        </span>
+
+                                        <strong>
+                                            {{ feedback.communication_rating
+                                            if feedback.communication_rating
+                                            is not none else "—" }}
+                                        </strong>
+                                    </div>
+
+                                    <div>
+                                        <span>
+                                            Teamwork
+                                        </span>
+
+                                        <strong>
+                                            {{ feedback.teamwork_rating
+                                            if feedback.teamwork_rating
+                                            is not none else "—" }}
+                                        </strong>
+                                    </div>
+
+                                    <div>
+                                        <span>
+                                            Professionalism
+                                        </span>
+
+                                        <strong>
+                                            {{ feedback.professionalism_rating
+                                            if feedback.professionalism_rating
+                                            is not none else "—" }}
+                                        </strong>
+                                    </div>
+
+                                </div>
+
+
+                                {% if feedback.created_at %}
+
+                                    <div class="mentor-feedback-date">
+
+                                        Submitted:
+                                        {{ feedback.created_at.strftime(
+                                            '%d %b %Y, %I:%M %p'
+                                        ) }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="internship-empty-state">
+
+                        <div class="internship-empty-icon">
+                            💬
+                        </div>
+
+                        <h3>
+                            No Feedback Yet
+                        </h3>
+
+                        <p>
+                            Mentor feedback will appear here
+                            once it is submitted.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}"
+></script>
+
+</body>
+
+</html>

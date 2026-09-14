@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Collaboration Details | Student Portal
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/student/student_base.css'
+          ) }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/student/student_collaborations.css'
+          ) }}">
+
+</head>
+
+
+<body>
+
+
+<div class="student-page">
+
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <div class="student-main">
+
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <main class="student-content">
+
+
+            <a
+                href="{{ url_for('student_collaborations') }}"
+                class="back-link"
+            >
+                ← Back to Collaborations
+            </a>
+
+
+            <section class="collaboration-detail-header">
+
+                <div class="detail-icon">
+                    🤝
+                </div>
+
+                <div>
+
+                    <span class="collaboration-eyebrow">
+                        COLLABORATION DETAILS
+                    </span>
+
+                    <h1>
+                        {{ collaboration.title }}
+                    </h1>
+
+                    <p>
+                        {{ collaboration.company_name }}
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <section class="detail-status-bar">
+
+                <span>
+                    Status
+                </span>
+
+                <strong class="
+                    collaboration-status
+                    status-{{ collaboration.status|lower }}
+                ">
+
+                    {{ collaboration.status }}
+
+                </strong>
+
+            </section>
+
+
+
+            <section class="collaboration-detail-grid">
+
+
+                <!-- OVERVIEW -->
+
+                <div class="detail-panel">
+
+                    <h2>
+                        📋 Collaboration Overview
+                    </h2>
+
+
+                    {% if collaboration.description %}
+
+                    <p class="detail-description">
+                        {{ collaboration.description }}
+                    </p>
+
+                    {% endif %}
+
+
+                    <div class="detail-fields">
+
+                        <div>
+                            <small>
+                                Collaboration Type
+                            </small>
+
+                            <strong>
+                                {{ collaboration.collaboration_type|replace("_", " ") }}
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <small>
+                                Initiated By
+                            </small>
+
+                            <strong>
+                                {{ collaboration.initiated_by }}
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <small>
+                                Start Date
+                            </small>
+
+                            <strong>
+                                {{ collaboration.start_date or "Not specified" }}
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <small>
+                                End Date
+                            </small>
+
+                            <strong>
+                                {{ collaboration.end_date or "Not specified" }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- INDUSTRY -->
+
+                <div class="detail-panel">
+
+                    <h2>
+                        🏢 Industry Partner
+                    </h2>
+
+
+                    <div class="company-detail">
+
+                        <h3>
+                            {{ collaboration.company_name }}
+                        </h3>
+
+
+                        {% if collaboration.company_type %}
+
+                        <p>
+                            {{ collaboration.company_type }}
+                        </p>
+
+                        {% endif %}
+
+
+                        {% if collaboration.industry_sector %}
+
+                        <p>
+                            {{ collaboration.industry_sector }}
+                        </p>
+
+                        {% endif %}
+
+
+                        {% if collaboration.contact_person %}
+
+                        <hr>
+
+                        <strong>
+                            {{ collaboration.contact_person }}
+                        </strong>
+
+
+                        {% if collaboration.designation %}
+
+                        <p>
+                            {{ collaboration.designation }}
+                        </p>
+
+                        {% endif %}
+
+                        {% endif %}
+
+
+                        {% if collaboration.industry_email %}
+
+                        <p>
+                            ✉️
+                            {{ collaboration.industry_email }}
+                        </p>
+
+                        {% endif %}
+
+
+                        {% if collaboration.industry_phone %}
+
+                        <p>
+                            📞
+                            {{ collaboration.industry_phone }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- COLLEGE -->
+
+                <div class="detail-panel">
+
+                    <h2>
+                        🎓 College
+                    </h2>
+
+                    <h3>
+                        {{ collaboration.college_name }}
+                    </h3>
+
+                    {% if collaboration.college_code %}
+
+                    <p>
+                        College Code:
+                        {{ collaboration.college_code }}
+                    </p>
+
+                    {% endif %}
+
+
+                    {% if collaboration.university_name %}
+
+                    <p>
+                        University:
+                        {{ collaboration.university_name }}
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+
+
+                <!-- LOCATION -->
+
+                <div class="detail-panel">
+
+                    <h2>
+                        📍 Industry Location
+                    </h2>
+
+                    <p>
+
+                        {% if collaboration.industry_address %}
+                            {{ collaboration.industry_address }}<br>
+                        {% endif %}
+
+                        {% if collaboration.industry_city %}
+                            {{ collaboration.industry_city }},
+                        {% endif %}
+
+                        {% if collaboration.industry_state %}
+                            {{ collaboration.industry_state }}
+                        {% endif %}
+
+                    </p>
+
+
+                    {% if collaboration.industry_website %}
+
+                    <a
+                        href="{{ collaboration.industry_website }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="website-link"
+                    >
+                        Visit Industry Website →
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/collaborations.js'
+    ) }}"
+></script>
+
+</body>
+
+</html>

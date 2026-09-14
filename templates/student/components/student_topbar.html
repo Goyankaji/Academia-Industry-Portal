@@ -1,0 +1,153 @@
+<!-- =========================================================
+     STUDENT TOPBAR
+     SIH Academia–Industry Collaboration Portal
+========================================================= -->
+
+<header class="student-topbar" id="studentTopbar">
+
+    <!-- Left Side -->
+    <div class="topbar-left">
+
+        <!-- Mobile Sidebar Toggle -->
+        <button
+            type="button"
+            class="sidebar-toggle-btn"
+            id="sidebarToggleBtn"
+            aria-label="Open student navigation"
+            aria-controls="studentSidebar"
+            aria-expanded="false">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
+
+        <!-- Page Heading -->
+        <div class="topbar-page-info">
+
+            <h1 class="topbar-page-title">
+                {% if page_title is defined and page_title %}
+                    {{ page_title }}
+                {% else %}
+                    Student Portal
+                {% endif %}
+            </h1>
+
+            <p class="topbar-page-subtitle">
+                {% if page_subtitle is defined and page_subtitle %}
+                    {{ page_subtitle }}
+                {% else %}
+                    Academia • Industry Collaboration
+                {% endif %}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Right Side -->
+    <div class="topbar-right">
+
+
+        <!-- =================================================
+             NOTIFICATIONS
+        ================================================== -->
+
+        <div class="topbar-notification-wrapper">
+
+            <button
+                type="button"
+                class="topbar-icon-btn notification-btn"
+                id="notificationBtn"
+                aria-label="Notifications"
+                aria-expanded="false"
+                aria-controls="notificationDropdown">
+
+                <span class="topbar-icon">🔔</span>
+
+                {% if unread_notifications is defined and unread_notifications|int > 0 %}
+
+                    <span class="topbar-notification-badge">
+                        {% if unread_notifications|int > 99 %}
+                            99+
+                        {% else %}
+                            {{ unread_notifications }}
+                        {% endif %}
+                    </span>
+
+                {% endif %}
+
+            </button>
+
+
+            <!-- Notification Dropdown -->
+            {% include "student/components/notification_dropdown.html" %}
+
+        </div>
+
+
+        <!-- Divider -->
+        <div class="topbar-divider"></div>
+
+
+        <!-- =================================================
+             STUDENT PROFILE
+        ================================================== -->
+
+        <div class="topbar-profile">
+
+            <div class="topbar-profile-avatar">
+
+                {% if student is defined and student.name %}
+
+                    {{ student.name[0]|upper }}
+
+                {% elif session.get('user_name') %}
+
+                    {{ session.get('user_name')[0]|upper }}
+
+                {% else %}
+
+                    S
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="topbar-profile-info">
+
+                <span class="topbar-profile-name">
+
+                    {% if student is defined and student.name %}
+
+                        {{ student.name }}
+
+                    {% else %}
+
+                        {{ session.get('user_name') or 'Student' }}
+
+                    {% endif %}
+
+                </span>
+
+                <span class="topbar-profile-role">
+                    Student
+                </span>
+
+            </div>
+
+
+            <!-- Profile Arrow -->
+            <span class="topbar-profile-arrow">
+                ▾
+            </span>
+
+        </div>
+
+    </div>
+
+</header>

@@ -1,0 +1,423 @@
+/* =========================================================
+   STUDENT COLLABORATIONS
+========================================================= */
+
+.collaboration-header {
+    margin-bottom: 25px;
+}
+
+.collaboration-eyebrow {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    opacity: .55;
+    margin-bottom: 7px;
+}
+
+.collaboration-header h1,
+.collaboration-detail-header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.collaboration-header p {
+    margin: 8px 0 0;
+    opacity: .6;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.collaboration-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.collab-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px;
+    border: 1px solid rgba(127,127,127,.15);
+    border-radius: 13px;
+}
+
+.collab-stat-icon {
+    font-size: 21px;
+}
+
+.collab-stat small {
+    display: block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .7px;
+    opacity: .5;
+}
+
+.collab-stat strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   FILTER
+========================================================= */
+
+.collaboration-filter-panel {
+    margin-bottom: 22px;
+    padding: 15px;
+    border: 1px solid rgba(127,127,127,.15);
+    border-radius: 13px;
+}
+
+.collaboration-filter {
+    display: flex;
+    gap: 10px;
+}
+
+.collaboration-search {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(127,127,127,.2);
+    border-radius: 8px;
+    padding: 0 11px;
+}
+
+.collaboration-search input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    padding: 10px 0;
+}
+
+.collaboration-filter select,
+.collaboration-filter button,
+.collaboration-filter a {
+    border: 1px solid rgba(127,127,127,.2);
+    border-radius: 8px;
+    padding: 9px 12px;
+    background: transparent;
+    color: inherit;
+    font-size: 12px;
+}
+
+.collaboration-filter button {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.collaboration-filter a {
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.collaboration-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.collaboration-card {
+    border: 1px solid rgba(127,127,127,.15);
+    border-radius: 15px;
+    padding: 20px;
+    transition: .2s ease;
+}
+
+.collaboration-card:hover {
+    transform: translateY(-2px);
+}
+
+.collaboration-card-top {
+    display: flex;
+    gap: 15px;
+}
+
+.collaboration-icon,
+.detail-icon {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.collaboration-main {
+    flex: 1;
+}
+
+.collaboration-title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.collaboration-title-row h2 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.collaboration-company {
+    margin: 6px 0;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: .75;
+}
+
+.collaboration-description {
+    margin: 9px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: .65;
+}
+
+.collaboration-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    margin-top: 11px;
+    font-size: 11px;
+    opacity: .6;
+}
+
+
+/* STATUS */
+
+.collaboration-status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.status-active {
+    background: rgba(30,150,80,.13);
+}
+
+.status-pending {
+    background: rgba(220,170,30,.13);
+}
+
+.status-completed {
+    background: rgba(40,110,210,.13);
+}
+
+.status-rejected,
+.status-cancelled {
+    background: rgba(210,60,60,.13);
+}
+
+
+/* FOOTER */
+
+.collaboration-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 18px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(127,127,127,.1);
+}
+
+.collaboration-contact {
+    font-size: 11px;
+    opacity: .6;
+}
+
+.collaboration-view-btn,
+.website-link,
+.back-link {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.collaboration-empty {
+    text-align: center;
+    padding: 65px 20px;
+    border: 1px dashed rgba(127,127,127,.2);
+    border-radius: 15px;
+}
+
+.empty-icon {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.collaboration-empty h2 {
+    margin: 0 0 7px;
+    font-size: 18px;
+}
+
+.collaboration-empty p {
+    margin: 0;
+    font-size: 13px;
+    opacity: .6;
+}
+
+
+/* =========================================================
+   DETAIL
+========================================================= */
+
+.collaboration-detail-header {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.collaboration-detail-header p {
+    margin: 7px 0 0;
+    opacity: .65;
+}
+
+.detail-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(127,127,127,.15);
+    border-radius: 12px;
+}
+
+.detail-status-bar > span {
+    font-size: 12px;
+    opacity: .6;
+}
+
+.collaboration-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 17px;
+}
+
+.detail-panel {
+    padding: 21px;
+    border: 1px solid rgba(127,127,127,.15);
+    border-radius: 14px;
+}
+
+.detail-panel h2 {
+    margin: 0 0 15px;
+    font-size: 16px;
+}
+
+.detail-panel h3 {
+    margin: 0 0 8px;
+}
+
+.detail-panel p {
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: .65;
+}
+
+.detail-description {
+    margin-bottom: 20px;
+}
+
+.detail-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.detail-fields small {
+    display: block;
+    font-size: 10px;
+    opacity: .5;
+}
+
+.detail-fields strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+.company-detail hr {
+    border: 0;
+    border-top: 1px solid rgba(127,127,127,.12);
+    margin: 15px 0;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .collaboration-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+@media (max-width: 750px) {
+
+    .collaboration-filter {
+        flex-wrap: wrap;
+    }
+
+    .collaboration-search {
+        flex-basis: 100%;
+    }
+
+    .collaboration-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 550px) {
+
+    .collaboration-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .collaboration-title-row {
+        flex-direction: column;
+    }
+
+    .collaboration-card-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .detail-fields {
+        grid-template-columns: 1fr;
+    }
+
+}

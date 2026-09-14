@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Internship Progress | Student Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_base.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_internship.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="student-layout">
+
+    <!-- SIDEBAR -->
+    {% include "student/components/student_sidebar.html" %}
+
+    <!-- MAIN AREA -->
+    <main class="student-main">
+
+        <!-- TOPBAR -->
+        {% include "student/components/student_topbar.html" %}
+
+        <div class="internship-page">
+
+            <!-- PAGE HEADER -->
+            <div class="internship-page-header">
+
+                <div>
+                    <span class="internship-eyebrow">
+                        INTERNSHIP
+                    </span>
+
+                    <h1>
+                        Internship Progress
+                    </h1>
+
+                    <p>
+                        Track your internship progress and maintain
+                        your progress history.
+                    </p>
+                </div>
+
+                <a
+                    href="{{ url_for(
+                        'student_internship_detail',
+                        internship_id=internship.id
+                    ) }}"
+                    class="internship-back-btn"
+                >
+                    ← Back to Internship
+                </a>
+
+            </div>
+
+
+            <!-- FLASH MESSAGES -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% if messages %}
+
+                    <div class="internship-flash-container">
+
+                        {% for category, message in messages %}
+
+                            <div
+                                class="internship-flash
+                                internship-flash-{{ category }}"
+                            >
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endwith %}
+
+
+            <!-- INTERNSHIP SUMMARY -->
+            <section class="internship-progress-summary">
+
+                <div class="internship-summary-info">
+
+                    <h2>
+                        {{ internship.opportunity_title }}
+                    </h2>
+
+                    <p>
+                        {{ internship.industry_name }}
+                    </p>
+
+                    <span class="internship-status-badge">
+                        {{ internship.status.replace('_', ' ') }}
+                    </span>
+
+                </div>
+
+
+                <div class="internship-overall-progress">
+
+                    <div class="internship-progress-heading">
+
+                        <span>
+                            Overall Progress
+                        </span>
+
+                        <strong>
+                            {{ internship.progress_percentage or 0 }}%
+                        </strong>
+
+                    </div>
+
+                    <div class="internship-progress-track">
+
+                        <div
+                            class="internship-progress-fill"
+                            data-progress="{{ internship.progress_percentage or 0 }}"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ADD PROGRESS -->
+            <section class="internship-progress-card">
+
+                <div class="internship-section-heading">
+
+                    <div>
+                        <span class="internship-section-label">
+                            UPDATE
+                        </span>
+
+                        <h2>
+                            Add Progress Update
+                        </h2>
+
+                        <p>
+                            Record your latest internship activity.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <form
+                    method="POST"
+                    id="internshipProgressForm"
+                    class="internship-progress-form"
+                >
+
+                    <div class="internship-form-grid">
+
+                        <!-- TITLE -->
+                        <div class="internship-form-group">
+
+                            <label for="title">
+                                Progress Title
+                            </label>
+
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                placeholder="e.g. Completed database module"
+                                maxlength="200"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- DATE -->
+                        <div class="internship-form-group">
+
+                            <label for="progress_date">
+                                Progress Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="progress_date"
+                                name="progress_date"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- PERCENTAGE -->
+                        <div class="internship-form-group">
+
+                            <label for="progress_percentage">
+                                Progress Percentage
+                            </label>
+
+                            <input
+                                type="number"
+                                id="progress_percentage"
+                                name="progress_percentage"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                value="{{ internship.progress_percentage or 0 }}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- STATUS -->
+                        <div class="internship-form-group">
+
+                            <label for="status">
+                                Status
+                            </label>
+
+                            <select
+                                id="status"
+                                name="status"
+                            >
+
+                                <option value="PENDING">
+                                    Pending
+                                </option>
+
+                                <option
+                                    value="IN_PROGRESS"
+                                    selected
+                                >
+                                    In Progress
+                                </option>
+
+                                <option value="COMPLETED">
+                                    Completed
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- DESCRIPTION -->
+                        <div
+                            class="internship-form-group internship-form-full"
+                        >
+
+                            <label for="description">
+                                Description
+                            </label>
+
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="5"
+                                placeholder="Describe what you worked on..."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FORM ACTION -->
+                    <div class="internship-form-actions">
+
+                        <button
+                            type="submit"
+                            class="internship-primary-btn"
+                            id="progressSubmitBtn"
+                        >
+                            Add Progress Update
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+            <!-- PROGRESS HISTORY -->
+            <section class="internship-progress-card">
+
+                <div class="internship-section-heading">
+
+                    <div>
+
+                        <span class="internship-section-label">
+                            HISTORY
+                        </span>
+
+                        <h2>
+                            Progress History
+                        </h2>
+
+                        <p>
+                            Your previous internship progress updates.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {% if progress_updates %}
+
+                    <div class="internship-progress-history">
+
+                        {% for update in progress_updates %}
+
+                            <div
+                                class="internship-progress-history-item"
+                            >
+
+                                <div class="internship-history-date">
+
+                                    <strong>
+                                        {{ update.progress_date.strftime('%d') }}
+                                    </strong>
+
+                                    <span>
+                                        {{ update.progress_date.strftime('%b %Y') }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="internship-history-content">
+
+                                    <div class="internship-history-top">
+
+                                        <h3>
+                                            {{ update.title }}
+                                        </h3>
+
+                                        <span
+                                            class="internship-history-status
+                                            status-{{ update.status|lower }}"
+                                        >
+                                            {{ update.status.replace('_', ' ') }}
+                                        </span>
+
+                                    </div>
+
+
+                                    {% if update.description %}
+
+                                        <p>
+                                            {{ update.description }}
+                                        </p>
+
+                                    {% endif %}
+
+
+                                    <div class="internship-history-progress">
+
+                                        <div
+                                            class="internship-history-progress-info"
+                                        >
+                                            <span>
+                                                Progress
+                                            </span>
+
+                                            <strong>
+                                                {{ update.progress_percentage or 0 }}%
+                                            </strong>
+                                        </div>
+
+                                        <div class="internship-progress-track">
+
+                                            <div
+                                                class="internship-progress-fill history-progress-fill"
+                                                data-progress="{{ update.progress_percentage or 0 }}"
+                                            ></div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="internship-empty-state">
+
+                        <div class="internship-empty-icon">
+                            📈
+                        </div>
+
+                        <h3>
+                            No Progress Updates Yet
+                        </h3>
+
+                        <p>
+                            Add your first progress update using
+                            the form above.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}"
+></script>
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/internship_progress.js'
+    ) }}"
+></script>
+
+</body>
+</html>

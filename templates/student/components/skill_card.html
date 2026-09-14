@@ -1,0 +1,162 @@
+<!-- =========================================================
+     STUDENT SKILL CARD
+     Reusable Component
+========================================================= -->
+
+<div class="student-skill-card">
+
+    <!-- Header -->
+    <div class="skill-card-header">
+
+        <div class="skill-card-icon">
+            ⚡
+        </div>
+
+        <div class="skill-card-heading">
+
+            <h3 class="skill-card-name">
+                {{ skill.name if skill is defined and skill.name else 'Skill' }}
+            </h3>
+
+            {% if skill.category is defined and skill.category %}
+
+                <span class="skill-card-category">
+                    {{ skill.category }}
+                </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- Skill Level -->
+    <div class="skill-card-level-row">
+
+        <span class="skill-card-level-label">
+            Proficiency
+        </span>
+
+        <span class="skill-card-level">
+
+            {% if skill.level is defined and skill.level %}
+                {{ skill.level }}
+            {% elif skill.proficiency_level is defined and skill.proficiency_level %}
+                {{ skill.proficiency_level }}
+            {% else %}
+                Not specified
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <!-- Progress -->
+    {% if skill.score is defined and skill.score is not none %}
+
+        <div class="skill-card-progress">
+
+            <div class="skill-card-progress-header">
+
+                <span>Skill Score</span>
+
+                <span>
+                    {{ skill.score }}%
+                </span>
+
+            </div>
+
+
+            <div
+                class="skill-progress-track"
+                role="progressbar"
+                aria-valuenow="{{ skill.score }}"
+                aria-valuemin="0"
+                aria-valuemax="100">
+
+                <div
+                    class="skill-progress-fill"
+                    data-progress="{{ skill.score|int }}">
+                </div>
+
+            </div>
+
+        </div>
+
+    {% elif skill.proficiency is defined and skill.proficiency is not none %}
+
+        <div class="skill-card-progress">
+
+            <div class="skill-card-progress-header">
+
+                <span>Proficiency</span>
+
+                <span>
+                    {{ skill.proficiency }}%
+                </span>
+
+            </div>
+
+
+            <div
+                class="skill-progress-track"
+                role="progressbar"
+                aria-valuenow="{{ skill.proficiency }}"
+                aria-valuemin="0"
+                aria-valuemax="100">
+
+                <div
+                    class="skill-progress-fill"
+                    data-progress="{{ skill.proficiency|int }}">
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- Verification -->
+    <div class="skill-card-footer">
+
+        {% if skill.is_verified is defined and skill.is_verified %}
+
+            <span class="skill-verified-badge">
+                ✓ Verified
+            </span>
+
+        {% elif skill.verified is defined and skill.verified %}
+
+            <span class="skill-verified-badge">
+                ✓ Verified
+            </span>
+
+        {% else %}
+
+            <span class="skill-unverified-badge">
+                ○ Self Added
+            </span>
+
+        {% endif %}
+
+
+        <!-- Optional Action -->
+        {% if skill.url is defined and skill.url %}
+
+            <a
+                href="{{ skill.url }}"
+                class="skill-card-action">
+
+                View
+                <span>→</span>
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>

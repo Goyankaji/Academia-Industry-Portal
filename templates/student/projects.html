@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Projects</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_base.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_projects.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <!-- PAGE HEADER -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>My Projects</h1>
+
+                    <p>
+                        Manage and showcase your academic
+                        and professional projects.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="openAddProject"
+                >
+                    + Add Project
+                </button>
+
+            </section>
+
+
+            <!-- STATISTICS -->
+
+            <section class="project-stats">
+
+                <div class="project-stat-card">
+
+                    <div class="stat-icon">
+                        🚀
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Projects
+                        </span>
+
+                        <strong>
+                            {{ total_projects }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="project-stat-card">
+
+                    <div class="stat-icon">
+                        🔄
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Ongoing
+                        </span>
+
+                        <strong>
+                            {{ ongoing_projects }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="project-stat-card">
+
+                    <div class="stat-icon">
+                        ✅
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Completed
+                        </span>
+
+                        <strong>
+                            {{ completed_projects }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="project-stat-card">
+
+                    <div class="stat-icon">
+                        ❌
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Cancelled
+                        </span>
+
+                        <strong>
+                            {{ cancelled_projects }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PROJECTS -->
+
+            <section class="projects-section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2>Your Projects</h2>
+
+                        <p>
+                            Projects added to your student profile.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {% if projects %}
+
+                    <div class="project-grid">
+
+                        {% for project in projects %}
+
+                            <article class="project-card">
+
+                                <div class="project-card-top">
+
+                                    <div class="project-icon">
+                                        🚀
+                                    </div>
+
+                                    <span
+                                        class="project-status {{ project.status|lower }}"
+                                    >
+                                        {{ project.status }}
+                                    </span>
+
+                                </div>
+
+
+                                <h3>
+                                    {{ project.title }}
+                                </h3>
+
+
+                                {% if project.industry_name %}
+
+                                    <p class="industry-name">
+                                        🏢 {{ project.industry_name }}
+                                    </p>
+
+                                {% endif %}
+
+
+                                {% if project.description %}
+
+                                    <p class="project-description">
+
+                                        {{ project.description[:180] }}
+
+                                        {% if project.description|length > 180 %}
+                                            ...
+                                        {% endif %}
+
+                                    </p>
+
+                                {% endif %}
+
+
+                                {% if project.technology_stack %}
+
+                                    <div class="technology-section">
+
+                                        <span>
+                                            Technologies
+                                        </span>
+
+                                        <p>
+                                            {{ project.technology_stack }}
+                                        </p>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="project-dates">
+
+                                    {% if project.start_date %}
+
+                                        <div>
+
+                                            <span>
+                                                Start
+                                            </span>
+
+                                            <strong>
+                                                {{ project.start_date.strftime('%d %b %Y') }}
+                                            </strong>
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                    {% if project.end_date %}
+
+                                        <div>
+
+                                            <span>
+                                                End
+                                            </span>
+
+                                            <strong>
+                                                {{ project.end_date.strftime('%d %b %Y') }}
+                                            </strong>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="project-actions">
+
+                                    <a
+                                        href="{{ url_for('student_project_detail', project_id=project.id) }}"
+                                        class="btn btn-outline"
+                                    >
+                                        View Details
+                                    </a>
+
+
+                                    {% if project.project_url %}
+
+                                        <a
+                                            href="{{ project.project_url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="btn btn-outline"
+                                        >
+                                            Project Link
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            🚀
+                        </div>
+
+                        <h3>
+                            No Projects Yet
+                        </h3>
+
+                        <p>
+                            Add your academic or professional
+                            projects to build your profile.
+                        </p>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="openAddProjectEmpty"
+                        >
+                            + Add Your First Project
+                        </button>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ADD PROJECT MODAL
+====================================================== -->
+
+<div
+    class="modal-overlay"
+    id="projectModal"
+    hidden
+>
+
+    <div class="project-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    Add Project
+                </h2>
+
+                <p>
+                    Enter your project information.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closeProjectModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('student_project_add') }}"
+            id="projectForm"
+        >
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Project Title *
+                    </label>
+
+                    <input
+                        type="text"
+                        name="title"
+                        maxlength="200"
+                        required
+                        placeholder="e.g. Student Management System"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Industry
+                    </label>
+
+                    <select name="industry_id">
+
+                        <option value="">
+                            Academic / Personal Project
+                        </option>
+
+                        {% for industry in industries %}
+
+                            <option
+                                value="{{ industry.id }}"
+                            >
+                                {{ industry.company_name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Status
+                    </label>
+
+                    <select name="status">
+
+                        <option value="ONGOING">
+                            Ongoing
+                        </option>
+
+                        <option value="COMPLETED">
+                            Completed
+                        </option>
+
+                        <option value="CANCELLED">
+                            Cancelled
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Technology Stack
+                    </label>
+
+                    <input
+                        type="text"
+                        name="technology_stack"
+                        placeholder="e.g. Python, Flask, MySQL, HTML, CSS"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Start Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="start_date"
+                        id="projectStartDate"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        End Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="end_date"
+                        id="projectEndDate"
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Project URL
+                    </label>
+
+                    <input
+                        type="url"
+                        name="project_url"
+                        maxlength="255"
+                        placeholder="https://github.com/..."
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Report URL
+                    </label>
+
+                    <input
+                        type="url"
+                        name="report_url"
+                        maxlength="255"
+                        placeholder="https://drive.google.com/..."
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Description
+                    </label>
+
+                    <textarea
+                        name="description"
+                        rows="5"
+                        placeholder="Describe your project, its purpose and your contribution..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelProject"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save Project
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/student/projects.js') }}"
+></script>
+
+</body>
+</html>

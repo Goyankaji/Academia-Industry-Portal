@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Achievements</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_base.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/student/student_achievements.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+        <main class="student-content">
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>
+                        My Achievements
+                    </h1>
+
+                    <p>
+                        Showcase your accomplishments, awards
+                        and recognitions.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="openAddAchievement"
+                >
+                    + Add Achievement
+                </button>
+
+            </section>
+
+
+            <!-- =================================================
+                 STATS
+            ================================================== -->
+
+            <section class="achievement-stats">
+
+                <div class="achievement-stat-card">
+
+                    <div class="stat-icon">
+                        🏆
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Achievements
+                        </span>
+
+                        <strong>
+                            {{ total_achievements }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="achievement-stat-card">
+
+                    <div class="stat-icon">
+                        📅
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Dated
+                        </span>
+
+                        <strong>
+                            {{ dated_achievements }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="achievement-stat-card">
+
+                    <div class="stat-icon">
+                        🔗
+                    </div>
+
+                    <div>
+
+                        <span>
+                            With Proof
+                        </span>
+
+                        <strong>
+                            {{ with_proof }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="achievement-stat-card">
+
+                    <div class="stat-icon">
+                        🏢
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Organizations
+                        </span>
+
+                        <strong>
+                            {{ total_organizations }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ACHIEVEMENT LIST
+            ================================================== -->
+
+            <section class="achievements-section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2>
+                            Your Achievements
+                        </h2>
+
+                        <p>
+                            Awards, competitions, recognitions
+                            and other accomplishments.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {% if achievements %}
+
+                    <div class="achievement-list">
+
+                        {% for achievement in achievements %}
+
+                            <article
+                                class="achievement-card"
+                                data-achievement-id="{{ achievement.id }}"
+                            >
+
+                                <div class="achievement-icon">
+                                    🏆
+                                </div>
+
+
+                                <div class="achievement-content">
+
+                                    <div class="achievement-top">
+
+                                        <div>
+
+                                            <h3>
+                                                {{ achievement.title }}
+                                            </h3>
+
+                                            {% if achievement.achievement_type %}
+
+                                                <span class="achievement-type">
+                                                    {{ achievement.achievement_type }}
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+
+                                        {% if achievement.achievement_date %}
+
+                                            <span class="achievement-date">
+
+                                                📅
+
+                                                {{ achievement.achievement_date.strftime('%d %b %Y') }}
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    {% if achievement.issuing_organization %}
+
+                                        <p class="issuing-organization">
+                                            🏢 {{ achievement.issuing_organization }}
+                                        </p>
+
+                                    {% endif %}
+
+
+                                    {% if achievement.description %}
+
+                                        <p class="achievement-description">
+                                            {{ achievement.description }}
+                                        </p>
+
+                                    {% endif %}
+
+
+                                    <div class="achievement-bottom">
+
+                                        {% if achievement.proof_url %}
+
+                                            <a
+                                                href="{{ achievement.proof_url }}"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="btn btn-outline"
+                                            >
+                                                🔗 View Proof
+                                            </a>
+
+                                        {% endif %}
+
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-secondary edit-achievement"
+                                            data-id="{{ achievement.id }}"
+                                        >
+                                            Edit
+                                        </button>
+
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('student_achievement_delete', achievement_id=achievement.id) }}"
+                                            class="delete-achievement-form"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-danger"
+                                            >
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Hidden data for edit -->
+
+                                <div
+                                    class="achievement-data"
+                                    hidden
+
+                                    data-title="{{ achievement.title }}"
+
+                                    data-description="{{ achievement.description or '' }}"
+
+                                    data-type="{{ achievement.achievement_type or '' }}"
+
+                                    data-date="{{ achievement.achievement_date.strftime('%Y-%m-%d') if achievement.achievement_date else '' }}"
+
+                                    data-organization="{{ achievement.issuing_organization or '' }}"
+
+                                    data-proof="{{ achievement.proof_url or '' }}"
+                                ></div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            🏆
+                        </div>
+
+                        <h3>
+                            No Achievements Yet
+                        </h3>
+
+                        <p>
+                            Add your awards, recognitions,
+                            competition wins and other achievements.
+                        </p>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="openAddAchievementEmpty"
+                        >
+                            + Add Your First Achievement
+                        </button>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ADD / EDIT MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="achievementModal"
+    hidden
+>
+
+    <div class="achievement-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2 id="modalTitle">
+                    Add Achievement
+                </h2>
+
+                <p>
+                    Enter your achievement details.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closeAchievementModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('student_achievement_add') }}"
+            id="achievementForm"
+        >
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Achievement Title *
+                    </label>
+
+                    <input
+                        type="text"
+                        name="title"
+                        id="achievementTitle"
+                        maxlength="200"
+                        required
+                        placeholder="e.g. Winner - Smart India Hackathon"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Achievement Type
+                    </label>
+
+                    <input
+                        type="text"
+                        name="achievement_type"
+                        id="achievementType"
+                        maxlength="100"
+                        placeholder="e.g. Competition, Award, Sports"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Achievement Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="achievement_date"
+                        id="achievementDate"
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Issuing Organization
+                    </label>
+
+                    <input
+                        type="text"
+                        name="issuing_organization"
+                        id="issuingOrganization"
+                        maxlength="200"
+                        placeholder="e.g. Smart India Hackathon"
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Proof URL
+                    </label>
+
+                    <input
+                        type="url"
+                        name="proof_url"
+                        id="proofUrl"
+                        maxlength="255"
+                        placeholder="https://..."
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Description
+                    </label>
+
+                    <textarea
+                        name="description"
+                        id="achievementDescription"
+                        rows="5"
+                        placeholder="Describe your achievement..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelAchievement"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save Achievement
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/student/achievements.js') }}"
+></script>
+
+</body>
+</html>

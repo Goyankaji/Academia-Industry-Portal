@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Notifications | Student Portal</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/student/student_base.css'
+          ) }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/student/student_notifications.css'
+          ) }}">
+
+</head>
+
+
+<body>
+
+
+<div class="student-page">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <div class="student-main">
+
+
+        <!-- TOPBAR -->
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <!-- =================================================
+             CONTENT
+        ================================================== -->
+
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+
+            <section class="notifications-header">
+
+                <div class="notifications-heading">
+
+                    <span class="notifications-eyebrow">
+                        STUDENT PORTAL / ALERT CENTER
+                    </span>
+
+                    <h1>
+                        Notifications
+                    </h1>
+
+                    <p>
+                        Stay updated with important activities,
+                        applications, opportunities and system updates.
+                    </p>
+
+                </div>
+
+
+                {% if stats.unread > 0 %}
+
+                <form
+                    method="POST"
+                    action="{{ url_for(
+                        'student_mark_all_notifications_read'
+                    ) }}"
+                    class="mark-all-form"
+                >
+
+                    <button
+                        type="submit"
+                        class="notification-primary-btn"
+                    >
+
+                        ✓ Mark All as Read
+
+                    </button>
+
+                </form>
+
+                {% endif %}
+
+            </section>
+
+
+
+            <!-- =================================================
+                 SUMMARY
+            ================================================== -->
+
+            <section class="notification-summary">
+
+
+                <div class="notification-stat-card">
+
+                    <div class="notification-stat-icon">
+                        🔔
+                    </div>
+
+                    <div>
+
+                        <span>
+                            TOTAL
+                        </span>
+
+                        <strong>
+                            {{ stats.total }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="notification-stat-card unread-stat">
+
+                    <div class="notification-stat-icon">
+                        ●
+                    </div>
+
+                    <div>
+
+                        <span>
+                            UNREAD
+                        </span>
+
+                        <strong>
+                            {{ stats.unread }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="notification-stat-card">
+
+                    <div class="notification-stat-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            READ
+                        </span>
+
+                        <strong>
+                            {{ stats.read }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 NOTIFICATION PANEL
+            ================================================== -->
+
+            <section class="notifications-panel">
+
+
+                <!-- PANEL HEADER -->
+
+                <div class="notifications-panel-header">
+
+                    <div>
+
+                        <span class="panel-eyebrow">
+                            ACTIVITY CENTER
+                        </span>
+
+                        <h2>
+                            Your Notifications
+                        </h2>
+
+                        <p>
+                            Review your latest portal updates.
+                        </p>
+
+                    </div>
+
+
+                    <div class="notification-count">
+
+                        {{ notifications|length }}
+
+                        notification{% if notifications|length != 1 %}s{% endif %}
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     SEARCH / FILTER
+                ================================================== -->
+
+                <form
+                    method="GET"
+                    action="{{ url_for('student_notifications') }}"
+                    class="notification-filter-bar"
+                >
+
+
+                    <div class="notification-search-box">
+
+                        <span>
+                            ⌕
+                        </span>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search or '' }}"
+                            placeholder="Search notifications..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+
+                    <select
+                        name="type"
+                        class="notification-type-select"
+                    >
+
+                        <option value="">
+                            All Types
+                        </option>
+
+
+                        {% for item in notification_types %}
+
+                            <option
+                                value="{{ item.notification_type }}"
+                                {% if selected_type == item.notification_type %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ item.notification_type }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+
+                    <button
+                        type="submit"
+                        class="notification-filter-btn"
+                    >
+
+                        Search
+
+                    </button>
+
+
+                    {% if search or selected_type %}
+
+                    <a
+                        href="{{ url_for('student_notifications') }}"
+                        class="notification-clear-btn"
+                    >
+
+                        Clear
+
+                    </a>
+
+                    {% endif %}
+
+
+                </form>
+
+
+
+                <!-- =================================================
+                     NOTIFICATIONS LIST
+                ================================================== -->
+
+                <div class="notification-list">
+
+
+                    {% if notifications %}
+
+
+                        {% for notification in notifications %}
+
+
+                        <article
+                            class="
+                                notification-item
+                                {% if not notification.is_read %}
+                                    unread
+                                {% endif %}
+                            "
+                        >
+
+
+                            <!-- ICON -->
+
+                            <div class="
+                                notification-item-icon
+                                {% if notification.notification_type %}
+                                    type-{{ notification.notification_type|lower }}
+                                {% endif %}
+                            ">
+
+                                {% if notification.notification_type == "APPLICATION" %}
+
+                                    📄
+
+                                {% elif notification.notification_type == "COLLABORATION" %}
+
+                                    🤝
+
+                                {% elif notification.notification_type == "OPPORTUNITY" %}
+
+                                    💼
+
+                                {% elif notification.notification_type == "SYSTEM" %}
+
+                                    ⚙️
+
+                                {% elif notification.notification_type == "WORKSHOP" %}
+
+                                    🎓
+
+                                {% else %}
+
+                                    🔔
+
+                                {% endif %}
+
+                            </div>
+
+
+
+                            <!-- CONTENT -->
+
+                            <div class="notification-item-content">
+
+
+                                <div class="notification-item-top">
+
+
+                                    <div>
+
+                                        <h3>
+                                            {{ notification.title }}
+                                        </h3>
+
+
+                                        {% if notification.notification_type %}
+
+                                        <span class="notification-type-badge">
+
+                                            {{ notification.notification_type }}
+
+                                        </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    {% if notification.created_at %}
+
+                                    <time>
+
+                                        {{ notification.created_at.strftime(
+                                            '%d %b %Y, %I:%M %p'
+                                        ) }}
+
+                                    </time>
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+
+                                <p class="notification-message">
+
+                                    {{ notification.message }}
+
+                                </p>
+
+
+
+                                <div class="notification-item-footer">
+
+
+                                    {% if not notification.is_read %}
+
+                                        <span class="unread-label">
+                                            ● Unread
+                                        </span>
+
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for(
+                                                'student_mark_notification_read',
+                                                notification_id=notification.id
+                                            ) }}"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="mark-read-btn"
+                                            >
+
+                                                ✓ Mark as Read
+
+                                            </button>
+
+                                        </form>
+
+                                    {% else %}
+
+                                        <span class="read-label">
+                                            ✓ Read
+                                        </span>
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </article>
+
+
+                        {% endfor %}
+
+
+                    {% else %}
+
+
+                        <!-- =================================================
+                             EMPTY STATE
+                        ================================================== -->
+
+                        <div class="notifications-empty">
+
+                            <div class="notifications-empty-icon">
+                                🔔
+                            </div>
+
+                            <h3>
+                                No Notifications
+                            </h3>
+
+                            <p>
+
+                                {% if search or selected_type %}
+
+                                    No notifications match your
+                                    current search or filter.
+
+                                {% else %}
+
+                                    You're all caught up.
+                                    Important updates will appear here.
+
+                                {% endif %}
+
+                            </p>
+
+
+                            {% if search or selected_type %}
+
+                            <a
+                                href="{{ url_for('student_notifications') }}"
+                                class="notification-clear-btn"
+                            >
+
+                                Clear Filters
+
+                            </a>
+
+                            {% endif %}
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+</div>
+
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/notifications.js'
+    ) }}"
+></script>
+
+
+</body>
+
+</html>

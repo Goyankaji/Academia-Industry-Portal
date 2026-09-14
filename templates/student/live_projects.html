@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Live Projects | Student Portal</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_engagement.css'
+        ) }}">
+
+</head>
+
+
+<body>
+
+<div class="student-layout">
+
+    {% include 'student/components/student_sidebar.html' %}
+
+    <main class="student-main">
+
+        {% include 'student/components/student_topbar.html' %}
+
+
+        <section class="live-projects-page">
+
+
+            <!-- HEADER -->
+
+            <div class="engagement-header">
+
+                <div>
+
+                    <div class="engagement-eyebrow">
+                        STUDENT ENGAGEMENT
+                    </div>
+
+                    <h1>Live Projects</h1>
+
+                    <p>
+                        Work on real-world projects and gain
+                        practical industry experience.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATS -->
+
+            <div class="mentorship-stats">
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        🚀
+                    </div>
+
+                    <div>
+                        <span>My Projects</span>
+
+                        <strong>
+                            {{ total_projects }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        ⚙️
+                    </div>
+
+                    <div>
+                        <span>Active</span>
+
+                        <strong>
+                            {{ active_projects }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="engagement-stat-card">
+
+                    <div class="engagement-stat-icon">
+                        🏆
+                    </div>
+
+                    <div>
+                        <span>Completed</span>
+
+                        <strong>
+                            {{ completed_projects }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SECTION -->
+
+            <div class="engagement-section-header">
+
+                <div>
+
+                    <h2>
+                        Available Live Projects
+                    </h2>
+
+                    <p>
+                        Explore projects offered by industry partners.
+                    </p>
+
+                </div>
+
+
+                <div class="engagement-search">
+
+                    🔎
+
+                    <input
+                        type="text"
+                        id="liveProjectSearch"
+                        placeholder="Search projects...">
+
+                </div>
+
+            </div>
+
+
+            <!-- PROJECT GRID -->
+
+            <div
+                class="mentor-grid"
+                id="liveProjectGrid">
+
+
+                {% if live_projects %}
+
+                    {% for project in live_projects %}
+
+                    <article
+                        class="mentor-card live-project-card"
+                        data-title="{{ project.title|lower }}"
+                        data-tech="{{ (project.technology_stack or '')|lower }}">
+
+
+                        <div class="live-project-top">
+
+                            <span class="live-project-status">
+                                {{ project.status }}
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            {{ project.title }}
+                        </h3>
+
+
+                        {% if project.description %}
+
+                        <p class="live-project-description">
+                            {{ project.description }}
+                        </p>
+
+                        {% endif %}
+
+
+                        {% if project.technology_stack %}
+
+                        <div class="live-project-tech">
+
+                            <strong>Technology:</strong>
+
+                            {{ project.technology_stack }}
+
+                        </div>
+
+                        {% endif %}
+
+
+                        <div class="live-project-info">
+
+                            <div>
+                                <span>Organizer</span>
+
+                                <strong>
+                                    {{ project.organizer_name }}
+                                </strong>
+                            </div>
+
+
+                            {% if project.start_date %}
+
+                            <div>
+                                <span>Start</span>
+
+                                <strong>
+                                    {{ project.start_date }}
+                                </strong>
+                            </div>
+
+                            {% endif %}
+
+
+                            {% if project.end_date %}
+
+                            <div>
+                                <span>End</span>
+
+                                <strong>
+                                    {{ project.end_date }}
+                                </strong>
+                            </div>
+
+                            {% endif %}
+
+
+                            {% if project.application_deadline %}
+
+                            <div>
+                                <span>Deadline</span>
+
+                                <strong>
+                                    {{ project.application_deadline }}
+                                </strong>
+                            </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- ACTION -->
+
+                        {% if project.participation_id %}
+
+
+                            {% if project.participation_status == 'APPLIED' %}
+
+                            <div class="project-status-box pending">
+
+                                ⏳ Application submitted
+
+                            </div>
+
+
+                            {% elif project.participation_status == 'SELECTED' %}
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_start_live_project',
+                                    project_id=project.id
+                                ) }}">
+
+                                <button
+                                    type="submit"
+                                    class="engagement-primary-btn">
+
+                                    🚀 Start Project
+
+                                </button>
+
+                            </form>
+
+
+                            {% elif project.participation_status == 'IN_PROGRESS' %}
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_complete_live_project',
+                                    project_id=project.id
+                                ) }}">
+
+                                <button
+                                    type="submit"
+                                    class="engagement-primary-btn complete-project-btn">
+
+                                    🏆 Complete Project
+
+                                </button>
+
+                            </form>
+
+
+                            {% elif project.participation_status == 'COMPLETED' %}
+
+                            <div class="project-status-box completed">
+
+                                🏆 Project Completed
+
+                                <small>
+                                    Achievement added to your profile
+                                </small>
+
+                            </div>
+
+
+                            {% elif project.participation_status == 'REJECTED' %}
+
+                            <div class="project-status-box rejected">
+
+                                ❌ Application not selected
+
+                            </div>
+
+                            {% endif %}
+
+
+                        {% else %}
+
+
+                            {% if project.status == 'OPEN' %}
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'student_apply_live_project',
+                                    project_id=project.id
+                                ) }}">
+
+                                <button
+                                    type="submit"
+                                    class="engagement-primary-btn">
+
+                                    📝 Apply for Project
+
+                                </button>
+
+                            </form>
+
+                            {% else %}
+
+                            <div class="project-status-box">
+
+                                Applications closed
+
+                            </div>
+
+                            {% endif %}
+
+
+                        {% endif %}
+
+
+                    </article>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <div class="engagement-empty">
+
+                        <div class="empty-icon">
+                            🚀
+                        </div>
+
+                        <h3>
+                            No live projects available
+                        </h3>
+
+                        <p>
+                            New industry projects will appear here.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+
+            <!-- SEARCH EMPTY -->
+
+            <div
+                id="liveProjectSearchEmpty"
+                class="engagement-empty"
+                style="display:none;">
+
+                <div class="empty-icon">
+                    🔍
+                </div>
+
+                <h3>
+                    No matching projects
+                </h3>
+
+                <p>
+                    Try another project name or technology.
+                </p>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/student_base.js'
+    ) }}">
+</script>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/live_projects.js'
+    ) }}">
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Skill Profile</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_base.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/student/student_skills.css'
+        ) }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="student-page">
+
+    {% include "student/components/student_sidebar.html" %}
+
+
+    <div class="student-main">
+
+        {% include "student/components/student_topbar.html" %}
+
+
+        <main class="student-content">
+
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <h1>
+                        My Skill Profile
+                    </h1>
+
+                    <p>
+                        View your skills, proficiency
+                        and assessment performance.
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <a
+                        href="{{ url_for(
+                            'student_skill_assessment'
+                        ) }}"
+                        class="skill-btn primary"
+                    >
+                        🧠 Take Assessment
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 STATS
+            ================================================== -->
+
+            <section class="skill-profile-stats">
+
+                <div class="profile-stat-card">
+
+                    <div class="profile-stat-icon">
+                        🧠
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Skills
+                        </span>
+
+                        <strong>
+                            {{ total_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="profile-stat-card">
+
+                    <div class="profile-stat-icon">
+                        📊
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Assessed
+                        </span>
+
+                        <strong>
+                            {{ assessed_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="profile-stat-card">
+
+                    <div class="profile-stat-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Verified
+                        </span>
+
+                        <strong>
+                            {{ verified_skills }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="profile-stat-card">
+
+                    <div class="profile-stat-icon">
+                        🎯
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Average Score
+                        </span>
+
+                        <strong>
+                            {{ average_score }}%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PROFILE
+            ================================================== -->
+
+            {% if profiles %}
+
+                <section class="skill-profile-section">
+
+                    <div class="section-heading">
+
+                        <h2>
+                            Your Skills
+                        </h2>
+
+                        <p>
+                            Your current skill profile based
+                            on declared skills and assessments.
+                        </p>
+
+                    </div>
+
+
+                    <div class="skill-profile-grid">
+
+                        {% for profile in profiles %}
+
+                            <article
+                                class="skill-profile-card"
+                            >
+
+                                <div
+                                    class="skill-profile-card-header"
+                                >
+
+                                    <div>
+
+                                        <span
+                                            class="skill-category"
+                                        >
+                                            {{ profile.skill_category
+                                               or "General Skill" }}
+                                        </span>
+
+                                        <h3>
+                                            {{ profile.skill_name }}
+                                        </h3>
+
+                                    </div>
+
+
+                                    {% if profile.verified %}
+
+                                        <span
+                                            class="verification-badge verified"
+                                        >
+                                            ✓ Verified
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="verification-badge"
+                                        >
+                                            Self Profile
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- PROFICIENCY -->
+
+                                <div
+                                    class="skill-profile-level"
+                                >
+
+                                    <div>
+
+                                        <span>
+                                            Proficiency
+                                        </span>
+
+                                        <strong>
+                                            {{ profile.proficiency_level }}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- SCORE -->
+
+                                <div
+                                    class="skill-score-section"
+                                >
+
+                                    <div
+                                        class="skill-score-header"
+                                    >
+
+                                        <span>
+                                            Skill Score
+                                        </span>
+
+                                        <strong>
+                                            {{ profile.skill_score }}%
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div
+                                        class="skill-score-track"
+                                    >
+
+                                        <div
+                                            class="skill-score-bar"
+                                            data-score="{{ profile.skill_score or 0 }}"
+                                        ></div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- SOURCE -->
+
+                                <div
+                                    class="skill-profile-meta"
+                                >
+
+                                    <span>
+
+                                        Source:
+                                        <strong>
+                                            {{ profile.source
+                                               or "SELF_DECLARED" }}
+                                        </strong>
+
+                                    </span>
+
+
+                                    {% if profile.last_assessed_at %}
+
+                                        <span>
+
+                                            Last Assessed:
+                                            <strong>
+                                                {{ profile.last_assessed_at }}
+                                            </strong>
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+
+            {% else %}
+
+                <!-- =================================================
+                     EMPTY STATE
+                ================================================== -->
+
+                <section
+                    class="skill-profile-empty"
+                >
+
+                    <div class="empty-icon">
+                        🎯
+                    </div>
+
+                    <h2>
+                        No Skill Profile Yet
+                    </h2>
+
+                    <p>
+                        Your skill profile will appear here
+                        when your skills are matched with the
+                        Skill Master.
+                    </p>
+
+
+                    <a
+                        href="{{ url_for(
+                            'student_skills'
+                        ) }}"
+                        class="skill-btn primary"
+                    >
+                        View My Skills
+                    </a>
+
+                </section>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 PROFICIENCY BREAKDOWN
+            ================================================== -->
+
+            <section class="proficiency-breakdown">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Proficiency Breakdown
+                    </h2>
+
+                    <p>
+                        Distribution of your current skill levels.
+                    </p>
+
+                </div>
+
+
+                <div class="proficiency-grid">
+
+                    <div class="proficiency-card">
+
+                        <span>
+                            Beginner
+                        </span>
+
+                        <strong>
+                            {{ beginner_count }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="proficiency-card">
+
+                        <span>
+                            Intermediate
+                        </span>
+
+                        <strong>
+                            {{ intermediate_count }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="proficiency-card">
+
+                        <span>
+                            Advanced
+                        </span>
+
+                        <strong>
+                            {{ advanced_count }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="proficiency-card">
+
+                        <span>
+                            Expert
+                        </span>
+
+                        <strong>
+                            {{ expert_count }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/student/skill_profile.js'
+    ) }}"
+></script>
+
+</body>
+
+</html>
